@@ -5,7 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include "helper/file-helper.hpp"
-#include "helper/color.hpp"
+#include "graphics/color.hpp"
 
 #include <include/glm/glm.hpp>
 #include <include/glm/gtc/matrix_transform.hpp>
