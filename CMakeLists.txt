@@ -5,6 +5,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 find_package(OpenGL REQUIRED)
 
+find_package(Lua REQUIRED)
+include_directories(${LUA_INCLUDE_DIR})
+
 include(FetchContent)
 FetchContent_Declare(SFML
     GIT_REPOSITORY https://github.com/SFML/SFML.git
@@ -19,5 +22,5 @@ include_directories(src)
 add_executable(SpaceGame 
 src/main.cpp
 )
-target_compile_features(SpaceGame PRIVATE cxx_std_17)
-target_link_libraries(SpaceGame PRIVATE SFML::Graphics OpenGL::GL)
+target_compile_features(SpaceGame PRIVATE cxx_std_20)
+target_link_libraries(SpaceGame PRIVATE SFML::Graphics OpenGL::GL ${LUA_LIBRARIES})

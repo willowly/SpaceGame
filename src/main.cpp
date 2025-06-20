@@ -11,15 +11,28 @@
 #include "graphics/texture.hpp"
 #include "graphics/camera.hpp"
 
+#include "engine/world.hpp"
+#include "engine/registry.hpp"
+#include "engine/loader.hpp"
+
+#include "actor/actor.hpp"
+#include "actor/character.hpp"
+
 #include <include/glm/glm.hpp>
 #include <include/glm/gtc/matrix_transform.hpp>
 #include <include/glm/gtc/type_ptr.hpp>
 
-using std::vector;
+#include "api/api-all.hpp"
+#include "helper/collision-helper.hpp"
+
+#include <sol/sol.hpp>
+
+using std::vector,glm::vec3,glm::quat;
 
 int main()
 {
 
+    // Set up context settings
     sf::ContextSettings settings;
     settings.attributeFlags = sf::ContextSettings::Core;
     settings.depthBits = 24;
@@ -28,44 +41,71 @@ int main()
     settings.majorVersion = 4;
     settings.minorVersion = 1;
 
-    auto window = sf::RenderWindow(sf::VideoMode({600, 600}), "Space Game",sf::State::Windowed,settings);
+    // set up window and opengl
+    auto window = sf::RenderWindow(sf::VideoMode({1200, 800}), "Space Game",sf::State::Windowed,settings);
     window.setFramerateLimit(144);
     window.setMouseCursorVisible(false);
-    //window.setMouseCursorGrabbed(true);
 
-    
-
-    std::cout << "version " << window.getSettings().majorVersion << "." << window.getSettings().minorVersion << std::endl;
+    std::cout << "OpenGL version " << window.getSettings().majorVersion << "." << window.getSettings().minorVersion << std::endl;
 
     glEnable(GL_DEPTH_TEST);
 
-    Shader shader;
-    shader.loadFromFiles("shaders/default.vert","shaders/default.frag");
+    // set up registry
+    Registry registry;
 
-    Model model;
-    model.loadFromFile("models/cube.obj",Model::DataFormat::PositionUV);
-    model.shader = &shader;
+    sol::state lua;
+    lua.open_libraries(sol::lib::base, sol::lib::package);
+    API::loadAPIAll(lua);
 
-    Texture texture;
-    texture.loadFromFile("textures/cow.png");
+    // load everything
+    Loader loader;
+    loader.loadAll(registry);
+    
+    lua["textures"] = API::TextureRegistry(registry);
+    lua["shaders"] = API::ShaderRegistry(registry);
+    lua["materials"] = API::MaterialRegistry(registry);
+    lua.do_file("scripts/load.lua");
+
+    Model quad;
+    quad.loadQuad();
+
+    //registry.textures.at("grid").setPointFiltering();
+    
+    World world;
+
+    Material material(&registry.litShader,&registry.textures.at("cow"));
+    
+    Actor cubePrototype(&registry.models.at("cube"),&registry.materials.at("cow"));
+    Actor containerPrototype(&registry.models.at("cube"),&registry.materials.at("container"));
+    Actor planePrototype(&registry.models.at("plane"),&registry.materials.at("grid"));
+    Character playerPrototype;
+    playerPrototype.useGravity = true;
+    
+
+    world.spawn<Actor>(&planePrototype,vec3(0,-3,0),quat(1.0f,0.0f,0.0f,0.0f));
+    Actor& cube = *world.spawn<Actor>(&cubePrototype,vec3(0,3,0),quat(1.0f,0.0f,0.0f,0.0f));
+    //world.spawn<Actor>(&containerPrototype,vec3(0,5,0),quat(1.0f,0.0f,0.0f,0.0f));
+    Character* playerActor = world.spawn(&playerPrototype,vec3(0,0,10),quat(1.0f,0.0f,0.0f,0.0f));
+    
 
     Camera camera;
-    //camera.move(vec3(0,0,8.0f));
     camera.setAspect(window.getSize().x,window.getSize().y);
 
-    // actually drawing!!
 
     sf::Vector2i screenCenter = sf::Vector2i((sf::Vector2f)window.getSize()/2.0f);
 
     sf::Mouse::setPosition((screenCenter + window.getPosition())*2);
+
+    
     
     sf::Clock clock;
+    float angle;
     while (window.isOpen())
     {
         while (const std::optional event = window.pollEvent())
         {
 
-            
+            // Events and Input
             if (event->is<sf::Event::Closed>())
             {
                 window.close();
@@ -78,48 +118,48 @@ int main()
                 screenCenter = sf::Vector2i((sf::Vector2f)window.getSize()/2.0f);
             } else if (const auto* mouseMoved = event->getIf<sf::Event::MouseMoved>()) {
                 if(window.hasFocus()) {
+
+                    // Mouse looking
                     auto movement = sf::Mouse::getPosition(window) - screenCenter;
                     sf::Mouse::setPosition((screenCenter + window.getPosition())*2);
 
-                    camera.rotate(vec2(movement.x,movement.y) * 0.1f);
+                    playerActor->moveMouse(vec2((float)movement.x,(float)movement.y) / 100.0f);
                 }
 
             }
         }
-        float dt = clock.restart().asSeconds();
-
-        float moveSpeed = 5.0f;
-        vec3 moveVector = vec3(0);
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) {
-            moveVector += vec3(0,0,-1);
-        }
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)) {
-            moveVector += vec3(0,0,1);
-        }
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)) {
-            moveVector += vec3(-1,0,0);
-        }
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)) {
-            moveVector += vec3(1,0,0);
-        }
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) {
-            moveVector += vec3(0,1,0);
-        }
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift)) {
-            moveVector += vec3(0,-1,0);
-        }
-
-        camera.move(moveVector * glm::angleAxis(glm::radians(camera.yaw),vec3(0,1,0)) * dt * moveSpeed);
+        // the camera should look out from the 
+        playerActor->firstPersonCamera(camera);
 
         // clear the buffers
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        texture.bind();
-        shader.use();
-
-
+        float dt = clock.restart().asSeconds();
         
-        model.render(camera.getViewMatrix(),glm::mat4(1.0f),camera.getProjectionMatrix());
+        
+        world.render(camera);
+
+        angle += dt * 30;
+    
+        world.step(dt);
+
+        cube.velocity += vec3(0,-10,0) * dt;
+        cube.velocity += vec3(0,10 * (3.0f - cube.position.y),0) * dt;
+        cube.velocity = MathHelper::lerp(cube.velocity,vec3(0),dt * 0.2);
+        cube.rotate(vec3(0,90,15) * dt);
+
+        CollisionHelper::Ray ray(vec3(0,0,5),glm::normalize(vec3(1,-1,0)));
+        CollisionHelper::Ray plane(vec3(0,-3,0),vec3(0,1,0));
+        ray.direction = glm::quat(vec3(0.0,0.0,glm::radians(angle))) * ray.direction;
+        
+        Debug::drawRay(ray.origin,ray.direction * 20.0f);
+        auto hitOpt = CollisionHelper::intersectPlane(plane,ray);
+        if(hitOpt) {
+            auto hit = hitOpt.value();
+            Debug::drawRay(hit.point,hit.normal);
+        }
+
+        Debug::renderDebugShapes(camera);
 
 
         window.display();

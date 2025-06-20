@@ -37,6 +37,12 @@ class Shader {
             glUniformMatrix4fv(paramLocation, 1, GL_FALSE,glm::value_ptr(matrix));
         }
 
+        void setViewModelProjection(glm::mat4 view,glm::mat4 model,glm::mat4 projection) {
+            setMat4("view",view);
+            setMat4("model",model);
+            setMat4("projection",projection);
+        }
+
         void loadFromFiles(string vertexShaderPath,string fragmentShaderPath) {
             string vertexShaderSource = FileHelper::readToString(vertexShaderPath);
             string fragmentShaderSource = FileHelper::readToString(fragmentShaderPath);

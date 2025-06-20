@@ -1,0 +1,70 @@
+#pragma once
+#include <include/glm/glm.hpp>
+#include <include/glm/gtc/quaternion.hpp>
+#include <include/glm/gtx/quaternion.hpp>
+#include "graphics/model.hpp"
+#include "graphics/material.hpp"
+
+using glm::vec3, glm::quat;
+
+class Actor {
+
+    public:
+        vec3 position = vec3(0);
+        vec3 velocity = vec3(0);
+        quat rotation = vec3(0);
+        Model* model = nullptr;
+        Material* material = nullptr;
+        bool useGravity = false; //doesn't move
+
+        Actor() {
+
+        }
+
+        Actor(Model* model,Material* material) : model(model), material(material) {
+
+        }
+
+        vec3 transformPoint(vec3 point) {
+            glm::mat4 matrix = glm::translate(glm::mat4(1.0f),position);
+            matrix *= glm::toMat4(rotation);
+            glm::vec4 v4 = matrix * glm::vec4(point.x,point.y,point.z,1);
+            return vec3(v4.x,v4.y,v4.z);
+        }
+
+        vec3 inverseTransformPoint(vec3 point) {
+            glm::mat4 matrix = glm::toMat4(glm::inverse(rotation));
+            matrix = glm::translate(matrix,-position);
+            glm::vec4 v4 = matrix * glm::vec4(point.x,point.y,point.z,1);
+            return vec3(v4.x,v4.y,v4.z);
+        }
+
+        vec3 transformDirection(vec3 direction) {
+            glm::vec4 v4 = glm::toMat4(rotation) * glm::vec4(direction.x,direction.y,direction.z,1);
+            return vec3(v4.x,v4.y,v4.z);
+        }
+
+        vec3 inverseTransformDirection(vec3 direction) {
+            glm::vec4 v4 = glm::toMat4(glm::inverse(rotation)) * glm::vec4(direction.x,direction.y,direction.z,1);
+            return vec3(v4.x,v4.y,v4.z);
+        }
+
+        void rotate(vec3 eulerAngles) {
+            rotation *= glm::angleAxis(glm::radians(eulerAngles.x),vec3(1,0,0));
+            rotation *= glm::angleAxis(glm::radians(eulerAngles.y),vec3(0,1,0));
+            rotation *= glm::angleAxis(glm::radians(eulerAngles.z),vec3(0,0,1));
+        }
+
+        virtual void step(float dt) {
+            position += velocity * dt;
+        }
+
+        virtual void render(Camera& camera) {
+            if(model == nullptr) return; //if no model, nothing to render :)
+            if(material == nullptr) {
+                std::cout << "null material" << std::endl;
+            }
+            model->render(glm::translate(glm::mat4(1.0f),position) * glm::toMat4(rotation),camera,*material);
+        }
+
+};

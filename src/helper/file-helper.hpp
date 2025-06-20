@@ -12,7 +12,7 @@ namespace FileHelper {
         string text;
         ifstream file(path);
         if(!file.good()) {
-            std::cout << "[ERROR] no file at path " << path << std::endl;
+            std::cout << "[WARNING] no file at path " << path << std::endl;
             return "";
         }
 

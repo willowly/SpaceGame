@@ -9,17 +9,27 @@ using std::string;
 
 class Texture {
 
-
+    
     unsigned int textureID;
 
     public:
+        enum Format {
+            RGB,
+            RGBA
+        };
         Texture() {
             glGenTextures(1,&textureID);
+            //std::cout << "new texture id: " << textureID << std::endl;
         }
         ~Texture() {
+            if(textureID == -1) return;
             glDeleteTextures(1,&textureID);
+            //std::cout << "deleting texture id: " << textureID << std::endl;
         }
-        void loadFromFile(string path) {
+        Texture (Texture&& obj) : textureID(obj.textureID) {
+            obj.textureID = -1;
+        }
+        void loadFromFile(string path,Format format) {
 
             // bind it
             glBindTexture(GL_TEXTURE_2D,textureID);
@@ -35,12 +45,16 @@ class Texture {
             stbi_set_flip_vertically_on_load(true); 
             unsigned char *data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
             if(data) {
-
+                auto glFormat = GL_RGBA;
+                switch(format) {
+                    case RGB:
+                        glFormat = Format::RGB;
+                }
                 // load the data to the gpu
-                glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,data);
+                glTexImage2D(GL_TEXTURE_2D,0,glFormat,width,height,0,glFormat,GL_UNSIGNED_BYTE,data);
                 glGenerateMipmap(GL_TEXTURE_2D);
             } else {
-                std::cout << "[ERROR] could not load texture " + path << std::endl;
+                std::cout << "[WARNING] could not load texture " + path << std::endl;
             }
 
             stbi_image_free(data); //get rid of the data
@@ -48,5 +62,15 @@ class Texture {
 
         void bind() {
             glBindTexture(GL_TEXTURE_2D,textureID);
+        }
+
+        void setLinearFiltering(){
+            bind();
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        }
+
+        void setPointFiltering(){
+            bind();
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         }
 };

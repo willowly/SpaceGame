@@ -4,15 +4,15 @@
 #include <include/glm/gtc/quaternion.hpp>
 #include <include/glm/gtx/quaternion.hpp>
 
-using glm::vec3,glm::quat;
+using glm::vec2,glm::vec3,glm::quat;
 
 class Camera {
 
     public:
         vec3 position = vec3(0);
-        //quat rotation = quat(1,0,0,0);
-        float pitch;
-        float yaw;
+        quat rotation = quat(1,0,0,0);
+        // float pitch;
+        // float yaw;
         float fov = 45.0f;
         float nearClip = 0.1f;
         float farClip = 100.0f;
@@ -22,17 +22,10 @@ class Camera {
             position += motion;
         }
 
-        // void rotate(vec3 rotationAmount) {
-        //     rotation *= glm::angleAxis(glm::radians(rotationAmount.x),vec3(1,0,0));
-        //     rotation *= glm::angleAxis(glm::radians(rotationAmount.y),vec3(0,1,0));
-        //     rotation *= glm::angleAxis(glm::radians(rotationAmount.z),vec3(0,0,1));
-        // }
-
-        void rotate(vec2 amount) {
-            yaw += amount.x;
-            pitch += amount.y;
-            if(pitch > 89.9f) pitch = 89.9f;
-            if(pitch < -89.9f) pitch = -89.9f;
+        void rotate(vec3 rotationAmount) {
+            rotation *= glm::angleAxis(glm::radians(rotationAmount.x),vec3(1,0,0));
+            rotation *= glm::angleAxis(glm::radians(rotationAmount.y),vec3(0,1,0));
+            rotation *= glm::angleAxis(glm::radians(rotationAmount.z),vec3(0,0,1));
         }
 
         void setAspect(float x,float y) {
@@ -41,9 +34,14 @@ class Camera {
 
         glm::mat4 getViewMatrix() {
             glm::mat4 view = glm::mat4(1.0f);
-            view = glm::rotate(view,glm::radians(pitch),vec3(1,0,0));
-            view = glm::rotate(view,glm::radians(yaw),vec3(0,1,0));
+            view = view * glm::toMat4(rotation);
             view = glm::translate(view,-position);
+            return view;
+        }
+
+        glm::mat4 getViewRotationMatrix() {
+            glm::mat4 view = glm::mat4(1.0f);
+            view = view * glm::toMat4(rotation);
             return view;
         }
 
