@@ -28,6 +28,10 @@ class Camera {
             rotation *= glm::angleAxis(glm::radians(rotationAmount.z),vec3(0,0,1));
         }
 
+        vec3 direction() {
+            return vec3(0,0,-1) * rotation;
+        }
+
         void setAspect(float x,float y) {
             this->aspect = x/y;
         }

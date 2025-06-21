@@ -83,7 +83,7 @@ int main()
     
 
     world.spawn<Actor>(&planePrototype,vec3(0,-3,0),quat(1.0f,0.0f,0.0f,0.0f));
-    Actor& cube = *world.spawn<Actor>(&cubePrototype,vec3(0,3,0),quat(1.0f,0.0f,0.0f,0.0f));
+    //Actor& cube = *world.spawn<Actor>(&cubePrototype,vec3(0,3,0),quat(1.0f,0.0f,0.0f,0.0f));
     //world.spawn<Actor>(&containerPrototype,vec3(0,5,0),quat(1.0f,0.0f,0.0f,0.0f));
     Character* playerActor = world.spawn(&playerPrototype,vec3(0,0,10),quat(1.0f,0.0f,0.0f,0.0f));
     
@@ -138,26 +138,33 @@ int main()
         
         
         world.render(camera);
-
-        angle += dt * 30;
+        
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) {
+            angle += dt * 30;
+        }
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) {
+            angle -= dt * 30;
+        }
     
         world.step(dt);
 
-        cube.velocity += vec3(0,-10,0) * dt;
-        cube.velocity += vec3(0,10 * (3.0f - cube.position.y),0) * dt;
-        cube.velocity = MathHelper::lerp(cube.velocity,vec3(0),dt * 0.2);
-        cube.rotate(vec3(0,90,15) * dt);
-
-        CollisionHelper::Ray ray(vec3(0,0,5),glm::normalize(vec3(1,-1,0)));
+        CollisionHelper::Ray ray(vec3(0,0,5),glm::normalize(vec3(0.1,-1,0.1)));
         CollisionHelper::Ray plane(vec3(0,-3,0),vec3(0,1,0));
-        ray.direction = glm::quat(vec3(0.0,0.0,glm::radians(angle))) * ray.direction;
+        ray.direction = glm::quat(vec3(glm::radians(angle),0.0,0.0)) * ray.direction;
+        
+        vec3 boxHalfSize = vec3(1.0f,1.0f,1.0f);
         
         Debug::drawRay(ray.origin,ray.direction * 20.0f);
-        auto hitOpt = CollisionHelper::intersectPlane(plane,ray);
+        auto hitOpt = CollisionHelper::intersectRayBox(vec3(0),boxHalfSize,CollisionHelper::Ray(camera.position,camera.direction()));
         if(hitOpt) {
             auto hit = hitOpt.value();
+            //Debug::drawPoint(hit.point);
             Debug::drawRay(hit.point,hit.normal);
         }
+
+
+        
+        registry.models.at("cube").render(camera.getViewMatrix(),glm::scale(glm::mat4(1.0f),boxHalfSize),camera.getProjectionMatrix(),registry.materials.at("cow"));
 
         Debug::renderDebugShapes(camera);
 

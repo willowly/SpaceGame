@@ -21,7 +21,7 @@ class Character : public Actor {
         float moveSpeed = 5.0f;
         float lookPitch = 0;
         float lookSensitivity = 5;
-        float height = 1;
+        float height = 0.75;
         float acceleration = 10;
         float jumpForce = 10;
 
