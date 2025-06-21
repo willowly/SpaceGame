@@ -16,6 +16,7 @@ class Actor {
         Model* model = nullptr;
         Material* material = nullptr;
         bool useGravity = false; //doesn't move
+        float modelScale = 1;
 
         Actor() {
 
@@ -64,7 +65,11 @@ class Actor {
             if(material == nullptr) {
                 std::cout << "null material" << std::endl;
             }
-            model->render(glm::translate(glm::mat4(1.0f),position) * glm::toMat4(rotation),camera,*material);
+            glm::mat4 matrix(1.0f);
+            matrix = glm::translate(matrix,position);
+            matrix = matrix * glm::toMat4(rotation);
+            matrix = glm::scale(matrix,vec3(modelScale));
+            model->render(matrix,camera,*material);
         }
 
 };

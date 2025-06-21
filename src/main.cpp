@@ -17,6 +17,7 @@
 
 #include "actor/actor.hpp"
 #include "actor/character.hpp"
+#include "actor/physics-actor.hpp"
 
 #include <include/glm/glm.hpp>
 #include <include/glm/gtc/matrix_transform.hpp>
@@ -78,11 +79,17 @@ int main()
     Actor cubePrototype(&registry.models.at("cube"),&registry.materials.at("cow"));
     Actor containerPrototype(&registry.models.at("cube"),&registry.materials.at("container"));
     Actor planePrototype(&registry.models.at("plane"),&registry.materials.at("grid"));
+
+    PhysicsActor physicsPrototype(&registry.models.at("cube"),&registry.materials.at("cow"));
+
     Character playerPrototype;
     playerPrototype.useGravity = true;
     
+    
 
     world.spawn<Actor>(&planePrototype,vec3(0,-3,0),quat(1.0f,0.0f,0.0f,0.0f));
+    auto physics = world.spawn(&physicsPrototype,vec3(1.0f,0.0f,0.0f),glm::identity<quat>());
+    physics->useGravity = true;
     //Actor& cube = *world.spawn<Actor>(&cubePrototype,vec3(0,3,0),quat(1.0f,0.0f,0.0f,0.0f));
     //world.spawn<Actor>(&containerPrototype,vec3(0,5,0),quat(1.0f,0.0f,0.0f,0.0f));
     Character* playerActor = world.spawn(&playerPrototype,vec3(0,0,10),quat(1.0f,0.0f,0.0f,0.0f));
@@ -103,6 +110,7 @@ int main()
     glm::quat cubeRotation(1.0f,0.0f,0.0f,0.0f);
     vec3 cubePosition = vec3(0.0f);
     vec3 cubeHalfSize = vec3(1.0f);
+    bool mousePressed = false;
     while (window.isOpen())
     {
         while (const std::optional event = window.pollEvent())
@@ -202,27 +210,49 @@ int main()
                 }
             }
         }
+
+        
+        
     
         world.step(dt);
+        
 
         CollisionHelper::Ray ray(camera.position,camera.direction());
         
-        //Debug::drawRay(ray.origin,ray.direction * 20.0f);
-        auto hitOpt = CollisionHelper::intersectRayBox(cubePosition,cubeHalfSize,cubeRotation,ray);
+
+        Debug::renderDebugShapes(camera);
+
+        auto hitOpt = physics->raycast(ray);
+
         if(hitOpt) {
             auto hit = hitOpt.value();
             Debug::drawPoint(hit.point);
-            Debug::drawRay(hit.point,hit.normal);
+
+            if(mousePressed) {
+                if(!sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)) {
+                    mousePressed = false;
+                }
+            } else {
+                if(sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)) {
+                    mousePressed = true;
+                    physics->applyForce(camera.direction() * 10.0f,hit.point);
+                }
+            }
         }
 
-        glm::mat4 matrix(1.0f);
-        matrix = glm::translate(matrix,cubePosition);
-        matrix = matrix * glm::toMat4(cubeRotation);
-        matrix = glm::scale(matrix,cubeHalfSize);
+        physics->angularVelocity = physics->angularVelocity * pow(2.0f,-dt);
         
-        registry.models.at("cube").render(camera.getViewMatrix(),matrix,camera.getProjectionMatrix(),registry.materials.at("cow"));
-
-        Debug::renderDebugShapes(camera);
+        vec3 ropePosition = vec3(0,5,0);
+        Debug::drawLine(ropePosition,physics->position);
+        vec3 ropeDelta = ropePosition - physics->position;
+        float ropeForce = 10;
+        float ropeLength = 4;
+        if(glm::length(ropeDelta) > ropeLength) {
+            physics->velocity += glm::dot(-glm::normalize(ropeDelta),physics->velocity) * glm::normalize(ropeDelta);
+            ropeDelta = glm::normalize(ropeDelta) * ropeLength;
+            physics->position = ropePosition - ropeDelta;
+        }
+        std::cout << StringHelper::toString(physics->position) << std::endl;
 
 
         window.display();
