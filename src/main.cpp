@@ -100,6 +100,9 @@ int main()
     
     sf::Clock clock;
     float angle;
+    glm::quat cubeRotation(1.0f,0.0f,0.0f,0.0f);
+    vec3 cubePosition = vec3(0.0f);
+    vec3 cubeHalfSize = vec3(1.0f);
     while (window.isOpen())
     {
         while (const std::optional event = window.pollEvent())
@@ -138,33 +141,86 @@ int main()
         
         
         world.render(camera);
-        
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) {
-            angle += dt * 30;
-        }
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) {
-            angle -= dt * 30;
+
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift)) {
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) {
+                cubeRotation = glm::rotate(cubeRotation,glm::radians(30*dt),vec3(0,1,0));
+            }
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) {
+                cubeRotation = glm::rotate(cubeRotation,glm::radians(-30*dt),vec3(0,1,0));
+            }
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)) {
+                cubeRotation = glm::rotate(cubeRotation,glm::radians(30*dt),vec3(1,0,0));
+            }
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down)) {
+                cubeRotation = glm::rotate(cubeRotation,glm::radians(-30*dt),vec3(1,0,0));
+            }
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Comma)) {
+                cubeRotation = glm::rotate(cubeRotation,glm::radians(30*dt),vec3(1,0,0));
+            }
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Period)) {
+                cubeRotation = glm::rotate(cubeRotation,glm::radians(-30*dt),vec3(1,0,0));
+            }
+        } else {
+            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LAlt)) {
+                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) {
+                    cubeHalfSize += vec3(dt,0,0);
+                }
+                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) {
+                    cubeHalfSize += vec3(-dt,0,0);
+                }
+                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)) {
+                    cubeHalfSize += vec3(0,0,dt);
+                }
+                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down)) {
+                    cubeHalfSize += vec3(0,0,-dt);
+                }
+                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Comma)) {
+                    cubeHalfSize += vec3(0,dt,0);
+                }
+                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Period)) {
+                    cubeHalfSize += vec3(0,-dt,0);
+                }
+            } else {
+                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) {
+                    cubePosition += vec3(dt,0,0);
+                }
+                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) {
+                    cubePosition += vec3(-dt,0,0);
+                }
+                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)) {
+                    cubePosition += vec3(0,0,dt);
+                }
+                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down)) {
+                    cubePosition += vec3(0,0,-dt);
+                }
+                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Comma)) {
+                    cubePosition += vec3(0,dt,0);
+                }
+                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Period)) {
+                    cubePosition += vec3(0,-dt,0);
+                }
+            }
         }
     
         world.step(dt);
 
-        CollisionHelper::Ray ray(vec3(0,0,5),glm::normalize(vec3(0.1,-1,0.1)));
-        CollisionHelper::Ray plane(vec3(0,-3,0),vec3(0,1,0));
-        ray.direction = glm::quat(vec3(glm::radians(angle),0.0,0.0)) * ray.direction;
+        CollisionHelper::Ray ray(camera.position,camera.direction());
         
-        vec3 boxHalfSize = vec3(1.0f,1.0f,1.0f);
-        
-        Debug::drawRay(ray.origin,ray.direction * 20.0f);
-        auto hitOpt = CollisionHelper::intersectRayBox(vec3(0),boxHalfSize,CollisionHelper::Ray(camera.position,camera.direction()));
+        //Debug::drawRay(ray.origin,ray.direction * 20.0f);
+        auto hitOpt = CollisionHelper::intersectRayBox(cubePosition,cubeHalfSize,cubeRotation,ray);
         if(hitOpt) {
             auto hit = hitOpt.value();
-            //Debug::drawPoint(hit.point);
+            Debug::drawPoint(hit.point);
             Debug::drawRay(hit.point,hit.normal);
         }
 
-
+        glm::mat4 matrix(1.0f);
+        matrix = glm::translate(matrix,cubePosition);
+        matrix = matrix * glm::toMat4(cubeRotation);
+        matrix = glm::scale(matrix,cubeHalfSize);
         
-        registry.models.at("cube").render(camera.getViewMatrix(),glm::scale(glm::mat4(1.0f),boxHalfSize),camera.getProjectionMatrix(),registry.materials.at("cow"));
+        registry.models.at("cube").render(camera.getViewMatrix(),matrix,camera.getProjectionMatrix(),registry.materials.at("cow"));
 
         Debug::renderDebugShapes(camera);
 

@@ -1,10 +1,14 @@
 #pragma once
 
 #include <include/glm/glm.hpp>
+#include <include/glm/gtc/quaternion.hpp>
+#include <include/glm/gtx/quaternion.hpp>
+
 #include <optional>
 #include <iostream>
 #include "engine/debug.hpp"
 #include "helper/math-helper.hpp"
+
 
 using glm::vec3,std::optional,MathHelper::sign;
 
@@ -27,20 +31,20 @@ namespace CollisionHelper {
             vec3 normal;
             vec3 localPoint = point - position;
             float min = std::numeric_limits<float>::max();
-            vec3 size = halfSize * 2.0f; // :shrug:
-            float distance = std::abs(size.x - std::abs(localPoint.x));
+            //vec3 size = halfSize * 2.0f; // :shrug:
+            float distance = std::abs(halfSize.x - std::abs(localPoint.x));
             if (distance < min) {
                 min = distance;
                 normal = vec3(1,0,0);
                 normal *= sign(localPoint.x);
             }
-            distance = std::abs(size.y - std::abs(localPoint.y));
+            distance = std::abs(halfSize.y - std::abs(localPoint.y));
             if (distance < min) {
                 min = distance;
                 normal = vec3(0,1,0);
                 normal *= sign(localPoint.y);
             }
-            distance = std::abs(size.z - std::abs(localPoint.z));
+            distance = std::abs(halfSize.z - std::abs(localPoint.z));
             if (distance < min) { 
                 min = distance; 
                 normal = vec3(0,0,1);
@@ -72,9 +76,9 @@ namespace CollisionHelper {
 
     // TODO: make intersect box hollow with dstToBox = dstB - dstToBox;
 
-    std::optional<RaycastHit> intersectRayBox(vec3 position,vec3 halfSize,Ray ray) {
-        vec3 min = position - halfSize;
-        vec3 max = position + halfSize;
+    std::optional<RaycastHit> intersectRayBox(vec3 halfSize,Ray ray) {
+        vec3 min = -halfSize;
+        vec3 max = halfSize;
 
         vec3 t0 = (min - ray.origin) / ray.direction;
         vec3 t1 = (max - ray.origin) / ray.direction;
@@ -104,9 +108,42 @@ namespace CollisionHelper {
         
         
         vec3 point = ray.origin + ray.direction * dstToBox;
-        vec3 normal = boxNormalAt(position,halfSize,point);
+        vec3 normal = boxNormalAt(vec3(0),halfSize,point);
         
         return RaycastHit(point,normal,dstToBox); 
+    }
+
+    std::optional<RaycastHit> intersectRayBox(vec3 position,vec3 halfSize,Ray ray) {
+
+        ray.origin -= position;
+
+        auto hitOpt = intersectRayBox(halfSize,ray);
+        if(hitOpt) {
+            auto hit = hitOpt.value();
+            hit.point += position;
+            return hit;
+        }
+        return std::nullopt;
+
+    }
+
+    std::optional<RaycastHit> intersectRayBox(vec3 position,vec3 halfSize,quat rotation,Ray ray) {
+
+
+        ray.origin -= position;
+        ray.origin = glm::inverse(rotation) * ray.origin;
+        ray.direction = glm::inverse(rotation) * ray.direction;
+
+        auto hitOpt = intersectRayBox(halfSize,ray);
+        if(hitOpt) {
+            auto hit = hitOpt.value();
+            hit.point = rotation * hit.point;
+            hit.normal = rotation * hit.normal;
+            hit.point += position;
+            return hit;
+        }
+        return std::nullopt;
+
     }
 
 
