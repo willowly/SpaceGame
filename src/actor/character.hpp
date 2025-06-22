@@ -80,4 +80,8 @@ class Character : public Actor {
             camera.rotation = glm::angleAxis(glm::radians(lookPitch),vec3(1,0,0)) * rotation;
         }
 
+        bool playerStep() {
+            return true;
+        }
+
 };

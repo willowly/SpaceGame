@@ -32,6 +32,11 @@ class Shader {
             glUniform4f(paramLocation, color.r, color.g, color.b, color.a);
         }
 
+        void setColor3(string paramName,Color color) {
+            int paramLocation = glGetUniformLocation(shaderProgram, paramName.c_str());
+            glUniform3f(paramLocation, color.r, color.g, color.b);
+        }
+
         void setMat4(string paramName,glm::mat4 matrix) {
             int paramLocation = glGetUniformLocation(shaderProgram, paramName.c_str());
             glUniformMatrix4fv(paramLocation, 1, GL_FALSE,glm::value_ptr(matrix));

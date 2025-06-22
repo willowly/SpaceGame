@@ -73,4 +73,8 @@ class Texture {
             bind();
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         }
+
+        int getID() {
+            return textureID;
+        }
 };

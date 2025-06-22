@@ -19,12 +19,16 @@
 #include "actor/character.hpp"
 #include "actor/physics-actor.hpp"
 
+#include "graphics/text.hpp"
+
 #include <include/glm/glm.hpp>
 #include <include/glm/gtc/matrix_transform.hpp>
 #include <include/glm/gtc/type_ptr.hpp>
 
 #include "api/api-all.hpp"
 #include "helper/collision-helper.hpp"
+
+#include <reactphysics3d/reactphysics3d.h>
 
 #include <sol/sol.hpp>
 
@@ -51,6 +55,10 @@ int main()
 
     glEnable(GL_DEPTH_TEST);
 
+    // for text
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     // set up registry
     Registry registry;
 
@@ -71,8 +79,17 @@ int main()
     quad.loadQuad();
 
     //registry.textures.at("grid").setPointFiltering();
+
+    reactphysics3d::PhysicsCommon physicsCommon;
     
     World world;
+    world.setPhysicsCommon(&physicsCommon);
+    auto physicsWorld = physicsCommon.createPhysicsWorld();
+    rp3d::RigidBody* planeBody = physicsWorld->createRigidBody(rp3d::Transform(rp3d::Vector3(0,-3,0),rp3d::Quaternion::identity()));
+    planeBody->addCollider(physicsCommon.createBoxShape(rp3d::Vector3(8.0f,1.0f,8.0f)),rp3d::Transform(rp3d::Vector3(0,-1,0),rp3d::Quaternion::identity()));
+    planeBody->setType(rp3d::BodyType::STATIC);
+    world.setPhysicsWorld(physicsWorld);
+    
 
     Material material(&registry.litShader,&registry.textures.at("cow"));
     
@@ -81,6 +98,7 @@ int main()
     Actor planePrototype(&registry.models.at("plane"),&registry.materials.at("grid"));
 
     PhysicsActor physicsPrototype(&registry.models.at("cube"),&registry.materials.at("cow"));
+    
 
     Character playerPrototype;
     playerPrototype.useGravity = true;
@@ -88,11 +106,14 @@ int main()
     
 
     world.spawn<Actor>(&planePrototype,vec3(0,-3,0),quat(1.0f,0.0f,0.0f,0.0f));
-    auto physics = world.spawn(&physicsPrototype,vec3(1.0f,0.0f,0.0f),glm::identity<quat>());
-    physics->useGravity = true;
-    //Actor& cube = *world.spawn<Actor>(&cubePrototype,vec3(0,3,0),quat(1.0f,0.0f,0.0f,0.0f));
-    //world.spawn<Actor>(&containerPrototype,vec3(0,5,0),quat(1.0f,0.0f,0.0f,0.0f));
+    auto physics = world.spawn(&physicsPrototype,vec3(0.0f,0.0f,0.0f),quat(vec3(0.0f)));
+    world.spawn(&physicsPrototype,vec3(0.0f,2.0f,1.0f),quat(vec3(0.0f)));
+    world.spawn(&physicsPrototype,vec3(0.0f,4.0f,1.0f),quat(vec3(0.0f)));
+    world.spawn(&physicsPrototype,vec3(0.0f,6.0f,1.0f),quat(vec3(0.0f)));
+
     Character* playerActor = world.spawn(&playerPrototype,vec3(0,0,10),quat(1.0f,0.0f,0.0f,0.0f));
+    
+
     
 
     Camera camera;
@@ -103,7 +124,10 @@ int main()
 
     sf::Mouse::setPosition((screenCenter + window.getPosition())*2);
 
-    
+
+    Text text("fonts/courier-new.ttf",30);
+    text.text = "hello world";
+    text.position = glm::vec2(50,50);
     
     sf::Clock clock;
     float angle;
@@ -111,6 +135,9 @@ int main()
     vec3 cubePosition = vec3(0.0f);
     vec3 cubeHalfSize = vec3(1.0f);
     bool mousePressed = false;
+    bool nextPressed = false;
+    float sinceLastStep;
+    float stepDt = 0.02f;
     while (window.isOpen())
     {
         while (const std::optional event = window.pollEvent())
@@ -146,81 +173,29 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         float dt = clock.restart().asSeconds();
+        sinceLastStep += dt;
         
+        //world.render(camera);
         
-        world.render(camera);
 
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift)) {
-            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) {
-                cubeRotation = glm::rotate(cubeRotation,glm::radians(30*dt),vec3(0,1,0));
-            }
-            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) {
-                cubeRotation = glm::rotate(cubeRotation,glm::radians(-30*dt),vec3(0,1,0));
-            }
-            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)) {
-                cubeRotation = glm::rotate(cubeRotation,glm::radians(30*dt),vec3(1,0,0));
-            }
-            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down)) {
-                cubeRotation = glm::rotate(cubeRotation,glm::radians(-30*dt),vec3(1,0,0));
-            }
-            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Comma)) {
-                cubeRotation = glm::rotate(cubeRotation,glm::radians(30*dt),vec3(1,0,0));
-            }
-            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Period)) {
-                cubeRotation = glm::rotate(cubeRotation,glm::radians(-30*dt),vec3(1,0,0));
-            }
-        } else {
-            if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LAlt)) {
-                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) {
-                    cubeHalfSize += vec3(dt,0,0);
-                }
-                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) {
-                    cubeHalfSize += vec3(-dt,0,0);
-                }
-                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)) {
-                    cubeHalfSize += vec3(0,0,dt);
-                }
-                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down)) {
-                    cubeHalfSize += vec3(0,0,-dt);
-                }
-                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Comma)) {
-                    cubeHalfSize += vec3(0,dt,0);
-                }
-                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Period)) {
-                    cubeHalfSize += vec3(0,-dt,0);
-                }
-            } else {
-                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) {
-                    cubePosition += vec3(dt,0,0);
-                }
-                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) {
-                    cubePosition += vec3(-dt,0,0);
-                }
-                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)) {
-                    cubePosition += vec3(0,0,dt);
-                }
-                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down)) {
-                    cubePosition += vec3(0,0,-dt);
-                }
-                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Comma)) {
-                    cubePosition += vec3(0,dt,0);
-                }
-                if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Period)) {
-                    cubePosition += vec3(0,-dt,0);
-                }
-            }
+        if(sinceLastStep > 0.1f) {
+            sinceLastStep = 0.1f; //we dont want to get caught in an infinite loop! if the physics takes too long the game will just slow down
         }
-
-        
-        
-    
-        world.step(dt);
-        
+        //max 5 steps before we render again (dont wanna get caught in an infinite loop!)
+        while (sinceLastStep > stepDt)
+        {
+            sinceLastStep -= stepDt;
+            world.step(stepDt);
+            world.playerStep(stepDt);
+        } 
 
         CollisionHelper::Ray ray(camera.position,camera.direction());
-        
 
-        Debug::renderDebugShapes(camera);
+        
+        
+        glDisable(GL_DEPTH_TEST);
+        //Debug::renderDebugShapes(camera);
+        glEnable(GL_DEPTH_TEST);
 
         auto hitOpt = physics->raycast(ray);
 
@@ -240,20 +215,7 @@ int main()
             }
         }
 
-        physics->angularVelocity = physics->angularVelocity * pow(2.0f,-dt);
-        
-        vec3 ropePosition = vec3(0,5,0);
-        Debug::drawLine(ropePosition,physics->position);
-        vec3 ropeDelta = ropePosition - physics->position;
-        float ropeForce = 10;
-        float ropeLength = 4;
-        if(glm::length(ropeDelta) > ropeLength) {
-            physics->velocity += glm::dot(-glm::normalize(ropeDelta),physics->velocity) * glm::normalize(ropeDelta);
-            ropeDelta = glm::normalize(ropeDelta) * ropeLength;
-            physics->position = ropePosition - ropeDelta;
-        }
-        std::cout << StringHelper::toString(physics->position) << std::endl;
-
+        text.render(registry.textShader,glm::ortho(0.0f,100.0f,0.0f,100.0f));
 
         window.display();
     }

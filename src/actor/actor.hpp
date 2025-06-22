@@ -72,4 +72,9 @@ class Actor {
             model->render(matrix,camera,*material);
         }
 
+        //for now to get the player to move differently than the physics sim :)
+        virtual bool playerStep() {
+            return false;
+        }
+
 };

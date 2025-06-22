@@ -14,5 +14,6 @@ class Registry {
         map<string,Material> materials;
 
         Shader litShader;
+        Shader textShader;
 
 };

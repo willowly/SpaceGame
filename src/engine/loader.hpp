@@ -81,6 +81,7 @@ class Loader {
         void loadShaders(Registry& registry) {
             std::cout << "Loading Shaders" << std::endl;
             registry.litShader.loadFromFiles("shaders/lit.vert","shaders/lit.frag");
+            registry.textShader.loadFromFiles("shaders/text.vert","shaders/text.frag");
         }
 
 };
