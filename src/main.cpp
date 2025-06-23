@@ -216,6 +216,7 @@ int main()
         }
 
         text.render(registry.textShader,glm::ortho(0.0f,100.0f,0.0f,100.0f));
+        
 
         window.display();
     }

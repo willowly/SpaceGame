@@ -1,0 +1,14 @@
+# Target labels
+ vorbis-populate
+# Source files and their labels
+/Users/willow/Documents/GitHub/SpaceGame/build/_deps/vorbis-subbuild/CMakeFiles/vorbis-populate
+/Users/willow/Documents/GitHub/SpaceGame/build/_deps/vorbis-subbuild/CMakeFiles/vorbis-populate.rule
+/Users/willow/Documents/GitHub/SpaceGame/build/_deps/vorbis-subbuild/CMakeFiles/vorbis-populate-complete.rule
+/Users/willow/Documents/GitHub/SpaceGame/build/_deps/vorbis-subbuild/vorbis-populate-prefix/src/vorbis-populate-stamp/vorbis-populate-build.rule
+/Users/willow/Documents/GitHub/SpaceGame/build/_deps/vorbis-subbuild/vorbis-populate-prefix/src/vorbis-populate-stamp/vorbis-populate-configure.rule
+/Users/willow/Documents/GitHub/SpaceGame/build/_deps/vorbis-subbuild/vorbis-populate-prefix/src/vorbis-populate-stamp/vorbis-populate-download.rule
+/Users/willow/Documents/GitHub/SpaceGame/build/_deps/vorbis-subbuild/vorbis-populate-prefix/src/vorbis-populate-stamp/vorbis-populate-install.rule
+/Users/willow/Documents/GitHub/SpaceGame/build/_deps/vorbis-subbuild/vorbis-populate-prefix/src/vorbis-populate-stamp/vorbis-populate-mkdir.rule
+/Users/willow/Documents/GitHub/SpaceGame/build/_deps/vorbis-subbuild/vorbis-populate-prefix/src/vorbis-populate-stamp/vorbis-populate-patch.rule
+/Users/willow/Documents/GitHub/SpaceGame/build/_deps/vorbis-subbuild/vorbis-populate-prefix/src/vorbis-populate-stamp/vorbis-populate-test.rule
+/Users/willow/Documents/GitHub/SpaceGame/build/_deps/vorbis-subbuild/vorbis-populate-prefix/src/vorbis-populate-stamp/vorbis-populate-update.rule
