@@ -1,7 +1,7 @@
 #pragma once
-#include <include/glm/glm.hpp>
-#include <include/glm/gtc/quaternion.hpp>
-#include <include/glm/gtx/quaternion.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include "graphics/model.hpp"
 #include "graphics/material.hpp"
 

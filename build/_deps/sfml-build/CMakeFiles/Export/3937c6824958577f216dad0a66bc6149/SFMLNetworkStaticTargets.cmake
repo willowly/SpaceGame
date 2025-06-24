@@ -62,7 +62,7 @@ set_target_properties(SFML::Network PROPERTIES
   INTERFACE_COMPILE_DEFINITIONS "SFML_STATIC"
   INTERFACE_COMPILE_FEATURES "cxx_std_17"
   INTERFACE_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include"
-  INTERFACE_LINK_LIBRARIES "SFML::System"
+  INTERFACE_LINK_LIBRARIES "SFML::System;\$<LINK_ONLY:ws2_32>"
 )
 
 # Load information for each installed configuration.

@@ -1,8 +1,8 @@
 #pragma once
 #include "actor.hpp"
-#include <include/glm/glm.hpp>
-#include <include/glm/gtc/quaternion.hpp>
-#include <include/glm/gtx/quaternion.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <format>
 #include <string>
 #include <iostream>

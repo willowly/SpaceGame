@@ -1,8 +1,8 @@
 #pragma once
 #include <vector>
-#include <include/glm/glm.hpp>
-#include <include/glm/gtc/matrix_transform.hpp>
-#include <include/glm/gtc/type_ptr.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include "helper/file-helper.hpp"
 #include "helper/string-helper.hpp"
 #include "graphics/material.hpp"

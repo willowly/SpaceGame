@@ -1,8 +1,8 @@
-# Install script for directory: /Users/willow/Documents/GitHub/SpaceGame/build/_deps/vorbis-src
+# Install script for directory: C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/vorbis-src
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/usr/local")
+  set(CMAKE_INSTALL_PREFIX "C:/Program Files (x86)/SpaceGame")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -34,12 +34,12 @@ endif()
 
 # Set default install directory permissions.
 if(NOT DEFINED CMAKE_OBJDUMP)
-  set(CMAKE_OBJDUMP "/usr/bin/objdump")
+  set(CMAKE_OBJDUMP "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/Llvm/x64/bin/llvm-objdump.exe")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/Users/willow/Documents/GitHub/SpaceGame/build/_deps/vorbis-build/lib/cmake_install.cmake")
+  include("C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/vorbis-build/lib/cmake_install.cmake")
 
 endif()
 

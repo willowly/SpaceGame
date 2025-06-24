@@ -61,7 +61,7 @@ add_library(FLAC::FLAC STATIC IMPORTED)
 set_target_properties(FLAC::FLAC PROPERTIES
   INTERFACE_COMPILE_DEFINITIONS "\$<\$<NOT:\$<BOOL:OFF>>:FLAC__NO_DLL>"
   INTERFACE_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include"
-  INTERFACE_LINK_LIBRARIES "\$<\$<BOOL:1>:m>;Ogg::ogg"
+  INTERFACE_LINK_LIBRARIES "\$<\$<BOOL:>:m>;Ogg::ogg"
 )
 
 # Load information for each installed configuration.

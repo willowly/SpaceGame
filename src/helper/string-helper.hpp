@@ -3,7 +3,7 @@
 #include <string>
 #include <format>
 
-#include <include/glm/glm.hpp>
+#include <glm/glm.hpp>
 
 using glm::vec3, glm::vec2;
 

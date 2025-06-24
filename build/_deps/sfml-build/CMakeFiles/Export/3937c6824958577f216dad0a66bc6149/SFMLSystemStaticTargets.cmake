@@ -62,7 +62,7 @@ set_target_properties(SFML::System PROPERTIES
   INTERFACE_COMPILE_DEFINITIONS "SFML_STATIC"
   INTERFACE_COMPILE_FEATURES "cxx_std_17"
   INTERFACE_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include"
-  INTERFACE_LINK_LIBRARIES "\$<LINK_ONLY:Threads::Threads>"
+  INTERFACE_LINK_LIBRARIES "\$<LINK_ONLY:Threads::Threads>;\$<LINK_ONLY:winmm>"
 )
 
 # Load information for each installed configuration.

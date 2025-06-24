@@ -1,8 +1,7 @@
 #pragma once
 #include <vector>
 #include <string>
-#include <OpenGL/gl3.h>
-#include "include/stb_image.h"
+#include "stb_image.h"
 #include <iostream>
 
 using std::string;

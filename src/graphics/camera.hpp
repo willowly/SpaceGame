@@ -1,8 +1,8 @@
 #pragma once
 #define GLM_ENABLE_EXPERIMENTAL
-#include <include/glm/glm.hpp>
-#include <include/glm/gtc/quaternion.hpp>
-#include <include/glm/gtx/quaternion.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 using glm::vec2,glm::vec3,glm::quat;
 

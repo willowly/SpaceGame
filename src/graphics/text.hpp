@@ -1,13 +1,11 @@
 #pragma once
 
-#include "SFML/Graphics.hpp"
+#include <glad/glad.h> 
+#include <GLFW/glfw3.h>
 
 #include <iostream>
-
-#include <OpenGL/gl3.h>
-
-#include <include/glm/glm.hpp>
-#include <include/glm/gtc/matrix_transform.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "texture.hpp"
 #include "shader.hpp"
@@ -43,8 +41,8 @@ class Text {
 
         std::map<char, Character> Characters;
 
-        int VBO = -1;
-        int VAO = -1;
+        unsigned int VBO = -1;
+        unsigned int VAO = -1;
         glm::vec2 position = glm::vec2(1.0f);
         Color color = Color::white;
         string text = "";
@@ -104,7 +102,7 @@ class Text {
                     texture, 
                     glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
                     glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-                    (uint)face->glyph->advance.x
+                    (unsigned int)face->glyph->advance.x
                 };
                 Characters.insert(std::pair<char, Character>(c, character));
             }
@@ -115,7 +113,6 @@ class Text {
             glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
             // text rendering
-            unsigned int VAO, VBO;
             glGenVertexArrays(1, &VAO);
             glGenBuffers(1, &VBO);
             glBindVertexArray(VAO);
@@ -129,7 +126,7 @@ class Text {
         }
         void render(Shader& shader,glm::mat4 projection) {
 
-            //glDisable(GL_DEPTH_TEST);
+            glDisable(GL_DEPTH_TEST);
             //glm::mat4 projection = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f);
             
             shader.use();
@@ -138,50 +135,40 @@ class Text {
             glActiveTexture(GL_TEXTURE0);
             glBindVertexArray(VAO);
 
-            float vertices[24] = {
-                     0,     0.5f,   0.0f, 0.0f,           
-                    0,     0,       0.0f, 1.0f,
-                     0.5f,    0,       1.0f, 1.0f ,
+            int x = position.x;
+            int y = position.y;
+            for (char c : text)
+            {
+                Character ch = Characters[c];
 
-                     0,     0.5f,   0.0f, 0.0f ,
-                     0.5f,    0,       1.0f, 1.0f ,
-                     0.5f,    0.5f,   1.0f, 0.0f            
+                float xpos = x + ch.Bearing.x * scale.x;
+                float ypos = y - (ch.Size.y - ch.Bearing.y) * scale.y;
+
+                float w = ch.Size.x * scale.x;
+                float h = ch.Size.y * scale.y;
+                // update VBO for each character
+                float vertices[6][4] = {
+                    { xpos,     ypos + h,   0.0f, 0.0f },            
+                    { xpos,     ypos,       0.0f, 1.0f },
+                    { xpos + w, ypos,       1.0f, 1.0f },
+
+                    { xpos,     ypos + h,   0.0f, 0.0f },
+                    { xpos + w, ypos,       1.0f, 1.0f },
+                    { xpos + w, ypos + h,   1.0f, 0.0f }           
                 };
-
-            // int x = position.x;
-            // int y = position.y;
-            // for (char c : text)
-            // {
-            //     Character ch = Characters[c];
-
-            //     float xpos = x + ch.Bearing.x * scale.x;
-            //     float ypos = y - (ch.Size.y - ch.Bearing.y) * scale.y;
-
-            //     float w = ch.Size.x * scale.x;
-            //     float h = ch.Size.y * scale.y;
-            //     // update VBO for each character
-            //     float vertices[6][4] = {
-            //         { xpos,     ypos + h,   0.0f, 0.0f },            
-            //         { xpos,     ypos,       0.0f, 1.0f },
-            //         { xpos + w, ypos,       1.0f, 1.0f },
-
-            //         { xpos,     ypos + h,   0.0f, 0.0f },
-            //         { xpos + w, ypos,       1.0f, 1.0f },
-            //         { xpos + w, ypos + h,   1.0f, 0.0f }           
-            //     };
-            //     // render glyph texture over quad
-            //     glBindTexture(GL_TEXTURE_2D, ch.textureID);
-                    // update content of VBO memory
+                // render glyph texture over quad
+                glBindTexture(GL_TEXTURE_2D, ch.textureID);
+                    //update content of VBO memory
                     glBindBuffer(GL_ARRAY_BUFFER, VBO);
                     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); 
                     glBindBuffer(GL_ARRAY_BUFFER, 0);
-            //     // render quad
+                // render quad
                  glDrawArrays(GL_TRIANGLES, 0, 6);
-            //     // now advance cursors for next glyph (note that advance is number of 1/64 pixels)
-            //     x += (ch.Advance >> 6) * scale.x; // bitshift by 6 to get value in pixels (2^6 = 64)
-            // }
+                // now advance cursors for next glyph (note that advance is number of 1/64 pixels)
+                x += (ch.Advance >> 6) * scale.x; // bitshift by 6 to get value in pixels (2^6 = 64)
+            }
 
-            //glEnable(GL_DEPTH_TEST);
+            glEnable(GL_DEPTH_TEST);
             
             
         }

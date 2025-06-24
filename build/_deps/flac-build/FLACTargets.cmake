@@ -51,15 +51,15 @@ add_library(FLAC::FLAC STATIC IMPORTED)
 
 set_target_properties(FLAC::FLAC PROPERTIES
   INTERFACE_COMPILE_DEFINITIONS "\$<\$<NOT:\$<BOOL:OFF>>:FLAC__NO_DLL>"
-  INTERFACE_INCLUDE_DIRECTORIES "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/flac-src/include"
-  INTERFACE_LINK_LIBRARIES "\$<\$<BOOL:1>:m>;Ogg::ogg"
+  INTERFACE_INCLUDE_DIRECTORIES "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/flac-src/include"
+  INTERFACE_LINK_LIBRARIES "\$<\$<BOOL:>:m>;Ogg::ogg"
 )
 
 # Import target "FLAC::FLAC" for configuration "Debug"
 set_property(TARGET FLAC::FLAC APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
 set_target_properties(FLAC::FLAC PROPERTIES
-  IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "C"
-  IMPORTED_LOCATION_DEBUG "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/sfml-build/lib/libFLACd.a"
+  IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "C;RC"
+  IMPORTED_LOCATION_DEBUG "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/sfml-build/lib/FLACd.lib"
   )
 
 # Make sure the targets which have been exported in some other

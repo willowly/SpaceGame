@@ -68,22 +68,22 @@
 #define HAVE_CPUID_H
 
 /* Define to 1 if fseeko (and presumably ftello) exists and is declared. */
-#define HAVE_FSEEKO
+/* #undef HAVE_FSEEKO */
 
 /* Define to 1 if you have the `getopt_long' function. */
 /* #undef HAVE_GETOPT_LONG */
 
 /* Define if you have the iconv() function and it works. */
-#define HAVE_ICONV
+/* #undef HAVE_ICONV */
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define HAVE_INTTYPES_H
 
 /* Define if you have <langinfo.h> and nl_langinfo(CODESET). */
-#define HAVE_LANGINFO_CODESET
+/* #undef HAVE_LANGINFO_CODESET */
 
 /* lround support */
-#define HAVE_LROUND 1
+#define HAVE_LROUND 0
 
 /* Define to 1 if you have the <memory.h> header file. */
 /* #undef HAVE_MEMORY_H */
@@ -101,7 +101,7 @@
 /* #undef HAVE_SYS_IOCTL_H */
 
 /* Define to 1 if you have the <sys/param.h> header file. */
-#define HAVE_SYS_PARAM_H
+/* #undef HAVE_SYS_PARAM_H */
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 /* #undef HAVE_SYS_STAT_H */
@@ -116,7 +116,7 @@
 /* #undef HAVE_TYPEOF */
 
 /* Define to 1 if you have the <unistd.h> header file. */
-#define HAVE_UNISTD_H
+/* #undef HAVE_UNISTD_H */
 
 /* Define to 1 if you have the <x86intrin.h> header file. */
 /* #undef HAVE_X86INTRIN_H */

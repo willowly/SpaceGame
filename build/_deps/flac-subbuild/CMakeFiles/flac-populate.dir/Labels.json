@@ -2,37 +2,37 @@
 	"sources" : 
 	[
 		{
-			"file" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/flac-subbuild/CMakeFiles/flac-populate"
+			"file" : "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/flac-subbuild/CMakeFiles/flac-populate"
 		},
 		{
-			"file" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/flac-subbuild/CMakeFiles/flac-populate.rule"
+			"file" : "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/flac-subbuild/CMakeFiles/flac-populate.rule"
 		},
 		{
-			"file" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/flac-subbuild/CMakeFiles/flac-populate-complete.rule"
+			"file" : "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/flac-subbuild/CMakeFiles/flac-populate-complete.rule"
 		},
 		{
-			"file" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/flac-subbuild/flac-populate-prefix/src/flac-populate-stamp/flac-populate-build.rule"
+			"file" : "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/flac-subbuild/flac-populate-prefix/src/flac-populate-stamp/flac-populate-build.rule"
 		},
 		{
-			"file" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/flac-subbuild/flac-populate-prefix/src/flac-populate-stamp/flac-populate-configure.rule"
+			"file" : "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/flac-subbuild/flac-populate-prefix/src/flac-populate-stamp/flac-populate-configure.rule"
 		},
 		{
-			"file" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/flac-subbuild/flac-populate-prefix/src/flac-populate-stamp/flac-populate-download.rule"
+			"file" : "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/flac-subbuild/flac-populate-prefix/src/flac-populate-stamp/flac-populate-download.rule"
 		},
 		{
-			"file" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/flac-subbuild/flac-populate-prefix/src/flac-populate-stamp/flac-populate-install.rule"
+			"file" : "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/flac-subbuild/flac-populate-prefix/src/flac-populate-stamp/flac-populate-install.rule"
 		},
 		{
-			"file" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/flac-subbuild/flac-populate-prefix/src/flac-populate-stamp/flac-populate-mkdir.rule"
+			"file" : "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/flac-subbuild/flac-populate-prefix/src/flac-populate-stamp/flac-populate-mkdir.rule"
 		},
 		{
-			"file" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/flac-subbuild/flac-populate-prefix/src/flac-populate-stamp/flac-populate-patch.rule"
+			"file" : "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/flac-subbuild/flac-populate-prefix/src/flac-populate-stamp/flac-populate-patch.rule"
 		},
 		{
-			"file" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/flac-subbuild/flac-populate-prefix/src/flac-populate-stamp/flac-populate-test.rule"
+			"file" : "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/flac-subbuild/flac-populate-prefix/src/flac-populate-stamp/flac-populate-test.rule"
 		},
 		{
-			"file" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/flac-subbuild/flac-populate-prefix/src/flac-populate-stamp/flac-populate-update.rule"
+			"file" : "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/flac-subbuild/flac-populate-prefix/src/flac-populate-stamp/flac-populate-update.rule"
 		}
 	],
 	"target" : 

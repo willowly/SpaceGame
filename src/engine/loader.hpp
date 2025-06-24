@@ -3,6 +3,7 @@
 #include "graphics/model.hpp"
 #include "graphics/texture.hpp"
 #include "graphics/shader.hpp"
+#include <filesystem>
 
 using std::string,std::vector;
 
@@ -25,7 +26,7 @@ class Loader {
                 std::filesystem::path p(entry.path());
 
                 if(entry.is_directory()) {
-                    loadModelsFromDir(registry,entry.path());
+                    loadModelsFromDir(registry,entry.path().string());
                     continue;
                 }
 
@@ -38,7 +39,7 @@ class Loader {
                     registry.models[name] = Model(); //replace since we can't update static models :shrug:
                 }
                 Model& model = registry.models.at(name);
-                model.loadFromFile(entry.path());
+                model.loadFromFile(entry.path().string());
 
             }
         }
@@ -56,11 +57,11 @@ class Loader {
                 std::filesystem::path p(entry.path());
 
                 if(entry.is_directory()) {
-                    loadModelsFromDir(registry,entry.path());
+                    loadModelsFromDir(registry,entry.path().string());
                     continue;
                 }
                 
-                string extension = entry.path().extension();
+                string extension = entry.path().extension().string();
                 if(extension != ".png" && extension != ".jpg" && extension != ".jpeg") continue;
                 
                 string name = p.stem().string();
@@ -69,10 +70,10 @@ class Loader {
                 }
                 Texture& texture = registry.textures.at(name);
                 if(extension == ".png") {
-                    texture.loadFromFile(entry.path(),Texture::Format::RGBA);
+                    texture.loadFromFile(entry.path().string(),Texture::Format::RGBA);
                 }
                 if(extension == ".jpg" || extension == ".jpeg") {
-                    texture.loadFromFile(entry.path(),Texture::Format::RGB);
+                    texture.loadFromFile(entry.path().string(),Texture::Format::RGB);
                 }
 
             }

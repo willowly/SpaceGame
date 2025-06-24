@@ -6,7 +6,7 @@
 #include "graphics/camera.hpp"
 #include "graphics/model.hpp"
 #include "graphics/color.hpp"
-#include <include/glm/glm.hpp>
+#include <glm/glm.hpp>
 
 using std::vector, std::string;
 

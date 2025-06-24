@@ -3,9 +3,9 @@
 # No other meaning or use of this file is supported.
 
 method=git
-command=/usr/local/Cellar/cmake/3.29.2/bin/cmake;-P;/Users/willow/Documents/GitHub/SpaceGame/build/_deps/sfml-subbuild/sfml-populate-prefix/tmp/sfml-populate-gitclone.cmake
-source_dir=/Users/willow/Documents/GitHub/SpaceGame/build/_deps/sfml-src
-work_dir=/Users/willow/Documents/GitHub/SpaceGame/build/_deps
+command=C:/Program Files/CMake/bin/cmake.exe;-P;C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/sfml-subbuild/sfml-populate-prefix/tmp/sfml-populate-gitclone.cmake
+source_dir=C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/sfml-src
+work_dir=C:/Users/wille/Documents/Hike/SpaceGame/build/_deps
 repository=https://github.com/SFML/SFML.git
 remote=origin
 init_submodules=TRUE
