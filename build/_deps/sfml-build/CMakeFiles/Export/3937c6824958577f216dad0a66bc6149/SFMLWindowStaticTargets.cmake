@@ -62,7 +62,7 @@ set_target_properties(SFML::Window PROPERTIES
   INTERFACE_COMPILE_DEFINITIONS "SFML_STATIC"
   INTERFACE_COMPILE_FEATURES "cxx_std_17"
   INTERFACE_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include"
-  INTERFACE_LINK_LIBRARIES "SFML::System;\$<LINK_ONLY:OpenGL::GL>;\$<LINK_ONLY:winmm>;\$<LINK_ONLY:gdi32>"
+  INTERFACE_LINK_LIBRARIES "SFML::System;\$<LINK_ONLY:-ObjC>;\$<LINK_ONLY:OpenGL::GL>;-framework Foundation;-framework AppKit;-framework IOKit;-framework Carbon"
 )
 
 # Load information for each installed configuration.

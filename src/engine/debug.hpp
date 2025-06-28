@@ -8,21 +8,38 @@
 #include "graphics/color.hpp"
 #include <glm/glm.hpp>
 
+#include <fstream>
+
 using std::vector, std::string;
+
+enum InfoPriority{
+    HIGH,
+    MEDIUM,
+    LOW
+};
 
 class Debug {
 
     struct Point {
         vec3 position;
         Color color;
-        Point(vec3 position,Color color = Color::blue) : position(position), color(color) {}
+        float time;
+        Point(vec3 position,Color color = Color::blue,float time = 0) : position(position), color(color), time(time) {}
     };
 
     struct Line {
         vec3 a;
         vec3 b;
         Color color;
-        Line(vec3 a,vec3 b,Color color = Color::blue) : a(a), b(b), color(color) {}
+        float time;
+        Line(vec3 a,vec3 b,Color color = Color::blue,float time = 0) : a(a), b(b), color(color), time(time) {}
+    };
+    struct Cube {
+        vec3 origin;
+        vec3 size;
+        Color color;
+        float time;
+        Cube(vec3 origin,vec3 size,Color color = Color::blue,float time = 0) : origin(origin), size(size), color(color), time(time) {}
     };
 
     private:
@@ -33,11 +50,13 @@ class Debug {
 
         vector<Point> pointsToDraw;
         vector<Line> linesToDraw;
+        vector<Cube> cubesToDraw;
 
         std::unique_ptr<Model> _quadModel;
         std::unique_ptr<Shader> _shader;
         float pointSize = 0.05;
-        //std::ofstream logFile;
+        
+        std::ofstream logFile;
 
         
 
@@ -45,7 +64,9 @@ class Debug {
 
     public:
 
-
+        Debug() {
+            logFile = std::ofstream("log.txt", std::ofstream::trunc);
+        }
 
         static Debug* getInstance() {
             if(_instance == nullptr) {
@@ -142,7 +163,15 @@ class Debug {
         }
 
         static void warn(string string) {
+            Debug* instance = getInstance();
             std::cout << "[WARNING] " << string << traceString() << std::endl;
+            instance->logFile << "[WARNING] " << string << traceString() << std::endl;
+        }
+
+        static void info(string string,InfoPriority priority) {
+            Debug* instance = getInstance();
+            std::cout << "[INFO] " << string << traceString() << std::endl;
+            instance->logFile << "[INFO] " << string << traceString() << std::endl;
         }
 
         //set the draw
@@ -159,6 +188,11 @@ class Debug {
         static void drawRay(vec3 origin,vec3 direction,Color color = Color::blue) {
             Debug* instance = getInstance();
             instance->linesToDraw.push_back(Line(origin,origin + direction,color));
+        }
+
+        static void drawCube(vec3 origin,vec3 size,Color color = Color::blue) {
+            Debug* instance = getInstance();
+            instance->cubesToDraw.push_back(Cube(origin,size,color));
         }
 
         //actually render the shapes
@@ -180,7 +214,7 @@ class Debug {
             }
         
             
-            instance->pointsToDraw.clear();
+            //instance->pointsToDraw.clear();
 
             for (auto& l : instance->linesToDraw)
             {
@@ -191,6 +225,20 @@ class Debug {
                 shader.setColor("color",l.color);
                 model.renderMode = Model::RenderMode::Wireframe;
                 model.render(camera.getViewMatrix(),glm::mat4(1.0f),camera.getProjectionMatrix(),shader);
+            }
+        
+            instance->linesToDraw.clear();
+
+            Model cubeModel;
+            cubeModel.loadFromFile("models/block.obj");
+            for (auto& l : instance->cubesToDraw)
+            {
+                
+                Shader& shader = *instance->getShader();
+                shader.use();
+                shader.setColor("color",l.color);
+                cubeModel.renderMode = Model::RenderMode::Wireframe;
+                cubeModel.render(camera.getViewMatrix(),glm::mat4(1.0f),camera.getProjectionMatrix(),shader);
             }
         
             instance->linesToDraw.clear();

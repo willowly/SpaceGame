@@ -7,6 +7,12 @@
 
 #include <engine/loader.hpp>
 #include <engine/world.hpp>
+#include <engine/input.hpp>
+#include <actor/construction.hpp>
+
+#include <interface/console.hpp>
+
+#include <actor/character.hpp>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -14,16 +20,59 @@
 
 #include <graphics/text.hpp>
 
+#include "api/api-all.hpp"
+
 using glm::vec3;
+
+Input input;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
+    std::cout << "resize " << width << " " << height << std::endl;
     glViewport(0, 0, width, height);
-}  
+}
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if(action == GLFW_PRESS) {
+        input.keys[key] = true;
+        input.keysPressed[key] = true;
+    }
+    if(action == GLFW_RELEASE) {
+        input.keys[key] = false;
+        input.keysReleased[key] = true;
+    }
+}
+
+void character_callback(GLFWwindow* window, unsigned int codepoint)
+{
+    input.textInput += (char)codepoint;
+}
+
+
+
+void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
+{
+    input.currentMousePosition = vec2(xposIn,yposIn);
+}
+
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+    if(action == GLFW_PRESS) {
+        input.mouseButtons[button] = true;
+        input.mouseButtonsPressed[button] = true;
+    }
+    if(action == GLFW_RELEASE) {
+        input.mouseButtons[button] = false;
+        input.mouseButtonsReleased[button] = true;
+    }
+}
+
 
 int main()
 {
 
+    // ---------------- SET UP GLFW WINDOW ------------------
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -37,29 +86,17 @@ int main()
     }
     glfwMakeContextCurrent(window);
 
+    
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
 
-    Registry registry;
-    Loader loader;
-    loader.loadAll(registry);
-
-    Material material(&registry.litShader,&registry.textures.at("cow"));
-
-    // World world;
-
-    Text text("fonts/courier-new.ttf",30);
-    text.text = "hello world";
-
-    Camera camera;
-    camera.move(vec3(0,0,5));
-
-    camera.setAspect(800,600);
-    
-    glViewport(0, 0, 800, 600);
+    int width;
+    int height;
+    glfwGetFramebufferSize(window,&width,&height);
+    glViewport(0, 0, width, height);
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);  
     glEnable(GL_DEPTH_TEST);
@@ -67,23 +104,93 @@ int main()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    float angle;
+    glfwSetKeyCallback(window,key_callback);
+    glfwSetCursorPosCallback(window, mouse_callback); 
+    glfwSetCharCallback(window, character_callback);
+    glfwSetMouseButtonCallback(window, mouse_button_callback);
+
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);  
+
+    // ---------------- SET UP ENGINE ------------------
+    sol::state lua;
+    lua.open_libraries(sol::lib::base, sol::lib::package);
+    API::loadAPIAll(lua);
+    
+    Registry registry;
+    Loader loader;
+    loader.loadAll(registry,lua);
+    
+    RigidbodyActor cubePrototype(registry.getModel("cube"),registry.getMaterial("cow"));
+    Character playerPrototype(nullptr,nullptr);
+
+    Construction constructionPrototype(registry.getModel("block"),registry.getMaterial("cow"));
+
+
+    Text text("fonts/sburbits.ttf",16);
+    text.scale = vec2(2,2);
+
+    World world;
+
+    Console console("fonts/sburbits.ttf");
+
+    Model cursorModel;
+    cursorModel.loadQuad();
+
+    
+
+
+    //world.getCamera().move(vec3(0,0,5));
+
+
+    auto player = world.spawn(&playerPrototype,vec3(0,1,10),quat(vec3(0,0,0)));
+    world.spawn(registry.getActor("plane"),vec3(0,0,0),quat(vec3(0,0,0)));
+
+    auto construction = world.spawn(&constructionPrototype,vec3(0,2,0),quat(vec3(0,0,0)));
+    construction->setBlock(ivec3(0,0,0),1);
+    lua["construction"] = construction;
+
+
+    float lastTime;
 
     while(!glfwWindowShouldClose(window))
     {
 
-        glClearColor(0.1f, 0.1f, 0.3f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        
 
-        angle += 0.1;
-        auto matrix = glm::ortho(0.0f,800.0f,0.0f,600.0f);
+        glfwGetWindowSize(window,&width,&height);
+        world.getCamera().setAspect(width,height);
+        
+        float dt = (float)glfwGetTime() - lastTime;
+        lastTime = glfwGetTime();
+
+        player->firstPersonCamera(world.getCamera());
+        
+        if(input.getKeyPressed(GLFW_KEY_GRAVE_ACCENT)) {
+            console.enabled = !console.enabled;
+        }
+        if(console.enabled) {
+            console.processInput(input,lua);
+        } else {
+            player->processInput(input);
+        }
+
+        world.frame(dt);
+
+        auto matrix = glm::ortho(0.0f,(float)width,0.0f,(float)height);
+        text.text = std::format("FPS: {}",(int)(1.0f/dt));
         text.render(registry.textShader,matrix);
-        // auto matrix = glm::mat4(1.0f);
-        // matrix = glm::toMat4(glm::quat(glm::vec3(0,angle,0))) * matrix;
-        // registry.models.at("cube").render(matrix,camera,material);
+
+        if(console.enabled) console.render(vec2(width,height),registry.textShader);
+
+        glDisable(GL_DEPTH_TEST);
+        Debug::renderDebugShapes(world.getCamera());
+
+        cursorModel.render(glm::mat4(1.0f),glm::scale(glm::mat4(1.0f),vec3(4,4,4)),glm::ortho(-width/2.0f,width/2.0f,-height/2.0f,height/2.0f),*Debug::getShader());
+        glEnable(GL_DEPTH_TEST);
         
         glfwSwapBuffers(window);
+        input.clearInputBuffers(); //do it before we poll for events
         glfwPollEvents();    
     }
 

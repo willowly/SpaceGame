@@ -5,7 +5,13 @@
 #include "graphics/model.hpp"
 #include "graphics/material.hpp"
 
+#include <reactphysics3d/reactphysics3d.h>
+
 using glm::vec3, glm::quat;
+
+#ifndef WORLD
+class World;
+#endif
 
 class Actor {
 
@@ -56,7 +62,7 @@ class Actor {
             rotation *= glm::angleAxis(glm::radians(eulerAngles.z),vec3(0,0,1));
         }
 
-        virtual void step(float dt) {
+        virtual void step(float dt,World* world) {
             position += velocity * dt;
         }
 
@@ -77,4 +83,22 @@ class Actor {
             return false;
         }
 
+        virtual void addToPhysicsWorld(rp3d::PhysicsWorld* world,rp3d::PhysicsCommon* common) {
+
+        }
+
+        virtual void updatePhysicsRepresentation() {
+
+        }
+
+        virtual void updateFromPhysicsRepresentation() {
+            
+        }
+
+};
+
+
+// 
+struct ActorUserData {
+    Actor* actor;
 };

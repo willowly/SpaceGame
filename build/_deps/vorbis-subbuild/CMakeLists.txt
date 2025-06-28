@@ -18,18 +18,18 @@ project(vorbis-populate NONE)
 
 # Pass through things we've already detected in the main project to avoid
 # paying the cost of redetecting them again in ExternalProject_Add()
-set(GIT_EXECUTABLE [==[C:/Program Files/Git/cmd/git.exe]==])
-set(GIT_VERSION_STRING [==[2.43.0.windows.1]==])
+set(GIT_EXECUTABLE [==[/usr/bin/git]==])
+set(GIT_VERSION_STRING [==[2.39.3 (Apple Git-146)]==])
 set_property(GLOBAL PROPERTY _CMAKE_FindGit_GIT_EXECUTABLE_VERSION
-  [==[C:/Program Files/Git/cmd/git.exe;2.43.0.windows.1]==]
+  [==[/usr/bin/git;2.39.3 (Apple Git-146)]==]
 )
 
 
 include(ExternalProject)
 ExternalProject_Add(vorbis-populate
-                     "UPDATE_DISCONNECTED" "False" "GIT_REPOSITORY" "https://github.com/xiph/vorbis.git" "EXTERNALPROJECT_INTERNAL_ARGUMENT_SEPARATOR" "GIT_TAG" "v1.3.7" "GIT_SHALLOW" "ON" "PATCH_COMMAND" "C:/Program Files/CMake/bin/cmake.exe" "-DVORBIS_DIR=C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/vorbis-src" "-P" "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/sfml-src/tools/vorbis/PatchVorbis.cmake"
-                    SOURCE_DIR          "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/vorbis-src"
-                    BINARY_DIR          "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/vorbis-build"
+                     "UPDATE_DISCONNECTED" "False" "GIT_REPOSITORY" "https://github.com/xiph/vorbis.git" "EXTERNALPROJECT_INTERNAL_ARGUMENT_SEPARATOR" "GIT_TAG" "v1.3.7" "GIT_SHALLOW" "ON" "PATCH_COMMAND" "/usr/local/Cellar/cmake/3.29.2/bin/cmake" "-DVORBIS_DIR=/Users/willow/Documents/GitHub/SpaceGame/build/_deps/vorbis-src" "-P" "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/sfml-src/tools/vorbis/PatchVorbis.cmake"
+                    SOURCE_DIR          "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/vorbis-src"
+                    BINARY_DIR          "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/vorbis-build"
                     CONFIGURE_COMMAND   ""
                     BUILD_COMMAND       ""
                     INSTALL_COMMAND     ""

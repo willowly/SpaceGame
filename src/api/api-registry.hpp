@@ -81,17 +81,73 @@ namespace API {
         sol::object obj = table[key];
         if(obj.is<string>()) {
             string str = obj.as<string>();
-            if(registry.textures.contains(str)) {
-                *pointer = &registry.textures.at(str);
-            } else {
-                Debug::warn("no texture called " + str);
-            }
+            *pointer = registry.getTexture(str);
             Debug::subtractTrace();
             return;
             
         }
         Debug::subtractTrace();
         get<Texture*>(table,key,pointer,required);
+    }
+    void getMaterial(sol::table table,std::variant<string,int> key,Material** pointer,Registry& registry,bool required = false) {
+        Debug::addTrace(keyAsString(key));
+        sol::object obj = table[key];
+        if(obj.is<string>()) {
+            string str = obj.as<string>();
+            *pointer = registry.getMaterial(str);
+            Debug::subtractTrace();
+            return;
+            
+        }
+        Debug::subtractTrace();
+        get<Material*>(table,key,pointer,required);
+    }
+
+    void getModel(sol::table table,std::variant<string,int> key,Model** pointer,Registry& registry,bool required = false) {
+        Debug::addTrace(keyAsString(key));
+        sol::object obj = table[key];
+        if(obj.is<string>()) {
+            string str = obj.as<string>();
+            *pointer = registry.getModel(str);
+            Debug::subtractTrace();
+            return;
+            
+        }
+        Debug::subtractTrace();
+        get<Model*>(table,key,pointer,required);
+    }
+
+    
+
+    void loadActorDummyType(ObjLoadType loadType,sol::table table,Actor* actor,Registry& registry) {
+        switch (loadType) {
+            case ObjLoadType::ARRAY:
+                // type is in slot 1 (hopefully)
+                getModel(table,2,&actor->model,registry,false);
+                getMaterial(table,3,&actor->material,registry,false);
+                break;
+            case ObjLoadType::TABLE:
+                getModel(table,"model",&actor->model,registry,false);
+                getMaterial(table,"material",&actor->material,registry,false);
+                break;
+            case ObjLoadType::INVALID:
+                //registry.materials.erase(name);
+                Debug::warn("trying to load with invalid object");
+                break;
+        }
+    }
+
+    void addActorWithTypeAndLoad(string type,string name,ObjLoadType loadType,sol::table table,Registry& registry) {
+        if(type == "character") {
+
+        }
+        if(type == "rigidbody") {
+
+        }
+        Actor* actor = registry.addActor<Actor>(name);
+        loadActorDummyType(loadType,table,actor,registry);
+        Debug::info("Loaded Actor \"" + name + "\"",InfoPriority::MEDIUM);
+        
     }
 
     //these are all seperate to make it easier to access
@@ -100,11 +156,7 @@ namespace API {
         Registry& registry;
 
         Texture* index(string name) {
-            if(registry.textures.contains(name)) {
-                return &registry.textures.at(name);
-            }
-            Debug::warn("no texture called " + name);
-            return nullptr;
+            return registry.getTexture(name);
         }
         
         void newindex(string name,sol::object obj) {
@@ -133,40 +185,78 @@ namespace API {
 
         Material* index(string name) {
             
-            if(registry.materials.contains(name)) {
-                return &registry.materials.at(name);
-            }
-            return nullptr;
+            return registry.getMaterial(name);
         }
         
         void newindex(sol::this_state lua,string name,sol::object obj) {
             Debug::addTrace("materials");
             Debug::addTrace(name);
-            registry.materials[name] = Material();
-            Material& material = registry.materials[name];
+            registry.addMaterial(name);
+            Material* material = registry.getMaterial(name);
             sol::table table = obj; //this will be null if it doesnt work, so be careful
             switch (getObjectLoadType(lua,obj)) {
                 case ObjLoadType::ARRAY:
-                    getShader(table,1,&material.shader,registry,true);
-                    getTexture(table,2,&material.texture,registry,true);
+                    getShader(table,1,&material->shader,registry,true);
+                    getTexture(table,2,&material->texture,registry,true);
                     break;
                 case ObjLoadType::TABLE:
-                    getShader(table,"shader",&material.shader,registry,true);
-                    getTexture(table,"texture",&material.texture,registry,true);
+                    getShader(table,"shader",&material->shader,registry,true);
+                    getTexture(table,"texture",&material->texture,registry,true);
                     break;
                 case ObjLoadType::INVALID:
-                    registry.materials.erase(name);
+                    //registry.materials.erase(name);
                     Debug::warn("trying to load with invalid object");
                     break;
+                    
             }
+            Debug::info("Loaded Material \"" + name + "\"",InfoPriority::MEDIUM);
             Debug::subtractTrace();
             Debug::subtractTrace();
         }
     };
 
-    struct PrototypeRegistry {
-        PrototypeRegistry(Registry& registry) : registry(registry) {}
+    struct ActorRegistry {
+        ActorRegistry(Registry& registry) : registry(registry) {}
         Registry& registry;
+
+        Actor* index(string name) {
+            return registry.getActor(name);
+        }
+
+        void newindex(sol::this_state lua,string name,sol::object obj) {
+            Debug::addTrace("actors");
+            Debug::addTrace(name);
+            sol::table table = obj; //this will be null if it doesnt work, so be careful
+
+            string type = "";
+            ObjLoadType loadType = getObjectLoadType(lua,obj);
+            switch (getObjectLoadType(lua,obj)) {
+                case ObjLoadType::ARRAY:
+                    get<string>(table,1,&type,true);
+                    break;
+                case ObjLoadType::TABLE:
+                    get<string>(table,"type",&type,true);
+                    break;
+                case ObjLoadType::INVALID:
+                    type = "invalid";
+                    Debug::warn("object is invalid");
+                    break;
+                    
+            }
+
+            if(type != "invalid") {
+                if(type == "character") {
+
+                }
+                if(type == "rigidbody") {
+
+                }
+                addActorWithTypeAndLoad(type,name,loadType,table,registry);
+                Debug::info("Loaded Actor \"" + name + "\"",InfoPriority::MEDIUM);
+            }
+            Debug::subtractTrace();
+            Debug::subtractTrace();
+        }
     };
 
     void loadAPIRegistry(sol::state& lua) {
@@ -184,6 +274,11 @@ namespace API {
 
         materialRegistry["__index"] = &MaterialRegistry::index;
         materialRegistry["__newindex"] = &MaterialRegistry::newindex;
+
+        sol::usertype<ActorRegistry> actorRegistry = lua.new_usertype<ActorRegistry>("actorRegistry",sol::no_constructor);
+
+        actorRegistry["__index"] = &ActorRegistry::index;
+        actorRegistry["__newindex"] = &ActorRegistry::newindex;
 
     }
 

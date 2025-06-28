@@ -60,7 +60,7 @@ add_library(Vorbis::vorbis STATIC IMPORTED)
 
 set_target_properties(Vorbis::vorbis PROPERTIES
   INTERFACE_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include"
-  INTERFACE_LINK_LIBRARIES "Ogg::ogg;\$<LINK_ONLY:\$<\$<BOOL:>:m>>"
+  INTERFACE_LINK_LIBRARIES "Ogg::ogg;\$<LINK_ONLY:\$<\$<BOOL:1>:m>>"
 )
 
 # Create imported target Vorbis::vorbisenc

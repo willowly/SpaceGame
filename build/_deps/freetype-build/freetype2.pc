@@ -1,4 +1,4 @@
-prefix=C:/Program Files (x86)/SpaceGame
+prefix=/usr/local
 exec_prefix=${prefix}
 libdir=${prefix}/lib
 includedir=${prefix}/include

@@ -2,5 +2,5 @@
 # The update step will be re-executed if anything in this file changes.
 # No other meaning or use of this file is supported.
 
-command=C:/Program Files/CMake/bin/cmake.exe;-DOGG_DIR=C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/ogg-src;-P;C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/sfml-src/tools/ogg/PatchOgg.cmake
-work_dir=C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/ogg-src
+command=/usr/local/Cellar/cmake/3.29.2/bin/cmake;-DOGG_DIR=/Users/willow/Documents/GitHub/SpaceGame/build/_deps/ogg-src;-P;/Users/willow/Documents/GitHub/SpaceGame/build/_deps/sfml-src/tools/ogg/PatchOgg.cmake
+work_dir=/Users/willow/Documents/GitHub/SpaceGame/build/_deps/ogg-src

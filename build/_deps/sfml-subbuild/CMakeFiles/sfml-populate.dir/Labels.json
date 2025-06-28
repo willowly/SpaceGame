@@ -2,37 +2,37 @@
 	"sources" : 
 	[
 		{
-			"file" : "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/sfml-subbuild/CMakeFiles/sfml-populate"
+			"file" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/sfml-subbuild/CMakeFiles/sfml-populate"
 		},
 		{
-			"file" : "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/sfml-subbuild/CMakeFiles/sfml-populate.rule"
+			"file" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/sfml-subbuild/CMakeFiles/sfml-populate.rule"
 		},
 		{
-			"file" : "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/sfml-subbuild/CMakeFiles/sfml-populate-complete.rule"
+			"file" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/sfml-subbuild/CMakeFiles/sfml-populate-complete.rule"
 		},
 		{
-			"file" : "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/sfml-subbuild/sfml-populate-prefix/src/sfml-populate-stamp/sfml-populate-build.rule"
+			"file" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/sfml-subbuild/sfml-populate-prefix/src/sfml-populate-stamp/sfml-populate-build.rule"
 		},
 		{
-			"file" : "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/sfml-subbuild/sfml-populate-prefix/src/sfml-populate-stamp/sfml-populate-configure.rule"
+			"file" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/sfml-subbuild/sfml-populate-prefix/src/sfml-populate-stamp/sfml-populate-configure.rule"
 		},
 		{
-			"file" : "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/sfml-subbuild/sfml-populate-prefix/src/sfml-populate-stamp/sfml-populate-download.rule"
+			"file" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/sfml-subbuild/sfml-populate-prefix/src/sfml-populate-stamp/sfml-populate-download.rule"
 		},
 		{
-			"file" : "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/sfml-subbuild/sfml-populate-prefix/src/sfml-populate-stamp/sfml-populate-install.rule"
+			"file" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/sfml-subbuild/sfml-populate-prefix/src/sfml-populate-stamp/sfml-populate-install.rule"
 		},
 		{
-			"file" : "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/sfml-subbuild/sfml-populate-prefix/src/sfml-populate-stamp/sfml-populate-mkdir.rule"
+			"file" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/sfml-subbuild/sfml-populate-prefix/src/sfml-populate-stamp/sfml-populate-mkdir.rule"
 		},
 		{
-			"file" : "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/sfml-subbuild/sfml-populate-prefix/src/sfml-populate-stamp/sfml-populate-patch.rule"
+			"file" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/sfml-subbuild/sfml-populate-prefix/src/sfml-populate-stamp/sfml-populate-patch.rule"
 		},
 		{
-			"file" : "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/sfml-subbuild/sfml-populate-prefix/src/sfml-populate-stamp/sfml-populate-test.rule"
+			"file" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/sfml-subbuild/sfml-populate-prefix/src/sfml-populate-stamp/sfml-populate-test.rule"
 		},
 		{
-			"file" : "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/sfml-subbuild/sfml-populate-prefix/src/sfml-populate-stamp/sfml-populate-update.rule"
+			"file" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/sfml-subbuild/sfml-populate-prefix/src/sfml-populate-stamp/sfml-populate-update.rule"
 		}
 	],
 	"target" : 

@@ -4,19 +4,19 @@
 cmake_minimum_required(VERSION 3.5)
 
 file(MAKE_DIRECTORY
-  "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/ogg-src"
-  "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/ogg-build"
-  "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/ogg-subbuild/ogg-populate-prefix"
-  "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/ogg-subbuild/ogg-populate-prefix/tmp"
-  "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/ogg-subbuild/ogg-populate-prefix/src/ogg-populate-stamp"
-  "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/ogg-subbuild/ogg-populate-prefix/src"
-  "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/ogg-subbuild/ogg-populate-prefix/src/ogg-populate-stamp"
+  "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/ogg-src"
+  "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/ogg-build"
+  "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/ogg-subbuild/ogg-populate-prefix"
+  "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/ogg-subbuild/ogg-populate-prefix/tmp"
+  "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/ogg-subbuild/ogg-populate-prefix/src/ogg-populate-stamp"
+  "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/ogg-subbuild/ogg-populate-prefix/src"
+  "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/ogg-subbuild/ogg-populate-prefix/src/ogg-populate-stamp"
 )
 
 set(configSubDirs )
 foreach(subDir IN LISTS configSubDirs)
-    file(MAKE_DIRECTORY "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/ogg-subbuild/ogg-populate-prefix/src/ogg-populate-stamp/${subDir}")
+    file(MAKE_DIRECTORY "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/ogg-subbuild/ogg-populate-prefix/src/ogg-populate-stamp/${subDir}")
 endforeach()
 if(cfgdir)
-  file(MAKE_DIRECTORY "C:/Users/wille/Documents/Hike/SpaceGame/build/_deps/ogg-subbuild/ogg-populate-prefix/src/ogg-populate-stamp${cfgdir}") # cfgdir has leading slash
+  file(MAKE_DIRECTORY "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/ogg-subbuild/ogg-populate-prefix/src/ogg-populate-stamp${cfgdir}") # cfgdir has leading slash
 endif()

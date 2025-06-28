@@ -235,6 +235,7 @@ class Model {
                     break;
             }
             glDrawArrays(GL_TRIANGLES, 0, vertexData.size());
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
 
 

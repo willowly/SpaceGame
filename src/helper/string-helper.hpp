@@ -5,7 +5,7 @@
 
 #include <glm/glm.hpp>
 
-using glm::vec3, glm::vec2;
+using glm::vec4, glm::vec3, glm::vec2,glm::ivec3;
 
 namespace StringHelper {
 
@@ -22,8 +22,13 @@ namespace StringHelper {
 
         return tokens;
     }
-
+    std::string toString(vec4 v) {
+        return std::format("<{},{},{},{}>",v.x,v.y,v.z,v.w);
+    }
     std::string toString(vec3 v) {
+        return std::format("<{},{},{}>",v.x,v.y,v.z);
+    }
+    std::string toString(ivec3 v) {
         return std::format("<{},{},{}>",v.x,v.y,v.z);
     }
     std::string toString(vec2 v) {

@@ -7,6 +7,7 @@
 #include "api-material.hpp"
 #include "api-actor.hpp"
 #include "api-character.hpp"
+#include "api-construction.hpp"
 #include "api-world.hpp"
 #include "api-registry.hpp"
 
@@ -17,6 +18,7 @@ namespace API {
         loadAPIMaterial(lua);
         loadAPIActor(lua);
         loadAPICharacter(lua);
+        loadAPIConstruction(lua);
         loadAPIWorld(lua);
         loadAPIRegistry(lua);
     }

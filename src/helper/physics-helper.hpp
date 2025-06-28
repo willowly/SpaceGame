@@ -24,4 +24,30 @@ namespace PhysicsHelper {
     glm::quat toGlmQuaternion(rp3d::Quaternion q) {
         return glm::quat(q.w,q.x,q.y,q.z);
     }
+
+    struct RaycastCallback : public rp3d::RaycastCallback {
+
+        public:
+
+            bool success = false;
+            glm::vec3 worldPoint;
+            glm::vec3 worldNormal;
+            rp3d::Body* body;
+
+
+            rp3d::decimal notifyRaycastHit(const rp3d::RaycastInfo& info) {
+
+                
+                success= true;
+
+                worldPoint = toGlmVector(info.worldPoint);
+                worldNormal = toGlmVector(info.worldNormal);
+                body = info.body;
+
+                
+                return info.hitFraction;
+            }
+    };
 }
+
+namespace ph = PhysicsHelper;

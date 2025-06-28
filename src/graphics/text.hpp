@@ -62,7 +62,7 @@ class Text {
             {
                 std::cout << "[ERROR] FREETYPE: Failed to load font" << std::endl;  
             }
-            FT_Set_Pixel_Sizes(face, 0, 48);
+            FT_Set_Pixel_Sizes(face, 0, characterSize);
 
 
             glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // because the texture will not be a multiple of 4 with single byte colors
@@ -95,8 +95,8 @@ class Text {
                 // set texture options 
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
                 // now store character for later use
                 Character character = {
                     texture, 
