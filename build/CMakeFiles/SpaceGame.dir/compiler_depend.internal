@@ -1236,6 +1236,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o
  /Users/willow/Documents/GitHub/SpaceGame/src/api/api-registry.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/api/api-texture.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/api/api-world.hpp
+ /Users/willow/Documents/GitHub/SpaceGame/src/block/block.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/engine/debug.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/engine/input.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/engine/loader.hpp
@@ -1254,6 +1255,9 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o
  /Users/willow/Documents/GitHub/SpaceGame/src/helper/physics-helper.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/helper/string-helper.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/interface/console.hpp
+ /Users/willow/Documents/GitHub/SpaceGame/src/item/pickaxe-tool.hpp
+ /Users/willow/Documents/GitHub/SpaceGame/src/item/place-block-tool.hpp
+ /Users/willow/Documents/GitHub/SpaceGame/src/item/tool.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/sol/config.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/sol/sol.hpp
  /usr/local/include/GLFW/glfw3.h

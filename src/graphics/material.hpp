@@ -1,6 +1,7 @@
 #pragma once
 #include "shader.hpp"
 #include "texture.hpp"
+#include "color.hpp"
 
 class Material {
     public:
@@ -8,14 +9,19 @@ class Material {
         Material() {
             
         }
-        Material(Shader* shader,Texture* texture) : shader(shader), texture(texture) {
-
+        Material(Shader* shader,Texture* texture,Color color = Color::white) : shader(shader), texture(texture), color(color) {
+            
         }
         Shader* shader = nullptr;
         Texture* texture = nullptr;
+        Color color = Color::white;
+
 
         void use() {
-            if(texture != nullptr) shader->use();
+            if(shader != nullptr) {
+                shader->use();
+                shader->setColor3("color",color);
+            }
             if(texture != nullptr) texture->bind();
         }
 };

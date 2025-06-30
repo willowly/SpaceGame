@@ -75,7 +75,7 @@ class World {
         void frame(float dt) {
             
             float clock = glfwGetTime();
-            render(camera);
+            render(camera,dt);
             renderProcessMs = ((float)glfwGetTime() - clock) * 1000;
 
             sinceLastStep += dt;
@@ -93,10 +93,10 @@ class World {
             }
         }
 
-        void render(Camera& camera) {
+        void render(Camera& camera,float dt) {
             for (auto& actor : actors)
             {
-                actor->render(camera);
+                actor->render(camera,dt);
             }
             
         }

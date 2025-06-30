@@ -4,6 +4,7 @@
 
 #include "engine/registry.hpp"
 #include "engine/debug.hpp"
+#include <graphics/color.hpp>
 
 using std::string,std::variant;
 
@@ -198,10 +199,12 @@ namespace API {
                 case ObjLoadType::ARRAY:
                     getShader(table,1,&material->shader,registry,true);
                     getTexture(table,2,&material->texture,registry,true);
+                    get<Color>(table,3,&material->color,false);
                     break;
                 case ObjLoadType::TABLE:
                     getShader(table,"shader",&material->shader,registry,true);
                     getTexture(table,"texture",&material->texture,registry,true);
+                    get<Color>(table,"color",&material->color,false);
                     break;
                 case ObjLoadType::INVALID:
                     //registry.materials.erase(name);
@@ -252,7 +255,6 @@ namespace API {
 
                 }
                 addActorWithTypeAndLoad(type,name,loadType,table,registry);
-                Debug::info("Loaded Actor \"" + name + "\"",InfoPriority::MEDIUM);
             }
             Debug::subtractTrace();
             Debug::subtractTrace();

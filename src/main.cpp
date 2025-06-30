@@ -10,6 +10,8 @@
 #include <engine/input.hpp>
 #include <actor/construction.hpp>
 
+#include <block/block.hpp>
+
 #include <interface/console.hpp>
 
 #include <actor/character.hpp>
@@ -125,6 +127,12 @@ int main()
 
     Construction constructionPrototype(registry.getModel("block"),registry.getMaterial("cow"));
 
+    Block tinBlock(registry.getModel("block"),registry.getMaterial("tin_block"));
+    Block cobaltBlock(registry.getModel("block"),registry.getMaterial("cobalt_block"));
+    Block chairBlock(registry.getModel("chair"),registry.getMaterial("chair"));
+    chairBlock.canRide = true;
+    Block thrusterBlock(registry.getModel("thruster"),registry.getMaterial("thruster"));
+
 
     Text text("fonts/sburbits.ttf",16);
     text.scale = vec2(2,2);
@@ -135,19 +143,72 @@ int main()
 
     Model cursorModel;
     cursorModel.loadQuad();
+    
+    
+    playerPrototype.placeTin.heldModel = registry.getModel("block");
+    playerPrototype.placeTin.heldModelMaterial = registry.getMaterial("tin_block");
+    playerPrototype.placeTin.modelOffset = vec3(0.3,-0.3,-1);
+    playerPrototype.placeTin.modelRotation = quat(vec3(0,glm::radians(45.0f),0));
+    playerPrototype.placeTin.modelScale = 0.3f;
+    playerPrototype.placeTin.lookLerp = 10;
+    playerPrototype.placeTin.block = &tinBlock;
+
+    playerPrototype.placeCobalt.heldModel = registry.getModel("block");
+    playerPrototype.placeCobalt.heldModelMaterial = registry.getMaterial("cobalt_block");
+    playerPrototype.placeCobalt.modelOffset = vec3(0.3,-0.3,-1);
+    playerPrototype.placeCobalt.modelRotation = quat(vec3(0,glm::radians(45.0f),0));
+    playerPrototype.placeCobalt.modelScale = 0.3f;
+    playerPrototype.placeCobalt.lookLerp = 10;
+    playerPrototype.placeCobalt.block = &cobaltBlock;
+
+    playerPrototype.placeChair.heldModel = registry.getModel("chair");
+    playerPrototype.placeChair.heldModelMaterial = registry.getMaterial("chair");
+    playerPrototype.placeChair.modelOffset = vec3(0.3,-0.3,-1);
+    playerPrototype.placeChair.modelRotation = quat(vec3(0,glm::radians(45.0f),0));
+    playerPrototype.placeChair.modelScale = 0.3f;
+    playerPrototype.placeChair.lookLerp = 10;
+    playerPrototype.placeChair.block = &chairBlock;
+
+    playerPrototype.placeThruster.heldModel = registry.getModel("thruster");
+    playerPrototype.placeThruster.heldModelMaterial = registry.getMaterial("thruster");
+    playerPrototype.placeThruster.modelOffset = vec3(0.3,-0.3,-1);
+    playerPrototype.placeThruster.modelRotation = quat(vec3(0,glm::radians(45.0f),0));
+    playerPrototype.placeThruster.modelScale = 0.3f;
+    playerPrototype.placeThruster.lookLerp = 10;
+    playerPrototype.placeThruster.block = &thrusterBlock;
+
+    playerPrototype.pickaxe.heldModel = registry.getModel("pickaxe");
+    playerPrototype.pickaxe.heldModelMaterial = registry.getMaterial("pickaxe");
+    playerPrototype.pickaxe.modelOffset = vec3(0.2,-0.4,-0.5);
+    playerPrototype.pickaxe.modelRotation = quat(vec3(glm::radians(-5.0f),glm::radians(90.0f),glm::radians(-5.0f)));
+    playerPrototype.pickaxe.modelScale = 0.3f;
+    playerPrototype.pickaxe.lookLerp = 8;
 
     
-
 
     //world.getCamera().move(vec3(0,0,5));
 
 
     auto player = world.spawn(&playerPrototype,vec3(0,1,10),quat(vec3(0,0,0)));
-    world.spawn(registry.getActor("plane"),vec3(0,0,0),quat(vec3(0,0,0)));
 
     auto construction = world.spawn(&constructionPrototype,vec3(0,2,0),quat(vec3(0,0,0)));
-    construction->setBlock(ivec3(0,0,0),1);
+    construction->setBlock(ivec3(0,0,0),&tinBlock);
     lua["construction"] = construction;
+
+    lua["rot"] = [&] (float x,float y,float z) {
+        player->pickaxe.modelRotation = quat(vec3(glm::radians(x),glm::radians(y),glm::radians(z)));
+    };
+
+    for (int i = 0; i < 50; i++)
+    {
+        int size = 150;
+        float x = (random() % size) - size/2.0f;
+        float y = (random() % size) - size/2.0f;
+        float z = (random() % size) - size/2.0f;
+        world.spawn(registry.getActor("asteroid"),vec3(x,y,z),glm::quat(vec3(0,0,0)));
+    }
+    
+    
 
 
     float lastTime;
@@ -164,7 +225,7 @@ int main()
         float dt = (float)glfwGetTime() - lastTime;
         lastTime = glfwGetTime();
 
-        player->firstPersonCamera(world.getCamera());
+        player->setCamera(world.getCamera());
         
         if(input.getKeyPressed(GLFW_KEY_GRAVE_ACCENT)) {
             console.enabled = !console.enabled;

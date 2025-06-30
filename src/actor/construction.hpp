@@ -10,15 +10,30 @@
 #include <helper/string-helper.hpp>
 #include <algorithm>
 
+#include <block/block.hpp>
+
 using glm::ivec3,glm::vec3;
 using std::map;
 
 class Construction : public RigidbodyActor {
 
 
+    struct BlockData {
+        Block* block = nullptr; //eventually this will be a list of blocks in the construction
+        rp3d::Collider* collider = nullptr;
+        BlockData(Block* block,rp3d::Collider* collider = nullptr) : block(block), collider(collider) {}
+        BlockData() {}
+    };
+
     ivec3 min = ivec3(0,0,0);
     ivec3 max = ivec3(0,0,0);
-    std::vector<int> blocks;
+    std::vector<BlockData> blockData;
+
+    vec3 targetVelocity;
+    quat targetRotation;
+
+    float thrustForce = 5;
+    float turnForce = 0.5;
 
     
 
@@ -41,14 +56,21 @@ class Construction : public RigidbodyActor {
         };
 
         Construction(Model* model,Material* material) : RigidbodyActor(model,material) {
-            blocks.push_back(0); //starting block
+            blockData.push_back(BlockData()); //starting block
         }
         Construction() : Construction(nullptr,nullptr) {
             
         }
 
+        void step(float dt,World* world) {
+            // just for testing
+            std::cout << StringHelper::toString(targetVelocity) << std::endl;
+            velocity = MathHelper::moveTowards(velocity,rotation * targetVelocity,thrustForce * dt);
+            rotation = glm::slerp(rotation,targetRotation,turnForce * dt);
+        }
 
-        void render(Camera& camera) {
+
+        void render(Camera& camera,float dt) {
             int i = 0;
             for (int z = min.z; z <= max.z; z++)
             {
@@ -57,8 +79,8 @@ class Construction : public RigidbodyActor {
                     for (int x = min.x; x <= max.x; x++)
                     {
                         
-                        if(blocks.size() > i && blocks[i] == 1) {
-                            model->render(transformPoint(vec3(x,y,z)),camera,*material);
+                        if(blockData.size() > i && blockData[i].block != nullptr) {
+                            blockData[i].block->model->render(glm::translate(transform(),vec3(x,y,z)),camera,*blockData[i].block->material);
                         } else {
                             // model->renderMode = Model::RenderMode::Wireframe;
                             // model->render(transformPoint(vec3(x,y,z)),camera,*Debug::getShader());
@@ -81,7 +103,7 @@ class Construction : public RigidbodyActor {
             
             
             //construct a map of existing blocks
-            map<Location,int> blockMap;
+            map<Location,BlockData> blockMap;
             createBlockMap(blockMap);
             min = newMin;
             max = newMax;
@@ -91,7 +113,7 @@ class Construction : public RigidbodyActor {
             // }
 
             int i = 0;
-            blocks.clear();
+            blockData.clear();
             for (int z = newMin.z; z <= newMax.z; z++)
             {
                 for (int y = newMin.y; y <= newMax.y; y++)
@@ -102,10 +124,10 @@ class Construction : public RigidbodyActor {
                         auto it = blockMap.find(location);
                         if(it != blockMap.end()) {
                             //std::cout << "<" << x << "," << y << "," << z <<  ">:" << blockMap.at(Location(x,y,z)) << std::endl;
-                            blocks.push_back(it->second);
+                            blockData.push_back(it->second);
                         } else {
                             //std::cout << "e,";
-                            blocks.push_back(0);
+                            blockData.push_back(BlockData());
                         }
                         i++;
                     }
@@ -119,22 +141,52 @@ class Construction : public RigidbodyActor {
             // std::cout << std::endl;
         }
 
-        void setBlock(ivec3 location,int block) {
+        void setBlock(ivec3 location,Block* block) {
             if(!isInsideBounds(location)) {
                 setBounds(glm::min(min,location),glm::max(max,location));
             }
+            int index = getIndex(location);
+            //Debug::info("index: " + std::to_string(index) + " " + StringHelper::toString(location),InfoPriority::LOW);
+            if(block != nullptr) {
+                auto collider = body->addCollider(common->createBoxShape(rp3d::Vector3(0.5f,0.5f,0.5f)),rp3d::Transform(PhysicsHelper::toRp3dVector(location),rp3d::Quaternion::identity()));
+                collider->getMaterial().setBounciness(0.0);
+                blockData[index] = BlockData(block,collider);
+            } else {
+                if(blockData[index].collider != nullptr) {
+                    body->removeCollider(blockData[index].collider);
+                }
+                blockData[index] = BlockData();
+            }
+            
+        }
+
+        void setTargetVelocity(vec3 target) {
+            targetVelocity = target;
+        }
+
+        void setTargetRotation(quat target) {
+            targetRotation = target;
+        }
+
+        void resetTargets() {
+            targetVelocity = vec3(0,0,0);
+            targetRotation = rotation;
+        }
+
+        int getIndex(ivec3 location) {
             ivec3 fromMin = location - min;
             ivec3 size = max - min;
             size.x += 1;
             size.y += 1;
             size.z += 1;
-            int index = fromMin.x + fromMin.y * size.x + fromMin.z * size.y * size.x;
-            //Debug::info("index: " + std::to_string(index) + " " + StringHelper::toString(location),InfoPriority::LOW);
-            blocks[index] = block;
-            if(block == 1) {
-                auto collider = body->addCollider(common->createBoxShape(rp3d::Vector3(0.5f,0.5f,0.5f)),rp3d::Transform(PhysicsHelper::toRp3dVector(location),rp3d::Quaternion::identity()));
-                collider->getMaterial().setBounciness(0.0);
+            return fromMin.x + fromMin.y * size.x + fromMin.z * size.y * size.x;
+        }
+
+        Block* getBlock(ivec3 location) {
+            if(!isInsideBounds(location)) {
+                return nullptr;
             }
+            return blockData[getIndex(location)].block;
         }
 
         void addCollisionShapes(rp3d::PhysicsCommon* common) {
@@ -153,7 +205,7 @@ class Construction : public RigidbodyActor {
             return true;
         }
 
-        void createBlockMap(map<Location,int>& blockMap) {
+        void createBlockMap(map<Location,BlockData>& blockMap) {
             int i = 0;
             for (int z = min.z; z <= max.z; z++)
             {
@@ -161,8 +213,8 @@ class Construction : public RigidbodyActor {
                 {
                     for (int x = min.x; x <= max.x; x++)
                     {
-                        if(blocks[i] != 0) {
-                            blockMap[Location(x,y,z)] = blocks[i];
+                        if(blockData[i].block != nullptr) {
+                            blockMap[Location(x,y,z)] = blockData[i];
                         }
                         i++;
                     }
@@ -172,7 +224,9 @@ class Construction : public RigidbodyActor {
 
         void addToPhysicsWorld(rp3d::PhysicsWorld* world,rp3d::PhysicsCommon* common) {
             RigidbodyActor::addToPhysicsWorld(world,common);
-            body->setType(rp3d::BodyType::STATIC);
+            body->setLinearDamping(0.1);
+            body->setAngularDamping(3);
+            //body->setType(rp3d::BodyType::STATIC);
         }
 };
 

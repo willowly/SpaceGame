@@ -32,6 +32,12 @@ class Actor {
 
         }
 
+        glm::mat4 transform() {
+            glm::mat4 matrix = glm::translate(glm::mat4(1.0f),position);
+            matrix *= glm::toMat4(rotation);
+            return matrix;
+        }
+
         vec3 transformPoint(vec3 point) {
             glm::mat4 matrix = glm::translate(glm::mat4(1.0f),position);
             matrix *= glm::toMat4(rotation);
@@ -66,7 +72,7 @@ class Actor {
             position += velocity * dt;
         }
 
-        virtual void render(Camera& camera) {
+        virtual void render(Camera& camera,float dt) {
             if(model == nullptr) return; //if no model, nothing to render :)
             if(material == nullptr) {
                 std::cout << "null material" << std::endl;

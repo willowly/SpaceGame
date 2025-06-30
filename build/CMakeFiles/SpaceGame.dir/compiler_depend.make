@@ -1235,6 +1235,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-registry.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-texture.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-world.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/block/block.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/debug.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/input.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/loader.hpp \
@@ -1253,6 +1254,9 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/physics-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/string-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/interface/console.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/item/pickaxe-tool.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/item/place-block-tool.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/item/tool.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/sol/config.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/sol/sol.hpp \
   /usr/local/include/GLFW/glfw3.h \
@@ -1475,6 +1479,8 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 
 /Users/willow/Documents/GitHub/SpaceGame/src/sol/config.hpp:
 
+/Users/willow/Documents/GitHub/SpaceGame/src/item/pickaxe-tool.hpp:
+
 /Users/willow/Documents/GitHub/SpaceGame/src/helper/physics-helper.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/src/helper/math-helper.hpp:
@@ -1510,6 +1516,8 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 /Users/willow/Documents/GitHub/SpaceGame/src/actor/character.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/include/stb_image.h:
+
+/Users/willow/Documents/GitHub/SpaceGame/src/item/tool.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/integer.hpp:
 
@@ -2749,6 +2757,8 @@ _deps/freetype-src/include/freetype/ftimage.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/function.h:
 
+/Users/willow/Documents/GitHub/SpaceGame/src/item/place-block-tool.hpp:
+
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/binary_negate.h:
 
 /usr/local/include/reactphysics3d/utils/DebugRenderer.h:
@@ -3902,6 +3912,8 @@ _deps/freetype-src/include/freetype/config/mac-support.h:
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__concepts/totally_ordered.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/width_estimation_table.h:
+
+/Users/willow/Documents/GitHub/SpaceGame/src/block/block.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/ranges_generate_n.h:
 

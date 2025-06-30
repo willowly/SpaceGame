@@ -34,11 +34,11 @@ class RigidbodyActor : public Actor {
             
         }
 
-        void step(float dt,World* world) {
+        virtual void step(float dt,World* world) {
             
         }
 
-        virtual void render(Camera& camera) {
+        virtual void render(Camera& camera,float dt) {
             if(model == nullptr) return; //if no model, nothing to render :)
             if(material == nullptr) {
                 std::cout << "null material" << std::endl;
@@ -75,6 +75,7 @@ class RigidbodyActor : public Actor {
         void addToPhysicsWorld(rp3d::PhysicsWorld* world,rp3d::PhysicsCommon* common) {
             userData.actor = this;
             body = world->createRigidBody(getPhysicsTransform());
+            body->enableGravity(false);
             body->setUserData(&userData);
             addCollisionShapes(common);
             this->common = common;

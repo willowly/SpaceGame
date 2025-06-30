@@ -19,6 +19,13 @@ materials.container = {
     texture="container",
 }
 
+materials.pickaxe = {"lit","pickaxe"}
+
+materials.tin_block = {"lit","tin_block"}
+materials.cobalt_block = {"lit","cobalt_block"}
+materials.chair = {"lit","solid",color(0.7,0.1,0.2)}
+materials.thruster = {"lit","solid",color(0.3,0.3,0.4)}
+
 print("Loading Actors")
 
 actors.plane = {
@@ -27,24 +34,27 @@ actors.plane = {
     material=materials.grid
 }
 
+actors.pickaxe = {
+    type="actor",
+    model="pickaxe",
+    material="pickaxe"
+}
+
+actors.asteroid = {
+    type="actor",
+    model="asteroid",
+    material="grid"
+}
+
 
 function setBlock(x,y,z)
-    construction:setBlock(ivec3.new(x,y,z),1);
+    construction:setBlock(ivec3(x,y,z),1);
 end
 
 function setBounds(x1,y1,z1,x2,y2,z2)
-    construction:setBounds(ivec3.new(x1,y1,z1),ivec3.new(x2,y2,z2));
+    construction:setBounds(ivec3(x1,y1,z1),ivec3(x2,y2,z2));
 end
 
-x = 0;
-
-function place() 
-    setBlock(x,0,0)
-    x = x + 1;
-end
-
-function test()
-    setBlock(0,1,0)
-    setBlock(0,4,1)
-    setBlock(0,4,2)
+function rotate(angle)
+    construction:rotate(vec3(0,angle,0))
 end

@@ -1331,6 +1331,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/math-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/physics-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/collision-helper.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/block/block.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-world.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-registry.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/world.hpp \
@@ -1360,4 +1361,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-src/include/freetype/ftbitmap.h \
   /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-src/include/freetype/ftcolor.h \
   /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-src/include/freetype/ftstroke.h \
-  /Users/willow/Documents/GitHub/SpaceGame/src/actor/character.hpp
+  /Users/willow/Documents/GitHub/SpaceGame/src/actor/character.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/item/pickaxe-tool.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/item/tool.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/item/place-block-tool.hpp
