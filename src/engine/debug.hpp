@@ -214,7 +214,7 @@ class Debug {
             }
         
             
-            //instance->pointsToDraw.clear();
+            instance->pointsToDraw.clear();
 
             for (auto& l : instance->linesToDraw)
             {

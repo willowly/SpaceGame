@@ -1226,16 +1226,23 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/character.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/construction.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/rigidbody-actor.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/actor/terrain.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-actor.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-all.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-character.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-construction.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-general.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-material.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/api/api-registry-actor.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/api/api-registry-block.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/api/api-registry-general.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-registry.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-texture.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-world.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/block/block-state.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/block/block.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/block/cockpit-block.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/block/thruster-block.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/debug.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/input.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/loader.hpp \
@@ -1253,7 +1260,10 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/math-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/physics-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/string-helper.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/helper/terrain-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/interface/console.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/interface/interface.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/interface/toolbar-widget.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/pickaxe-tool.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/place-block-tool.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/tool.hpp \
@@ -1481,6 +1491,10 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 
 /Users/willow/Documents/GitHub/SpaceGame/src/item/pickaxe-tool.hpp:
 
+/Users/willow/Documents/GitHub/SpaceGame/src/interface/toolbar-widget.hpp:
+
+/Users/willow/Documents/GitHub/SpaceGame/src/helper/terrain-helper.hpp:
+
 /Users/willow/Documents/GitHub/SpaceGame/src/helper/physics-helper.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/src/helper/math-helper.hpp:
@@ -1496,6 +1510,10 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 /Users/willow/Documents/GitHub/SpaceGame/src/engine/loader.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/src/engine/debug.hpp:
+
+/Users/willow/Documents/GitHub/SpaceGame/src/block/thruster-block.hpp:
+
+/Users/willow/Documents/GitHub/SpaceGame/src/block/cockpit-block.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/src/api/api-world.hpp:
 
@@ -1757,6 +1775,8 @@ _deps/freetype-src/include/freetype/config/ftstdlib.h:
 
 /usr/local/include/reactphysics3d/components/BallAndSocketJointComponents.h:
 
+/Users/willow/Documents/GitHub/SpaceGame/src/interface/interface.hpp:
+
 _deps/freetype-build/include/freetype/config/ftconfig.h:
 
 /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/float.h:
@@ -1935,6 +1955,8 @@ _deps/freetype-src/include/freetype/fterrors.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/pthread/sched.h:
 
+/Users/willow/Documents/GitHub/SpaceGame/src/api/api-registry-block.hpp:
+
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/pthread/qos.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/pthread.h:
@@ -2066,6 +2088,8 @@ _deps/freetype-src/include/freetype/fterrors.h:
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__hash_table:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/bit:
+
+/Users/willow/Documents/GitHub/SpaceGame/src/block/block-state.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/lower_bound.h:
 
@@ -2220,6 +2244,8 @@ _deps/freetype-src/include/freetype/fterrors.h:
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__type_traits/is_pointer.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__type_traits/is_pod.h:
+
+/Users/willow/Documents/GitHub/SpaceGame/src/api/api-registry-general.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/log2.h:
 
@@ -2925,6 +2951,8 @@ _deps/freetype-src/include/freetype/config/integer-types.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__concepts/common_with.h:
 
+/Users/willow/Documents/GitHub/SpaceGame/src/api/api-registry-actor.hpp:
+
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__concepts/class_or_enum.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/math.h:
@@ -3222,6 +3250,8 @@ _deps/freetype-src/include/freetype/ftcolor.h:
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/ranges_any_of.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/replace_copy_if.h:
+
+/Users/willow/Documents/GitHub/SpaceGame/src/actor/terrain.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/replace.h:
 

@@ -17,12 +17,12 @@ class Actor {
 
     public:
         vec3 position = vec3(0);
-        vec3 velocity = vec3(0);
         quat rotation = vec3(0);
         Model* model = nullptr;
         Material* material = nullptr;
-        bool useGravity = false; //doesn't move
         float modelScale = 1;
+
+        bool destroyed = false;
 
         Actor() {
 
@@ -69,7 +69,7 @@ class Actor {
         }
 
         virtual void step(float dt,World* world) {
-            position += velocity * dt;
+            
         }
 
         virtual void render(Camera& camera,float dt) {
@@ -99,6 +99,10 @@ class Actor {
 
         virtual void updateFromPhysicsRepresentation() {
             
+        }
+
+        virtual void destroy() {
+            destroyed = true;
         }
 
 };

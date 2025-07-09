@@ -98,6 +98,7 @@ class Loader {
             std::cout << "Loading Shaders" << std::endl;
             registry.litShader.loadFromFiles("shaders/lit.vert","shaders/lit.frag");
             registry.textShader.loadFromFiles("shaders/text.vert","shaders/text.frag");
+            registry.uiShader.loadFromFiles("shaders/ui.vert","shaders/ui.frag");
             Debug::subtractTrace();
         }
 
@@ -107,6 +108,7 @@ class Loader {
             lua["shaders"] = API::ShaderRegistry(registry);
             lua["materials"] = API::MaterialRegistry(registry);
             lua["actors"] = API::ActorRegistry(registry);
+            lua["blocks"] = API::BlockRegistry(registry);
             lua.do_file("scripts/load.lua");
         }
 

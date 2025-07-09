@@ -40,15 +40,13 @@ class Character : public RigidbodyActor {
         vec3 moveInput;
 
         Tool* currentTool = nullptr;
+        int selectedTool;
 
-        PlaceBlockTool placeTin;
-        PlaceBlockTool placeCobalt;
-        PlaceBlockTool placeChair;
-        PlaceBlockTool placeThruster;
-        PickaxeTool pickaxe;
+        Tool* toolbar[9] = {};
 
         Construction* ridingConstruction = nullptr;
         ivec3 ridingConstructionPoint;
+        quat ridingConstructionRotation;
 
         vec3 thirdPersonCameraOffset = vec3(0,3,20);
         //vec3 thirdPersonCameraRot;
@@ -72,16 +70,16 @@ class Character : public RigidbodyActor {
             }
 
             if(ridingConstruction != nullptr) {
-                ridingConstruction->setTargetVelocity(moveInput * 100.0f);
-                ridingConstruction->setTargetRotation(glm::inverse(getEyeRotation()));
-                position = ridingConstruction->transformPoint(ridingConstructionPoint); 
+                ridingConstruction->setMoveControl(ridingConstructionRotation * moveInput);
+                ridingConstruction->setTargetRotation(getEyeRotation() * glm::inverse(ridingConstructionRotation) * glm::angleAxis(glm::radians(180.0f),vec3(0,1,0)));
+                position = ridingConstruction->transformPoint(ridingConstructionPoint);
             } else {
                 if(clickInput) {
                     if(currentTool != nullptr) {
                         currentTool->use(world,getEyePosition(),getEyeDirection());
                     }
                 }
-                vec3 targetVelocity = glm::inverse(rotation) * moveInput * moveSpeed;
+                vec3 targetVelocity = rotation * moveInput * moveSpeed;
                 velocity = MathHelper::lerp(velocity,targetVelocity,acceleration*dt);
             }
 
@@ -94,19 +92,20 @@ class Character : public RigidbodyActor {
 
         }
 
-        void ride(Construction* construction,ivec3 point) {
+        void ride(Construction* construction,ivec3 point,quat rotation) {
             if(ridingConstruction != nullptr) {
                 dismount();
             }
             ridingConstruction = construction;
             ridingConstructionPoint = point;
+            ridingConstructionRotation = rotation;
             body->getCollider(0)->setIsTrigger(true);
         }
 
         void dismount() {
             ridingConstruction->resetTargets();
             ridingConstruction = nullptr;
-            body->getCollider(0)->setIsTrigger(false);
+            body->getCollider(0)->setIsSimulationCollider(true);
         }
 
         void interact(World* world) {
@@ -114,7 +113,6 @@ class Character : public RigidbodyActor {
                 dismount();
                 return;
             }
-            std::cout << "interacting with world" << std::endl;
             ph::RaycastCallback callback;
             world->raycast(getEyePosition(),getEyeDirection(),10,&callback);
             if(callback.success) {
@@ -125,12 +123,11 @@ class Character : public RigidbodyActor {
                     vec3 interactPointWorld = callback.worldPoint - callback.worldNormal * 0.5f;
                     vec3 interactPointLocal = construction->inverseTransformPoint(interactPointWorld);
                     ivec3 interactPointInt = glm::round(interactPointLocal);
-                    Block* block = construction->getBlock(interactPointInt);
-                    if(block != nullptr) {
-                        std::cout << "interacted with block" << StringHelper::toString(interactPointInt) << std::endl;
-                        if(block->canRide) {
-                            ride(construction,interactPointInt);
-                        }
+                    auto data = construction->getBlock(interactPointInt);
+                    auto block = data.first;
+                    auto state = data.second;
+                    if(data.first != nullptr) {
+                        block->onInteract(construction,interactPointInt,state,*this);
                     }
                 }
             }
@@ -169,31 +166,44 @@ class Character : public RigidbodyActor {
             }
 
             if(input.getKeyPressed(GLFW_KEY_1)) {
-                currentTool = &placeTin;
-                currentTool->setLookOrientation(getEyeRotation());
+                setCurrentTool(0);
             }
             if(input.getKeyPressed(GLFW_KEY_2)) {
-                currentTool = &placeCobalt;
-                currentTool->setLookOrientation(getEyeRotation());
+                setCurrentTool(1);
             }
             if(input.getKeyPressed(GLFW_KEY_3)) {
-                currentTool = &placeChair;
-                currentTool->setLookOrientation(getEyeRotation());
+                setCurrentTool(2);
             }
             if(input.getKeyPressed(GLFW_KEY_4)) {
-                currentTool = &placeThruster;
-                currentTool->setLookOrientation(getEyeRotation());
+                setCurrentTool(3);
             }
             if(input.getKeyPressed(GLFW_KEY_5)) {
-                currentTool = &pickaxe;
-                currentTool->setLookOrientation(getEyeRotation());
+                setCurrentTool(4);
+            }
+            if(input.getKeyPressed(GLFW_KEY_6)) {
+                setCurrentTool(5);
+            }
+            if(input.getKeyPressed(GLFW_KEY_7)) {
+                setCurrentTool(6);
+            }
+            if(input.getKeyPressed(GLFW_KEY_8)) {
+                setCurrentTool(7);
+            }
+            if(input.getKeyPressed(GLFW_KEY_9)) {
+                setCurrentTool(8);
             }
 
             moveMouse(input.getMouseDelta() * 0.01f);
         }
 
+        void setCurrentTool(int index) {
+            selectedTool = index;
+            currentTool = toolbar[index];
+            if(currentTool != nullptr) currentTool->setLookOrientation(getEyeRotation());
+        }
+
         void moveMouse(vec2 delta) {
-            rotation = glm::angleAxis(glm::radians(delta.x) * lookSensitivity,vec3(0,1,0)) * rotation;
+            rotation = glm::angleAxis(glm::radians(delta.x) * lookSensitivity,vec3(0,-1,0)) * rotation;
             lookPitch += delta.y * lookSensitivity;
             if(lookPitch > 89.9f) lookPitch = 89.9f;
             if(lookPitch < -89.9f) lookPitch = -89.9f;
@@ -204,7 +214,7 @@ class Character : public RigidbodyActor {
                 camera.position = getEyePosition();
                 camera.rotation = getEyeRotation();
             } else {
-                camera.position = position + glm::inverse(getEyeRotation()) * thirdPersonCameraOffset;
+                camera.position = position + getEyeRotation() * thirdPersonCameraOffset;
                 camera.rotation = getEyeRotation();
             }
             
@@ -215,11 +225,11 @@ class Character : public RigidbodyActor {
         }
 
         quat getEyeRotation() {
-            return glm::angleAxis(glm::radians(lookPitch),vec3(1,0,0)) * rotation;
+            return rotation * glm::angleAxis(glm::radians(lookPitch),vec3(-1,0,0));
         }
 
         vec3 getEyeDirection() {
-            return vec3(0,0,-1) * getEyeRotation();
+            return getEyeRotation() * vec3(0,0,-1);
         }
 
         bool playerStep() {

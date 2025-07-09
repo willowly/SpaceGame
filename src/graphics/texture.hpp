@@ -47,7 +47,9 @@ class Texture {
                 auto glFormat = GL_RGBA;
                 switch(format) {
                     case RGB:
-                        glFormat = Format::RGB;
+                        glFormat = GL_RGB;
+                    case RGBA:
+                        glFormat = GL_RGBA;
                 }
                 // load the data to the gpu
                 glTexImage2D(GL_TEXTURE_2D,0,glFormat,width,height,0,glFormat,GL_UNSIGNED_BYTE,data);

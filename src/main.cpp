@@ -8,13 +8,18 @@
 #include <engine/loader.hpp>
 #include <engine/world.hpp>
 #include <engine/input.hpp>
-#include <actor/construction.hpp>
 
 #include <block/block.hpp>
+#include <block/thruster-block.hpp>
+#include <block/cockpit-block.hpp>
 
 #include <interface/console.hpp>
+#include <interface/interface.hpp>
+#include <interface/toolbar-widget.hpp>
 
 #include <actor/character.hpp>
+#include <actor/terrain.hpp>
+#include <actor/construction.hpp>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -124,80 +129,44 @@ int main()
     
     RigidbodyActor cubePrototype(registry.getModel("cube"),registry.getMaterial("cow"));
     Character playerPrototype(nullptr,nullptr);
-
+    
     Construction constructionPrototype(registry.getModel("block"),registry.getMaterial("cow"));
-
-    Block tinBlock(registry.getModel("block"),registry.getMaterial("tin_block"));
-    Block cobaltBlock(registry.getModel("block"),registry.getMaterial("cobalt_block"));
-    Block chairBlock(registry.getModel("chair"),registry.getMaterial("chair"));
-    chairBlock.canRide = true;
-    Block thrusterBlock(registry.getModel("thruster"),registry.getMaterial("thruster"));
+    Terrain terrainPrototype;
 
 
     Text text("fonts/sburbits.ttf",16);
     text.scale = vec2(2,2);
 
     World world;
+    Interface interface(&registry.uiShader,glm::ivec2(width,height));
+
+    ToolbarWidget toolbarWidget;
+    toolbarWidget.solidTexture = registry.getTexture("solid");
 
     Console console("fonts/sburbits.ttf");
 
     Model cursorModel;
     cursorModel.loadQuad();
-    
-    
-    playerPrototype.placeTin.heldModel = registry.getModel("block");
-    playerPrototype.placeTin.heldModelMaterial = registry.getMaterial("tin_block");
-    playerPrototype.placeTin.modelOffset = vec3(0.3,-0.3,-1);
-    playerPrototype.placeTin.modelRotation = quat(vec3(0,glm::radians(45.0f),0));
-    playerPrototype.placeTin.modelScale = 0.3f;
-    playerPrototype.placeTin.lookLerp = 10;
-    playerPrototype.placeTin.block = &tinBlock;
 
-    playerPrototype.placeCobalt.heldModel = registry.getModel("block");
-    playerPrototype.placeCobalt.heldModelMaterial = registry.getMaterial("cobalt_block");
-    playerPrototype.placeCobalt.modelOffset = vec3(0.3,-0.3,-1);
-    playerPrototype.placeCobalt.modelRotation = quat(vec3(0,glm::radians(45.0f),0));
-    playerPrototype.placeCobalt.modelScale = 0.3f;
-    playerPrototype.placeCobalt.lookLerp = 10;
-    playerPrototype.placeCobalt.block = &cobaltBlock;
+    PlaceBlockTool placeTin(registry.getBlock("tin"));
+    placeTin.icon = registry.getTexture("tin_plate");
+    PlaceBlockTool placeCockpit(registry.getBlock("cockpit"));
+    placeCockpit.icon = registry.getTexture("cockpit_item");
+    PlaceBlockTool placeThruster(registry.getBlock("thruster"));
+    placeThruster.icon = registry.getTexture("thruster_item");
+    PickaxeTool pickaxe(registry.getModel("pickaxe"),registry.getMaterial("pickaxe"),vec3(0.2,-0.4,-0.5),quat(vec3(glm::radians(-5.0f),glm::radians(90.0f),glm::radians(-5.0f))));
+    pickaxe.icon = registry.getTexture("pickaxe_item");
 
-    playerPrototype.placeChair.heldModel = registry.getModel("chair");
-    playerPrototype.placeChair.heldModelMaterial = registry.getMaterial("chair");
-    playerPrototype.placeChair.modelOffset = vec3(0.3,-0.3,-1);
-    playerPrototype.placeChair.modelRotation = quat(vec3(0,glm::radians(45.0f),0));
-    playerPrototype.placeChair.modelScale = 0.3f;
-    playerPrototype.placeChair.lookLerp = 10;
-    playerPrototype.placeChair.block = &chairBlock;
-
-    playerPrototype.placeThruster.heldModel = registry.getModel("thruster");
-    playerPrototype.placeThruster.heldModelMaterial = registry.getMaterial("thruster");
-    playerPrototype.placeThruster.modelOffset = vec3(0.3,-0.3,-1);
-    playerPrototype.placeThruster.modelRotation = quat(vec3(0,glm::radians(45.0f),0));
-    playerPrototype.placeThruster.modelScale = 0.3f;
-    playerPrototype.placeThruster.lookLerp = 10;
-    playerPrototype.placeThruster.block = &thrusterBlock;
-
-    playerPrototype.pickaxe.heldModel = registry.getModel("pickaxe");
-    playerPrototype.pickaxe.heldModelMaterial = registry.getMaterial("pickaxe");
-    playerPrototype.pickaxe.modelOffset = vec3(0.2,-0.4,-0.5);
-    playerPrototype.pickaxe.modelRotation = quat(vec3(glm::radians(-5.0f),glm::radians(90.0f),glm::radians(-5.0f)));
-    playerPrototype.pickaxe.modelScale = 0.3f;
-    playerPrototype.pickaxe.lookLerp = 8;
-
-    
-
-    //world.getCamera().move(vec3(0,0,5));
-
+    playerPrototype.toolbar[0] = &placeTin;
+    playerPrototype.toolbar[1] = &placeCockpit;
+    playerPrototype.toolbar[2] = &placeThruster;
+    playerPrototype.toolbar[3] = &pickaxe;
 
     auto player = world.spawn(&playerPrototype,vec3(0,1,10),quat(vec3(0,0,0)));
 
     auto construction = world.spawn(&constructionPrototype,vec3(0,2,0),quat(vec3(0,0,0)));
-    construction->setBlock(ivec3(0,0,0),&tinBlock);
+    construction->setBlock(ivec3(0,0,0),registry.getBlock("tin"),BlockFacing::FORWARD);
     lua["construction"] = construction;
-
-    lua["rot"] = [&] (float x,float y,float z) {
-        player->pickaxe.modelRotation = quat(vec3(glm::radians(x),glm::radians(y),glm::radians(z)));
-    };
 
     for (int i = 0; i < 50; i++)
     {
@@ -209,9 +178,9 @@ int main()
     }
     
     
+    int terrainConfig = 0;
 
-
-    float lastTime;
+    float lastTime = 0;
 
     while(!glfwWindowShouldClose(window))
     {
@@ -236,6 +205,18 @@ int main()
             player->processInput(input);
         }
 
+        if(input.getKeyPressed(GLFW_KEY_UP)) {
+            terrainConfig++;
+            //terrainPrototype.setConfig(terrainConfig);
+        }
+        if(input.getKeyPressed(GLFW_KEY_DOWN)) {
+            terrainConfig--;
+            //terrainPrototype.setConfig(terrainConfig);
+        }
+        
+        terrainPrototype.setConfig(terrainConfig);
+        terrainPrototype.render(world.getCamera(),dt);
+
         world.frame(dt);
 
         auto matrix = glm::ortho(0.0f,(float)width,0.0f,(float)height);
@@ -247,8 +228,14 @@ int main()
         glDisable(GL_DEPTH_TEST);
         Debug::renderDebugShapes(world.getCamera());
 
+        interface.screenSize = glm::ivec2(width,height);
+        toolbarWidget.player = player;
+        toolbarWidget.render(interface);
+
         cursorModel.render(glm::mat4(1.0f),glm::scale(glm::mat4(1.0f),vec3(4,4,4)),glm::ortho(-width/2.0f,width/2.0f,-height/2.0f,height/2.0f),*Debug::getShader());
         glEnable(GL_DEPTH_TEST);
+
+        //registry.getModel("cockpit")->render(vec3(0,3,0),world.getCamera(),*registry.getMaterial("cockpit"));
         
         glfwSwapBuffers(window);
         input.clearInputBuffers(); //do it before we poll for events

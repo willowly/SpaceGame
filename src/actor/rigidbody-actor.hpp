@@ -24,6 +24,7 @@ class RigidbodyActor : public Actor {
         rp3d::PhysicsCommon* common;
         
     public:
+        vec3 velocity = vec3(0);
         rp3d::RigidBody* body;
         ActorUserData userData;
 

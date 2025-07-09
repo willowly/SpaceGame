@@ -66,6 +66,10 @@ class World {
             return dynamic_cast<T*>(actorPointer);
         }
 
+        void destroy(Actor* actor) {
+
+        }
+
 
         vec3 getGravityVector(vec3 position) {
             return constantGravity;
@@ -104,7 +108,6 @@ class World {
         void step(float dt) {
             for (auto& actor : actors)
             {
-                //applyGravityIfEnabled(actor.get(),dt);
                 actor->step(dt,this);
                 actor->updatePhysicsRepresentation();
             }
@@ -119,7 +122,7 @@ class World {
         }
 
         void applyGravityIfEnabled(Actor* actor,float dt) {
-            if(actor->useGravity) actor->velocity += getGravityVector(actor->position) * dt;
+            //if(actor->useGravity) actor->velocity += getGravityVector(actor->position) * dt;
         }
 
         void raycast(vec3 position,vec3 direction,float distance,rp3d::RaycastCallback* callback) {

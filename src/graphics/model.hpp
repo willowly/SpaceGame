@@ -41,6 +41,8 @@ class Model {
             Face() {}
         };
 
+        GLenum drawType = GL_STATIC_DRAW;
+
         
         vector<Face> faces;
 
@@ -129,10 +131,10 @@ class Model {
 
             normals.push_back(vec3(0.0,0.0,1.0));
 
-            uvs.push_back(vec2(0,0));
-            uvs.push_back(vec2(1,0));
-            uvs.push_back(vec2(0,1));
             uvs.push_back(vec2(1,1));
+            uvs.push_back(vec2(0,1));
+            uvs.push_back(vec2(1,0));
+            uvs.push_back(vec2(0,0));
 
                             // vertex       //normal     /uv
             faces.push_back(Face(0,1,2,     0,0,0,       0,1,2));
@@ -156,11 +158,19 @@ class Model {
             bindData();
         }
 
+        void setStaticDraw() {
+            drawType = GL_STATIC_DRAW;
+        };
+
+        void setDynamicDraw() {
+            drawType = GL_DYNAMIC_DRAW;
+        };
+
         void bindData() {
             glBindVertexArray(VAO);
 
             glBindBuffer(GL_ARRAY_BUFFER, VBO);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertexData.size(), vertexData.data(), GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertexData.size(), vertexData.data(), drawType);
             
 
             // set up indicies
@@ -243,11 +253,11 @@ class Model {
         void updateData() {
             vertexData.clear();
             for(auto face : faces) {
-                addFace(face);
+                addFaceToData(face);
             }
         }
 
-        void addFace(Face face) {
+        void addFaceToData(Face face) {
             for (int i = 0; i < 3; i++)
             {
                 vertexData.push_back(vertices[face.vertexIndices[i]].x);

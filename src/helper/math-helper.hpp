@@ -4,7 +4,13 @@
 using glm::vec3;
 
 namespace MathHelper {
+
+    
     vec3 lerp(vec3 a,vec3 b,float t) {
+        return b*t + a*(1.0f-t);
+    }
+
+    float lerp(float a,float b,float t) {
         return b*t + a*(1.0f-t);
     }
 
@@ -25,3 +31,20 @@ namespace MathHelper {
         }
     }
 }
+
+template <>
+class std::less<ivec3> {
+
+    bool operator()(const ivec3& a, const ivec3& b) const
+    {
+        if(a.x == b.x) {
+            if(a.y == b.y) {
+                return a.z < b.z;
+            }
+            return a.y < b.y;
+        }
+        return a.x < b.x;
+    }
+};
+
+namespace mh = MathHelper;

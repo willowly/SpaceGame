@@ -130,7 +130,7 @@ class Text {
             //glm::mat4 projection = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f);
             
             shader.use();
-            shader.setColor3("textColor",color);
+            shader.setColor3("color",color);
             shader.setMat4("projection",projection);
             glActiveTexture(GL_TEXTURE0);
             glBindVertexArray(VAO);

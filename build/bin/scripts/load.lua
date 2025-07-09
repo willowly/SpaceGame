@@ -23,7 +23,7 @@ materials.pickaxe = {"lit","pickaxe"}
 
 materials.tin_block = {"lit","tin_block"}
 materials.cobalt_block = {"lit","cobalt_block"}
-materials.chair = {"lit","solid",color(0.7,0.1,0.2)}
+materials.cockpit = {"lit","cockpit"}
 materials.thruster = {"lit","solid",color(0.3,0.3,0.4)}
 
 print("Loading Actors")
@@ -44,6 +44,24 @@ actors.asteroid = {
     type="actor",
     model="asteroid",
     material="grid"
+}
+
+print("Loading Blocks")
+
+blocks.cobalt = {"block","block","cobalt_block"}
+blocks.tin = {"block","block","tin_block"}
+
+blocks.cockpit = {
+    type = "cockpit",
+    model = "cockpit",
+    material = "cockpit"
+}
+
+blocks.thruster = {
+    type = "thruster",
+    model = "thruster",
+    material = "thruster",
+    force = 20
 }
 
 

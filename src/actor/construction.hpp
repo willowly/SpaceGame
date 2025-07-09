@@ -11,17 +11,20 @@
 #include <algorithm>
 
 #include <block/block.hpp>
+#include <block/block-state.hpp>
 
 using glm::ivec3,glm::vec3;
 using std::map;
 
+#define CONSTRUCTION
 class Construction : public RigidbodyActor {
 
 
     struct BlockData {
         Block* block = nullptr; //eventually this will be a list of blocks in the construction
         rp3d::Collider* collider = nullptr;
-        BlockData(Block* block,rp3d::Collider* collider = nullptr) : block(block), collider(collider) {}
+        BlockState state;
+        BlockData(Block* block,BlockState state,rp3d::Collider* collider = nullptr) : block(block), state(state), collider(collider){}
         BlockData() {}
     };
 
@@ -29,15 +32,69 @@ class Construction : public RigidbodyActor {
     ivec3 max = ivec3(0,0,0);
     std::vector<BlockData> blockData;
 
-    vec3 targetVelocity;
-    quat targetRotation;
+    vec3 moveControl;
+    quat targetRotation = glm::identity<quat>();
+    float turnForce = 1.5;
 
-    float thrustForce = 5;
-    float turnForce = 0.5;
+    int blockCount; //block count
 
     
-
     public:
+        // USES FACING AS INDEX
+        // 0 - FORWARD
+        // 1 - BACKWARD
+        // 2 - UP,
+        // 3 - DOWN
+        // 4 - LEFT
+        // 5 - RIGHT
+        float thrustForces[6];
+
+
+        static BlockFacing getFacingFromVector(vec3 v) {
+            v = glm::normalize(v);
+            if(v.z == 1) {
+                return BlockFacing::FORWARD;
+            }
+            if(v.z == -1) {
+                return BlockFacing::BACKWARD;
+            }
+            if(v.y == 1) {
+                return BlockFacing::UP;
+            }
+            if(v.y == -1) {
+                return BlockFacing::DOWN;
+            }
+            if(v.x == 1) {
+                return BlockFacing::RIGHT;
+            }
+            if(v.x == -1) {
+                return BlockFacing::LEFT;
+            }
+            return BlockFacing::FORWARD;
+        }
+
+        static quat getRotationFromFacing(BlockFacing blockFacing) {
+            switch(blockFacing) {
+                case BlockFacing::FORWARD:
+                    return glm::angleAxis(glm::radians(0.0f),vec3(0,1.0f,0));
+                    break;
+                case BlockFacing::BACKWARD:
+                    return glm::angleAxis(glm::radians(180.0f),vec3(0,1.0f,0));
+                    break;
+                case BlockFacing::UP:
+                    return glm::angleAxis(glm::radians(-90.0f),vec3(1.0f,0,0));
+                    break;
+                case BlockFacing::DOWN:
+                    return glm::angleAxis(glm::radians(90.0f),vec3(1.0f,0,0));
+                    break;
+                case BlockFacing::RIGHT:
+                    return glm::angleAxis(glm::radians(90.0f),vec3(0,1.0f,0));
+                    break;
+                case BlockFacing::LEFT:
+                    return glm::angleAxis(glm::radians(-90.0f),vec3(0,1.0f,0));
+                    break;
+            }
+        }
 
         // idk
         struct Location {
@@ -63,12 +120,32 @@ class Construction : public RigidbodyActor {
         }
 
         void step(float dt,World* world) {
-            // just for testing
-            std::cout << StringHelper::toString(targetVelocity) << std::endl;
-            velocity = MathHelper::moveTowards(velocity,rotation * targetVelocity,thrustForce * dt);
-            rotation = glm::slerp(rotation,targetRotation,turnForce * dt);
-        }
+            
+            
 
+            // i have no idea why z and x are inverted :shrug:
+            if(moveControl.z > 0) {
+                body->applyLocalForceAtCenterOfMass(rp3d::Vector3(0,0,-1) * thrustForces[BlockFacing::FORWARD] * moveControl.z);
+            }
+            if(moveControl.z < 0) {
+                body->applyLocalForceAtCenterOfMass(rp3d::Vector3(0,0,-1) * thrustForces[BlockFacing::BACKWARD] * moveControl.z);
+            }
+            if(moveControl.x < 0) {
+                body->applyLocalForceAtCenterOfMass(rp3d::Vector3(-1,0,0) * thrustForces[BlockFacing::LEFT] * moveControl.x);
+            }
+            if(moveControl.x > 0) {
+                body->applyLocalForceAtCenterOfMass(rp3d::Vector3(-1,0,0) * thrustForces[BlockFacing::RIGHT] * moveControl.x);
+            }
+            if(moveControl.y < 0) {
+                body->applyLocalForceAtCenterOfMass(rp3d::Vector3(0,1,0) * thrustForces[BlockFacing::UP] * moveControl.y);
+            }
+            if(moveControl.y > 0) {
+                body->applyLocalForceAtCenterOfMass(rp3d::Vector3(0,1,0) * thrustForces[BlockFacing::DOWN] * moveControl.y);
+            }
+            //velocity = MathHelper::moveTowards(velocity,rotation * targetVelocity,thrustForce * dt);
+            rotation = glm::slerp(rotation,targetRotation,turnForce * dt);
+            
+        }
 
         void render(Camera& camera,float dt) {
             int i = 0;
@@ -80,7 +157,8 @@ class Construction : public RigidbodyActor {
                     {
                         
                         if(blockData.size() > i && blockData[i].block != nullptr) {
-                            blockData[i].block->model->render(glm::translate(transform(),vec3(x,y,z)),camera,*blockData[i].block->material);
+                            quat rotation = getRotationFromFacing(blockData[i].state.facing);
+                            blockData[i].block->model->render(glm::translate(transform(),vec3(x,y,z)) * glm::mat4(rotation),camera,*blockData[i].block->material);
                         } else {
                             // model->renderMode = Model::RenderMode::Wireframe;
                             // model->render(transformPoint(vec3(x,y,z)),camera,*Debug::getShader());
@@ -90,9 +168,15 @@ class Construction : public RigidbodyActor {
                     }
                 }
             }
+            Debug::drawRay(transformPoint(vec3(0,0,1)),transformDirection(vec3(0,0,0.1) * thrustForces[BlockFacing::FORWARD]));
+            Debug::drawRay(transformPoint(vec3(0,0,-1)),transformDirection(vec3(0,0,-0.1) * thrustForces[BlockFacing::BACKWARD]));
 
-            //Debug::drawCube(position,vec
-            
+            Debug::drawRay(transformPoint(vec3(0,1,0)),transformDirection(vec3(0,0.1,0) * thrustForces[BlockFacing::UP]));
+            Debug::drawRay(transformPoint(vec3(0,-1,0)),transformDirection(vec3(0,-0.1,0) * thrustForces[BlockFacing::DOWN]));
+
+            Debug::drawRay(transformPoint(vec3(1,0,0)),transformDirection(vec3(0.1,0,0) * thrustForces[BlockFacing::RIGHT]));
+            Debug::drawRay(transformPoint(vec3(-1,0,0)),transformDirection(vec3(-0.1,0,0) * thrustForces[BlockFacing::LEFT]));
+
         }
 
         void setBounds(ivec3 newMin,ivec3 newMax) {
@@ -133,35 +217,43 @@ class Construction : public RigidbodyActor {
                     }
                 }
             }
-            //std::cout << std::endl;
-            //Debug::info("Setting bounds to " + StringHelper::toString(newMin) + " " + StringHelper::toString(newMax),InfoPriority::LOW);
-            // for(int block : blocks) {
-            //     std::cout << block << ",";
-            // }
-            // std::cout << std::endl;
         }
 
-        void setBlock(ivec3 location,Block* block) {
+        void setBlock(ivec3 location,Block* block,BlockFacing facing) {
             if(!isInsideBounds(location)) {
                 setBounds(glm::min(min,location),glm::max(max,location));
             }
             int index = getIndex(location);
+
+            if(blockData[index].collider != nullptr) {
+                body->removeCollider(blockData[index].collider);
+            }
+            if(blockData[index].block != nullptr) {
+                blockData[index].block->onBreak(this,location,blockData[index].state);
+                blockCount--;
+            }
             //Debug::info("index: " + std::to_string(index) + " " + StringHelper::toString(location),InfoPriority::LOW);
             if(block != nullptr) {
                 auto collider = body->addCollider(common->createBoxShape(rp3d::Vector3(0.5f,0.5f,0.5f)),rp3d::Transform(PhysicsHelper::toRp3dVector(location),rp3d::Quaternion::identity()));
                 collider->getMaterial().setBounciness(0.0);
-                blockData[index] = BlockData(block,collider);
-            } else {
-                if(blockData[index].collider != nullptr) {
-                    body->removeCollider(blockData[index].collider);
+                collider->getMaterial().setMassDensity(1);
+                body->updateMassPropertiesFromColliders(); //center of mass + inertia tensor included
+                blockData[index] = BlockData(block,BlockState(facing),collider);
+                if(blockData[index].block != nullptr) {
+                    blockData[index].block->onPlace(this,location,blockData[index].state);
+                    blockCount++;
                 }
+            } else {
                 blockData[index] = BlockData();
             }
             
+            if(blockCount <= 0) {
+                destroy();
+            }
         }
 
-        void setTargetVelocity(vec3 target) {
-            targetVelocity = target;
+        void setMoveControl(vec3 move) {
+            moveControl = move;
         }
 
         void setTargetRotation(quat target) {
@@ -169,7 +261,7 @@ class Construction : public RigidbodyActor {
         }
 
         void resetTargets() {
-            targetVelocity = vec3(0,0,0);
+            moveControl = vec3(0,0,0);
             targetRotation = rotation;
         }
 
@@ -182,11 +274,12 @@ class Construction : public RigidbodyActor {
             return fromMin.x + fromMin.y * size.x + fromMin.z * size.y * size.x;
         }
 
-        Block* getBlock(ivec3 location) {
+        std::pair<Block*,BlockState> getBlock(ivec3 location) {
             if(!isInsideBounds(location)) {
-                return nullptr;
+                return std::pair(nullptr,BlockState());
             }
-            return blockData[getIndex(location)].block;
+            auto data = blockData[getIndex(location)];
+            return std::pair(data.block,data.state);
         }
 
         void addCollisionShapes(rp3d::PhysicsCommon* common) {

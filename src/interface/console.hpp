@@ -17,7 +17,7 @@ class Console {
             
         }
 
-        bool enabled;
+        bool enabled = false;
         string inputString;
         Text inputText;
         string response;

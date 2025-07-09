@@ -1310,9 +1310,18 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /usr/local/include/reactphysics3d/constraint/HingeJoint.h \
   /usr/local/include/reactphysics3d/constraint/FixedJoint.h \
   /usr/local/include/reactphysics3d/utils/Message.h \
+  /Users/willow/Documents/GitHub/SpaceGame/src/block/block.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/item/tool.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/engine/world.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/actor/rigidbody-actor.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/helper/math-helper.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/helper/physics-helper.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/helper/collision-helper.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/engine/debug.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/actor/construction.hpp \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/map \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__tree \
-  /Users/willow/Documents/GitHub/SpaceGame/src/engine/debug.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/block/block-state.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-all.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/sol/sol.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/sol/config.hpp \
@@ -1326,16 +1335,17 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-actor.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-character.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-construction.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/actor/construction.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/actor/rigidbody-actor.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/helper/math-helper.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/helper/physics-helper.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/helper/collision-helper.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/block/block.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-world.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-registry.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/engine/world.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/api/api-registry-general.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/api/api-registry-actor.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/api/api-registry-block.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/block/cockpit-block.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/actor/character.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/input.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/item/pickaxe-tool.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/item/place-block-tool.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/block/thruster-block.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/interface/console.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/graphics/text.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-src/include/ft2build.h \
@@ -1361,7 +1371,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-src/include/freetype/ftbitmap.h \
   /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-src/include/freetype/ftcolor.h \
   /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-src/include/freetype/ftstroke.h \
-  /Users/willow/Documents/GitHub/SpaceGame/src/actor/character.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/item/pickaxe-tool.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/item/tool.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/item/place-block-tool.hpp
+  /Users/willow/Documents/GitHub/SpaceGame/src/interface/interface.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/interface/toolbar-widget.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/actor/terrain.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/helper/terrain-helper.hpp
