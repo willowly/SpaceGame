@@ -21,6 +21,7 @@ class Terrain : Actor {
     }
 
     virtual void render(Camera& camera,float dt) {
+        std::cout << "rendering terrain:" << std::endl;
         model->render(vec3(0,0,0),camera,*material);
     }
 
@@ -57,13 +58,13 @@ class Terrain : Actor {
             Debug::drawPoint(getEdgePos(edge));
             if(vertIndex == 2) { 
                 model->faces.push_back(face);
-                std::cout << "(face)" << std::endl;
+                std::cout << "(face)";
             }
             i++;
         }
         std::cout << std::endl;
-
         model->updateData();
+        model->bindData();
         
         
     }

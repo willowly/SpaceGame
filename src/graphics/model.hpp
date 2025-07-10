@@ -244,7 +244,7 @@ class Model {
                     glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
                     break;
             }
-            glDrawArrays(GL_TRIANGLES, 0, vertexData.size());
+            glDrawArrays(GL_TRIANGLES, 0, vertexData.size()/8);
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
 
