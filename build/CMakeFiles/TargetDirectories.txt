@@ -1,5 +1,6 @@
 /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles/GLAD.dir
 /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles/STB.dir
+/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles/SIMPLEXNOISE.dir
 /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles/SpaceGame.dir
 /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles/package.dir
 /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles/package_source.dir

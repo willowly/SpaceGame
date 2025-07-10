@@ -4,14 +4,20 @@
 #include "actor/actor.hpp"
 #include "helper/terrain-helper.hpp"
 #include "engine/debug.hpp"
+#include "SimplexNoise.h"
 
 using std::unique_ptr;
 
 class Terrain : Actor {
 
+    std::vector<float> terrainData;
+
+
     public:
         unique_ptr<Model> dynamicModel;
         Material* material;
+        int size = 8;
+        float scale = 0.2;
 
 
     Terrain() {
@@ -20,9 +26,43 @@ class Terrain : Actor {
         model = dynamicModel.get();
     }
 
+    void generate() {
+        terrainData.clear();
+
+        const SimplexNoise simplex;
+
+        for (int z = 0; z < size; z++)
+        {
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float noise = simplex.noise(x*scale,y*scale,z*scale);
+                    terrainData.push_back(noise);
+                    std::cout << StringHelper::toString(vec3(x,y,z)) << noise << std::endl;
+                }
+            }
+        }
+    }
+
     virtual void render(Camera& camera,float dt) {
-        std::cout << "rendering terrain:" << std::endl;
+        //std::cout << "rendering terrain:" << std::endl;
         model->render(vec3(0,0,0),camera,*material);
+
+        int i = 0;
+        for (int z = 0; z < size; z++)
+        {
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float noise = terrainData[i];
+                    Debug::drawPoint(vec3(x,y,z),Color(noise,noise,noise));
+                    i++;
+                }
+            }
+        }
+        
     }
 
 
@@ -42,7 +82,6 @@ class Terrain : Actor {
             return;
         }
         const int* tris = TerrainHelper::triTable[config];
-        std::cout << "tris: ";
         int i = 0;
         Model::Face face;
         while(i < 100) //break out if theres a problem lol
@@ -58,11 +97,9 @@ class Terrain : Actor {
             Debug::drawPoint(getEdgePos(edge));
             if(vertIndex == 2) { 
                 model->faces.push_back(face);
-                std::cout << "(face)";
             }
             i++;
         }
-        std::cout << std::endl;
         model->updateData();
         model->bindData();
         

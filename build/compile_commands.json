@@ -13,6 +13,12 @@
 },
 {
   "directory": "/Users/willow/Documents/GitHub/SpaceGame/build",
+  "command": "/usr/bin/clang++  -I/usr/local/include -I/usr/local/include/lua -I/Users/willow/Documents/GitHub/SpaceGame/src -I/Users/willow/Documents/GitHub/SpaceGame/include -g -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mmacosx-version-min=14.3 -o CMakeFiles/SIMPLEXNOISE.dir/include/SimplexNoise.cpp.o -c /Users/willow/Documents/GitHub/SpaceGame/include/SimplexNoise.cpp",
+  "file": "/Users/willow/Documents/GitHub/SpaceGame/include/SimplexNoise.cpp",
+  "output": "CMakeFiles/SIMPLEXNOISE.dir/include/SimplexNoise.cpp.o"
+},
+{
+  "directory": "/Users/willow/Documents/GitHub/SpaceGame/build",
   "command": "/usr/bin/clang++  -I/usr/local/include/lua -I/Users/willow/Documents/GitHub/SpaceGame/src -I/Users/willow/Documents/GitHub/SpaceGame/include -iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks -isystem /usr/local/include -isystem /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-build/include -isystem /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-src/include -g -std=gnu++20 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mmacosx-version-min=14.3 -o CMakeFiles/SpaceGame.dir/src/main.cpp.o -c /Users/willow/Documents/GitHub/SpaceGame/src/main.cpp",
   "file": "/Users/willow/Documents/GitHub/SpaceGame/src/main.cpp",
   "output": "CMakeFiles/SpaceGame.dir/src/main.cpp.o"

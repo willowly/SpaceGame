@@ -3,7 +3,7 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "libSTB.a"
+			"path" : "libGLAD.a"
 		}
 	],
 	"backtrace" : 1,
@@ -26,7 +26,7 @@
 			{
 				"command" : 0,
 				"file" : 0,
-				"line" : 35,
+				"line" : 34,
 				"parent" : 0
 			},
 			{
@@ -44,13 +44,13 @@
 			{
 				"command" : 1,
 				"file" : 0,
-				"line" : 46,
+				"line" : 47,
 				"parent" : 0
 			},
 			{
 				"command" : 1,
 				"file" : 0,
-				"line" : 48,
+				"line" : 49,
 				"parent" : 0
 			}
 		]
@@ -83,16 +83,16 @@
 					"path" : "/Users/willow/Documents/GitHub/SpaceGame/include"
 				}
 			],
-			"language" : "CXX",
+			"language" : "C",
 			"sourceIndexes" : 
 			[
 				0
 			]
 		}
 	],
-	"id" : "STB::@6890427a1f51a3e7e1df",
-	"name" : "STB",
-	"nameOnDisk" : "libSTB.a",
+	"id" : "GLAD::@6890427a1f51a3e7e1df",
+	"name" : "GLAD",
+	"nameOnDisk" : "libGLAD.a",
 	"paths" : 
 	{
 		"build" : ".",
@@ -113,7 +113,7 @@
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "include/stb_image.cpp",
+			"path" : "src/glad.c",
 			"sourceGroupIndex" : 0
 		}
 	],

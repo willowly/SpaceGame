@@ -33,6 +33,7 @@ include_directories(${FREETYPE_INCLUDE_DIR})
 
 add_library(GLAD "src/glad.c")
 add_library(STB "include/stb_image.cpp")
+add_library(SIMPLEXNOISE "include/SimplexNoise.cpp")
 
 include(FetchContent)
 FetchContent_Declare(SFML
@@ -50,5 +51,5 @@ include_directories(include)
 add_executable(SpaceGame 
 src/main.cpp
 )
-target_compile_features(SpaceGame PRIVATE cxx_std_20)
-target_link_libraries(SpaceGame PRIVATE OpenGL::GL ReactPhysics3D::ReactPhysics3D ${LUA_LIBRARIES} Freetype::Freetype ${GLFW3_LIBRARY} GLAD STB ${COCOA_LIBRARY} ${IOKIT_LIBRARY})
+target_compile_features(SpaceGame PRIVATE cxx_std_20 )
+target_link_libraries(SpaceGame PRIVATE OpenGL::GL ReactPhysics3D::ReactPhysics3D ${LUA_LIBRARIES} Freetype::Freetype ${GLFW3_LIBRARY} GLAD STB ${COCOA_LIBRARY} ${IOKIT_LIBRARY} SIMPLEXNOISE)

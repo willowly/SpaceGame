@@ -1,0 +1,2 @@
+/usr/bin/ar qc libFASTNOISE.a CMakeFiles/FASTNOISE.dir/include/FastNoise.cpp.o
+/usr/bin/ranlib libFASTNOISE.a

@@ -954,6 +954,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o
  /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-src/include/freetype/fttypes.h
  /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-src/include/ft2build.h
  /Users/willow/Documents/GitHub/SpaceGame/include/KHR/khrplatform.h
+ /Users/willow/Documents/GitHub/SpaceGame/include/SimplexNoise.h
  /Users/willow/Documents/GitHub/SpaceGame/include/glad/glad.h
  /Users/willow/Documents/GitHub/SpaceGame/include/glm/common.hpp
  /Users/willow/Documents/GitHub/SpaceGame/include/glm/detail/qualifier.hpp

@@ -208,6 +208,19 @@ STB/fast:
 .PHONY : STB/fast
 
 #=============================================================================
+# Target rules for targets named SIMPLEXNOISE
+
+# Build rule for target.
+SIMPLEXNOISE: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 SIMPLEXNOISE
+.PHONY : SIMPLEXNOISE
+
+# fast build rule for target.
+SIMPLEXNOISE/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SIMPLEXNOISE.dir/build.make CMakeFiles/SIMPLEXNOISE.dir/build
+.PHONY : SIMPLEXNOISE/fast
+
+#=============================================================================
 # Target rules for targets named SpaceGame
 
 # Build rule for target.
@@ -376,6 +389,30 @@ vorbisfile/fast:
 	$(MAKE) $(MAKESILENT) -f _deps/vorbis-build/lib/CMakeFiles/vorbisfile.dir/build.make _deps/vorbis-build/lib/CMakeFiles/vorbisfile.dir/build
 .PHONY : vorbisfile/fast
 
+include/SimplexNoise.o: include/SimplexNoise.cpp.o
+.PHONY : include/SimplexNoise.o
+
+# target to build an object file
+include/SimplexNoise.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SIMPLEXNOISE.dir/build.make CMakeFiles/SIMPLEXNOISE.dir/include/SimplexNoise.cpp.o
+.PHONY : include/SimplexNoise.cpp.o
+
+include/SimplexNoise.i: include/SimplexNoise.cpp.i
+.PHONY : include/SimplexNoise.i
+
+# target to preprocess a source file
+include/SimplexNoise.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SIMPLEXNOISE.dir/build.make CMakeFiles/SIMPLEXNOISE.dir/include/SimplexNoise.cpp.i
+.PHONY : include/SimplexNoise.cpp.i
+
+include/SimplexNoise.s: include/SimplexNoise.cpp.s
+.PHONY : include/SimplexNoise.s
+
+# target to generate assembly for a file
+include/SimplexNoise.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SIMPLEXNOISE.dir/build.make CMakeFiles/SIMPLEXNOISE.dir/include/SimplexNoise.cpp.s
+.PHONY : include/SimplexNoise.cpp.s
+
 include/stb_image.o: include/stb_image.cpp.o
 .PHONY : include/stb_image.o
 
@@ -464,6 +501,7 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... FLAC"
 	@echo "... GLAD"
+	@echo "... SIMPLEXNOISE"
 	@echo "... STB"
 	@echo "... SpaceGame"
 	@echo "... benchmark_residual"
@@ -477,6 +515,9 @@ help:
 	@echo "... vorbis"
 	@echo "... vorbisenc"
 	@echo "... vorbisfile"
+	@echo "... include/SimplexNoise.o"
+	@echo "... include/SimplexNoise.i"
+	@echo "... include/SimplexNoise.s"
 	@echo "... include/stb_image.o"
 	@echo "... include/stb_image.i"
 	@echo "... include/stb_image.s"

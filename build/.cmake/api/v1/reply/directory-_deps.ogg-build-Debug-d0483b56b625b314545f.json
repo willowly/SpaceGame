@@ -45,7 +45,7 @@
 				"_deps/sfml-build/lib/liboggd.a"
 			],
 			"targetId" : "ogg::@4e5ed7d02827854e35f8",
-			"targetIndex" : 6,
+			"targetIndex" : 7,
 			"type" : "target"
 		},
 		{
@@ -57,7 +57,7 @@
 			[
 				{
 					"id" : "ogg::@4e5ed7d02827854e35f8",
-					"index" : 6
+					"index" : 7
 				}
 			],
 			"paths" : 

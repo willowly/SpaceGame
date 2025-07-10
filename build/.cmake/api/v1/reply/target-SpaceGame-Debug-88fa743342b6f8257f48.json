@@ -28,7 +28,7 @@
 			{
 				"command" : 0,
 				"file" : 0,
-				"line" : 50,
+				"line" : 51,
 				"parent" : 0
 			},
 			{
@@ -40,7 +40,7 @@
 			{
 				"command" : 2,
 				"file" : 0,
-				"line" : 54,
+				"line" : 55,
 				"parent" : 0
 			},
 			{
@@ -52,13 +52,13 @@
 			{
 				"command" : 3,
 				"file" : 0,
-				"line" : 46,
+				"line" : 47,
 				"parent" : 0
 			},
 			{
 				"command" : 3,
 				"file" : 0,
-				"line" : 48,
+				"line" : 49,
 				"parent" : 0
 			},
 			{
@@ -70,7 +70,7 @@
 			{
 				"command" : 4,
 				"file" : 0,
-				"line" : 53,
+				"line" : 54,
 				"parent" : 0
 			}
 		]
@@ -156,6 +156,10 @@
 		},
 		{
 			"backtrace" : 3,
+			"id" : "SIMPLEXNOISE::@6890427a1f51a3e7e1df"
+		},
+		{
+			"backtrace" : 3,
 			"id" : "freetype::@d06f9f5ffc3cc0b4bd77"
 		}
 	],
@@ -221,6 +225,11 @@
 			},
 			{
 				"fragment" : "-framework IOKit",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "libSIMPLEXNOISE.a",
 				"role" : "libraries"
 			}
 		],

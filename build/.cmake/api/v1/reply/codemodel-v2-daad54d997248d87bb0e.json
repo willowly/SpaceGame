@@ -22,7 +22,8 @@
 					[
 						1,
 						2,
-						3
+						3,
+						4
 					]
 				},
 				{
@@ -32,7 +33,7 @@
 						2
 					],
 					"hasInstallRule" : true,
-					"jsonFile" : "directory-_deps.sfml-build-Debug-e200feab297f0577722a.json",
+					"jsonFile" : "directory-_deps.sfml-build-Debug-5baf4f1f14f6fd289599.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.22"
@@ -64,7 +65,7 @@
 				{
 					"build" : "_deps/sfml-build/src/SFML/System",
 					"hasInstallRule" : true,
-					"jsonFile" : "directory-_deps.sfml-build.src.SFML.System-Debug-44cd6c5d794218624c33.json",
+					"jsonFile" : "directory-_deps.sfml-build.src.SFML.System-Debug-45786c2ed7fdef7c73b2.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.22"
@@ -74,13 +75,13 @@
 					"source" : "build/_deps/sfml-src/src/SFML/System",
 					"targetIndexes" : 
 					[
-						10
+						11
 					]
 				},
 				{
 					"build" : "_deps/sfml-build/src/SFML/Window",
 					"hasInstallRule" : true,
-					"jsonFile" : "directory-_deps.sfml-build.src.SFML.Window-Debug-39a34d08ea93063753fb.json",
+					"jsonFile" : "directory-_deps.sfml-build.src.SFML.Window-Debug-0c57531c8c8ff9c7696e.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.22"
@@ -90,13 +91,13 @@
 					"source" : "build/_deps/sfml-src/src/SFML/Window",
 					"targetIndexes" : 
 					[
-						11
+						12
 					]
 				},
 				{
 					"build" : "_deps/sfml-build/src/SFML/Network",
 					"hasInstallRule" : true,
-					"jsonFile" : "directory-_deps.sfml-build.src.SFML.Network-Debug-bd069b5601ff46ee94a9.json",
+					"jsonFile" : "directory-_deps.sfml-build.src.SFML.Network-Debug-73e3e6ede48dfe9f2852.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.22"
@@ -106,7 +107,7 @@
 					"source" : "build/_deps/sfml-src/src/SFML/Network",
 					"targetIndexes" : 
 					[
-						9
+						10
 					]
 				},
 				{
@@ -116,7 +117,7 @@
 						7
 					],
 					"hasInstallRule" : true,
-					"jsonFile" : "directory-_deps.sfml-build.src.SFML.Graphics-Debug-3b5ef10efa580547d443.json",
+					"jsonFile" : "directory-_deps.sfml-build.src.SFML.Graphics-Debug-c21f5d57ec29023ee72a.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.22"
@@ -126,13 +127,13 @@
 					"source" : "build/_deps/sfml-src/src/SFML/Graphics",
 					"targetIndexes" : 
 					[
-						8
+						9
 					]
 				},
 				{
 					"build" : "_deps/freetype-build",
 					"hasInstallRule" : true,
-					"jsonFile" : "directory-_deps.freetype-build-Debug-6fb76a08fc92139adfdb.json",
+					"jsonFile" : "directory-_deps.freetype-build-Debug-3dd27edac40e106061ba.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.0"
@@ -142,7 +143,7 @@
 					"source" : "build/_deps/freetype-src",
 					"targetIndexes" : 
 					[
-						5
+						6
 					]
 				},
 				{
@@ -154,7 +155,7 @@
 						14
 					],
 					"hasInstallRule" : true,
-					"jsonFile" : "directory-_deps.sfml-build.src.SFML.Audio-Debug-c7dff580fae4c7b266c6.json",
+					"jsonFile" : "directory-_deps.sfml-build.src.SFML.Audio-Debug-1ee1a8ef87e292832d32.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.22"
@@ -164,13 +165,13 @@
 					"source" : "build/_deps/sfml-src/src/SFML/Audio",
 					"targetIndexes" : 
 					[
-						7
+						8
 					]
 				},
 				{
 					"build" : "_deps/ogg-build",
 					"hasInstallRule" : true,
-					"jsonFile" : "directory-_deps.ogg-build-Debug-f882dd20a272173c3e86.json",
+					"jsonFile" : "directory-_deps.ogg-build-Debug-d0483b56b625b314545f.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "2.8.12"
@@ -180,7 +181,7 @@
 					"source" : "build/_deps/ogg-src",
 					"targetIndexes" : 
 					[
-						6
+						7
 					]
 				},
 				{
@@ -244,7 +245,7 @@
 					"source" : "build/_deps/flac-src/microbench",
 					"targetIndexes" : 
 					[
-						4
+						5
 					]
 				},
 				{
@@ -266,7 +267,7 @@
 				{
 					"build" : "_deps/vorbis-build/lib",
 					"hasInstallRule" : true,
-					"jsonFile" : "directory-_deps.vorbis-build.lib-Debug-c4502b075bd2a5cff78e.json",
+					"jsonFile" : "directory-_deps.vorbis-build.lib-Debug-56a01b01cc32c2ff9a08.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "2.8.12"
@@ -276,9 +277,9 @@
 					"source" : "build/_deps/vorbis-src/lib",
 					"targetIndexes" : 
 					[
-						12,
 						13,
-						14
+						14,
+						15
 					]
 				}
 			],
@@ -299,7 +300,8 @@
 					[
 						1,
 						2,
-						3
+						3,
+						4
 					]
 				},
 				{
@@ -324,11 +326,11 @@
 					"parentIndex" : 0,
 					"targetIndexes" : 
 					[
-						7,
 						8,
 						9,
 						10,
-						11
+						11,
+						12
 					]
 				},
 				{
@@ -340,7 +342,7 @@
 					"parentIndex" : 1,
 					"targetIndexes" : 
 					[
-						5
+						6
 					]
 				},
 				{
@@ -352,7 +354,7 @@
 					"parentIndex" : 1,
 					"targetIndexes" : 
 					[
-						6
+						7
 					]
 				},
 				{
@@ -368,7 +370,7 @@
 					"targetIndexes" : 
 					[
 						0,
-						4
+						5
 					]
 				},
 				{
@@ -381,9 +383,9 @@
 					"parentIndex" : 1,
 					"targetIndexes" : 
 					[
-						12,
 						13,
-						14
+						14,
+						15
 					]
 				}
 			],
@@ -399,21 +401,28 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "GLAD::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-GLAD-Debug-09a16d21a3baaac0fc2f.json",
+					"jsonFile" : "target-GLAD-Debug-c8a3855b8b6ed06eccc0.json",
 					"name" : "GLAD",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 0,
+					"id" : "SIMPLEXNOISE::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-SIMPLEXNOISE-Debug-9c020e5a32bafabf6b64.json",
+					"name" : "SIMPLEXNOISE",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
 					"id" : "STB::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-STB-Debug-f73bd0a0e651417116aa.json",
+					"jsonFile" : "target-STB-Debug-79d5a67eea528b26033f.json",
 					"name" : "STB",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 0,
 					"id" : "SpaceGame::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-SpaceGame-Debug-37a013d27abd0c2c8848.json",
+					"jsonFile" : "target-SpaceGame-Debug-88fa743342b6f8257f48.json",
 					"name" : "SpaceGame",
 					"projectIndex" : 0
 				},
