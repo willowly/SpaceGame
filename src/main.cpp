@@ -132,6 +132,7 @@ int main()
     
     Construction constructionPrototype(registry.getModel("block"),registry.getMaterial("cow"));
     Terrain terrainPrototype;
+    terrainPrototype.material = registry.getMaterial("grid");
 
 
     Text text("fonts/sburbits.ttf",16);

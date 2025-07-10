@@ -11,6 +11,7 @@ class Terrain : Actor {
 
     public:
         unique_ptr<Model> dynamicModel;
+        Material* material;
 
 
     Terrain() {
@@ -20,7 +21,7 @@ class Terrain : Actor {
     }
 
     virtual void render(Camera& camera,float dt) {
-        model->render(vec3(0,0,0),camera,*Debug::getShader());
+        model->render(vec3(0,0,0),camera,*material);
     }
 
 
