@@ -133,7 +133,8 @@ int main()
     Construction constructionPrototype(registry.getModel("block"),registry.getMaterial("cow"));
     Terrain terrainPrototype;
     terrainPrototype.material = registry.getMaterial("grid");
-    terrainPrototype.generate();
+    terrainPrototype.generateData();
+    terrainPrototype.generateMesh();
 
 
     Text text("fonts/sburbits.ttf",16);
@@ -208,15 +209,16 @@ int main()
         }
 
         if(input.getKeyPressed(GLFW_KEY_UP)) {
-            terrainConfig++;
+            terrainPrototype.surfaceLevel += 0.1f;
+            terrainPrototype.generateMesh();
             //terrainPrototype.setConfig(terrainConfig);
         }
         if(input.getKeyPressed(GLFW_KEY_DOWN)) {
-            terrainConfig--;
+            terrainPrototype.surfaceLevel -= 0.1f;
+            terrainPrototype.generateMesh();
             //terrainPrototype.setConfig(terrainConfig);
         }
-        
-        terrainPrototype.setConfig(terrainConfig);
+    
         terrainPrototype.render(world.getCamera(),dt);
 
         world.frame(dt);

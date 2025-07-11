@@ -30,6 +30,10 @@ namespace MathHelper {
             return 1;
         }
     }
+
+    vec3 normalFromPlanePoints(vec3 a,vec3 b,vec3 c) {
+        return glm::normalize(glm::cross(b-a,c-a));
+    }
 }
 
 template <>
