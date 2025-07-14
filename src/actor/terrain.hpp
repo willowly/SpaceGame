@@ -8,7 +8,7 @@
 
 using std::unique_ptr;
 
-class Terrain : Actor {
+class Terrain : RigidbodyActor {
 
     std::vector<float> terrainData;
 
@@ -16,12 +16,13 @@ class Terrain : Actor {
     public:
         unique_ptr<Model> dynamicModel;
         Material* material;
-        int size = 20;
-        float scale = 0.1;
+        int size = 50;
+        float noiseScale = 100;
         float surfaceLevel = 0.5;
+        float cellSize = 0.5f;
 
 
-    Terrain() {
+    Terrain() : RigidbodyActor(nullptr,nullptr) {
         dynamicModel = std::make_unique<Model>();
         dynamicModel->setDynamicDraw();
         model = dynamicModel.get();
@@ -32,14 +33,18 @@ class Terrain : Actor {
 
         const SimplexNoise simplex;
 
+        float radius = size*0.5f;
         for (int z = 0; z < size; z++)
         {
             for (int y = 0; y < size; y++)
             {
                 for (int x = 0; x < size; x++)
                 {
-                    float noise = simplex.noise(x*scale,y*scale,z*scale);
-                    terrainData.push_back(noise);
+                    float noise = simplex.fractal(5,x/noiseScale,y/noiseScale,z/noiseScale);
+                    float distance = glm::length(vec3(x-radius,y-radius,z-radius));
+                    float radiusInfluence = (radius-distance)/radius;
+                    std::cout << radiusInfluence  << " " << distance << " " << x << "," << y << "," << z << "" << std::endl;
+                    terrainData.push_back(noise * (radiusInfluence+0.5f));
                 }
             }
         }
@@ -48,8 +53,6 @@ class Terrain : Actor {
     virtual void render(Camera& camera,float dt) {
         //std::cout << "rendering terrain:" << std::endl;
         model->render(position,camera,*material);
-        
-        
     }
 
     int getPointIndex(int x,int y,int z) {
@@ -68,6 +71,15 @@ class Terrain : Actor {
         return getPoint(x,y,z) > surfaceLevel;
     }
 
+    void addToPhysicsWorld(rp3d::PhysicsWorld* world,rp3d::PhysicsCommon* common) {
+        RigidbodyActor::addToPhysicsWorld(world,common);
+        body->setType(rp3d::BodyType::STATIC);
+    }
+
+    virtual void addCollisionShapes(rp3d::PhysicsCommon* common) {
+
+    }
+
 
     void generateMesh() {
         model->vertices.clear();
@@ -84,21 +96,28 @@ class Terrain : Actor {
                 for (int x = -1; x < size; x++)
                 {
                     int config = 0;
-                    if(getPoint(x,y,z)) config |= 1;
-                    if(getPoint(x+1,y,z)) config |= 2;
-                    if(getPoint(x+1,y,z+1)) config |= 4;
-                    if(getPoint(x,y,z+1)) config |= 8;
-                    if(getPoint(x,y+1,z)) config |= 16;
-                    if(getPoint(x+1,y+1,z)) config |= 32;
-                    if(getPoint(x+1,y+1,z+1)) config |= 64;
-                    if(getPoint(x,y+1,z+1)) config |= 128;
+                    if(getPointInside(x,y,z)) config |= 1;
+                    if(getPointInside(x+1,y,z)) config |= 2;
+                    if(getPointInside(x+1,y,z+1)) config |= 4;
+                    if(getPointInside(x,y,z+1)) config |= 8;
+                    if(getPointInside(x,y+1,z)) config |= 16;
+                    if(getPointInside(x+1,y+1,z)) config |= 32;
+                    if(getPointInside(x+1,y+1,z+1)) config |= 64;
+                    if(getPointInside(x,y+1,z+1)) config |= 128;
                     addCell(config,vec3(x,y,z));
                     i++;
                 }
             }
         }
+
+
         model->updateData();
         model->bindData();
+    }
+
+
+    void raycast(Ray ray,float distance) {
+        
     }
 
     void addCell(int config,vec3 cellPos) {
@@ -118,12 +137,14 @@ class Terrain : Actor {
         {
             int edge = tris[i];
             if(edge == -1) break;
-            vec3 aPos = getEdgePos(edge,0);
-            vec3 bPos = getEdgePos(edge,1);
+            vec3 aPos = getEdgePos(edge,0)+cellPos;
+            vec3 bPos = getEdgePos(edge,1)+cellPos;
             float a = getPoint((int)aPos.x,(int)aPos.y,(int)aPos.z);
             float b = getPoint((int)bPos.x,(int)bPos.y,(int)bPos.z);
+           
             float t = (surfaceLevel - a)/(b-a);
-            model->vertices.push_back(getEdgePos(edge,t) + cellPos);
+            t = std::min(std::max(t,0.0f),1.0f);
+            model->vertices.push_back((getEdgePos(edge,t) + cellPos)*cellSize);
             int vertIndex = i % 3;
             face.vertexIndices[vertIndex] =  i + startIndex;
             face.normalIndicies[vertIndex] = 0;
@@ -171,6 +192,29 @@ class Terrain : Actor {
 
         }
         return vec3(0,0,0);
+    }
+
+    void terraformSphere(vec3 pos,int radius,float change) {
+        int i = 0;
+        for (int z = 0; z < size; z++)
+        {
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    vec3 cellPos = vec3(x,y,z)*cellSize;
+                    float dist = glm::distance(cellPos,pos);
+                    float influence = (radius-dist)/radius;
+                    if(influence > 0) {
+                        //std::cout << "influence: " << influence << " data: " << terrainData[i] << std::endl;
+                        terrainData[i] += change * influence;
+                        terrainData[i] = std::min(std::max(terrainData[i],0.0f),1.0f);
+                        //std::cout << "data after: " << terrainData[i] << std::endl;
+                    }
+                    i++;
+                }
+            }
+        }
     }
 
 };

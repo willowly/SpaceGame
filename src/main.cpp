@@ -130,12 +130,7 @@ int main()
     RigidbodyActor cubePrototype(registry.getModel("cube"),registry.getMaterial("cow"));
     Character playerPrototype(nullptr,nullptr);
     
-    Construction constructionPrototype(registry.getModel("block"),registry.getMaterial("cow"));
-    Terrain terrainPrototype;
-    terrainPrototype.material = registry.getMaterial("grid");
-    terrainPrototype.generateData();
-    terrainPrototype.generateMesh();
-
+    Actor grid(registry.getModel("plane"),registry.getMaterial("grid"));
 
     Text text("fonts/sburbits.ttf",16);
     text.scale = vec2(2,2);
@@ -165,23 +160,16 @@ int main()
     playerPrototype.toolbar[2] = &placeThruster;
     playerPrototype.toolbar[3] = &pickaxe;
 
-    auto player = world.spawn(&playerPrototype,vec3(0,1,10),quat(vec3(0,0,0)));
+    auto player = world.spawn(&playerPrototype,vec3(0,1,0),quat(vec3(0,0,0)));
+    world.spawn(&grid,vec3(0,0,0),glm::identity<quat>());
 
-    auto construction = world.spawn(&constructionPrototype,vec3(0,2,0),quat(vec3(0,0,0)));
-    construction->setBlock(ivec3(0,0,0),registry.getBlock("tin"),BlockFacing::FORWARD);
-    lua["construction"] = construction;
+    auto cube = world.spawn(&cubePrototype,vec3(0,3,0),glm::identity<quat>());
+    
+    vec3 rayDir = vec3(1,0,0);
+    float rayDist = 10;
 
-    for (int i = 0; i < 50; i++)
-    {
-        int size = 150;
-        float x = (random() % size) - size/2.0f;
-        float y = (random() % size) - size/2.0f;
-        float z = (random() % size) - size/2.0f;
-        world.spawn(registry.getActor("asteroid"),vec3(x,y,z),glm::quat(vec3(0,0,0)));
-    }
-    
-    
-    int terrainConfig = 0;
+
+    float radius = 1;
 
     float lastTime = 0;
 
@@ -202,24 +190,28 @@ int main()
         if(input.getKeyPressed(GLFW_KEY_GRAVE_ACCENT)) {
             console.enabled = !console.enabled;
         }
+
         if(console.enabled) {
             console.processInput(input,lua);
         } else {
             player->processInput(input);
         }
+        
+        auto hit_opt = cube->raycast(Ray(player->getEyePosition(),player->getEyeDirection()));
+        if(hit_opt) {
+            auto hit = hit_opt.value();
+            Debug::drawPoint(hit.point,Color::blue);
+            if(input.getMouseButtonPressed(GLFW_MOUSE_BUTTON_1)) {
+                cube->applyForce(player->getEyeDirection()*35.0f,hit.point);
+            }
+        }
 
-        if(input.getKeyPressed(GLFW_KEY_UP)) {
-            terrainPrototype.surfaceLevel += 0.1f;
-            terrainPrototype.generateMesh();
-            //terrainPrototype.setConfig(terrainConfig);
+        if(cube->position.y < 1) {
+            cube->position.y = 1;
+            cube->velocity.y = 0;
+            cube->velocity *= pow(1.5,-dt);
         }
-        if(input.getKeyPressed(GLFW_KEY_DOWN)) {
-            terrainPrototype.surfaceLevel -= 0.1f;
-            terrainPrototype.generateMesh();
-            //terrainPrototype.setConfig(terrainConfig);
-        }
-    
-        terrainPrototype.render(world.getCamera(),dt);
+        cube->collideWithPlane();
 
         world.frame(dt);
 
@@ -238,8 +230,6 @@ int main()
 
         cursorModel.render(glm::mat4(1.0f),glm::scale(glm::mat4(1.0f),vec3(4,4,4)),glm::ortho(-width/2.0f,width/2.0f,-height/2.0f,height/2.0f),*Debug::getShader());
         glEnable(GL_DEPTH_TEST);
-
-        //registry.getModel("cockpit")->render(vec3(0,3,0),world.getCamera(),*registry.getMaterial("cockpit"));
         
         glfwSwapBuffers(window);
         input.clearInputBuffers(); //do it before we poll for events

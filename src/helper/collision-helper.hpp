@@ -12,20 +12,27 @@
 
 using glm::vec3,std::optional,MathHelper::sign;
 
-namespace CollisionHelper {
+struct RaycastHit {
+    vec3 point;
+    vec3 normal;
+    float distance;
+    RaycastHit(vec3 point,vec3 normal,float distance) : point(point),normal(normal),distance(distance) { }
+};
 
-    struct RaycastHit {
-        vec3 point;
-        vec3 normal;
-        float distance;
-        RaycastHit(vec3 point,vec3 normal,float distance) : point(point),normal(normal),distance(distance) { }
-    };
+struct Ray {
+    vec3 origin;
+    vec3 direction;
+    Ray(vec3 origin,vec3 direction) : origin(origin), direction(direction) { }
+};
 
-    struct Ray {
-        vec3 origin;
-        vec3 direction;
-        Ray(vec3 origin,vec3 direction) : origin(origin), direction(direction) { }
-    };
+struct Contact {
+    vec3 point;
+    vec3 relativePoint;
+    vec3 normal;
+    Contact(vec3 point,vec3 relativePoint,vec3 normal) : point(point), relativePoint(relativePoint), normal(normal) { }
+};
+
+namespace Physics {
 
     vec3 boxNormalAt(vec3 position,vec3 halfSize,vec3 point) {
             vec3 normal;

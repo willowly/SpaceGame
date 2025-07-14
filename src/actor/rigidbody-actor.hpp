@@ -14,18 +14,18 @@
 
 #include "helper/collision-helper.hpp"
 
-using CollisionHelper::RaycastHit,CollisionHelper::intersectRayBox,std::optional,glm::vec3,CollisionHelper::Ray,MathHelper::lerp;
+using Physics::intersectRayBox,std::optional,glm::vec3,MathHelper::lerp;
 
 class RigidbodyActor : public Actor {
 
     protected:
         glm::vec3 scale = vec3(1.0f); //this is temporary!!!
 
-        rp3d::PhysicsCommon* common;
+        rp3d::PhysicsCommon* common = nullptr;
         
     public:
         vec3 velocity = vec3(0);
-        rp3d::RigidBody* body;
+        rp3d::RigidBody* body = nullptr;
         ActorUserData userData;
 
         RigidbodyActor(Model* model,Material* material) : Actor(model,material) {
@@ -76,7 +76,7 @@ class RigidbodyActor : public Actor {
         void addToPhysicsWorld(rp3d::PhysicsWorld* world,rp3d::PhysicsCommon* common) {
             userData.actor = this;
             body = world->createRigidBody(getPhysicsTransform());
-            body->enableGravity(false);
+            body->enableGravity(true);
             body->setUserData(&userData);
             addCollisionShapes(common);
             this->common = common;
@@ -95,8 +95,42 @@ class RigidbodyActor : public Actor {
         }
 
         virtual void addCollisionShapes(rp3d::PhysicsCommon* common) {
-            auto collider = body->addCollider(common->createBoxShape(rp3d::Vector3(scale.x,scale.y,scale.z)),rp3d::Transform());
-            collider->getMaterial().setBounciness(0.0);
+            
+        }
+
+        optional<RaycastHit> raycast(Ray ray) {
+            return intersectRayBox(position,vec3(1.0f),rotation,ray);
+        }
+
+        void collideWithPlane() {
+            std::vector<Contact> contacts;
+            generateContacts(contacts);
+        }
+
+        void generateContacts(std::vector<Contact>& contacts) {
+            generateContactWithPoint(vec3(1,1,1),contacts);
+            generateContactWithPoint(vec3(-1,1,1),contacts);
+            generateContactWithPoint(vec3(-1,-1,1),contacts);
+            generateContactWithPoint(vec3(1,-1,1),contacts);
+
+            generateContactWithPoint(vec3(1,1,-1),contacts);
+            generateContactWithPoint(vec3(-1,1,-1),contacts);
+            generateContactWithPoint(vec3(-1,-1,-1),contacts);
+            generateContactWithPoint(vec3(1,-1,-1),contacts);
+        }
+
+        void resolveContact(Contact& contact) {
+            vec3 torquePerUnitImpulse = glm::cross(contact.relativePoint,contact.normal);
+            vec3 rotationPerUnitImpulse = 
+        }
+
+        void generateContactWithPoint(vec3 relativePoint,std::vector<Contact>& contacts) {
+            vec3 worldPoint = transformPoint(relativePoint);
+            if(worldPoint.y < 0) {
+                worldPoint.y = 0;
+                contacts.push_back(Contact(worldPoint,inverseTransformPoint(relativePoint),vec3(0,1,0)));
+                Debug::drawPoint(worldPoint);
+            }
         }
 
 
