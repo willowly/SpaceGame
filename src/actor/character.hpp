@@ -23,9 +23,10 @@ class Character : public RigidbodyActor {
     public: 
 
         Character() : Character(nullptr,nullptr) {
-
+            
         }
         Character(Model* model,Material* material) : RigidbodyActor(model,material) {
+            useGravity = false;
         }
         float moveSpeed = 5.0f;
         float lookPitch = 0;
@@ -99,13 +100,13 @@ class Character : public RigidbodyActor {
             ridingConstruction = construction;
             ridingConstructionPoint = point;
             ridingConstructionRotation = rotation;
-            body->getCollider(0)->setIsTrigger(true);
+            //body->getCollider(0)->setIsTrigger(true);
         }
 
         void dismount() {
             ridingConstruction->resetTargets();
             ridingConstruction = nullptr;
-            body->getCollider(0)->setIsSimulationCollider(true);
+            //body->getCollider(0)->setIsSimulationCollider(true);
         }
 
         void interact(World* world) {
@@ -234,17 +235,6 @@ class Character : public RigidbodyActor {
 
         bool playerStep() {
             return true;
-        }
-
-        void addToPhysicsWorld(rp3d::PhysicsWorld* world,rp3d::PhysicsCommon* common) {
-            RigidbodyActor::addToPhysicsWorld(world,common);
-            body->setAngularLockAxisFactor(rp3d::Vector3(0,0,0));
-            body->enableGravity(false);
-        }
-
-        void addCollisionShapes(rp3d::PhysicsCommon* common) {
-            auto collider = body->addCollider(common->createCapsuleShape(radius,height),rp3d::Transform(rp3d::Vector3(0,height/2,0),rp3d::Quaternion::identity()));
-            collider->getMaterial().setBounciness(0.0);
         }
 
 };

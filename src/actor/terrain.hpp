@@ -71,15 +71,6 @@ class Terrain : RigidbodyActor {
         return getPoint(x,y,z) > surfaceLevel;
     }
 
-    void addToPhysicsWorld(rp3d::PhysicsWorld* world,rp3d::PhysicsCommon* common) {
-        RigidbodyActor::addToPhysicsWorld(world,common);
-        body->setType(rp3d::BodyType::STATIC);
-    }
-
-    virtual void addCollisionShapes(rp3d::PhysicsCommon* common) {
-
-    }
-
 
     void generateMesh() {
         model->vertices.clear();

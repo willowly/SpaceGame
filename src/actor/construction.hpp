@@ -22,9 +22,8 @@ class Construction : public RigidbodyActor {
 
     struct BlockData {
         Block* block = nullptr; //eventually this will be a list of blocks in the construction
-        rp3d::Collider* collider = nullptr;
         BlockState state;
-        BlockData(Block* block,BlockState state,rp3d::Collider* collider = nullptr) : block(block), state(state), collider(collider){}
+        BlockData(Block* block,BlockState state) : block(block), state(state) {}
         BlockData() {}
     };
 
@@ -125,22 +124,22 @@ class Construction : public RigidbodyActor {
 
             // i have no idea why z and x are inverted :shrug:
             if(moveControl.z > 0) {
-                body->applyLocalForceAtCenterOfMass(rp3d::Vector3(0,0,-1) * thrustForces[BlockFacing::FORWARD] * moveControl.z);
+                applyForce(vec3(0,0,-1) * thrustForces[BlockFacing::FORWARD] * moveControl.z);
             }
             if(moveControl.z < 0) {
-                body->applyLocalForceAtCenterOfMass(rp3d::Vector3(0,0,-1) * thrustForces[BlockFacing::BACKWARD] * moveControl.z);
+                applyForce(vec3(0,0,-1) * thrustForces[BlockFacing::BACKWARD] * moveControl.z);
             }
             if(moveControl.x < 0) {
-                body->applyLocalForceAtCenterOfMass(rp3d::Vector3(-1,0,0) * thrustForces[BlockFacing::LEFT] * moveControl.x);
+                applyForce(vec3(-1,0,0) * thrustForces[BlockFacing::LEFT] * moveControl.x);
             }
             if(moveControl.x > 0) {
-                body->applyLocalForceAtCenterOfMass(rp3d::Vector3(-1,0,0) * thrustForces[BlockFacing::RIGHT] * moveControl.x);
+                applyForce(vec3(-1,0,0) * thrustForces[BlockFacing::RIGHT] * moveControl.x);
             }
             if(moveControl.y < 0) {
-                body->applyLocalForceAtCenterOfMass(rp3d::Vector3(0,1,0) * thrustForces[BlockFacing::UP] * moveControl.y);
+                applyForce(vec3(0,1,0) * thrustForces[BlockFacing::UP] * moveControl.y);
             }
             if(moveControl.y > 0) {
-                body->applyLocalForceAtCenterOfMass(rp3d::Vector3(0,1,0) * thrustForces[BlockFacing::DOWN] * moveControl.y);
+                applyForce(vec3(0,1,0) * thrustForces[BlockFacing::DOWN] * moveControl.y);
             }
             //velocity = MathHelper::moveTowards(velocity,rotation * targetVelocity,thrustForce * dt);
             rotation = glm::slerp(rotation,targetRotation,turnForce * dt);
@@ -225,20 +224,18 @@ class Construction : public RigidbodyActor {
             }
             int index = getIndex(location);
 
-            if(blockData[index].collider != nullptr) {
-                body->removeCollider(blockData[index].collider);
-            }
+             
             if(blockData[index].block != nullptr) {
                 blockData[index].block->onBreak(this,location,blockData[index].state);
                 blockCount--;
             }
             //Debug::info("index: " + std::to_string(index) + " " + StringHelper::toString(location),InfoPriority::LOW);
             if(block != nullptr) {
-                auto collider = body->addCollider(common->createBoxShape(rp3d::Vector3(0.5f,0.5f,0.5f)),rp3d::Transform(PhysicsHelper::toRp3dVector(location),rp3d::Quaternion::identity()));
-                collider->getMaterial().setBounciness(0.0);
-                collider->getMaterial().setMassDensity(1);
-                body->updateMassPropertiesFromColliders(); //center of mass + inertia tensor included
-                blockData[index] = BlockData(block,BlockState(facing),collider);
+                //auto collider = body->addCollider(common->createBoxShape(rp3d::Vector3(0.5f,0.5f,0.5f)),rp3d::Transform(PhysicsHelper::toRp3dVector(location),rp3d::Quaternion::identity()));
+                //collider->getMaterial().setBounciness(0.0);
+                //collider->getMaterial().setMassDensity(1);
+                //body->updateMassPropertiesFromColliders(); //center of mass + inertia tensor included
+                blockData[index] = BlockData(block,BlockState(facing));
                 if(blockData[index].block != nullptr) {
                     blockData[index].block->onPlace(this,location,blockData[index].state);
                     blockCount++;
@@ -313,13 +310,6 @@ class Construction : public RigidbodyActor {
                     }
                 }
             }
-        }
-
-        void addToPhysicsWorld(rp3d::PhysicsWorld* world,rp3d::PhysicsCommon* common) {
-            RigidbodyActor::addToPhysicsWorld(world,common);
-            body->setLinearDamping(0.1);
-            body->setAngularDamping(3);
-            //body->setType(rp3d::BodyType::STATIC);
         }
 };
 

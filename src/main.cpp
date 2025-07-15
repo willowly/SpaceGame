@@ -29,6 +29,8 @@
 
 #include "api/api-all.hpp"
 
+#include "helper/random-helper.hpp"
+
 using glm::vec3;
 
 Input input;
@@ -160,10 +162,12 @@ int main()
     playerPrototype.toolbar[2] = &placeThruster;
     playerPrototype.toolbar[3] = &pickaxe;
 
-    auto player = world.spawn(&playerPrototype,vec3(0,1,0),quat(vec3(0,0,0)));
+    auto player = world.spawn(&playerPrototype,vec3(0,1,10),quat(vec3(0,0,0)));
     world.spawn(&grid,vec3(0,0,0),glm::identity<quat>());
 
-    auto cube = world.spawn(&cubePrototype,vec3(0,3,0),glm::identity<quat>());
+    auto cube = world.spawn(&cubePrototype,vec3(0,5,0),glm::identity<quat>());
+
+    cube->rotation = quat(vec3(glm::radians(Random::random(0,360)),glm::radians(Random::random(0,360)),glm::radians(Random::random(0,360))));
     
     vec3 rayDir = vec3(1,0,0);
     float rayDist = 10;
@@ -202,15 +206,25 @@ int main()
             auto hit = hit_opt.value();
             Debug::drawPoint(hit.point,Color::blue);
             if(input.getMouseButtonPressed(GLFW_MOUSE_BUTTON_1)) {
-                cube->applyForce(player->getEyeDirection()*35.0f,hit.point);
+                cube->applyForce(player->getEyeDirection()*3.0f,hit.point);
             }
         }
 
-        if(cube->position.y < 1) {
-            cube->position.y = 1;
-            cube->velocity.y = 0;
-            cube->velocity *= pow(1.5,-dt);
+        if(input.getKeyPressed(GLFW_KEY_R)) {
+            cube->position = vec3(0,5,0);
+            cube->velocity = vec3(0,0,0);
+            cube->angularVelocity = vec3(0,0,0);
+            cube->rotation = quat(vec3(glm::radians(Random::random(0,360)),glm::radians(Random::random(0,360)),glm::radians(Random::random(0,360))));
         }
+
+        // if(cube->position.y < 1) {
+        //     cube->position.y = 1;
+        //     cube->velocity.y = 0;
+        //     cube->velocity *= pow(2,-dt);
+        //     cube->angularVelocity *= pow(2,-dt);
+        // }
+        cube->velocity *= pow(1.5,-dt);
+        cube->angularVelocity *= pow(1.5,-dt);
         cube->collideWithPlane();
 
         world.frame(dt);

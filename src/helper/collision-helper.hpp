@@ -27,9 +27,8 @@ struct Ray {
 
 struct Contact {
     vec3 point;
-    vec3 relativePoint;
     vec3 normal;
-    Contact(vec3 point,vec3 relativePoint,vec3 normal) : point(point), relativePoint(relativePoint), normal(normal) { }
+    Contact(vec3 point,vec3 normal) : point(point), normal(normal) { }
 };
 
 namespace Physics {

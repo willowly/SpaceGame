@@ -1260,6 +1260,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/file-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/math-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/physics-helper.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/helper/random-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/string-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/terrain-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/interface/console.hpp \
@@ -3101,6 +3102,8 @@ _deps/freetype-src/include/freetype/config/integer-types.h:
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__bit/blsr.h:
 
 /usr/local/include/reactphysics3d/utils/DefaultLogger.h:
+
+/Users/willow/Documents/GitHub/SpaceGame/src/helper/random-helper.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__utility/forward.h:
 

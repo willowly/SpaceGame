@@ -4,7 +4,6 @@
 
 #include "actor/actor.hpp"
 #include <memory>
-#include "actor/rigidbody-actor.hpp"
 #include "helper/collision-helper.hpp"
 
 #include <reactphysics3d/reactphysics3d.h>
@@ -24,20 +23,20 @@ class World {
 
     float sinceLastStep;
    
-    class DebugCallback : public rp3d::RaycastCallback {
+    // class DebugCallback : public rp3d::RaycastCallback {
     
-        public:
+    //     public:
     
-        virtual rp3d::decimal notifyRaycastHit(const rp3d::RaycastInfo& info) {
+    //     virtual rp3d::decimal notifyRaycastHit(const rp3d::RaycastInfo& info) {
     
-            // Display the world hit point coordinates
-            Debug::drawPoint(ph::toGlmVector(info.worldPoint));
+    //         // Display the world hit point coordinates
+    //         Debug::drawPoint(ph::toGlmVector(info.worldPoint));
 
-            std::cout << "Hit point : " << StringHelper::toString(ph::toGlmVector(info.worldPoint)) << std::endl;
+    //         std::cout << "Hit point : " << StringHelper::toString(ph::toGlmVector(info.worldPoint)) << std::endl;
     
-            return info.hitFraction;
-        }
-    };
+    //         return info.hitFraction;
+    //     }
+    // };
         
 
     public:
@@ -126,7 +125,7 @@ class World {
         }
 
         void raycast(vec3 position,vec3 direction,float distance,rp3d::RaycastCallback* callback) {
-            physicsWorld->raycast(rp3d::Ray(ph::toRp3dVector(position),ph::toRp3dVector(position + glm::normalize(direction) * distance),1.0),callback);
+            //physicsWorld->raycast(rp3d::Ray(ph::toRp3dVector(position),ph::toRp3dVector(position + glm::normalize(direction) * distance),1.0),callback);
         }
 
         Camera& getCamera() {

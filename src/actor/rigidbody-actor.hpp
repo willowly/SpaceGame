@@ -11,32 +11,57 @@
 #include "helper/math-helper.hpp"
 #include "helper/string-helper.hpp"
 #include "helper/physics-helper.hpp"
+#include "engine/world.hpp"
 
 #include "helper/collision-helper.hpp"
 
-using Physics::intersectRayBox,std::optional,glm::vec3,MathHelper::lerp;
+using Physics::intersectRayBox,std::optional,glm::vec3,glm::mat3,MathHelper::lerp;
 
 class RigidbodyActor : public Actor {
 
     protected:
         glm::vec3 scale = vec3(1.0f); //this is temporary!!!
-
-        rp3d::PhysicsCommon* common = nullptr;
         
     public:
         vec3 velocity = vec3(0);
-        rp3d::RigidBody* body = nullptr;
-        ActorUserData userData;
+        //vec3 accumVelocity = vec3(0);
+        vec3 angularVelocity = vec3(0);
+        //vec3 accumAngularVelocity = vec3(0);
+        float inverseMass = 1;
+        bool useGravity = true;
+        float restitution = 0.2f;
+
+        mat3 localInverseInertiaTensor;
+        mat3 worldInverseInertiaTensor;
 
         RigidbodyActor(Model* model,Material* material) : Actor(model,material) {
-            
+            float mass = getMass();
+            vec3 d = scale * 2.0f;
+            vec3 d2 = vec3(d.x*d.x,d.y*d.y,d.z*d.z);
+            localInverseInertiaTensor = glm::inverse(mat3(
+                vec3((d2.y*d2.z)*mass/12,0,0),
+                vec3(0,(d2.x*d2.z)*mass/12,0),
+                vec3(0,0,(d2.x*d2.y)*mass/12)
+            ));
+            transformInertiaTensor(worldInverseInertiaTensor,rotation,localInverseInertiaTensor);
         }
+
         RigidbodyActor() : RigidbodyActor(nullptr,nullptr){
             
         }
 
         virtual void step(float dt,World* world) {
-            
+            // velocity += accumVelocity;
+            // accumVelocity = vec3(0);
+            // angularVelocity += accumAngularVelocity;
+            // accumAngularVelocity = vec3(0);
+
+            if(useGravity) velocity += world->getGravityVector(position) * dt;
+            position += velocity * dt;
+            //rotation = glm::quat(angularVelocity * dt) * rotation;
+            rotation += dt * 0.5f * glm::quat(0,angularVelocity.x,angularVelocity.y,angularVelocity.z) * rotation;
+            rotation = glm::normalize(rotation);
+            transformInertiaTensor(worldInverseInertiaTensor,rotation,localInverseInertiaTensor);
         }
 
         virtual void render(Camera& camera,float dt) {
@@ -51,13 +76,6 @@ class RigidbodyActor : public Actor {
             model->render(matrix,camera,*material);
         }
 
-        // these functions are not named properly
-        rp3d::Transform getPhysicsTransform() {
-            rp3d::Vector3 rp3dPosition(position.x,position.y,position.z);
-            rp3d::Quaternion p3dRotation(rotation.x,rotation.y,rotation.z,rotation.w);
-            return rp3d::Transform(rp3dPosition,p3dRotation);
-        }
-
         void setScale(vec3 scale) {
             this->scale = scale;
         }
@@ -67,31 +85,22 @@ class RigidbodyActor : public Actor {
         }
 
         void applyForce(vec3 force,vec3 point) {
-            body->applyWorldForceAtWorldPosition(
-                PhysicsHelper::toRp3dVector(force),
-                PhysicsHelper::toRp3dVector(point)
-            );
+            vec3 delta = point - position;
+            vec3 torque = glm::cross(delta,force);
+            applyTorque(torque);
+            applyForce(force);
         }
 
-        void addToPhysicsWorld(rp3d::PhysicsWorld* world,rp3d::PhysicsCommon* common) {
-            userData.actor = this;
-            body = world->createRigidBody(getPhysicsTransform());
-            body->enableGravity(true);
-            body->setUserData(&userData);
-            addCollisionShapes(common);
-            this->common = common;
+        void applyForce(vec3 force) {
+            velocity += force * inverseMass;
         }
 
-        void updatePhysicsRepresentation() {
-            body->setTransform(getPhysicsTransform());
-            body->setLinearVelocity(PhysicsHelper::toRp3dVector(velocity));
+        void applyTorque(vec3 torque) {
+            angularVelocity += worldInverseInertiaTensor * torque;
         }
 
-        void updateFromPhysicsRepresentation() {
-            auto transform = (body->getTransform());
-            position = PhysicsHelper::toGlmVector(transform.getPosition());
-            rotation = PhysicsHelper::toGlmQuaternion(transform.getOrientation());
-            velocity = PhysicsHelper::toGlmVector(body->getLinearVelocity());
+        vec3 getVelocityAtPointRelative(vec3 point) {
+            return glm::cross(angularVelocity,point) + velocity;
         }
 
         virtual void addCollisionShapes(rp3d::PhysicsCommon* common) {
@@ -105,6 +114,11 @@ class RigidbodyActor : public Actor {
         void collideWithPlane() {
             std::vector<Contact> contacts;
             generateContacts(contacts);
+            for (Contact& contact : contacts)
+            {
+                resolveContact(contact);
+            }
+            
         }
 
         void generateContacts(std::vector<Contact>& contacts) {
@@ -119,26 +133,106 @@ class RigidbodyActor : public Actor {
             generateContactWithPoint(vec3(1,-1,-1),contacts);
         }
 
+
         void resolveContact(Contact& contact) {
-            vec3 torquePerUnitImpulse = glm::cross(contact.relativePoint,contact.normal);
-            vec3 rotationPerUnitImpulse = 
+            vec3 contactPointRelative = inverseTransformPoint(contact.point);
+            vec3 torquePerUnitImpulse = glm::cross(contactPointRelative,contact.normal);
+            vec3 rotationPerUnitImpulse = worldInverseInertiaTensor * torquePerUnitImpulse;
+            vec3 velocityPerUnitImpulse = glm::cross(rotationPerUnitImpulse,contactPointRelative);
+            float angularComponent = glm::dot(velocityPerUnitImpulse,contact.normal);
+            float pointVelocityPerUnitImpuse = angularComponent + inverseMass;
+
+
+            vec3 closingVelocity = getVelocityAtPointRelative(contactPointRelative);
+
+            float deltaVelocity = -closingVelocity.y * (1+restitution);
+
+            applyForce(deltaVelocity / pointVelocityPerUnitImpuse * vec3(0,1,0),contact.point);
+
+            if(contact.point.y < 0) position.y += -contact.point.y;
+
         }
 
         void generateContactWithPoint(vec3 relativePoint,std::vector<Contact>& contacts) {
             vec3 worldPoint = transformPoint(relativePoint);
             if(worldPoint.y < 0) {
-                worldPoint.y = 0;
-                contacts.push_back(Contact(worldPoint,inverseTransformPoint(relativePoint),vec3(0,1,0)));
+                contacts.push_back(Contact(worldPoint,vec3(0,1,0)));
                 Debug::drawPoint(worldPoint);
             }
         }
 
-
         float getMass() {
-            return body->getMass();
+            if(inverseMass == 0) return std::numeric_limits<float>::infinity();
+            return 1/inverseMass;
         }
         void setMass(float mass) {
-            body->setMass(mass);
+            if(mass == 0) mass = 0.0001;
+            inverseMass = 1/mass;
+        }
+
+        static void transformInertiaTensor(glm::mat3 &iitWorld, const glm::quat &q, const glm::mat3 &iitBody)
+        {
+
+            const float* rotMatData = glm::value_ptr(glm::toMat4(q));
+            const float* ittBodyData = glm::value_ptr(iitBody);
+
+            float t4 = rotMatData[0]*ittBodyData[0]+
+            rotMatData[1]*ittBodyData[3]+
+            rotMatData[2]*ittBodyData[6];
+            float t9 = rotMatData[0]*ittBodyData[1]+
+            rotMatData[1]*ittBodyData[4]+
+            rotMatData[2]*ittBodyData[7];
+            float t14 = rotMatData[0]*ittBodyData[2]+
+            rotMatData[1]*ittBodyData[5]+
+            rotMatData[2]*ittBodyData[8];
+            float t28 = rotMatData[4]*ittBodyData[0]+
+            rotMatData[5]*ittBodyData[3]+
+            rotMatData[6]*ittBodyData[6];
+            float t33 = rotMatData[4]*ittBodyData[1]+
+            rotMatData[5]*ittBodyData[4]+
+            rotMatData[6]*ittBodyData[7];
+            float t38 = rotMatData[4]*ittBodyData[2]+
+            rotMatData[5]*ittBodyData[5]+
+            rotMatData[6]*ittBodyData[8];
+            float t52 = rotMatData[8]*ittBodyData[0]+
+            rotMatData[9]*ittBodyData[3]+
+            rotMatData[10]*ittBodyData[6];
+            float t57 = rotMatData[8]*ittBodyData[1]+
+            rotMatData[9]*ittBodyData[4]+
+            rotMatData[10]*ittBodyData[7];
+            float t62 = rotMatData[8]*ittBodyData[2]+
+            rotMatData[9]*ittBodyData[5]+
+            rotMatData[10]*ittBodyData[8];
+
+            float* ittWorldData = glm::value_ptr(iitWorld);
+
+            ittWorldData[0] = t4*rotMatData[0]+
+            t9*rotMatData[1]+
+            t14*rotMatData[2];
+            ittWorldData[1] = t4*rotMatData[4]+
+            t9*rotMatData[5]+
+            t14*rotMatData[6];
+            ittWorldData[2] = t4*rotMatData[8]+
+            t9*rotMatData[9]+
+            t14*rotMatData[10];
+            ittWorldData[3] = t28*rotMatData[0]+
+            t33*rotMatData[1]+
+            t38*rotMatData[2];
+            ittWorldData[4] = t28*rotMatData[4]+
+            t33*rotMatData[5]+
+            t38*rotMatData[6];
+            ittWorldData[5] = t28*rotMatData[8]+
+            t33*rotMatData[9]+
+            t38*rotMatData[10];
+            ittWorldData[6] = t52*rotMatData[0]+
+            t57*rotMatData[1]+
+            t62*rotMatData[2];
+            ittWorldData[7] = t52*rotMatData[4]+
+            t57*rotMatData[5]+
+            t62*rotMatData[6];
+            ittWorldData[8] = t52*rotMatData[8]+
+            t57*rotMatData[9]+
+            t62*rotMatData[10];
         }
 
         

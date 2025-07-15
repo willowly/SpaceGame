@@ -1,4 +1,5 @@
 build/bin/SpaceGame
+build/CMakeCache.txt
 out
 .cache
 .idea

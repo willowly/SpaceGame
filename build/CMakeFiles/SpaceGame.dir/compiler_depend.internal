@@ -1261,6 +1261,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o
  /Users/willow/Documents/GitHub/SpaceGame/src/helper/file-helper.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/helper/math-helper.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/helper/physics-helper.hpp
+ /Users/willow/Documents/GitHub/SpaceGame/src/helper/random-helper.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/helper/string-helper.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/helper/terrain-helper.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/interface/console.hpp
