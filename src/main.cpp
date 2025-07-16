@@ -218,10 +218,12 @@ int main()
             cube.rotation = quat(vec3(glm::radians(Random::random(0,360)),glm::radians(Random::random(0,360)),glm::radians(Random::random(0,360))));
         }
 
-        cube.step(dt,&world);
-        cube.velocity *= pow(1.5,-dt);
-        cube.angularVelocity *= pow(1.5,-dt);
-        cube.collideWithPlane();
+        if(input.getKey(GLFW_KEY_P) || input.getKeyPressed(GLFW_KEY_O)) {
+            cube.step(dt,&world);
+            cube.velocity *= pow(1.5,-dt);
+            cube.angularVelocity *= pow(1.5,-dt);
+            cube.collideWithPlane();
+        }
 
         world.frame(dt);
         cube.render(world.getCamera(),dt);

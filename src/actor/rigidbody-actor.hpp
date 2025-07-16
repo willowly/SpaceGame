@@ -166,25 +166,27 @@ class RigidbodyActor : public Actor {
             return deltaVelocity / pointVelocityPerUnitImpuse;
         }
 
-        void resolveContactVelocity(Contact& contact) {
-            vec3 contactPointRelative = contact.point;
-            vec3 torquePerUnitImpulse = glm::cross(contactPointRelative,contact.normal);
-            vec3 rotationPerUnitImpulse = worldInverseInertiaTensor * torquePerUnitImpulse;
-            vec3 velocityPerUnitImpulse = glm::cross(rotationPerUnitImpulse,contactPointRelative);
-            float angularComponent = glm::dot(velocityPerUnitImpulse,contact.normal);
-            float pointVelocityPerUnitImpuse = angularComponent + inverseMass;
-
-
-            vec3 closingVelocity = getVelocityAtPointRelative(contactPointRelative);
-
-            float deltaVelocity = -closingVelocity.y * (1+restitution);
-
-            applyForce(deltaVelocity / pointVelocityPerUnitImpuse * vec3(0,1,0),contact.point);
-        }
-
         void resolveContactPosition(Contact& contact) {
             vec3 contactPointWorld = transformPoint(contact.point);
-            if(contactPointWorld.y < 0) position.y += -contactPointWorld.y;
+            vec3 contactPointDelta = contactPointWorld - position;
+            if(contactPointWorld.y >= 0) return;
+            vec3 torquePerUnitImpulse = glm::cross(contactPointDelta,contact.normal);
+            vec3 rotationPerUnitImpulse = worldInverseInertiaTensor * torquePerUnitImpulse;
+            vec3 velocityPerUnitImpulse = glm::cross(rotationPerUnitImpulse,contactPointDelta);
+            float angularInertia = glm::dot(velocityPerUnitImpulse,contact.normal);
+            float linearInertia = inverseMass;
+
+            float totalInertia = linearInertia + angularInertia;
+            float inverseInertia = 1 / totalInertia;
+            float penetration = -contactPointWorld.y;
+            float linearMove = penetration * linearInertia * inverseInertia;
+            float angularMove = penetration * angularMove * inverseInertia;
+
+            vec3 rotationPerMove = rotationPerUnitImpulse * (1/angularInertia);
+
+            position += contact.normal * linearMove;
+            rotate(rotationPerMove * angularMove);
+
         }
 
         void generateContacts(std::vector<Contact>& contacts) {
@@ -197,26 +199,6 @@ class RigidbodyActor : public Actor {
             generateContactWithPoint(vec3(-1,1,-1),contacts);
             generateContactWithPoint(vec3(-1,-1,-1),contacts);
             generateContactWithPoint(vec3(1,-1,-1),contacts);
-        }
-
-
-        void resolveContact(Contact& contact,vec3& deltaPosition) {
-            vec3 contactPointRelative = inverseTransformPoint(contact.point);
-            vec3 torquePerUnitImpulse = glm::cross(contactPointRelative,contact.normal);
-            vec3 rotationPerUnitImpulse = worldInverseInertiaTensor * torquePerUnitImpulse;
-            vec3 velocityPerUnitImpulse = glm::cross(rotationPerUnitImpulse,contactPointRelative);
-            float angularComponent = glm::dot(velocityPerUnitImpulse,contact.normal);
-            float pointVelocityPerUnitImpuse = angularComponent + inverseMass;
-
-
-            vec3 closingVelocity = getVelocityAtPointRelative(contactPointRelative);
-
-            float deltaVelocity = -closingVelocity.y * (1+restitution);
-
-            applyForce(deltaVelocity / pointVelocityPerUnitImpuse * vec3(0,1,0),contact.point);
-
-            if(contact.point.y < 0) deltaPosition.y += -contact.point.y;
-
         }
 
         void generateContactWithPoint(vec3 relativePoint,std::vector<Contact>& contacts) {
