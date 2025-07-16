@@ -165,9 +165,10 @@ int main()
     auto player = world.spawn(&playerPrototype,vec3(0,1,10),quat(vec3(0,0,0)));
     world.spawn(&grid,vec3(0,0,0),glm::identity<quat>());
 
-    auto cube = world.spawn(&cubePrototype,vec3(0,5,0),glm::identity<quat>());
+    //auto cube = world.spawn(&cubePrototype,vec3(0,5,0),glm::identity<quat>());
+    auto cube = RigidbodyActor(cubePrototype);
 
-    cube->rotation = quat(vec3(glm::radians(Random::random(0,360)),glm::radians(Random::random(0,360)),glm::radians(Random::random(0,360))));
+    cube.rotation = quat(vec3(glm::radians(Random::random(0,360)),glm::radians(Random::random(0,360)),glm::radians(Random::random(0,360))));
     
     vec3 rayDir = vec3(1,0,0);
     float rayDist = 10;
@@ -201,33 +202,29 @@ int main()
             player->processInput(input);
         }
         
-        auto hit_opt = cube->raycast(Ray(player->getEyePosition(),player->getEyeDirection()));
+        auto hit_opt = cube.raycast(Ray(player->getEyePosition(),player->getEyeDirection()));
         if(hit_opt) {
             auto hit = hit_opt.value();
             Debug::drawPoint(hit.point,Color::blue);
             if(input.getMouseButtonPressed(GLFW_MOUSE_BUTTON_1)) {
-                cube->applyForce(player->getEyeDirection()*3.0f,hit.point);
+                cube.applyForce(player->getEyeDirection()*3.0f,hit.point);
             }
         }
 
         if(input.getKeyPressed(GLFW_KEY_R)) {
-            cube->position = vec3(0,5,0);
-            cube->velocity = vec3(0,0,0);
-            cube->angularVelocity = vec3(0,0,0);
-            cube->rotation = quat(vec3(glm::radians(Random::random(0,360)),glm::radians(Random::random(0,360)),glm::radians(Random::random(0,360))));
+            cube.position = vec3(0,5,0);
+            cube.velocity = vec3(0,0,0);
+            cube.angularVelocity = vec3(0,0,0);
+            cube.rotation = quat(vec3(glm::radians(Random::random(0,360)),glm::radians(Random::random(0,360)),glm::radians(Random::random(0,360))));
         }
 
-        // if(cube->position.y < 1) {
-        //     cube->position.y = 1;
-        //     cube->velocity.y = 0;
-        //     cube->velocity *= pow(2,-dt);
-        //     cube->angularVelocity *= pow(2,-dt);
-        // }
-        cube->velocity *= pow(1.5,-dt);
-        cube->angularVelocity *= pow(1.5,-dt);
-        cube->collideWithPlane();
+        cube.step(dt,&world);
+        cube.velocity *= pow(1.5,-dt);
+        cube.angularVelocity *= pow(1.5,-dt);
+        cube.collideWithPlane();
 
         world.frame(dt);
+        cube.render(world.getCamera(),dt);
 
         auto matrix = glm::ortho(0.0f,(float)width,0.0f,(float)height);
         text.text = std::format("FPS: {}",(int)(1.0f/dt));
