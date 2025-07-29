@@ -24,6 +24,8 @@ class Actor {
 
         bool destroyed = false;
 
+
+        // Prototype constructors
         Actor() {
 
         }
@@ -31,6 +33,9 @@ class Actor {
         Actor(Model* model,Material* material) : model(model), material(material) {
 
         }
+
+
+
 
         glm::mat4 transform() {
             glm::mat4 matrix = glm::translate(glm::mat4(1.0f),position);
@@ -76,6 +81,7 @@ class Actor {
             if(model == nullptr) return; //if no model, nothing to render :)
             if(material == nullptr) {
                 std::cout << "null material" << std::endl;
+                return;
             }
             glm::mat4 matrix(1.0f);
             matrix = glm::translate(matrix,position);

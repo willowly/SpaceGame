@@ -24,7 +24,7 @@ class Debug {
         vec3 position;
         Color color;
         float time;
-        Point(vec3 position,Color color = Color::blue,float time = 0) : position(position), color(color), time(time) {}
+        Point(vec3 position,Color color = Color::green,float time = 0) : position(position), color(color), time(time) {}
     };
 
     struct Line {
@@ -32,14 +32,14 @@ class Debug {
         vec3 b;
         Color color;
         float time;
-        Line(vec3 a,vec3 b,Color color = Color::blue,float time = 0) : a(a), b(b), color(color), time(time) {}
+        Line(vec3 a,vec3 b,Color color = Color::green,float time = 0) : a(a), b(b), color(color), time(time) {}
     };
     struct Cube {
         vec3 origin;
         vec3 size;
         Color color;
         float time;
-        Cube(vec3 origin,vec3 size,Color color = Color::blue,float time = 0) : origin(origin), size(size), color(color), time(time) {}
+        Cube(vec3 origin,vec3 size,Color color = Color::green,float time = 0) : origin(origin), size(size), color(color), time(time) {}
     };
 
     private:
@@ -175,22 +175,22 @@ class Debug {
         }
 
         //set the draw
-        static void drawPoint(vec3 position,Color color = Color::blue) {
+        static void drawPoint(vec3 position,Color color = Color::green) {
             Debug* instance = getInstance();
             instance->pointsToDraw.push_back(Point(position,color));
         }
 
-        static void drawLine(vec3 a,vec3 b,Color color = Color::blue) {
+        static void drawLine(vec3 a,vec3 b,Color color = Color::green) {
             Debug* instance = getInstance();
             instance->linesToDraw.push_back(Line(a,b,color));
         }
 
-        static void drawRay(vec3 origin,vec3 direction,Color color = Color::blue) {
+        static void drawRay(vec3 origin,vec3 direction,Color color = Color::green) {
             Debug* instance = getInstance();
             instance->linesToDraw.push_back(Line(origin,origin + direction,color));
         }
 
-        static void drawCube(vec3 origin,vec3 size,Color color = Color::blue) {
+        static void drawCube(vec3 origin,vec3 size,Color color = Color::green) {
             Debug* instance = getInstance();
             instance->cubesToDraw.push_back(Cube(origin,size,color));
         }
@@ -212,9 +212,7 @@ class Debug {
                 modelMatrix *= glm::inverse(camera.getViewRotationMatrix());
                 model->render(camera.getViewMatrix(),modelMatrix,camera.getProjectionMatrix(),shader);
             }
-        
-            
-            instance->pointsToDraw.clear();
+    
 
             for (auto& l : instance->linesToDraw)
             {
@@ -226,23 +224,32 @@ class Debug {
                 model.renderMode = Model::RenderMode::Wireframe;
                 model.render(camera.getViewMatrix(),glm::mat4(1.0f),camera.getProjectionMatrix(),shader);
             }
-        
-            instance->linesToDraw.clear();
+    
 
             Model cubeModel;
             cubeModel.loadFromFile("models/block.obj");
-            for (auto& l : instance->cubesToDraw)
+            for (auto& c : instance->cubesToDraw)
             {
                 
                 Shader& shader = *instance->getShader();
                 shader.use();
-                shader.setColor("color",l.color);
+                shader.setColor("color",c.color);
                 cubeModel.renderMode = Model::RenderMode::Wireframe;
-                cubeModel.render(camera.getViewMatrix(),glm::mat4(1.0f),camera.getProjectionMatrix(),shader);
+                glm::mat4 modelMatrix = glm::mat4(1.0f);
+                modelMatrix = glm::translate(modelMatrix,c.origin);
+                modelMatrix = glm::scale(modelMatrix,c.size);
+                cubeModel.render(camera.getViewMatrix(),modelMatrix,camera.getProjectionMatrix(),shader);
             }
         
-            instance->linesToDraw.clear();
+            
 
+        }
+
+        static void clearDebugShapes() {
+            Debug* instance = getInstance();
+            instance->linesToDraw.clear();
+            instance->pointsToDraw.clear();
+            instance->cubesToDraw.clear();
         }
 
 };

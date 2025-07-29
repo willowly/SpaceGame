@@ -1223,7 +1223,10 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/vec4.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/vector_relational.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/stb_image.h \
+  /Users/willow/Documents/GitHub/SpaceGame/src/actor/actor-factory-fwd.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/actor/actor-factory.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/actor.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/actor/actors-all.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/character.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/construction.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/rigidbody-actor.hpp \
@@ -1534,6 +1537,8 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 /usr/local/include/reactphysics3d/collision/ContactManifoldInfo.h:
 
 /Users/willow/Documents/GitHub/SpaceGame/src/actor/character.hpp:
+
+/Users/willow/Documents/GitHub/SpaceGame/src/actor/actor-factory-fwd.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/include/stb_image.h:
 
@@ -2509,6 +2514,8 @@ _deps/freetype-src/include/freetype/fterrors.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__memory/voidify.h:
 
+/Users/willow/Documents/GitHub/SpaceGame/src/actor/actors-all.hpp:
+
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__bit/byteswap.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__memory/uses_allocator_construction.h:
@@ -2598,6 +2605,8 @@ _deps/freetype-src/include/freetype/fterrors.h:
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__iterator/permutable.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__utility/declval.h:
+
+/Users/willow/Documents/GitHub/SpaceGame/src/actor/actor-factory.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__type_traits/remove_cv.h:
 

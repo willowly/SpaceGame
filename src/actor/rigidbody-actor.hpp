@@ -29,7 +29,9 @@ class RigidbodyActor : public Actor {
         //vec3 accumAngularVelocity = vec3(0);
         float inverseMass = 1;
         bool useGravity = true;
-        float restitution = 0.0f;
+        float restitution = 0.4f;
+        float friction = 0.5;
+        float staticFrictionThreshold = 0.1;
 
         mat3 localInverseInertiaTensor;
         mat3 worldInverseInertiaTensor;
@@ -118,26 +120,25 @@ class RigidbodyActor : public Actor {
             
             for (int i = 0; i <= 10; i++)
             {
-                float greatestContactForce = getContactForce(contacts[0]);
-                Contact& worst = contacts[0];
+                vec3 greatestContactForce = getContactForce(contacts[0]);
+                Contact worst = contacts[0];
                 for (Contact& contact : contacts)
                 {
-                    float force = getContactForce(contact);
-                    if(force > greatestContactForce) {
+                    vec3 force = getContactForce(contact);
+                    if(glm::length(force) > glm::length(greatestContactForce)) {
                         worst = contact;
                         greatestContactForce = force;
                     }
                 }
-                if(greatestContactForce > 0.0001) {
-                    std::cout << greatestContactForce << std::endl;
-                    Debug::drawRay(transformPoint(worst.point),greatestContactForce * vec3(0,1,0));
-                    applyForce(greatestContactForce * vec3(0,1,0),transformPoint(worst.point));
+                if(glm::length(greatestContactForce) > 0.0001) {
+                    Debug::drawRay(transformPoint(worst.point),greatestContactForce);
+                    applyForce(greatestContactForce,transformPoint(worst.point));
                 }
             }
  
             for (int i = 0; i <= 10; i++)
             {
-                Contact& worst = contacts[0];
+                Contact worst = contacts[0];
                 for (Contact& contact : contacts)
                 {
                     if(contact.point.y < worst.point.y) {
@@ -150,20 +151,57 @@ class RigidbodyActor : public Actor {
             
         }
 
-        float getContactForce(Contact& contact) {
+        vec3 getContactForce(Contact& contact) {
             vec3 contactPointWorld = transformPoint(contact.point);
             vec3 contactPointDelta = contactPointWorld - position;
-            vec3 torquePerUnitImpulse = glm::cross(contactPointDelta,contact.normal);
-            vec3 rotationPerUnitImpulse = worldInverseInertiaTensor * torquePerUnitImpulse;
-            vec3 velocityPerUnitImpulse = glm::cross(rotationPerUnitImpulse,contactPointDelta);
-            float angularComponent = glm::dot(velocityPerUnitImpulse,contact.normal);
-            float pointVelocityPerUnitImpuse = angularComponent + inverseMass;
+
+            mat3 impulseToTorque = mat3(
+                vec3(0,                     -contactPointDelta.z,   contactPointDelta.y),
+                vec3(contactPointDelta.z,   0,                      -contactPointDelta.x),
+                vec3(-contactPointDelta.y,  contactPointDelta.x,    0)
+            );
+
+            mat3 torquePerUnitImpulse = impulseToTorque * mat3(1.0f);
+            mat3 rotationPerUnitImpulse = worldInverseInertiaTensor * torquePerUnitImpulse;
+            mat3 velocityPerUnitImpulse = rotationPerUnitImpulse * impulseToTorque;
+            velocityPerUnitImpulse *= -1;
+            float* velocityPerUnitImpulse_valueptr = glm::value_ptr(velocityPerUnitImpulse);
+            velocityPerUnitImpulse_valueptr[0] += inverseMass;
+            velocityPerUnitImpulse_valueptr[4] += inverseMass;
+            velocityPerUnitImpulse_valueptr[8] += inverseMass;
+
+            mat3 impulseMatrix = glm::inverse(velocityPerUnitImpulse);
 
 
             vec3 closingVelocity = getVelocityAtPointRelative(contactPointDelta);
+            if(closingVelocity.y > 0) return vec3(0.0f); //if its moving away, we dont need to apply any velocity
 
-            float deltaVelocity = -closingVelocity.y * (1+restitution);
-            return deltaVelocity / pointVelocityPerUnitImpuse;
+            float deltaVelocityY = -closingVelocity.y * (1+restitution);
+            vec3 deltaVelocity = vec3(
+                -closingVelocity.x,
+                -closingVelocity.y * (1+restitution),
+                -closingVelocity.z
+            );
+            vec3 impulse = impulseMatrix * deltaVelocity;
+            float planarImpulse = glm::length(vec2(impulse.x,impulse.z));
+            std::cout << planarImpulse << std::endl;
+            if(planarImpulse > friction * impulse.y) {
+                //scale the vector to be exactly the right size
+                impulse.x /= planarImpulse;
+                impulse.z /= planarImpulse;
+
+                impulse.y = //why are we modifying the y impulse??
+                    velocityPerUnitImpulse_valueptr[3] * friction * impulse.x + 
+                    velocityPerUnitImpulse_valueptr[4] + 
+                    velocityPerUnitImpulse_valueptr[5] * friction * impulse.z;
+                impulse.y = deltaVelocity.y / impulse.y;
+                impulse.x *= friction * impulse.y;
+                impulse.z *= friction * impulse.y;
+
+            }
+
+            //impulse.y = std::max(impulse.y,0.0f);
+            return impulse;
         }
 
         void resolveContactPosition(Contact& contact) {

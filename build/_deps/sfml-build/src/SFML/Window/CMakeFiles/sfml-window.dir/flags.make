@@ -8,7 +8,7 @@ CXX_DEFINES = -DSFML_STATIC
 
 CXX_INCLUDES = -I/usr/local/include -I/usr/local/include/lua -I/Users/willow/Documents/GitHub/SpaceGame/build/_deps/sfml-src/src -isystem /Users/willow/Documents/GitHub/SpaceGame/build/_deps/sfml-src/include -isystem /Users/willow/Documents/GitHub/SpaceGame/build/_deps/sfml-src/extlibs/headers/glad/include -isystem /Users/willow/Documents/GitHub/SpaceGame/build/_deps/sfml-src/extlibs/headers/vulkan -iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks
 
-CXX_FLAGS = -g -std=gnu++17 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mmacosx-version-min=14.3 -fvisibility=hidden -fvisibility-inlines-hidden -Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wcast-align -Wunused -Woverloaded-virtual -Wconversion -Wsign-conversion -Wdouble-promotion -Wformat=2 -Wimplicit-fallthrough -Wsuggest-override -Wnull-dereference -Wold-style-cast -Wpedantic -Wno-unknown-warning-option
+CXX_FLAGS =  -fpermissive -g -std=gnu++17 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mmacosx-version-min=14.3 -fvisibility=hidden -fvisibility-inlines-hidden -Wall -Wextra -Wshadow -Wnon-virtual-dtor -Wcast-align -Wunused -Woverloaded-virtual -Wconversion -Wsign-conversion -Wdouble-promotion -Wformat=2 -Wimplicit-fallthrough -Wsuggest-override -Wnull-dereference -Wold-style-cast -Wpedantic -Wno-unknown-warning-option
 
 OBJC_DEFINES = -DSFML_STATIC
 

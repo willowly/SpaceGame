@@ -34,6 +34,14 @@ namespace MathHelper {
     vec3 normalFromPlanePoints(vec3 a,vec3 b,vec3 c) {
         return glm::normalize(glm::cross(b-a,c-a));
     }
+
+    //
+    float integerBelow(float a) {
+        if(floor(a) == a) {
+            return a - 1;
+        }
+        return floor(a);
+    }
 }
 
 template <>

@@ -30,6 +30,7 @@
 [INFO] Loaded Material "cobalt_block" (materials.cobalt_block)
 [INFO] Loaded Material "cockpit" (materials.cockpit)
 [INFO] Loaded Material "thruster" (materials.thruster)
+[INFO] Loaded Material "terrain" (materials.terrain)
 [INFO] Loaded Actor "plane" (actors.plane)
 [INFO] Loaded Actor "pickaxe" (actors.pickaxe)
 [INFO] Loaded Actor "asteroid" (actors.asteroid)

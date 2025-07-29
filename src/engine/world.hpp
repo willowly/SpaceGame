@@ -5,6 +5,7 @@
 #include "actor/actor.hpp"
 #include <memory>
 #include "helper/collision-helper.hpp"
+#include <actor/actor-factory-fwd.hpp>
 
 #include <reactphysics3d/reactphysics3d.h>
 
@@ -55,14 +56,12 @@ class World {
             // floor->setType(rp3d::BodyType::STATIC);
         }
 
-        template <typename T>
-        T* spawn(T* prototype,vec3 position,quat rotation) {
-            Actor* actorPointer = new T(*prototype);
-            actors.push_back(std::unique_ptr<Actor>(actorPointer));
-            actors[actors.size()-1]->position = position;
-            actors[actors.size()-1]->rotation = rotation;
-            actors[actors.size()-1]->addToPhysicsWorld(physicsWorld,&physicsCommon);
-            return dynamic_cast<T*>(actorPointer);
+        template<typename T,typename... Args>
+        T* spawn(Args... args) {
+            unique_ptr<T> spawned = ActorFactory::make<T>(std::forward<Args>(args)...);
+            T* rawSpawned = spawned.get();
+            actors.push_back(std::move(spawned));
+            return rawSpawned;
         }
 
         void destroy(Actor* actor) {

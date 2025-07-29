@@ -35,8 +35,8 @@ class Color {
 };
 
 Color Color::red = Color(1,0,0);
-Color Color::green = Color(1,0,0);
-Color Color::blue = Color(1,0,0);
+Color Color::green = Color(0,1,0);
+Color Color::blue = Color(0,0,1);
 
 Color Color::magenta = Color(1,0,1);
 Color Color::cyan = Color(0,1,1);

@@ -5,27 +5,37 @@
 #include "helper/terrain-helper.hpp"
 #include "engine/debug.hpp"
 #include "SimplexNoise.h"
+#include "helper/collision-helper.hpp"
 
 using std::unique_ptr;
 
-class Terrain : RigidbodyActor {
+class Terrain : public Actor {
 
     std::vector<float> terrainData;
 
 
     public:
         unique_ptr<Model> dynamicModel;
-        Material* material;
         int size = 50;
         float noiseScale = 100;
         float surfaceLevel = 0.5;
         float cellSize = 0.5f;
 
+    
 
-    Terrain() : RigidbodyActor(nullptr,nullptr) {
+    Terrain() : Actor(nullptr,nullptr) {
+        
         dynamicModel = std::make_unique<Model>();
         dynamicModel->setDynamicDraw();
         model = dynamicModel.get();
+
+        generateData();
+        generateMesh();
+    }
+
+    Terrain(vec3 position,quat rotation) : Terrain() {
+        this->position = position;
+        this->rotation = rotation;
     }
 
     void generateData() {
@@ -43,7 +53,6 @@ class Terrain : RigidbodyActor {
                     float noise = simplex.fractal(5,x/noiseScale,y/noiseScale,z/noiseScale);
                     float distance = glm::length(vec3(x-radius,y-radius,z-radius));
                     float radiusInfluence = (radius-distance)/radius;
-                    std::cout << radiusInfluence  << " " << distance << " " << x << "," << y << "," << z << "" << std::endl;
                     terrainData.push_back(noise * (radiusInfluence+0.5f));
                 }
             }
@@ -51,7 +60,10 @@ class Terrain : RigidbodyActor {
     }
 
     virtual void render(Camera& camera,float dt) {
-        //std::cout << "rendering terrain:" << std::endl;
+        if(material == nullptr) {
+            std::cout << "null material" << std::endl;
+            return;
+        }
         model->render(position,camera,*material);
     }
 
@@ -185,6 +197,16 @@ class Terrain : RigidbodyActor {
         return vec3(0,0,0);
     }
 
+    ivec3 getCellAtWorldPos(vec3 pos) {
+        return glm::floor(inverseTransformPoint(pos)/cellSize);
+    }
+
+    vec3 getCellWorldPos(ivec3 cell) {
+        vec3 cellPos = (vec3)cell + vec3(0.5);
+        cellPos = transformPoint(cellPos*cellSize);
+        return cellPos;
+    }
+
     void terraformSphere(vec3 pos,int radius,float change) {
         int i = 0;
         for (int z = 0; z < size; z++)
@@ -193,7 +215,7 @@ class Terrain : RigidbodyActor {
             {
                 for (int x = 0; x < size; x++)
                 {
-                    vec3 cellPos = vec3(x,y,z)*cellSize;
+                    vec3 cellPos = getCellWorldPos(vec3(x,y,z));
                     float dist = glm::distance(cellPos,pos);
                     float influence = (radius-dist)/radius;
                     if(influence > 0) {
@@ -205,6 +227,37 @@ class Terrain : RigidbodyActor {
                     i++;
                 }
             }
+        }
+    }
+
+
+    void drawCellsOnRay(Ray ray,float dist) {
+
+        
+        //assert(abs(glm::length(ray.direction) - 1) > 0.001);
+        
+        Debug::drawRay(ray.origin,ray.direction*10.0f,Color::white);
+        Ray cellSpaceRay = Ray(transformPoint(ray.origin),transformDirection(ray.direction));
+        cellSpaceRay.origin = cellSpaceRay.origin/cellSize;
+        float cellDist = dist/cellSize;
+        float yxSlope = cellSpaceRay.direction.y/cellSpaceRay.direction.x;
+        for(int i = 1;i < cellDist*cellSpaceRay.direction.x;i++) {
+            ivec3 cellPos = ivec3(
+                    floor(i+cellSpaceRay.origin.x)-1,
+                    MathHelper::integerBelow(((i-std::fmod(cellSpaceRay.origin.x,1))*yxSlope)+cellSpaceRay.origin.y),
+                    0
+            );
+            Debug::drawCube(getCellWorldPos(cellPos),vec3(cellSize),Color::green);
+        }
+
+        float xySlope = cellSpaceRay.direction.x/cellSpaceRay.direction.y;
+        for(int i = 1;i < cellDist*cellSpaceRay.direction.y;i++) {
+            ivec3 cellPos = ivec3(
+                    MathHelper::integerBelow(((i-std::fmod(cellSpaceRay.origin.y,1))*xySlope)+cellSpaceRay.origin.x),
+                    floor(i+cellSpaceRay.origin.y)-1,
+                    0
+            );
+            Debug::drawCube(getCellWorldPos(cellPos),vec3(cellSize),Color::magenta);
         }
     }
 

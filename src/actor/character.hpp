@@ -22,12 +22,16 @@
 class Character : public RigidbodyActor {
     public: 
 
+        // Prototype constructors
         Character() : Character(nullptr,nullptr) {
             
         }
         Character(Model* model,Material* material) : RigidbodyActor(model,material) {
             useGravity = false;
         }
+
+
+
         float moveSpeed = 5.0f;
         float lookPitch = 0;
         float lookSensitivity = 5;

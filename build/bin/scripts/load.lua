@@ -26,6 +26,8 @@ materials.cobalt_block = {"lit","cobalt_block"}
 materials.cockpit = {"lit","cockpit"}
 materials.thruster = {"lit","solid",color(0.3,0.3,0.4)}
 
+materials.terrain = {"lit","solid",color(0.2,0.2,0.8)}
+
 print("Loading Actors")
 
 actors.plane = {

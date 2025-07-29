@@ -1316,6 +1316,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/collision-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/debug.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/math-helper.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/actor/actor-factory-fwd.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/construction.hpp \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/map \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__tree \
@@ -1376,4 +1377,6 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/terrain.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/terrain-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/SimplexNoise.h \
-  /Users/willow/Documents/GitHub/SpaceGame/src/helper/random-helper.hpp
+  /Users/willow/Documents/GitHub/SpaceGame/src/helper/random-helper.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/actor/actor-factory.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/actor/actors-all.hpp
