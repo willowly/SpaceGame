@@ -19,7 +19,7 @@ class Terrain : public Actor {
         int size = 50;
         float noiseScale = 100;
         float surfaceLevel = 0.5;
-        float cellSize = 0.5f;
+        float cellSize = 2.0f;
 
     
 
@@ -241,23 +241,39 @@ class Terrain : public Actor {
         cellSpaceRay.origin = cellSpaceRay.origin/cellSize;
         float cellDist = dist/cellSize;
         float yxSlope = cellSpaceRay.direction.y/cellSpaceRay.direction.x;
-        for(int i = 1;i < cellDist*cellSpaceRay.direction.x;i++) {
+        float zxSlope = cellSpaceRay.direction.z/cellSpaceRay.direction.x;
+        std::cout << cellDist*cellSpaceRay.direction.x << std::endl;
+        int xDir = 1;
+        for(int i = xDir;xDir*i <= ceil(cellDist*abs(cellSpaceRay.direction.x))+1;i += xDir) {
+            
             ivec3 cellPos = ivec3(
                     floor(i+cellSpaceRay.origin.x)-1,
                     MathHelper::integerBelow(((i-std::fmod(cellSpaceRay.origin.x,1))*yxSlope)+cellSpaceRay.origin.y),
-                    0
+                    MathHelper::integerBelow(((i-std::fmod(cellSpaceRay.origin.x,1))*zxSlope)+cellSpaceRay.origin.z)
             );
             Debug::drawCube(getCellWorldPos(cellPos),vec3(cellSize),Color::green);
         }
 
         float xySlope = cellSpaceRay.direction.x/cellSpaceRay.direction.y;
-        for(int i = 1;i < cellDist*cellSpaceRay.direction.y;i++) {
+        float zySlope = cellSpaceRay.direction.z/cellSpaceRay.direction.y;
+        for(int i = 1;i <= ceil(cellDist*cellSpaceRay.direction.y)+1;i++) {
             ivec3 cellPos = ivec3(
                     MathHelper::integerBelow(((i-std::fmod(cellSpaceRay.origin.y,1))*xySlope)+cellSpaceRay.origin.x),
                     floor(i+cellSpaceRay.origin.y)-1,
-                    0
+                    MathHelper::integerBelow(((i-std::fmod(cellSpaceRay.origin.y,1))*zySlope)+cellSpaceRay.origin.z)
             );
             Debug::drawCube(getCellWorldPos(cellPos),vec3(cellSize),Color::magenta);
+        }
+
+        float xzSlope = cellSpaceRay.direction.x/cellSpaceRay.direction.z;
+        float yzSlope = cellSpaceRay.direction.y/cellSpaceRay.direction.z;
+        for(int i = 1;i <= ceil(cellDist*cellSpaceRay.direction.z)+1;i++) {
+            ivec3 cellPos = ivec3(
+                    MathHelper::integerBelow(((i-std::fmod(cellSpaceRay.origin.z,1))*xzSlope)+cellSpaceRay.origin.x),
+                    MathHelper::integerBelow(((i-std::fmod(cellSpaceRay.origin.z,1))*yzSlope)+cellSpaceRay.origin.y),
+                    floor(i+cellSpaceRay.origin.z)-1
+            );
+            Debug::drawCube(getCellWorldPos(cellPos),vec3(cellSize),Color::cyan);
         }
     }
 

@@ -170,7 +170,7 @@ int main()
 
     //cube.rotation = quat(vec3(glm::radians(Random::random(0,360)),glm::radians(Random::random(0,360)),glm::radians(Random::random(0,360))));
     
-    Ray testRay(vec3(0),vec3(1,0,0));
+    Ray testRay(vec3(0),vec3(0,0,1));
 
 
     
@@ -203,28 +203,34 @@ int main()
             if(input.getKey(GLFW_KEY_LEFT_SHIFT)) {
                 const float speed = 0.3f;
                 if(input.getKey(GLFW_KEY_W)) {
-                    testRay.direction.x += dt * speed;
+                    testRay.origin.x += dt * speed;
+                }
+                if(input.getKey(GLFW_KEY_S)) {
+                    testRay.origin.x -= dt * speed;
                 }
                 if(input.getKey(GLFW_KEY_A)) {
-                    testRay.direction.x -= dt * speed;
+                    testRay.origin.z -= dt * speed;
+                }
+                if(input.getKey(GLFW_KEY_D)) {
+                    testRay.origin.z += dt * speed;
                 }
                 if(input.getKey(GLFW_KEY_SPACE)) {
-                    testRay.direction.y += dt * speed;
+                    testRay.origin.y += dt * speed;
                 }
                 if(input.getKey(GLFW_KEY_C)) {
-                    testRay.direction.y -= dt * speed;
+                    testRay.origin.y -= dt * speed;
                 }
 
-                if(input.getKey(GLFW_KEY_UP)) {
+                if(input.getKey(GLFW_KEY_LEFT)) {
                     testRay.direction = glm::quat(vec3(0,glm::radians(dt*10),0)) * testRay.direction;
                 }
-                if(input.getKey(GLFW_KEY_DOWN)) {
+                if(input.getKey(GLFW_KEY_RIGHT)) {
                     testRay.direction = glm::quat(vec3(0,glm::radians(-dt*10),0)) * testRay.direction;
                 }
-                if(input.getKey(GLFW_KEY_LEFT)) {
+                if(input.getKey(GLFW_KEY_UP)) {
                     testRay.direction = glm::quat(vec3(0,0,glm::radians(dt*10))) * testRay.direction;
                 }
-                if(input.getKey(GLFW_KEY_RIGHT)) {
+                if(input.getKey(GLFW_KEY_DOWN)) {
                     testRay.direction = glm::quat(vec3(0,0,glm::radians(-dt*10))) * testRay.direction;
                 }
             } else {
