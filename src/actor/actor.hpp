@@ -4,8 +4,8 @@
 #include <glm/gtx/quaternion.hpp>
 #include "graphics/model.hpp"
 #include "graphics/material.hpp"
+#include "collision/intersections.hpp"
 
-#include <reactphysics3d/reactphysics3d.h>
 
 using glm::vec3, glm::quat;
 
@@ -73,7 +73,11 @@ class Actor {
             rotation *= glm::angleAxis(glm::radians(eulerAngles.z),vec3(0,0,1));
         }
 
-        virtual void step(float dt,World* world) {
+        virtual std::optional<RaycastHit> raycast(Ray ray, float dist) {
+            return std::nullopt;
+        }
+
+        virtual void step(World* world,float dt) {
             
         }
 
@@ -93,18 +97,6 @@ class Actor {
         //for now to get the player to move differently than the physics sim :)
         virtual bool playerStep() {
             return false;
-        }
-
-        virtual void addToPhysicsWorld(rp3d::PhysicsWorld* world,rp3d::PhysicsCommon* common) {
-
-        }
-
-        virtual void updatePhysicsRepresentation() {
-
-        }
-
-        virtual void updateFromPhysicsRepresentation() {
-            
         }
 
         virtual void destroy() {

@@ -8,7 +8,7 @@
 
 
 class Construction;
-class BlockState;
+struct BlockState;
 class Character;
 
 

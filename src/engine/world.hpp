@@ -4,10 +4,7 @@
 
 #include "actor/actor.hpp"
 #include <memory>
-#include "helper/collision-helper.hpp"
 #include <actor/actor-factory-fwd.hpp>
-
-#include <reactphysics3d/reactphysics3d.h>
 
 using glm::vec3, glm::quat,std::unique_ptr;
 
@@ -15,14 +12,21 @@ using glm::vec3, glm::quat,std::unique_ptr;
 class World {
 
     vector<unique_ptr<Actor>> actors;
+    vector<unique_ptr<Actor>> spawnedActors; //for when we spawn in the step
     vec3 constantGravity = vec3(0,-15,0);
-
-    rp3d::PhysicsWorld* physicsWorld;
-    rp3d::PhysicsCommon physicsCommon;
 
     Camera camera;
 
     float sinceLastStep;
+
+    struct WorldRaycastHit {
+        Actor* actor;
+        RaycastHit hit;
+
+        WorldRaycastHit(Actor* actor,RaycastHit hit) : actor(actor), hit(hit) {
+
+        }
+    };
    
     // class DebugCallback : public rp3d::RaycastCallback {
     
@@ -47,20 +51,20 @@ class World {
         float stepProcessMs;
         float renderProcessMs;
 
-        rp3d::RigidBody* floor;
+        bool inStep = false; //so we dont resize the actor vector when iterating over it
 
         World() {
-            physicsWorld = physicsCommon.createPhysicsWorld();
-            // floor = physicsWorld->createRigidBody(rp3d::Transform(rp3d::Vector3(0,0,0),rp3d::Quaternion::identity()));
-            // floor->addCollider(physicsCommon.createBoxShape(rp3d::Vector3(10,1,10)),rp3d::Transform(rp3d::Vector3(0,-0.5,0),rp3d::Quaternion::identity()));
-            // floor->setType(rp3d::BodyType::STATIC);
         }
 
         template<typename T,typename... Args>
         T* spawn(Args... args) {
             unique_ptr<T> spawned = ActorFactory::make<T>(std::forward<Args>(args)...);
             T* rawSpawned = spawned.get();
-            actors.push_back(std::move(spawned));
+            if(inStep) {
+                spawnedActors.push_back(std::move(spawned));
+            } else {
+                actors.push_back(std::move(spawned));
+            }
             return rawSpawned;
         }
 
@@ -104,41 +108,45 @@ class World {
         }
 
         void step(float dt) {
+            inStep = true;
             for (auto& actor : actors)
             {
-                actor->step(dt,this);
-                actor->updatePhysicsRepresentation();
+                actor->step(this,dt);
             }
-            physicsStep(dt);
-            for(auto& actor : actors) {
-                actor->updateFromPhysicsRepresentation();
+            inStep = false;
+            for(auto& actor : spawnedActors) {
+                actors.push_back(std::move(actor));
             }
-        }
-
-        void physicsStep(float dt) {
-            physicsWorld->update(dt);
+            spawnedActors.clear();
         }
 
         void applyGravityIfEnabled(Actor* actor,float dt) {
             //if(actor->useGravity) actor->velocity += getGravityVector(actor->position) * dt;
         }
 
-        void raycast(vec3 position,vec3 direction,float distance,rp3d::RaycastCallback* callback) {
-            //physicsWorld->raycast(rp3d::Ray(ph::toRp3dVector(position),ph::toRp3dVector(position + glm::normalize(direction) * distance),1.0),callback);
+        std::optional<WorldRaycastHit> raycast(Ray ray,float dist) {
+            std::optional<WorldRaycastHit> result = std::nullopt;
+            for (auto& actor : actors)
+            {
+                auto hitopt = actor->raycast(ray,dist);
+                if(hitopt) {
+                    auto hit = hitopt.value();
+                    if(hit.distance <= dist) {
+                        if(result) {
+                            result.value().hit = hit;
+                            result.value().actor = actor.get();
+                        } else {
+                            result = WorldRaycastHit(actor.get(),hit);
+                        }
+                        dist = hit.distance;
+                    }
+                }
+            }
+            return result;
         }
 
         Camera& getCamera() {
             return camera;
-        }
-
-
-
-        rp3d::PhysicsWorld* getPhysicsWorld() {
-            return physicsWorld;
-        }
-
-        rp3d::PhysicsCommon* getPhysicsCommon() {
-            return &physicsCommon;
         }
 
 };

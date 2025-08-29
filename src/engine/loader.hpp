@@ -1,4 +1,4 @@
-#pragma 
+#pragma once
 #include "registry.hpp"
 #include "graphics/model.hpp"
 #include "graphics/texture.hpp"

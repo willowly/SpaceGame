@@ -12,6 +12,7 @@
 #include "engine/input.hpp"
 #include "engine/world.hpp"
 #include "construction.hpp"
+#include "item/tool-user.hpp"
 
 #include <item/pickaxe-tool.hpp>
 #include <item/place-block-tool.hpp>
@@ -19,7 +20,7 @@
 #include <GLFW/glfw3.h>
 
 
-class Character : public RigidbodyActor {
+class Character : public RigidbodyActor, public ToolUser {
     public: 
 
         // Prototype constructors
@@ -59,12 +60,11 @@ class Character : public RigidbodyActor {
 
         void render(Camera& camera,float dt) {
             if(currentTool != nullptr && ridingConstruction == nullptr) {
-                currentTool->lerpLookOrientation(getEyeRotation(),dt);
-                currentTool->render(camera);
+                currentTool->render(camera,this,dt);
             }
         }
 
-        void step(float dt,World* world) {
+        void step(World* world,float dt) {
 
             float moveSpeed = 5.0f;
             
@@ -74,23 +74,24 @@ class Character : public RigidbodyActor {
                 interact(world);
             }
 
+            if(currentTool != nullptr) {
+                currentTool->step(world,this,dt);
+            }
+
             if(ridingConstruction != nullptr) {
                 ridingConstruction->setMoveControl(ridingConstructionRotation * moveInput);
                 ridingConstruction->setTargetRotation(getEyeRotation() * glm::inverse(ridingConstructionRotation) * glm::angleAxis(glm::radians(180.0f),vec3(0,1,0)));
                 position = ridingConstruction->transformPoint(ridingConstructionPoint);
             } else {
-                if(clickInput) {
-                    if(currentTool != nullptr) {
-                        currentTool->use(world,getEyePosition(),getEyeDirection());
-                    }
-                }
                 vec3 targetVelocity = rotation * moveInput * moveSpeed;
                 velocity = MathHelper::lerp(velocity,targetVelocity,acceleration*dt);
             }
 
+
+
             
 
-            RigidbodyActor::step(dt,world);
+            RigidbodyActor::step(world,dt);
 
             clickInput = false;
             interactInput = false;
@@ -118,14 +119,13 @@ class Character : public RigidbodyActor {
                 dismount();
                 return;
             }
-            ph::RaycastCallback callback;
-            world->raycast(getEyePosition(),getEyeDirection(),10,&callback);
-            if(callback.success) {
-                ActorUserData* data = static_cast<ActorUserData*>(callback.body->getUserData());
-                Construction* construction = dynamic_cast<Construction*>(data->actor);
+            auto worldHitOpt = world->raycast(Ray(getEyePosition(),getEyeDirection()),10);
+            if(worldHitOpt) {
+                auto worldHit = worldHitOpt.value();
+                Construction* construction = dynamic_cast<Construction*>(worldHit.actor);
                 if(construction != nullptr) {
                     std::cout << "interacted with construction" << std::endl;
-                    vec3 interactPointWorld = callback.worldPoint - callback.worldNormal * 0.5f;
+                    vec3 interactPointWorld = worldHit.hit.point - worldHit.hit.normal * 0.5f;
                     vec3 interactPointLocal = construction->inverseTransformPoint(interactPointWorld);
                     ivec3 interactPointInt = glm::round(interactPointLocal);
                     auto data = construction->getBlock(interactPointInt);
@@ -166,10 +166,6 @@ class Character : public RigidbodyActor {
                 interactInput = true;
             }
 
-            if(input.getMouseButtonPressed(GLFW_MOUSE_BUTTON_1)) {
-                clickInput = true;
-            }
-
             if(input.getKeyPressed(GLFW_KEY_1)) {
                 setCurrentTool(0);
             }
@@ -198,13 +194,22 @@ class Character : public RigidbodyActor {
                 setCurrentTool(8);
             }
 
+            if(currentTool != nullptr) {
+                currentTool->processInput(input);
+            }
+
             moveMouse(input.getMouseDelta() * 0.01f);
         }
 
         void setCurrentTool(int index) {
+            if(currentTool != nullptr) {
+                currentTool->unequip(this);
+            }
             selectedTool = index;
             currentTool = toolbar[index];
-            if(currentTool != nullptr) currentTool->setLookOrientation(getEyeRotation());
+            if(currentTool != nullptr) {
+                currentTool->equip(this);
+            }
         }
 
         void moveMouse(vec2 delta) {
@@ -235,6 +240,10 @@ class Character : public RigidbodyActor {
 
         vec3 getEyeDirection() {
             return getEyeRotation() * vec3(0,0,-1);
+        }
+
+        Ray getLookRay() {
+            return Ray(getEyePosition(),getEyeDirection());
         }
 
         bool playerStep() {

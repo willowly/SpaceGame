@@ -21,7 +21,6 @@ class Texture {
             //std::cout << "new texture id: " << textureID << std::endl;
         }
         ~Texture() {
-            if(textureID == -1) return;
             glDeleteTextures(1,&textureID);
             //std::cout << "deleting texture id: " << textureID << std::endl;
         }

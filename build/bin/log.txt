@@ -1,6 +1,8 @@
 [INFO] Loaded Model "plane" (models)
 [INFO] Loaded Model "cube" (models)
+[INFO] Loaded Model "tri" (models)
 [INFO] Loaded Model "cockpit" (models)
+[INFO] Loaded Model "icosphere" (models)
 [INFO] Loaded Model "monkey" (models)
 [INFO] Loaded Model "pickaxe" (models)
 [INFO] Loaded Model "thruster" (models)

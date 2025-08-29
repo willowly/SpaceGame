@@ -165,13 +165,9 @@ int main()
     playerPrototype.toolbar[3] = &pickaxe;
 
     auto player = world.spawn<Character>(&playerPrototype,vec3(0,1,10));
-    world.spawn<Actor>(&grid,vec3(0,0,0));
-    auto terrain = world.spawn<Terrain>(registry.getMaterial("terrain"),vec3(0,0,0));
-
-    //cube.rotation = quat(vec3(glm::radians(Random::random(0,360)),glm::radians(Random::random(0,360)),glm::radians(Random::random(0,360))));
-    
-    Ray testRay(vec3(0),vec3(0,0,1));
-
+    auto construction = world.spawn<Construction>(vec3(0,0,0));
+    auto terrain = world.spawn<Terrain>(registry.getMaterial("grid"),vec3(0));
+    construction->setBlock(ivec3(0,5,0),registry.getBlock("tin"),BlockFacing::FORWARD);
 
     
 
@@ -203,54 +199,54 @@ int main()
             if(input.getKey(GLFW_KEY_LEFT_SHIFT)) {
                 const float speed = 0.3f;
                 if(input.getKey(GLFW_KEY_W)) {
-                    testRay.origin.x += dt * speed;
+                    terrain->position.x += dt * speed;
                 }
                 if(input.getKey(GLFW_KEY_S)) {
-                    testRay.origin.x -= dt * speed;
+                    terrain->position.x -= dt * speed;
                 }
                 if(input.getKey(GLFW_KEY_A)) {
-                    testRay.origin.z -= dt * speed;
+                    terrain->position.z -= dt * speed;
                 }
                 if(input.getKey(GLFW_KEY_D)) {
-                    testRay.origin.z += dt * speed;
+                    terrain->position.z += dt * speed;
                 }
                 if(input.getKey(GLFW_KEY_SPACE)) {
-                    testRay.origin.y += dt * speed;
+                    terrain->position.y += dt * speed;
                 }
                 if(input.getKey(GLFW_KEY_C)) {
-                    testRay.origin.y -= dt * speed;
+                    terrain->position.y -= dt * speed;
                 }
 
-                if(input.getKey(GLFW_KEY_LEFT)) {
-                    testRay.direction = glm::quat(vec3(0,glm::radians(dt*10),0)) * testRay.direction;
-                }
-                if(input.getKey(GLFW_KEY_RIGHT)) {
-                    testRay.direction = glm::quat(vec3(0,glm::radians(-dt*10),0)) * testRay.direction;
-                }
-                if(input.getKey(GLFW_KEY_UP)) {
-                    testRay.direction = glm::quat(vec3(0,0,glm::radians(dt*10))) * testRay.direction;
-                }
-                if(input.getKey(GLFW_KEY_DOWN)) {
-                    testRay.direction = glm::quat(vec3(0,0,glm::radians(-dt*10))) * testRay.direction;
-                }
+                // if(input.getKey(GLFW_KEY_LEFT)) {
+                //     construction->rotate(vec3(0,glm::radians(dt*10),0));
+                // }
+                // if(input.getKey(GLFW_KEY_RIGHT)) {
+                //     construction->rotate(vec3(0,glm::radians(-dt*10),0));
+                // }
+                // if(input.getKey(GLFW_KEY_UP)) {
+                //     construction->rotate(vec3(0,0,glm::radians(dt*10)));
+                // }
+                // if(input.getKey(GLFW_KEY_DOWN)) {
+                //     construction->rotate(vec3(0,0,glm::radians(-dt*10)));
+                // }
             } else {
                 player->processInput(input);
             }
             
         }
         
-        // auto hit_opt = cube.raycast(Ray(player->getEyePosition(),player->getEyeDirection()));
-        // if(hit_opt) {
-        //     auto hit = hit_opt.value();
-        //     //Debug::drawPoint(hit.point,Color::blue);
-        //     if(input.getMouseButtonPressed(GLFW_MOUSE_BUTTON_1)) {
-        //         cube.applyForce(player->getEyeDirection()*15.0f,hit.point);
-        //     }
-        // }
 
+        //auto hit_opt = terrain->raycast(player->getLookRay(),10);
+        auto worldhit_opt = world.raycast(Ray(player->getEyePosition(),player->getEyeDirection()),10);
+        if(worldhit_opt) {
+            auto worldHit = worldhit_opt.value();
+            auto hit = worldHit.hit;
+            Debug::drawPoint(hit.point,Color::red);
+            Debug::drawLine(hit.point,hit.point+hit.normal,Color::red);
+        }
         
-
-        terrain->drawCellsOnRay(testRay,10);
+        //std::cout << StringHelper::toString(testRay.direction) << std::endl;
+        //terrain->drawCellsOnRay(testRay,10);
 
         // if(input.getKeyPressed(GLFW_KEY_P)) {
         //     playPhysics = !playPhysics;
@@ -272,20 +268,21 @@ int main()
 
         if(console.enabled) console.render(vec2(width,height),registry.textShader);
 
-        glDisable(GL_DEPTH_TEST);
         Debug::renderDebugShapes(world.getCamera());
         Debug::clearDebugShapes();
-
+        
+        glDisable(GL_DEPTH_TEST);
         interface.screenSize = glm::ivec2(width,height);
         toolbarWidget.player = player;
         toolbarWidget.render(interface);
-
+        
+        
         cursorModel.render(glm::mat4(1.0f),glm::scale(glm::mat4(1.0f),vec3(4,4,4)),glm::ortho(-width/2.0f,width/2.0f,-height/2.0f,height/2.0f),*Debug::getShader());
         glEnable(GL_DEPTH_TEST);
         
         glfwSwapBuffers(window);
         input.clearInputBuffers(); //do it before we poll for events
-        glfwPollEvents();    
+        glfwPollEvents();
     }
 
     glfwTerminate();

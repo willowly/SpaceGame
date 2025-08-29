@@ -118,36 +118,36 @@ class Construction : public RigidbodyActor {
             
         }
 
-        void step(float dt,World* world) {
+        void step(World* world,float dt) {
             
             
 
             // i have no idea why z and x are inverted :shrug:
-            if(moveControl.z > 0) {
-                applyForce(vec3(0,0,-1) * thrustForces[BlockFacing::FORWARD] * moveControl.z);
-            }
-            if(moveControl.z < 0) {
-                applyForce(vec3(0,0,-1) * thrustForces[BlockFacing::BACKWARD] * moveControl.z);
-            }
-            if(moveControl.x < 0) {
-                applyForce(vec3(-1,0,0) * thrustForces[BlockFacing::LEFT] * moveControl.x);
-            }
-            if(moveControl.x > 0) {
-                applyForce(vec3(-1,0,0) * thrustForces[BlockFacing::RIGHT] * moveControl.x);
-            }
-            if(moveControl.y < 0) {
-                applyForce(vec3(0,1,0) * thrustForces[BlockFacing::UP] * moveControl.y);
-            }
-            if(moveControl.y > 0) {
-                applyForce(vec3(0,1,0) * thrustForces[BlockFacing::DOWN] * moveControl.y);
-            }
-            //velocity = MathHelper::moveTowards(velocity,rotation * targetVelocity,thrustForce * dt);
-            rotation = glm::slerp(rotation,targetRotation,turnForce * dt);
+            // if(moveControl.z > 0) {
+            //     applyForce(vec3(0,0,-1) * thrustForces[BlockFacing::FORWARD] * moveControl.z);
+            // }
+            // if(moveControl.z < 0) {
+            //     applyForce(vec3(0,0,-1) * thrustForces[BlockFacing::BACKWARD] * moveControl.z);
+            // }
+            // if(moveControl.x < 0) {
+            //     applyForce(vec3(-1,0,0) * thrustForces[BlockFacing::LEFT] * moveControl.x);
+            // }
+            // if(moveControl.x > 0) {
+            //     applyForce(vec3(-1,0,0) * thrustForces[BlockFacing::RIGHT] * moveControl.x);
+            // }
+            // if(moveControl.y < 0) {
+            //     applyForce(vec3(0,1,0) * thrustForces[BlockFacing::UP] * moveControl.y);
+            // }
+            // if(moveControl.y > 0) {
+            //     applyForce(vec3(0,1,0) * thrustForces[BlockFacing::DOWN] * moveControl.y);
+            // }
+            // //velocity = MathHelper::moveTowards(velocity,rotation * targetVelocity,thrustForce * dt);
+            // rotation = glm::slerp(rotation,targetRotation,turnForce * dt);
             
         }
 
         void render(Camera& camera,float dt) {
-            int i = 0;
+            size_t i = 0;
             for (int z = min.z; z <= max.z; z++)
             {
                 for (int y = min.y; y <= max.y; y++)
@@ -167,14 +167,6 @@ class Construction : public RigidbodyActor {
                     }
                 }
             }
-            Debug::drawRay(transformPoint(vec3(0,0,1)),transformDirection(vec3(0,0,0.1) * thrustForces[BlockFacing::FORWARD]));
-            Debug::drawRay(transformPoint(vec3(0,0,-1)),transformDirection(vec3(0,0,-0.1) * thrustForces[BlockFacing::BACKWARD]));
-
-            Debug::drawRay(transformPoint(vec3(0,1,0)),transformDirection(vec3(0,0.1,0) * thrustForces[BlockFacing::UP]));
-            Debug::drawRay(transformPoint(vec3(0,-1,0)),transformDirection(vec3(0,-0.1,0) * thrustForces[BlockFacing::DOWN]));
-
-            Debug::drawRay(transformPoint(vec3(1,0,0)),transformDirection(vec3(0.1,0,0) * thrustForces[BlockFacing::RIGHT]));
-            Debug::drawRay(transformPoint(vec3(-1,0,0)),transformDirection(vec3(-0.1,0,0) * thrustForces[BlockFacing::LEFT]));
 
         }
 
@@ -191,11 +183,7 @@ class Construction : public RigidbodyActor {
             min = newMin;
             max = newMax;
 
-            // for(auto& pair : blockMap) {
-            //     std::cout << "<" << pair.first.x << "," << pair.first.y << "," << pair.first.z <<  ">:" << pair.second << std::endl;
-            // }
-
-            int i = 0;
+            //int i = 0;
             blockData.clear();
             for (int z = newMin.z; z <= newMax.z; z++)
             {
@@ -212,10 +200,40 @@ class Construction : public RigidbodyActor {
                             //std::cout << "e,";
                             blockData.push_back(BlockData());
                         }
+                        //i++;
+                    }
+                }
+            }
+        }
+
+        virtual std::optional<RaycastHit> raycast(Ray ray, float dist) {
+            int i = 0;
+            std::optional<RaycastHit> result = std::nullopt;
+            Ray localRay = Ray(inverseTransformPoint(ray.origin),inverseTransformDirection(ray.direction));
+            for (int z = min.z; z <= max.z; z++)
+            {
+                for (int y = min.y; y <= max.y; y++)
+                {
+                    for (int x = min.x; x <= max.x; x++)
+                    {
+                        if(blockData[i].block != nullptr) {
+                            auto hitopt = Physics::intersectRayBox(vec3(x,y,z),vec3(0.5),localRay);
+                            if(hitopt) {
+                                
+                                auto hit = hitopt.value();
+                                if(hit.distance <= dist) {
+                                    hit.point = transformPoint(hit.point);
+                                    hit.normal = transformDirection(hit.normal);
+                                    result = hit;
+                                    dist = hit.distance; //distance stays the same when transformed
+                                }
+                            }
+                        }
                         i++;
                     }
                 }
             }
+            return result;
         }
 
         void setBlock(ivec3 location,Block* block,BlockFacing facing) {
@@ -279,8 +297,8 @@ class Construction : public RigidbodyActor {
             return std::pair(data.block,data.state);
         }
 
-        void addCollisionShapes(rp3d::PhysicsCommon* common) {
-
+        vec3 blockCenterLocal(ivec3 location) {
+            return vec3(location.x+0.5f,location.y+0.5f,location.z+0.5f);
         }
 
         bool isInsideBounds(ivec3 location) {
@@ -291,7 +309,6 @@ class Construction : public RigidbodyActor {
             if(location.x < min.x) return false;
             if(location.y < min.y) return false;
             if(location.z < min.z) return false;
-
             return true;
         }
 

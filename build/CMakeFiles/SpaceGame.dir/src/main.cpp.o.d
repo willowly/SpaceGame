@@ -1,4 +1,5 @@
 CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
+  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/share/asan_ignorelist.txt \
   /Users/willow/Documents/GitHub/SpaceGame/src/main.cpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/glad/glad.h \
   /Users/willow/Documents/GitHub/SpaceGame/include/KHR/khrplatform.h \
@@ -1205,124 +1206,20 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/norm.inl \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/quaternion.inl \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/actor.hpp \
-  /usr/local/include/reactphysics3d/reactphysics3d.h \
-  /usr/local/include/reactphysics3d/configuration.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/sstream \
-  /usr/local/include/reactphysics3d/decimal.h \
-  /usr/local/include/reactphysics3d/containers/Pair.h \
-  /usr/local/include/reactphysics3d/containers/containers_common.h \
-  /usr/local/include/reactphysics3d/mathematics/mathematics.h \
-  /usr/local/include/reactphysics3d/mathematics/Matrix3x3.h \
-  /usr/local/include/reactphysics3d/mathematics/Vector3.h \
-  /usr/local/include/reactphysics3d/mathematics/mathematics_common.h \
-  /usr/local/include/reactphysics3d/mathematics/Matrix2x2.h \
-  /usr/local/include/reactphysics3d/mathematics/Vector2.h \
-  /usr/local/include/reactphysics3d/mathematics/mathematics_functions.h \
-  /usr/local/include/reactphysics3d/containers/Array.h \
-  /usr/local/include/reactphysics3d/memory/MemoryAllocator.h \
-  /usr/local/include/reactphysics3d/mathematics/Quaternion.h \
-  /usr/local/include/reactphysics3d/mathematics/Transform.h \
-  /usr/local/include/reactphysics3d/mathematics/Ray.h \
-  /usr/local/include/reactphysics3d/body/Body.h \
-  /usr/local/include/reactphysics3d/engine/Entity.h \
-  /usr/local/include/reactphysics3d/collision/shapes/AABB.h \
-  /usr/local/include/reactphysics3d/body/RigidBody.h \
-  /usr/local/include/reactphysics3d/engine/PhysicsCommon.h \
-  /usr/local/include/reactphysics3d/memory/MemoryManager.h \
-  /usr/local/include/reactphysics3d/memory/DefaultAllocator.h \
-  /usr/local/include/reactphysics3d/memory/PoolAllocator.h \
-  /usr/local/include/reactphysics3d/memory/HeapAllocator.h \
-  /usr/local/include/reactphysics3d/containers/Map.h \
-  /usr/local/include/reactphysics3d/memory/SingleFrameAllocator.h \
-  /usr/local/include/reactphysics3d/engine/PhysicsWorld.h \
-  /usr/local/include/reactphysics3d/constraint/Joint.h \
-  /usr/local/include/reactphysics3d/engine/EntityManager.h \
-  /usr/local/include/reactphysics3d/containers/Deque.h \
-  /usr/local/include/reactphysics3d/components/BodyComponents.h \
-  /usr/local/include/reactphysics3d/components/Components.h \
-  /usr/local/include/reactphysics3d/components/RigidBodyComponents.h \
-  /usr/local/include/reactphysics3d/containers/Set.h \
-  /usr/local/include/reactphysics3d/components/TransformComponents.h \
-  /usr/local/include/reactphysics3d/components/ColliderComponents.h \
-  /usr/local/include/reactphysics3d/engine/Material.h \
-  /usr/local/include/reactphysics3d/components/JointComponents.h \
-  /usr/local/include/reactphysics3d/components/BallAndSocketJointComponents.h \
-  /usr/local/include/reactphysics3d/components/FixedJointComponents.h \
-  /usr/local/include/reactphysics3d/components/HingeJointComponents.h \
-  /usr/local/include/reactphysics3d/components/SliderJointComponents.h \
-  /usr/local/include/reactphysics3d/collision/CollisionCallback.h \
-  /usr/local/include/reactphysics3d/collision/ContactPair.h \
-  /usr/local/include/reactphysics3d/engine/OverlappingPairs.h \
-  /usr/local/include/reactphysics3d/collision/Collider.h \
-  /usr/local/include/reactphysics3d/collision/shapes/CollisionShape.h \
-  /usr/local/include/reactphysics3d/utils/Profiler.h \
-  /usr/local/include/reactphysics3d/utils/Logger.h \
-  /usr/local/include/reactphysics3d/constraint/ContactPoint.h \
-  /usr/local/include/reactphysics3d/collision/ContactPointInfo.h \
-  /usr/local/include/reactphysics3d/collision/OverlapCallback.h \
-  /usr/local/include/reactphysics3d/systems/ConstraintSolverSystem.h \
-  /usr/local/include/reactphysics3d/systems/SolveBallAndSocketJointSystem.h \
-  /usr/local/include/reactphysics3d/systems/SolveFixedJointSystem.h \
-  /usr/local/include/reactphysics3d/systems/SolveHingeJointSystem.h \
-  /usr/local/include/reactphysics3d/systems/SolveSliderJointSystem.h \
-  /usr/local/include/reactphysics3d/systems/CollisionDetectionSystem.h \
-  /usr/local/include/reactphysics3d/systems/BroadPhaseSystem.h \
-  /usr/local/include/reactphysics3d/collision/broadphase/DynamicAABBTree.h \
-  /usr/local/include/reactphysics3d/containers/LinkedList.h \
-  /usr/local/include/reactphysics3d/collision/ContactManifoldInfo.h \
-  /usr/local/include/reactphysics3d/collision/ContactManifold.h \
-  /usr/local/include/reactphysics3d/collision/narrowphase/NarrowPhaseInput.h \
-  /usr/local/include/reactphysics3d/collision/narrowphase/NarrowPhaseInfoBatch.h \
-  /usr/local/include/reactphysics3d/collision/narrowphase/CollisionDispatch.h \
-  /usr/local/include/reactphysics3d/collision/narrowphase/SphereVsSphereAlgorithm.h \
-  /usr/local/include/reactphysics3d/collision/narrowphase/NarrowPhaseAlgorithm.h \
-  /usr/local/include/reactphysics3d/collision/narrowphase/SphereVsConvexPolyhedronAlgorithm.h \
-  /usr/local/include/reactphysics3d/collision/narrowphase/SphereVsCapsuleAlgorithm.h \
-  /usr/local/include/reactphysics3d/collision/narrowphase/CapsuleVsCapsuleAlgorithm.h \
-  /usr/local/include/reactphysics3d/collision/narrowphase/CapsuleVsConvexPolyhedronAlgorithm.h \
-  /usr/local/include/reactphysics3d/collision/narrowphase/ConvexPolyhedronVsConvexPolyhedronAlgorithm.h \
-  /usr/local/include/reactphysics3d/collision/HalfEdgeStructure.h \
-  /usr/local/include/reactphysics3d/systems/ContactSolverSystem.h \
-  /usr/local/include/reactphysics3d/systems/DynamicsSystem.h \
-  /usr/local/include/reactphysics3d/engine/Islands.h \
-  /usr/local/include/reactphysics3d/utils/DebugRenderer.h \
-  /usr/local/include/reactphysics3d/engine/EventListener.h \
-  /usr/local/include/reactphysics3d/collision/shapes/SphereShape.h \
-  /usr/local/include/reactphysics3d/collision/shapes/ConvexShape.h \
-  /usr/local/include/reactphysics3d/collision/shapes/BoxShape.h \
-  /usr/local/include/reactphysics3d/collision/shapes/ConvexPolyhedronShape.h \
-  /usr/local/include/reactphysics3d/collision/shapes/CapsuleShape.h \
-  /usr/local/include/reactphysics3d/collision/shapes/HeightFieldShape.h \
-  /usr/local/include/reactphysics3d/collision/shapes/ConcaveShape.h \
-  /usr/local/include/reactphysics3d/collision/shapes/TriangleShape.h \
-  /usr/local/include/reactphysics3d/collision/HeightField.h \
-  /usr/local/include/reactphysics3d/collision/shapes/ConvexMeshShape.h \
-  /usr/local/include/reactphysics3d/collision/ConvexMesh.h \
-  /usr/local/include/reactphysics3d/collision/shapes/ConcaveMeshShape.h \
-  /usr/local/include/reactphysics3d/collision/TriangleMesh.h \
-  /usr/local/include/reactphysics3d/utils/DefaultLogger.h \
-  /usr/local/include/reactphysics3d/collision/PolygonVertexArray.h \
-  /usr/local/include/reactphysics3d/collision/VertexArray.h \
-  /usr/local/include/reactphysics3d/collision/RaycastInfo.h \
-  /usr/local/include/reactphysics3d/collision/TriangleVertexArray.h \
-  /usr/local/include/reactphysics3d/constraint/BallAndSocketJoint.h \
-  /usr/local/include/reactphysics3d/constraint/SliderJoint.h \
-  /usr/local/include/reactphysics3d/constraint/HingeJoint.h \
-  /usr/local/include/reactphysics3d/constraint/FixedJoint.h \
-  /usr/local/include/reactphysics3d/utils/Message.h \
+  /Users/willow/Documents/GitHub/SpaceGame/src/collision/intersections.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/engine/debug.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/helper/math-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/block/block.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/tool.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/world.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/helper/collision-helper.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/engine/debug.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/helper/math-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/actor-factory-fwd.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/construction.hpp \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/map \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__tree \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/rigidbody-actor.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/helper/physics-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/block/block-state.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/item/tool-user.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/engine/input.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-all.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/sol/sol.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/sol/config.hpp \
@@ -1330,6 +1227,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /usr/local/include/lua/luaconf.h /usr/local/include/lua/lualib.h \
   /usr/local/include/lua/lauxlib.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/forward_list \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/sstream \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-general.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-texture.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-material.hpp \
@@ -1343,8 +1241,10 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-registry-block.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/block/cockpit-block.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/character.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/engine/input.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/pickaxe-tool.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/actor/terrain.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/helper/terrain-helper.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/include/SimplexNoise.h \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/place-block-tool.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/block/thruster-block.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/interface/console.hpp \
@@ -1374,9 +1274,6 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-src/include/freetype/ftstroke.h \
   /Users/willow/Documents/GitHub/SpaceGame/src/interface/interface.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/interface/toolbar-widget.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/actor/terrain.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/helper/terrain-helper.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/SimplexNoise.h \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/random-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/actor-factory.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/actors-all.hpp

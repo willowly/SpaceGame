@@ -10,12 +10,9 @@
 #include <iostream>
 #include "helper/math-helper.hpp"
 #include "helper/string-helper.hpp"
-#include "helper/physics-helper.hpp"
 #include "engine/world.hpp"
 
-#include "helper/collision-helper.hpp"
-
-using Physics::intersectRayBox,std::optional,glm::vec3,glm::mat3,MathHelper::lerp;
+using std::optional,glm::vec3,glm::mat3,MathHelper::lerp;
 
 class RigidbodyActor : public Actor {
 
@@ -52,7 +49,7 @@ class RigidbodyActor : public Actor {
             
         }
 
-        virtual void step(float dt,World* world) {
+        virtual void step(World* world,float dt) {
             // velocity += accumVelocity;
             // accumVelocity = vec3(0);
             // angularVelocity += accumAngularVelocity;
@@ -105,13 +102,9 @@ class RigidbodyActor : public Actor {
             return glm::cross(angularVelocity,point) + velocity;
         }
 
-        virtual void addCollisionShapes(rp3d::PhysicsCommon* common) {
-            
-        }
-
-        optional<RaycastHit> raycast(Ray ray) {
-            return intersectRayBox(position,vec3(1.0f),rotation,ray);
-        }
+        // virtual optional<RaycastHit> raycast(Ray ray,float distance) {
+        //     return Physics::intersectRayBox(position,vec3(1.0f),rotation,ray);
+        // }
 
         void collideWithPlane() {
             std::vector<Contact> contacts;
@@ -259,7 +252,8 @@ class RigidbodyActor : public Actor {
         static void transformInertiaTensor(glm::mat3 &iitWorld, const glm::quat &q, const glm::mat3 &iitBody)
         {
 
-            const float* rotMatData = glm::value_ptr(glm::toMat4(q));
+            glm::mat4 qMat = glm::toMat4(q);
+            const float* rotMatData = glm::value_ptr(qMat);
             const float* ittBodyData = glm::value_ptr(iitBody);
 
             float t4 = rotMatData[0]*ittBodyData[0]+

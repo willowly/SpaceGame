@@ -1,4 +1,5 @@
 #include "tool.hpp"
+#include "actor/terrain.hpp"
 
 
 class PickaxeTool : public Tool {
@@ -13,18 +14,33 @@ class PickaxeTool : public Tool {
             
         }
 
-        void use(World* world,vec3 position,vec3 direction) {
-            ph::RaycastCallback callback;
-            world->raycast(position,direction,10,&callback);
-            if(callback.success) {
-                ActorUserData* data = static_cast<ActorUserData*>(callback.body->getUserData());
-                Construction* construction = dynamic_cast<Construction*>(data->actor);
+        float mineRadius = 0.75;
+        float mineAmount = 0.5;
+
+        void pickaxe(World* world,Ray ray) {
+            
+            auto worldHitOpt = world->raycast(ray,10);
+            if(worldHitOpt) {
+                auto worldHit = worldHitOpt.value();
+                Construction* construction = dynamic_cast<Construction*>(worldHit.actor);
                 if(construction != nullptr) {
-                    vec3 placePointWorld = callback.worldPoint - callback.worldNormal * 0.5f;
+                    vec3 placePointWorld = worldHit.hit.point - worldHit.hit.normal * 0.5f;
                     vec3 placePointLocal = construction->inverseTransformPoint(placePointWorld);
                     ivec3 placePointLocalInt = glm::round(placePointLocal);
                     construction->setBlock(placePointLocalInt,nullptr,BlockFacing::FORWARD);
                 }
+                Terrain* terrain = dynamic_cast<Terrain*>(worldHit.actor);
+                if(terrain != nullptr) {
+                    terrain->terraformSphere(worldHit.hit.point,mineRadius,-mineAmount);
+                    terrain->generateMesh();
+                }
+            }
+        }
+
+        virtual void step(World* world,ToolUser* user,float dt) {
+            if(clickInput) {
+                clickInput = false;
+                pickaxe(world,user->getLookRay());
             }
         }
 

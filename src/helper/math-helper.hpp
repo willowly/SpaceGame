@@ -42,6 +42,10 @@ namespace MathHelper {
         }
         return floor(a);
     }
+
+    float fromFloor(float a) {
+        return a - floor(a);
+    }
 }
 
 template <>

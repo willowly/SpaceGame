@@ -5,7 +5,6 @@
 #include "helper/terrain-helper.hpp"
 #include "engine/debug.hpp"
 #include "SimplexNoise.h"
-#include "helper/collision-helper.hpp"
 
 using std::unique_ptr;
 
@@ -16,10 +15,10 @@ class Terrain : public Actor {
 
     public:
         unique_ptr<Model> dynamicModel;
-        int size = 50;
-        float noiseScale = 100;
+        int size = 10;
+        float noiseScale = 30;
         float surfaceLevel = 0.5;
-        float cellSize = 2.0f;
+        float cellSize = 0.5f;
 
     
 
@@ -60,11 +59,13 @@ class Terrain : public Actor {
     }
 
     virtual void render(Camera& camera,float dt) {
+        float clock = (float)glfwGetTime();
         if(material == nullptr) {
             std::cout << "null material" << std::endl;
             return;
         }
         model->render(position,camera,*material);
+        //std::cout << "render time: " << (float)glfwGetTime() - clock << std::endl;
     }
 
     int getPointIndex(int x,int y,int z) {
@@ -85,6 +86,7 @@ class Terrain : public Actor {
 
 
     void generateMesh() {
+        float clock = (float)glfwGetTime();
         model->vertices.clear();
         model->faces.clear();
         model->normals.clear();
@@ -116,11 +118,7 @@ class Terrain : public Actor {
 
         model->updateData();
         model->bindData();
-    }
-
-
-    void raycast(Ray ray,float distance) {
-        
+        std::cout << "generate time: " << (float)glfwGetTime() - clock << std::endl;
     }
 
     void addCell(int config,vec3 cellPos) {
@@ -207,27 +205,65 @@ class Terrain : public Actor {
         return cellPos;
     }
 
-    void terraformSphere(vec3 pos,int radius,float change) {
+    virtual std::optional<RaycastHit> raycast(Ray ray, float dist) {
         int i = 0;
-        for (int z = 0; z < size; z++)
+        float clock = (float)glfwGetTime();
+        std::optional<RaycastHit> result = std::nullopt;
+        Ray localRay = Ray(inverseTransformPoint(ray.origin),inverseTransformDirection(ray.direction));
+        for (auto& face : model->faces)
         {
-            for (int y = 0; y < size; y++)
+            vec3 a = model->vertices[face.vertexIndices[0]];
+            vec3 b = model->vertices[face.vertexIndices[1]];
+            vec3 c = model->vertices[face.vertexIndices[2]];
+
+            auto hitopt = Physics::intersectRayTriangle(a,b,c,localRay);
+            if(hitopt) {
+                
+                auto hit = hitopt.value();
+                if(hit.distance <= dist) {
+                    hit.point = transformPoint(hit.point);
+                    hit.normal = transformDirection(hit.normal);
+                    result = hit;
+                    dist = hit.distance; //distance stays the same when transformed
+                }
+            }
+            i++;
+                
+        }
+        //std::cout << "raycast time: " << (float)glfwGetTime() - clock << std::endl;
+        return result;
+    }
+    
+    //need to manually regenerate the mesh (in case things want to)
+    void terraformSphere(vec3 pos,float radius,float change) {
+
+        float clock = (float)glfwGetTime();
+        auto posCellSpace = getCellAtWorldPos(pos);
+        auto radiusCellSpace = radius/cellSize;
+        std::cout << radiusCellSpace << std::endl;
+        std::cout << posCellSpace.z-radiusCellSpace << std::endl;
+        std::cout << posCellSpace.z+radiusCellSpace << std::endl;
+        for (int z = floor(std::max(0.0f,posCellSpace.z-radiusCellSpace)); z < ceil(std::min((float)size,posCellSpace.z+radiusCellSpace)); z++)
+        {
+            for (int y = floor(std::max(0.0f,posCellSpace.y-radiusCellSpace)); y < ceil(std::min((float)size,posCellSpace.y+radiusCellSpace)); y++)
             {
-                for (int x = 0; x < size; x++)
+                for (int x = floor(std::max(0.0f,posCellSpace.x-radiusCellSpace)); x < ceil(std::min((float)size,posCellSpace.x+radiusCellSpace)); x++)
                 {
+                    int i = getPointIndex(x,y,z);
+                    
                     vec3 cellPos = getCellWorldPos(vec3(x,y,z));
                     float dist = glm::distance(cellPos,pos);
                     float influence = (radius-dist)/radius;
+                    
                     if(influence > 0) {
-                        //std::cout << "influence: " << influence << " data: " << terrainData[i] << std::endl;
                         terrainData[i] += change * influence;
                         terrainData[i] = std::min(std::max(terrainData[i],0.0f),1.0f);
-                        //std::cout << "data after: " << terrainData[i] << std::endl;
                     }
                     i++;
                 }
             }
         }
+        std::cout << "terraform time: " << (float)glfwGetTime() - clock << std::endl;
     }
 
 
@@ -240,16 +276,19 @@ class Terrain : public Actor {
         Ray cellSpaceRay = Ray(transformPoint(ray.origin),transformDirection(ray.direction));
         cellSpaceRay.origin = cellSpaceRay.origin/cellSize;
         float cellDist = dist/cellSize;
-        float yxSlope = cellSpaceRay.direction.y/cellSpaceRay.direction.x;
-        float zxSlope = cellSpaceRay.direction.z/cellSpaceRay.direction.x;
+        float yxSlope = cellSpaceRay.direction.y/abs(cellSpaceRay.direction.x);
+        float zxSlope = cellSpaceRay.direction.z/abs(cellSpaceRay.direction.x);
         std::cout << cellDist*cellSpaceRay.direction.x << std::endl;
-        int xDir = 1;
-        for(int i = xDir;xDir*i <= ceil(cellDist*abs(cellSpaceRay.direction.x))+1;i += xDir) {
+        int xDir = ray.direction.x > 0 ? 1 : -1;
+        float xOffset = MathHelper::fromFloor(cellSpaceRay.origin.x*xDir);
+        for(int i = 1;((i-1)*cellSize) <= (abs(cellSpaceRay.direction.x)*dist+xOffset);i++) {
+
+            
             
             ivec3 cellPos = ivec3(
-                    floor(i+cellSpaceRay.origin.x)-1,
-                    MathHelper::integerBelow(((i-std::fmod(cellSpaceRay.origin.x,1))*yxSlope)+cellSpaceRay.origin.y),
-                    MathHelper::integerBelow(((i-std::fmod(cellSpaceRay.origin.x,1))*zxSlope)+cellSpaceRay.origin.z)
+                    xDir*floor(i+cellSpaceRay.origin.x)-1,
+                    MathHelper::integerBelow(((i-xOffset)*yxSlope)+cellSpaceRay.origin.y),
+                    MathHelper::integerBelow(((i-xOffset)*zxSlope)+cellSpaceRay.origin.z)
             );
             Debug::drawCube(getCellWorldPos(cellPos),vec3(cellSize),Color::green);
         }
@@ -257,10 +296,13 @@ class Terrain : public Actor {
         float xySlope = cellSpaceRay.direction.x/cellSpaceRay.direction.y;
         float zySlope = cellSpaceRay.direction.z/cellSpaceRay.direction.y;
         for(int i = 1;i <= ceil(cellDist*cellSpaceRay.direction.y)+1;i++) {
+
+            float offset = MathHelper::fromFloor(cellSpaceRay.origin.y);
+
             ivec3 cellPos = ivec3(
-                    MathHelper::integerBelow(((i-std::fmod(cellSpaceRay.origin.y,1))*xySlope)+cellSpaceRay.origin.x),
+                    MathHelper::integerBelow(((i-offset)*xySlope)+cellSpaceRay.origin.x),
                     floor(i+cellSpaceRay.origin.y)-1,
-                    MathHelper::integerBelow(((i-std::fmod(cellSpaceRay.origin.y,1))*zySlope)+cellSpaceRay.origin.z)
+                    MathHelper::integerBelow(((i-offset)*zySlope)+cellSpaceRay.origin.z)
             );
             Debug::drawCube(getCellWorldPos(cellPos),vec3(cellSize),Color::magenta);
         }
@@ -268,12 +310,15 @@ class Terrain : public Actor {
         float xzSlope = cellSpaceRay.direction.x/cellSpaceRay.direction.z;
         float yzSlope = cellSpaceRay.direction.y/cellSpaceRay.direction.z;
         for(int i = 1;i <= ceil(cellDist*cellSpaceRay.direction.z)+1;i++) {
+
+            float offset = MathHelper::fromFloor(cellSpaceRay.origin.z);
+
             ivec3 cellPos = ivec3(
-                    MathHelper::integerBelow(((i-std::fmod(cellSpaceRay.origin.z,1))*xzSlope)+cellSpaceRay.origin.x),
-                    MathHelper::integerBelow(((i-std::fmod(cellSpaceRay.origin.z,1))*yzSlope)+cellSpaceRay.origin.y),
+                    MathHelper::integerBelow(((i-offset)*xzSlope)+cellSpaceRay.origin.x),
+                    MathHelper::integerBelow(((i-offset)*yzSlope)+cellSpaceRay.origin.y),
                     floor(i+cellSpaceRay.origin.z)-1
             );
-            Debug::drawCube(getCellWorldPos(cellPos),vec3(cellSize),Color::cyan);
+            Debug::drawCube(getCellWorldPos(cellPos),vec3(cellSize),Color::red);
         }
     }
 

@@ -932,6 +932,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/stdarg.h \
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/stddef.h \
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/stdint.h \
+  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/share/asan_ignorelist.txt \
   _deps/freetype-build/include/freetype/config/ftconfig.h \
   _deps/freetype-build/include/freetype/config/ftoption.h \
   _deps/freetype-src/include/freetype/config/ftheader.h \
@@ -1247,6 +1248,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
   /Users/willow/Documents/GitHub/SpaceGame/src/block/block.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/block/cockpit-block.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/block/thruster-block.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/collision/intersections.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/debug.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/input.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/loader.hpp \
@@ -1259,10 +1261,8 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
   /Users/willow/Documents/GitHub/SpaceGame/src/graphics/shader.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/graphics/text.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/graphics/texture.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/helper/collision-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/file-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/math-helper.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/helper/physics-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/random-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/string-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/terrain-helper.hpp \
@@ -1271,6 +1271,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
   /Users/willow/Documents/GitHub/SpaceGame/src/interface/toolbar-widget.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/pickaxe-tool.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/place-block-tool.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/item/tool-user.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/tool.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/sol/config.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/sol/sol.hpp \
@@ -1279,212 +1280,8 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
   /usr/local/include/lua/lua.h \
   /usr/local/include/lua/lua.hpp \
   /usr/local/include/lua/luaconf.h \
-  /usr/local/include/lua/lualib.h \
-  /usr/local/include/reactphysics3d/body/Body.h \
-  /usr/local/include/reactphysics3d/body/RigidBody.h \
-  /usr/local/include/reactphysics3d/collision/Collider.h \
-  /usr/local/include/reactphysics3d/collision/CollisionCallback.h \
-  /usr/local/include/reactphysics3d/collision/ContactManifold.h \
-  /usr/local/include/reactphysics3d/collision/ContactManifoldInfo.h \
-  /usr/local/include/reactphysics3d/collision/ContactPair.h \
-  /usr/local/include/reactphysics3d/collision/ContactPointInfo.h \
-  /usr/local/include/reactphysics3d/collision/ConvexMesh.h \
-  /usr/local/include/reactphysics3d/collision/HalfEdgeStructure.h \
-  /usr/local/include/reactphysics3d/collision/HeightField.h \
-  /usr/local/include/reactphysics3d/collision/OverlapCallback.h \
-  /usr/local/include/reactphysics3d/collision/PolygonVertexArray.h \
-  /usr/local/include/reactphysics3d/collision/RaycastInfo.h \
-  /usr/local/include/reactphysics3d/collision/TriangleMesh.h \
-  /usr/local/include/reactphysics3d/collision/TriangleVertexArray.h \
-  /usr/local/include/reactphysics3d/collision/VertexArray.h \
-  /usr/local/include/reactphysics3d/collision/broadphase/DynamicAABBTree.h \
-  /usr/local/include/reactphysics3d/collision/narrowphase/CapsuleVsCapsuleAlgorithm.h \
-  /usr/local/include/reactphysics3d/collision/narrowphase/CapsuleVsConvexPolyhedronAlgorithm.h \
-  /usr/local/include/reactphysics3d/collision/narrowphase/CollisionDispatch.h \
-  /usr/local/include/reactphysics3d/collision/narrowphase/ConvexPolyhedronVsConvexPolyhedronAlgorithm.h \
-  /usr/local/include/reactphysics3d/collision/narrowphase/NarrowPhaseAlgorithm.h \
-  /usr/local/include/reactphysics3d/collision/narrowphase/NarrowPhaseInfoBatch.h \
-  /usr/local/include/reactphysics3d/collision/narrowphase/NarrowPhaseInput.h \
-  /usr/local/include/reactphysics3d/collision/narrowphase/SphereVsCapsuleAlgorithm.h \
-  /usr/local/include/reactphysics3d/collision/narrowphase/SphereVsConvexPolyhedronAlgorithm.h \
-  /usr/local/include/reactphysics3d/collision/narrowphase/SphereVsSphereAlgorithm.h \
-  /usr/local/include/reactphysics3d/collision/shapes/AABB.h \
-  /usr/local/include/reactphysics3d/collision/shapes/BoxShape.h \
-  /usr/local/include/reactphysics3d/collision/shapes/CapsuleShape.h \
-  /usr/local/include/reactphysics3d/collision/shapes/CollisionShape.h \
-  /usr/local/include/reactphysics3d/collision/shapes/ConcaveMeshShape.h \
-  /usr/local/include/reactphysics3d/collision/shapes/ConcaveShape.h \
-  /usr/local/include/reactphysics3d/collision/shapes/ConvexMeshShape.h \
-  /usr/local/include/reactphysics3d/collision/shapes/ConvexPolyhedronShape.h \
-  /usr/local/include/reactphysics3d/collision/shapes/ConvexShape.h \
-  /usr/local/include/reactphysics3d/collision/shapes/HeightFieldShape.h \
-  /usr/local/include/reactphysics3d/collision/shapes/SphereShape.h \
-  /usr/local/include/reactphysics3d/collision/shapes/TriangleShape.h \
-  /usr/local/include/reactphysics3d/components/BallAndSocketJointComponents.h \
-  /usr/local/include/reactphysics3d/components/BodyComponents.h \
-  /usr/local/include/reactphysics3d/components/ColliderComponents.h \
-  /usr/local/include/reactphysics3d/components/Components.h \
-  /usr/local/include/reactphysics3d/components/FixedJointComponents.h \
-  /usr/local/include/reactphysics3d/components/HingeJointComponents.h \
-  /usr/local/include/reactphysics3d/components/JointComponents.h \
-  /usr/local/include/reactphysics3d/components/RigidBodyComponents.h \
-  /usr/local/include/reactphysics3d/components/SliderJointComponents.h \
-  /usr/local/include/reactphysics3d/components/TransformComponents.h \
-  /usr/local/include/reactphysics3d/configuration.h \
-  /usr/local/include/reactphysics3d/constraint/BallAndSocketJoint.h \
-  /usr/local/include/reactphysics3d/constraint/ContactPoint.h \
-  /usr/local/include/reactphysics3d/constraint/FixedJoint.h \
-  /usr/local/include/reactphysics3d/constraint/HingeJoint.h \
-  /usr/local/include/reactphysics3d/constraint/Joint.h \
-  /usr/local/include/reactphysics3d/constraint/SliderJoint.h \
-  /usr/local/include/reactphysics3d/containers/Array.h \
-  /usr/local/include/reactphysics3d/containers/Deque.h \
-  /usr/local/include/reactphysics3d/containers/LinkedList.h \
-  /usr/local/include/reactphysics3d/containers/Map.h \
-  /usr/local/include/reactphysics3d/containers/Pair.h \
-  /usr/local/include/reactphysics3d/containers/Set.h \
-  /usr/local/include/reactphysics3d/containers/containers_common.h \
-  /usr/local/include/reactphysics3d/decimal.h \
-  /usr/local/include/reactphysics3d/engine/Entity.h \
-  /usr/local/include/reactphysics3d/engine/EntityManager.h \
-  /usr/local/include/reactphysics3d/engine/EventListener.h \
-  /usr/local/include/reactphysics3d/engine/Islands.h \
-  /usr/local/include/reactphysics3d/engine/Material.h \
-  /usr/local/include/reactphysics3d/engine/OverlappingPairs.h \
-  /usr/local/include/reactphysics3d/engine/PhysicsCommon.h \
-  /usr/local/include/reactphysics3d/engine/PhysicsWorld.h \
-  /usr/local/include/reactphysics3d/mathematics/Matrix2x2.h \
-  /usr/local/include/reactphysics3d/mathematics/Matrix3x3.h \
-  /usr/local/include/reactphysics3d/mathematics/Quaternion.h \
-  /usr/local/include/reactphysics3d/mathematics/Ray.h \
-  /usr/local/include/reactphysics3d/mathematics/Transform.h \
-  /usr/local/include/reactphysics3d/mathematics/Vector2.h \
-  /usr/local/include/reactphysics3d/mathematics/Vector3.h \
-  /usr/local/include/reactphysics3d/mathematics/mathematics.h \
-  /usr/local/include/reactphysics3d/mathematics/mathematics_common.h \
-  /usr/local/include/reactphysics3d/mathematics/mathematics_functions.h \
-  /usr/local/include/reactphysics3d/memory/DefaultAllocator.h \
-  /usr/local/include/reactphysics3d/memory/HeapAllocator.h \
-  /usr/local/include/reactphysics3d/memory/MemoryAllocator.h \
-  /usr/local/include/reactphysics3d/memory/MemoryManager.h \
-  /usr/local/include/reactphysics3d/memory/PoolAllocator.h \
-  /usr/local/include/reactphysics3d/memory/SingleFrameAllocator.h \
-  /usr/local/include/reactphysics3d/reactphysics3d.h \
-  /usr/local/include/reactphysics3d/systems/BroadPhaseSystem.h \
-  /usr/local/include/reactphysics3d/systems/CollisionDetectionSystem.h \
-  /usr/local/include/reactphysics3d/systems/ConstraintSolverSystem.h \
-  /usr/local/include/reactphysics3d/systems/ContactSolverSystem.h \
-  /usr/local/include/reactphysics3d/systems/DynamicsSystem.h \
-  /usr/local/include/reactphysics3d/systems/SolveBallAndSocketJointSystem.h \
-  /usr/local/include/reactphysics3d/systems/SolveFixedJointSystem.h \
-  /usr/local/include/reactphysics3d/systems/SolveHingeJointSystem.h \
-  /usr/local/include/reactphysics3d/systems/SolveSliderJointSystem.h \
-  /usr/local/include/reactphysics3d/utils/DebugRenderer.h \
-  /usr/local/include/reactphysics3d/utils/DefaultLogger.h \
-  /usr/local/include/reactphysics3d/utils/Logger.h \
-  /usr/local/include/reactphysics3d/utils/Message.h \
-  /usr/local/include/reactphysics3d/utils/Profiler.h
+  /usr/local/include/lua/lualib.h
 
-
-/usr/local/include/reactphysics3d/utils/Profiler.h:
-
-/usr/local/include/reactphysics3d/utils/Message.h:
-
-/usr/local/include/reactphysics3d/utils/Logger.h:
-
-/usr/local/include/reactphysics3d/systems/SolveSliderJointSystem.h:
-
-/usr/local/include/reactphysics3d/systems/SolveFixedJointSystem.h:
-
-/usr/local/include/reactphysics3d/systems/SolveBallAndSocketJointSystem.h:
-
-/usr/local/include/reactphysics3d/systems/CollisionDetectionSystem.h:
-
-/usr/local/include/reactphysics3d/memory/PoolAllocator.h:
-
-/usr/local/include/reactphysics3d/memory/HeapAllocator.h:
-
-/usr/local/include/reactphysics3d/mathematics/mathematics.h:
-
-/usr/local/include/reactphysics3d/mathematics/Vector3.h:
-
-/usr/local/include/reactphysics3d/mathematics/Vector2.h:
-
-/usr/local/include/reactphysics3d/mathematics/Quaternion.h:
-
-/usr/local/include/reactphysics3d/engine/PhysicsWorld.h:
-
-/usr/local/include/reactphysics3d/engine/PhysicsCommon.h:
-
-/usr/local/include/reactphysics3d/engine/OverlappingPairs.h:
-
-/usr/local/include/reactphysics3d/engine/Material.h:
-
-/usr/local/include/reactphysics3d/engine/Islands.h:
-
-/usr/local/include/reactphysics3d/decimal.h:
-
-/usr/local/include/reactphysics3d/containers/containers_common.h:
-
-/usr/local/include/reactphysics3d/containers/Set.h:
-
-/usr/local/include/reactphysics3d/containers/Pair.h:
-
-/usr/local/include/reactphysics3d/constraint/Joint.h:
-
-/usr/local/include/reactphysics3d/constraint/FixedJoint.h:
-
-/usr/local/include/reactphysics3d/components/SliderJointComponents.h:
-
-/usr/local/include/reactphysics3d/components/FixedJointComponents.h:
-
-/usr/local/include/reactphysics3d/components/Components.h:
-
-/usr/local/include/reactphysics3d/components/ColliderComponents.h:
-
-/usr/local/include/reactphysics3d/memory/SingleFrameAllocator.h:
-
-/usr/local/include/reactphysics3d/collision/shapes/TriangleShape.h:
-
-/usr/local/include/reactphysics3d/collision/shapes/HeightFieldShape.h:
-
-/usr/local/include/reactphysics3d/collision/shapes/ConvexPolyhedronShape.h:
-
-/usr/local/include/reactphysics3d/collision/shapes/CapsuleShape.h:
-
-/usr/local/include/reactphysics3d/collision/shapes/BoxShape.h:
-
-/usr/local/include/reactphysics3d/collision/shapes/AABB.h:
-
-/usr/local/include/reactphysics3d/collision/narrowphase/SphereVsSphereAlgorithm.h:
-
-/usr/local/include/reactphysics3d/collision/narrowphase/SphereVsConvexPolyhedronAlgorithm.h:
-
-/usr/local/include/reactphysics3d/collision/narrowphase/SphereVsCapsuleAlgorithm.h:
-
-/usr/local/include/reactphysics3d/collision/narrowphase/NarrowPhaseInput.h:
-
-/usr/local/include/reactphysics3d/collision/narrowphase/NarrowPhaseInfoBatch.h:
-
-/usr/local/include/reactphysics3d/collision/narrowphase/ConvexPolyhedronVsConvexPolyhedronAlgorithm.h:
-
-/usr/local/include/reactphysics3d/collision/narrowphase/CapsuleVsConvexPolyhedronAlgorithm.h:
-
-/usr/local/include/reactphysics3d/collision/narrowphase/CapsuleVsCapsuleAlgorithm.h:
-
-/usr/local/include/reactphysics3d/collision/broadphase/DynamicAABBTree.h:
-
-/usr/local/include/reactphysics3d/collision/PolygonVertexArray.h:
-
-/usr/local/include/reactphysics3d/collision/ConvexMesh.h:
-
-/usr/local/include/reactphysics3d/collision/CollisionCallback.h:
-
-/usr/local/include/reactphysics3d/collision/TriangleVertexArray.h:
-
-/usr/local/include/reactphysics3d/collision/Collider.h:
-
-/usr/local/include/reactphysics3d/body/RigidBody.h:
 
 /usr/local/include/lua/luaconf.h:
 
@@ -1494,13 +1291,13 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 
 /Users/willow/Documents/GitHub/SpaceGame/src/sol/config.hpp:
 
+/Users/willow/Documents/GitHub/SpaceGame/src/item/tool-user.hpp:
+
 /Users/willow/Documents/GitHub/SpaceGame/src/item/pickaxe-tool.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/src/interface/toolbar-widget.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/src/helper/terrain-helper.hpp:
-
-/Users/willow/Documents/GitHub/SpaceGame/src/helper/physics-helper.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/src/helper/math-helper.hpp:
 
@@ -1516,6 +1313,8 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 
 /Users/willow/Documents/GitHub/SpaceGame/src/engine/debug.hpp:
 
+/Users/willow/Documents/GitHub/SpaceGame/src/collision/intersections.hpp:
+
 /Users/willow/Documents/GitHub/SpaceGame/src/block/thruster-block.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/src/block/cockpit-block.hpp:
@@ -1524,8 +1323,6 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 
 /Users/willow/Documents/GitHub/SpaceGame/src/api/api-texture.hpp:
 
-/usr/local/include/reactphysics3d/memory/DefaultAllocator.h:
-
 /Users/willow/Documents/GitHub/SpaceGame/src/api/api-general.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/src/api/api-character.hpp:
@@ -1533,8 +1330,6 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 /Users/willow/Documents/GitHub/SpaceGame/src/api/api-actor.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/src/actor/rigidbody-actor.hpp:
-
-/usr/local/include/reactphysics3d/collision/ContactManifoldInfo.h:
 
 /Users/willow/Documents/GitHub/SpaceGame/src/actor/character.hpp:
 
@@ -1568,8 +1363,6 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/mat2x2.hpp:
 
-/usr/local/include/reactphysics3d/collision/shapes/SphereShape.h:
-
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/quaternion.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/ext/vector_double1_precision.hpp:
@@ -1583,8 +1376,6 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/ext/quaternion_float_precision.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/ext/quaternion_float.hpp:
-
-/usr/local/include/reactphysics3d/configuration.h:
 
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/ext/quaternion_double_precision.hpp:
 
@@ -1652,8 +1443,6 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/ext/vector_bool2_precision.hpp:
 
-/usr/local/include/reactphysics3d/containers/LinkedList.h:
-
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/ext/scalar_constants.inl:
 
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/ext/scalar_common.inl:
@@ -1664,8 +1453,6 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/ext/quaternion_exponential.inl:
 
-/usr/local/include/reactphysics3d/memory/MemoryAllocator.h:
-
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/ext/quaternion_common.inl:
 
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/ext/matrix_projection.inl:
@@ -1673,8 +1460,6 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/ext/matrix_float4x4_precision.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/ext/matrix_float4x4.hpp:
-
-/usr/local/include/reactphysics3d/collision/HeightField.h:
 
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/ext/matrix_float4x3.hpp:
 
@@ -1730,8 +1515,6 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/ext/vector_int4.hpp:
 
-/usr/local/include/reactphysics3d/collision/ContactManifold.h:
-
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/ext/vector_int1.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/ext/quaternion_geometric.hpp:
@@ -1782,15 +1565,13 @@ _deps/freetype-src/include/freetype/config/public-macros.h:
 
 _deps/freetype-src/include/freetype/config/ftstdlib.h:
 
-/usr/local/include/reactphysics3d/components/BallAndSocketJointComponents.h:
-
 /Users/willow/Documents/GitHub/SpaceGame/src/interface/interface.hpp:
 
 _deps/freetype-build/include/freetype/config/ftconfig.h:
 
-/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/float.h:
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/share/asan_ignorelist.txt:
 
-/usr/local/include/reactphysics3d/body/Body.h:
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/float.h:
 
 /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/__stddef_max_align_t.h:
 
@@ -1856,11 +1637,7 @@ _deps/freetype-build/include/freetype/config/ftconfig.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_types/_mode_t.h:
 
-/usr/local/include/reactphysics3d/collision/shapes/ConvexMeshShape.h:
-
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_types/_mach_port_t.h:
-
-/usr/local/include/reactphysics3d/collision/shapes/ConvexShape.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_types/_intptr_t.h:
 
@@ -1905,8 +1682,6 @@ _deps/freetype-src/include/freetype/ftbitmap.h:
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_types/_fd_copy.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_types/_fd_clr.h:
-
-/usr/local/include/reactphysics3d/mathematics/mathematics_functions.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_types/_errno_t.h:
 
@@ -2012,8 +1787,6 @@ _deps/freetype-src/include/freetype/fterrors.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/wchar.h:
 
-/usr/local/include/reactphysics3d/mathematics/mathematics_common.h:
-
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/vector:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/variant:
@@ -2029,8 +1802,6 @@ _deps/freetype-src/include/freetype/fterrors.h:
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/stdlib.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/stdint.h:
-
-/usr/local/include/reactphysics3d/collision/narrowphase/CollisionDispatch.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/stdexcept:
 
@@ -2268,8 +2039,6 @@ _deps/freetype-src/include/freetype/fterrors.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/array:
 
-/usr/local/include/reactphysics3d/systems/BroadPhaseSystem.h:
-
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__bit/countr.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__type_traits/is_move_constructible.h:
@@ -2285,8 +2054,6 @@ _deps/freetype-src/include/freetype/fterrors.h:
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__iterator/reverse_iterator.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__type_traits/is_member_object_pointer.h:
-
-/usr/local/include/reactphysics3d/collision/shapes/ConcaveShape.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__type_traits/is_member_function_pointer.h:
 
@@ -2309,8 +2076,6 @@ _deps/freetype-src/include/freetype/fterrors.h:
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/mat4x4.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/cstdlib:
-
-/usr/local/include/reactphysics3d/memory/MemoryManager.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__numeric/transform_reduce.h:
 
@@ -2404,15 +2169,11 @@ _deps/freetype-src/include/freetype/fterrors.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__type_traits/apply_cv.h:
 
-/usr/local/include/reactphysics3d/collision/ContactPair.h:
-
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__type_traits/add_volatile.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/stack:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__type_traits/add_rvalue_reference.h:
-
-/usr/local/include/reactphysics3d/components/JointComponents.h:
 
 /Users/willow/Documents/GitHub/SpaceGame/src/graphics/model.hpp:
 
@@ -2423,8 +2184,6 @@ _deps/freetype-src/include/freetype/fterrors.h:
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__tuple/sfinae_helpers.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__type_traits/type_identity.h:
-
-/usr/local/include/reactphysics3d/collision/narrowphase/NarrowPhaseAlgorithm.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__tuple/tuple_types.h:
 
@@ -2642,8 +2401,6 @@ _deps/freetype-src/include/freetype/fterrors.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__iterator/insert_iterator.h:
 
-/usr/local/include/reactphysics3d/components/BodyComponents.h:
-
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/glm.hpp:
 
 _deps/freetype-src/include/freetype/ftimage.h:
@@ -2659,8 +2416,6 @@ _deps/freetype-src/include/freetype/ftimage.h:
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/formatter_bool.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__iterator/incrementable_traits.h:
-
-/usr/local/include/reactphysics3d/collision/shapes/ConcaveMeshShape.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__memory/swap_allocator.h:
 
@@ -2800,19 +2555,13 @@ _deps/freetype-src/include/freetype/ftimage.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/binary_negate.h:
 
-/usr/local/include/reactphysics3d/utils/DebugRenderer.h:
-
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/binary_function.h:
-
-/usr/local/include/reactphysics3d/mathematics/Matrix3x3.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/float.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/cfloat:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/ranges_transform.h:
-
-/usr/local/include/reactphysics3d/collision/HalfEdgeStructure.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/write_escaped.h:
 
@@ -2831,8 +2580,6 @@ _deps/freetype-src/include/freetype/ftimage.h:
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__system_error/errc.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/replace_copy.h:
-
-/usr/local/include/reactphysics3d/constraint/HingeJoint.h:
 
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/ext/matrix_clip_space.hpp:
 
@@ -3078,10 +2825,6 @@ _deps/freetype-src/include/freetype/config/integer-types.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/pstl_backends/cpu_backends/merge.h:
 
-/usr/local/include/reactphysics3d/constraint/ContactPoint.h:
-
-/usr/local/include/reactphysics3d/components/TransformComponents.h:
-
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__bit/rotate.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/pstl_backend.h:
@@ -3089,8 +2832,6 @@ _deps/freetype-src/include/freetype/config/integer-types.h:
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__compare/compare_partial_order_fallback.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__bit/popcount.h:
-
-/usr/local/include/reactphysics3d/systems/ConstraintSolverSystem.h:
 
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/detail/type_mat4x4.hpp:
 
@@ -3110,13 +2851,9 @@ _deps/freetype-src/include/freetype/config/integer-types.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__bit/blsr.h:
 
-/usr/local/include/reactphysics3d/utils/DefaultLogger.h:
-
 /Users/willow/Documents/GitHub/SpaceGame/src/helper/random-helper.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__utility/forward.h:
-
-/usr/local/include/reactphysics3d/components/RigidBodyComponents.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__std_mbstate_t.h:
 
@@ -3242,8 +2979,6 @@ _deps/freetype-src/include/freetype/ftcolor.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/sample.h:
 
-/usr/local/include/reactphysics3d/engine/Entity.h:
-
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/rotate.h:
 
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/ext/matrix_float3x4_precision.hpp:
@@ -3255,8 +2990,6 @@ _deps/freetype-src/include/freetype/ftcolor.h:
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/pstl_backends/cpu_backends/fill.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/lexicographical_compare_three_way.h:
-
-/usr/local/include/reactphysics3d/components/HingeJointComponents.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__fwd/sstream.h:
 
@@ -3295,8 +3028,6 @@ _deps/freetype-src/include/freetype/ftcolor.h:
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__type_traits/is_compound.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__concepts/destructible.h:
-
-/usr/local/include/reactphysics3d/systems/ContactSolverSystem.h:
 
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/vec4.hpp:
 
@@ -3359,8 +3090,6 @@ _deps/freetype-src/include/freetype/ftcolor.h:
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/detail/_vectorize.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/ranges_merge.h:
-
-/usr/local/include/reactphysics3d/constraint/SliderJoint.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/_types.h:
 
@@ -3486,8 +3215,6 @@ _deps/freetype-src/include/freetype/config/ftheader.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/find_first_of.h:
 
-/usr/local/include/reactphysics3d/collision/VertexArray.h:
-
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/ranges_fill_n.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/ranges_count_if.h:
@@ -3506,15 +3233,11 @@ _deps/freetype-src/include/freetype/config/ftheader.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/ranges_partition_copy.h:
 
-/usr/local/include/reactphysics3d/collision/RaycastInfo.h:
-
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__type_traits/is_char_like_type.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/ranges_iterator_concept.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/ranges_upper_bound.h:
-
-/usr/local/include/reactphysics3d/constraint/BallAndSocketJoint.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__tuple/make_tuple_types.h:
 
@@ -3548,8 +3271,6 @@ _deps/freetype-build/include/freetype/config/ftoption.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/ranges_is_heap_until.h:
 
-/usr/local/include/reactphysics3d/containers/Map.h:
-
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/pstl_for_each.h:
 
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/ext/quaternion_trigonometric.hpp:
@@ -3572,19 +3293,13 @@ _deps/freetype-build/include/freetype/config/ftoption.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/none_of.h:
 
-/usr/local/include/reactphysics3d/mathematics/Ray.h:
-
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/pstl_copy.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__type_traits/lazy.h:
 
-/Users/willow/Documents/GitHub/SpaceGame/src/helper/collision-helper.hpp:
-
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__filesystem/path.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/compare:
-
-/usr/local/include/reactphysics3d/systems/DynamicsSystem.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__type_traits/aligned_union.h:
 
@@ -3615,8 +3330,6 @@ _deps/freetype-src/include/ft2build.h:
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/min_max_result.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/pop_heap.h:
-
-/usr/local/include/reactphysics3d/mathematics/Matrix2x2.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/pstl_backends/cpu_backends/libdispatch.h:
 
@@ -3662,11 +3375,7 @@ _deps/freetype-src/include/ft2build.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/partial_sort.h:
 
-/usr/local/include/reactphysics3d/collision/TriangleMesh.h:
-
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/bind_front.h:
-
-/usr/local/include/reactphysics3d/reactphysics3d.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/i386/_types.h:
 
@@ -3703,8 +3412,6 @@ _deps/freetype-src/include/ft2build.h:
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/make_heap.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/cstdarg:
-
-/usr/local/include/reactphysics3d/systems/SolveHingeJointSystem.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/min.h:
 
@@ -3788,8 +3495,6 @@ _deps/freetype-src/include/freetype/freetype.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/partition.h:
 
-/usr/local/include/reactphysics3d/collision/ContactPointInfo.h:
-
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/ctime:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__type_traits/is_nothrow_move_assignable.h:
@@ -3812,8 +3517,6 @@ _deps/freetype-src/include/freetype/freetype.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/in_fun_result.h:
 
-/usr/local/include/reactphysics3d/engine/EntityManager.h:
-
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/xlocale/_stdlib.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/in_out_result.h:
@@ -3823,8 +3526,6 @@ _deps/freetype-src/include/freetype/freetype.h:
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/detail/type_vec1.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__memory/pointer_traits.h:
-
-/usr/local/include/reactphysics3d/engine/EventListener.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/ranges_push_heap.h:
 
@@ -3886,15 +3587,11 @@ _deps/freetype-src/include/freetype/config/mac-support.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/binder2nd.h:
 
-/usr/local/include/reactphysics3d/collision/OverlapCallback.h:
-
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/sift_down.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/ranges_lower_bound.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/copy_move_common.h:
-
-/usr/local/include/reactphysics3d/mathematics/Transform.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__type_traits/is_nothrow_destructible.h:
 
@@ -3914,8 +3611,6 @@ _deps/freetype-src/include/freetype/config/mac-support.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/max_element.h:
 
-/usr/local/include/reactphysics3d/containers/Array.h:
-
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/resource.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/find_end.h:
@@ -3933,10 +3628,6 @@ _deps/freetype-src/include/freetype/config/mac-support.h:
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/find.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/ranges_prev_permutation.h:
-
-/usr/local/include/reactphysics3d/containers/Deque.h:
-
-/usr/local/include/reactphysics3d/collision/shapes/CollisionShape.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/formatter_pointer.h:
 
