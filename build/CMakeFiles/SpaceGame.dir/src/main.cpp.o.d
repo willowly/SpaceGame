@@ -1206,9 +1206,12 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/norm.inl \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/quaternion.inl \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/actor.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/collision/intersections.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/physics/intersections.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/closest_point.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/closest_point.inl \
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/debug.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/math-helper.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/physics/structs.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/block/block.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/tool.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/world.hpp \
@@ -1217,6 +1220,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/map \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__tree \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/rigidbody-actor.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/physics/resolution.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/block/block-state.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/tool-user.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/input.hpp \

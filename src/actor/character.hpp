@@ -36,12 +36,14 @@ class Character : public RigidbodyActor, public ToolUser {
         float moveSpeed = 5.0f;
         float lookPitch = 0;
         float lookSensitivity = 5;
-        float height = 0.75;
+        float height = 0.0f;
         float radius = 0.5;
         float acceleration = 10;
         float jumpForce = 10;
         bool clickInput = false;
         bool interactInput = false;
+
+        bool thirdPerson = true;
 
         vec3 moveInput;
 
@@ -61,6 +63,9 @@ class Character : public RigidbodyActor, public ToolUser {
         void render(Camera& camera,float dt) {
             if(currentTool != nullptr && ridingConstruction == nullptr) {
                 currentTool->render(camera,this,dt);
+            }
+            if(thirdPerson) {
+                Actor::render(camera,dt);
             }
         }
 
@@ -96,6 +101,10 @@ class Character : public RigidbodyActor, public ToolUser {
             clickInput = false;
             interactInput = false;
 
+            if(ridingConstruction == nullptr) { //dont collide with anything if we are riding
+                world->collideBasic(this,radius);
+            }
+
         }
 
         void ride(Construction* construction,ivec3 point,quat rotation) {
@@ -109,6 +118,7 @@ class Character : public RigidbodyActor, public ToolUser {
         }
 
         void dismount() {
+            position += ridingConstruction->transformDirection(vec3(0,1,0));
             ridingConstruction->resetTargets();
             ridingConstruction = nullptr;
             //body->getCollider(0)->setIsSimulationCollider(true);
@@ -194,6 +204,10 @@ class Character : public RigidbodyActor, public ToolUser {
                 setCurrentTool(8);
             }
 
+            if(input.getKeyPressed(GLFW_KEY_Z)) {
+                thirdPerson = !thirdPerson;
+            }
+
             if(currentTool != nullptr) {
                 currentTool->processInput(input);
             }
@@ -220,7 +234,7 @@ class Character : public RigidbodyActor, public ToolUser {
         }
 
         void setCamera(Camera& camera) {
-            if(ridingConstruction == nullptr) {
+            if(ridingConstruction == nullptr && !thirdPerson) {
                 camera.position = getEyePosition();
                 camera.rotation = getEyeRotation();
             } else {

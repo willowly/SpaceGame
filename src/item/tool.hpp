@@ -22,6 +22,7 @@ class Tool {
         float lookLerp = 10;
 
         bool clickInput = false;
+        bool clickHold = false;
 
         Tool() {
 
@@ -51,22 +52,24 @@ class Tool {
             if(input.getMouseButtonPressed(GLFW_MOUSE_BUTTON_1)) {
                 clickInput = true;
             }
+            clickHold = input.getMouseButton(GLFW_MOUSE_BUTTON_1);
         }
 
         virtual void step(World* world,ToolUser* user,float dt) {
 
         }
 
-        virtual quat getAnimationRotation() {
-
+        virtual std::pair<quat,vec3> animate(float dt) {
+            return std::pair<quat,vec3>(glm::identity<quat>(),vec3());
         }
 
         virtual void render(Camera& camera,ToolUser* user,float dt) {
             if(heldModel != nullptr && heldModelMaterial != nullptr) {
                 lookOrientation = glm::slerp(lookOrientation,user->getEyeRotation(),lookLerp * dt);
+                auto animation = animate(dt);
                 auto matrix = glm::mat4(1.0f);
-                matrix = glm::translate(matrix,modelOffset);
-                matrix = matrix * glm::toMat4(modelRotation);
+                matrix = glm::translate(matrix,modelOffset + animation.second);
+                matrix = matrix * glm::toMat4(modelRotation * animation.first);
                 matrix = glm::scale(matrix,vec3(modelScale));
                 heldModel->render(camera.getViewRotationMatrix(),glm::toMat4(lookOrientation) * matrix,camera.getProjectionMatrix(),*heldModelMaterial);
             }

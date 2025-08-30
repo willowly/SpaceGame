@@ -35,6 +35,14 @@ namespace MathHelper {
         return glm::normalize(glm::cross(b-a,c-a));
     }
 
+    vec3 closestPointOnLineSegment(vec3 p,vec3 a, vec3 b) {
+        vec3 a2b = b-a;
+        vec3 a2p = p-a;
+        float onLine = glm::dot(a2p,glm::normalize(a2b));
+        onLine = std::clamp(onLine,0.0f,glm::length(a2b));
+        return (a2b*onLine) + a;
+    }
+
     //
     float integerBelow(float a) {
         if(floor(a) == a) {

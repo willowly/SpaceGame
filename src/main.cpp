@@ -131,8 +131,8 @@ int main()
     Loader loader;
     loader.loadAll(registry,lua);
     
-    RigidbodyActor cubePrototype(registry.getModel("cube"),registry.getMaterial("cow"));
-    Character playerPrototype(nullptr,nullptr);
+    Actor cubePrototype(registry.getModel("block"),registry.getMaterial("cow"));
+    Character playerPrototype(registry.getModel("sphere"),registry.getMaterial("white"));
     
     Actor grid(registry.getModel("plane"),registry.getMaterial("grid"));
 
@@ -165,11 +165,23 @@ int main()
     playerPrototype.toolbar[3] = &pickaxe;
 
     auto player = world.spawn<Character>(&playerPrototype,vec3(0,1,10));
-    auto construction = world.spawn<Construction>(vec3(0,0,0));
     auto terrain = world.spawn<Terrain>(registry.getMaterial("grid"),vec3(0));
-    construction->setBlock(ivec3(0,5,0),registry.getBlock("tin"),BlockFacing::FORWARD);
 
-    
+
+    Model testModel;
+    testModel.vertices.push_back(vec3(0,0,0));
+    testModel.vertices.push_back(vec3(3,0,0.5));
+    testModel.vertices.push_back(vec3(1,3,0.3));
+
+    testModel.normals.push_back(vec3(0,0,0));
+
+    testModel.uvs.push_back(vec2(0,0));
+    testModel.uvs.push_back(vec2(1,0));
+    testModel.uvs.push_back(vec2(0.5,1));
+
+    testModel.faces.push_back(Model::Face(0,1,2,0,0,0,0,1,2));
+    testModel.updateData();
+    testModel.bindData();
 
     float lastTime = 0;
 
@@ -260,7 +272,19 @@ int main()
         //     cube.collideWithPlane();
         // }
 
+        testModel.render(vec3(0,0,0),world.getCamera(),*registry.getMaterial("grid"));
+
+        
+
         world.frame(dt);
+
+        auto contact_opt = Physics::intersectSphereTri(player->position,player->radius,testModel.vertices[0],testModel.vertices[1],testModel.vertices[2]);
+        if(contact_opt) {
+            auto contact = contact_opt.value();
+            player->position += contact.normal * contact.penetration;
+            Debug::drawPoint(contact.point);
+            Debug::drawRay(contact.point,contact.normal);
+        }
 
         auto matrix = glm::ortho(0.0f,(float)width,0.0f,(float)height);
         text.text = std::format("FPS: {}",(int)(1.0f/dt));

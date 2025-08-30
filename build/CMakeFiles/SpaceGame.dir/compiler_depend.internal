@@ -1203,6 +1203,8 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o
  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/component_wise.hpp
  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/norm.hpp
  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/quaternion.hpp
+ /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/closest_point.hpp
+ /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/closest_point.inl
  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/component_wise.inl
  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/norm.inl
  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/quaternion.hpp
@@ -1249,7 +1251,6 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o
  /Users/willow/Documents/GitHub/SpaceGame/src/block/block.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/block/cockpit-block.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/block/thruster-block.hpp
- /Users/willow/Documents/GitHub/SpaceGame/src/collision/intersections.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/engine/debug.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/engine/input.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/engine/loader.hpp
@@ -1274,6 +1275,9 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o
  /Users/willow/Documents/GitHub/SpaceGame/src/item/place-block-tool.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/item/tool-user.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/item/tool.hpp
+ /Users/willow/Documents/GitHub/SpaceGame/src/physics/intersections.hpp
+ /Users/willow/Documents/GitHub/SpaceGame/src/physics/resolution.hpp
+ /Users/willow/Documents/GitHub/SpaceGame/src/physics/structs.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/sol/config.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/sol/sol.hpp
  /usr/local/include/GLFW/glfw3.h

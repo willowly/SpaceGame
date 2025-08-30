@@ -6,6 +6,8 @@
 
 #include "engine/debug.hpp"
 #include "rigidbody-actor.hpp"
+#include "physics/resolution.hpp"
+#include "physics/intersections.hpp"
 
 #include <helper/string-helper.hpp>
 #include <algorithm>
@@ -30,6 +32,9 @@ class Construction : public RigidbodyActor {
     ivec3 min = ivec3(0,0,0);
     ivec3 max = ivec3(0,0,0);
     std::vector<BlockData> blockData;
+
+
+    std::vector<int> blockCountX;
 
     vec3 moveControl;
     quat targetRotation = glm::identity<quat>();
@@ -113,6 +118,7 @@ class Construction : public RigidbodyActor {
 
         Construction(Model* model,Material* material) : RigidbodyActor(model,material) {
             blockData.push_back(BlockData()); //starting block
+            blockCountX.push_back(0);
         }
         Construction() : Construction(nullptr,nullptr) {
             
@@ -185,6 +191,8 @@ class Construction : public RigidbodyActor {
 
             //int i = 0;
             blockData.clear();
+            blockCountX.clear();
+            blockCountX.resize((newMax.x - newMin.x) + 1);
             for (int z = newMin.z; z <= newMax.z; z++)
             {
                 for (int y = newMin.y; y <= newMax.y; y++)
@@ -196,6 +204,7 @@ class Construction : public RigidbodyActor {
                         if(it != blockMap.end()) {
                             //std::cout << "<" << x << "," << y << "," << z <<  ">:" << blockMap.at(Location(x,y,z)) << std::endl;
                             blockData.push_back(it->second);
+                            blockCountX[x - newMin.x]++;
                         } else {
                             //std::cout << "e,";
                             blockData.push_back(BlockData());
@@ -236,6 +245,31 @@ class Construction : public RigidbodyActor {
             return result;
         }
 
+        virtual void collideBasic(Actor* actor,float radius) {
+            vec3 localActorPosition = inverseTransformPoint(actor->position);
+            for (int z = floor(std::max((float)min.z,localActorPosition.z-radius)); z <= ceil(std::min((float)max.z,localActorPosition.z+radius)); z++)
+            {
+                for (int y = floor(std::max((float)min.y,localActorPosition.y-radius)); y <= ceil(std::min((float)max.y,localActorPosition.y+radius)); y++)
+                {
+                    for (int x = floor(std::max((float)min.x,localActorPosition.x-radius)); x <= ceil(std::min((float)max.x,localActorPosition.x+radius)); x++)
+                    {
+                        int i = getIndex(ivec3(x,y,z));
+                        if(blockData[i].block != nullptr) {
+                            auto contact_opt = Physics::intersectSphereBox(localActorPosition,radius,vec3(x,y,z),vec3(0.5f));
+                            if(contact_opt) {
+                                
+                                auto contact = contact_opt.value();
+                                Physics::resolveBasic(localActorPosition,contact);
+                                
+                            }
+                        }
+                        Debug::drawCube(transformPoint(vec3(x,y,z)),vec3(1),Color::green);
+                    }
+                }
+            }
+            actor->position = transformPoint(localActorPosition);
+        }
+
         void setBlock(ivec3 location,Block* block,BlockFacing facing) {
             if(!isInsideBounds(location)) {
                 setBounds(glm::min(min,location),glm::max(max,location));
@@ -246,6 +280,7 @@ class Construction : public RigidbodyActor {
             if(blockData[index].block != nullptr) {
                 blockData[index].block->onBreak(this,location,blockData[index].state);
                 blockCount--;
+                blockCountX[location.x - min.x]--;
             }
             //Debug::info("index: " + std::to_string(index) + " " + StringHelper::toString(location),InfoPriority::LOW);
             if(block != nullptr) {
@@ -257,10 +292,18 @@ class Construction : public RigidbodyActor {
                 if(blockData[index].block != nullptr) {
                     blockData[index].block->onPlace(this,location,blockData[index].state);
                     blockCount++;
+                    blockCountX[location.x - min.x]++;
                 }
             } else {
                 blockData[index] = BlockData();
             }
+
+            for (size_t i = 0; i < blockCountX.size(); i++)
+            {
+                std::cout << blockCountX[i] << ", ";
+            }
+            
+            std::cout << std::endl;
             
             if(blockCount <= 0) {
                 destroy();
@@ -280,13 +323,14 @@ class Construction : public RigidbodyActor {
             targetRotation = rotation;
         }
 
-        int getIndex(ivec3 location) {
+        size_t getIndex(ivec3 location) {
             ivec3 fromMin = location - min;
             ivec3 size = max - min;
             size.x += 1;
             size.y += 1;
             size.z += 1;
-            return fromMin.x + fromMin.y * size.x + fromMin.z * size.y * size.x;
+            int i = std::max(fromMin.x + fromMin.y * size.x + fromMin.z * size.y * size.x,0);
+            return std::min((size_t)i,blockData.size()-1); //I think this wont cause issues with out of bounds stuff
         }
 
         std::pair<Block*,BlockState> getBlock(ivec3 location) {

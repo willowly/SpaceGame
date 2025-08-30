@@ -106,43 +106,43 @@ class RigidbodyActor : public Actor {
         //     return Physics::intersectRayBox(position,vec3(1.0f),rotation,ray);
         // }
 
-        void collideWithPlane() {
-            std::vector<Contact> contacts;
-            generateContacts(contacts);
-            if(contacts.size() == 0) return;
+        // void collideWithPlane() {
+        //     std::vector<Contact> contacts;
+        //     generateContacts(contacts);
+        //     if(contacts.size() == 0) return;
             
-            for (int i = 0; i <= 10; i++)
-            {
-                vec3 greatestContactForce = getContactForce(contacts[0]);
-                Contact worst = contacts[0];
-                for (Contact& contact : contacts)
-                {
-                    vec3 force = getContactForce(contact);
-                    if(glm::length(force) > glm::length(greatestContactForce)) {
-                        worst = contact;
-                        greatestContactForce = force;
-                    }
-                }
-                if(glm::length(greatestContactForce) > 0.0001) {
-                    Debug::drawRay(transformPoint(worst.point),greatestContactForce);
-                    applyForce(greatestContactForce,transformPoint(worst.point));
-                }
-            }
+        //     for (int i = 0; i <= 10; i++)
+        //     {
+        //         vec3 greatestContactForce = getContactForce(contacts[0]);
+        //         Contact worst = contacts[0];
+        //         for (Contact& contact : contacts)
+        //         {
+        //             vec3 force = getContactForce(contact);
+        //             if(glm::length(force) > glm::length(greatestContactForce)) {
+        //                 worst = contact;
+        //                 greatestContactForce = force;
+        //             }
+        //         }
+        //         if(glm::length(greatestContactForce) > 0.0001) {
+        //             Debug::drawRay(transformPoint(worst.point),greatestContactForce);
+        //             applyForce(greatestContactForce,transformPoint(worst.point));
+        //         }
+        //     }
  
-            for (int i = 0; i <= 10; i++)
-            {
-                Contact worst = contacts[0];
-                for (Contact& contact : contacts)
-                {
-                    if(contact.point.y < worst.point.y) {
-                        worst = contact;
-                    }
-                }
-                resolveContactPosition(worst);
-            }
-            //position += deltaPosition;
+        //     for (int i = 0; i <= 10; i++)
+        //     {
+        //         Contact worst = contacts[0];
+        //         for (Contact& contact : contacts)
+        //         {
+        //             if(contact.point.y < worst.point.y) {
+        //                 worst = contact;
+        //             }
+        //         }
+        //         resolveContactPosition(worst);
+        //     }
+        //     //position += deltaPosition;
             
-        }
+        // }
 
         vec3 getContactForce(Contact& contact) {
             vec3 contactPointWorld = transformPoint(contact.point);
@@ -220,25 +220,25 @@ class RigidbodyActor : public Actor {
 
         }
 
-        void generateContacts(std::vector<Contact>& contacts) {
-            generateContactWithPoint(vec3(1,1,1),contacts);
-            generateContactWithPoint(vec3(-1,1,1),contacts);
-            generateContactWithPoint(vec3(-1,-1,1),contacts);
-            generateContactWithPoint(vec3(1,-1,1),contacts);
+        // void generateContacts(std::vector<Contact>& contacts) {
+        //     generateContactWithPoint(vec3(1,1,1),contacts);
+        //     generateContactWithPoint(vec3(-1,1,1),contacts);
+        //     generateContactWithPoint(vec3(-1,-1,1),contacts);
+        //     generateContactWithPoint(vec3(1,-1,1),contacts);
 
-            generateContactWithPoint(vec3(1,1,-1),contacts);
-            generateContactWithPoint(vec3(-1,1,-1),contacts);
-            generateContactWithPoint(vec3(-1,-1,-1),contacts);
-            generateContactWithPoint(vec3(1,-1,-1),contacts);
-        }
+        //     generateContactWithPoint(vec3(1,1,-1),contacts);
+        //     generateContactWithPoint(vec3(-1,1,-1),contacts);
+        //     generateContactWithPoint(vec3(-1,-1,-1),contacts);
+        //     generateContactWithPoint(vec3(1,-1,-1),contacts);
+        // }
 
-        void generateContactWithPoint(vec3 relativePoint,std::vector<Contact>& contacts) {
-            vec3 worldPoint = transformPoint(relativePoint);
-            if(worldPoint.y < 0) {
-                contacts.push_back(Contact(relativePoint,vec3(0,1,0)));
-                Debug::drawPoint(worldPoint);
-            }
-        }
+        // void generateContactWithPoint(vec3 relativePoint,std::vector<Contact>& contacts) {
+        //     vec3 worldPoint = transformPoint(relativePoint);
+        //     if(worldPoint.y < 0) {
+        //         contacts.push_back(Contact(relativePoint,vec3(0,1,0)));
+        //         Debug::drawPoint(worldPoint);
+        //     }
+        // }
 
         float getMass() {
             if(inverseMass == 0) return std::numeric_limits<float>::infinity();

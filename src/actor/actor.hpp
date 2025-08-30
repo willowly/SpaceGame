@@ -4,7 +4,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include "graphics/model.hpp"
 #include "graphics/material.hpp"
-#include "collision/intersections.hpp"
+#include "physics/intersections.hpp"
 
 
 using glm::vec3, glm::quat;
@@ -79,6 +79,10 @@ class Actor {
 
         virtual void step(World* world,float dt) {
             
+        }
+
+        virtual void collideBasic(Actor* actor,float radius) {
+
         }
 
         virtual void render(Camera& camera,float dt) {

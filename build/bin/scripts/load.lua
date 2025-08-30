@@ -19,6 +19,12 @@ materials.container = {
     texture="container",
 }
 
+materials.white = {
+    shader="lit",
+    texture="solid",
+    color=color(0.1,0.5,0.8)
+}
+
 materials.pickaxe = {"lit","pickaxe"}
 
 materials.tin_block = {"lit","tin_block"}

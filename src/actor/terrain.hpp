@@ -10,13 +10,20 @@ using std::unique_ptr;
 
 class Terrain : public Actor {
 
-    std::vector<float> terrainData;
+
+    struct VoxelData {
+        float amount = 0;
+        int verticiesStart = 0;
+        int verticiesEnd = 0;
+    };
+
+    std::vector<VoxelData> terrainData;
 
 
     public:
         unique_ptr<Model> dynamicModel;
-        int size = 10;
-        float noiseScale = 30;
+        int size = 30;
+        float noiseScale = 100;
         float surfaceLevel = 0.5;
         float cellSize = 0.5f;
 
@@ -38,11 +45,13 @@ class Terrain : public Actor {
     }
 
     void generateData() {
-        terrainData.clear();
+        terrainData.resize(size*size*size);
 
         const SimplexNoise simplex;
 
         float radius = size*0.5f;
+
+        int i = 0;
         for (int z = 0; z < size; z++)
         {
             for (int y = 0; y < size; y++)
@@ -52,7 +61,8 @@ class Terrain : public Actor {
                     float noise = simplex.fractal(5,x/noiseScale,y/noiseScale,z/noiseScale);
                     float distance = glm::length(vec3(x-radius,y-radius,z-radius));
                     float radiusInfluence = (radius-distance)/radius;
-                    terrainData.push_back(noise * (radiusInfluence+0.5f));
+                    terrainData[i].amount = noise;//(noise * (radiusInfluence+0.5f));
+                    i++;
                 }
             }
         }
@@ -76,7 +86,7 @@ class Terrain : public Actor {
         if(x < 0 || x >= size) return 0;
         if(y < 0 || y >= size) return 0;
         if(z < 0 || z >= size) return 0;
-        return terrainData[x + y * size + z * size * size];
+        return terrainData[x + y * size + z * size * size].amount;
     }
 
     bool getPointInside(int x,int y,int z) {
@@ -94,11 +104,11 @@ class Terrain : public Actor {
         model->uvs.push_back(glm::vec2(0,0));
 
         int i = 0;
-        for (int z = -1; z < size; z++)
+        for (int z = 0; z < size; z++)
         {
-            for (int y = -1; y < size; y++)
+            for (int y = 0; y < size; y++)
             {
-                for (int x = -1; x < size; x++)
+                for (int x = 0; x < size; x++)
                 {
                     int config = 0;
                     if(getPointInside(x,y,z)) config |= 1;
@@ -134,6 +144,8 @@ class Terrain : public Actor {
         int i = 0;
         int startIndex = model->vertices.size();
         Model::Face face;
+        int cellIndex = getPointIndex(cellPos.x,cellPos.y,cellPos.z);
+        terrainData[cellIndex].verticiesStart = startIndex;
         while(i < 100) //break out if theres a problem lol
         {
             int edge = tris[i];
@@ -160,6 +172,7 @@ class Terrain : public Actor {
             }
             i++;
         }
+        terrainData[cellIndex].verticiesEnd = model->vertices.size();
         
         
     }
@@ -233,6 +246,38 @@ class Terrain : public Actor {
         //std::cout << "raycast time: " << (float)glfwGetTime() - clock << std::endl;
         return result;
     }
+
+    virtual void collideBasic(Actor* actor,float radius) {
+        vec3 localActorPosition = inverseTransformPoint(actor->position);
+        auto posCellSpace = getCellAtWorldPos(actor->position);
+        auto radiusCellSpace = radius/cellSize;
+        for (int z = std::max(0,(int)floor(posCellSpace.z-radiusCellSpace)); z <= std::min(size-1,(int)ceil(posCellSpace.z+radiusCellSpace)); z++)
+        {
+            for (int y = std::max(0,(int)floor(posCellSpace.y-radiusCellSpace)); y <= std::min(size-1,(int)ceil(posCellSpace.y+radiusCellSpace)); y++)
+            {
+                for (int x = std::max(0,(int)floor(posCellSpace.x-radiusCellSpace)); x <= std::min(size-1,(int)ceil(posCellSpace.x+radiusCellSpace)); x++)
+                {
+                    auto voxel = terrainData[getPointIndex(x,y,z)];
+                    for (int i = voxel.verticiesStart;i < voxel.verticiesEnd;i += 3)
+                    {
+                        vec3 a = model->vertices[i];
+                        vec3 b = model->vertices[i+1];
+                        vec3 c = model->vertices[i+2];
+
+                        auto contact_opt = Physics::intersectSphereTri(localActorPosition,radius,a,b,c);
+                        if(contact_opt) {
+                            
+                            auto contact = contact_opt.value();
+                            Physics::resolveBasic(localActorPosition,contact);
+                            
+                        }
+                            
+                    } 
+                }
+            }
+        }
+        actor->position = transformPoint(localActorPosition);
+    }
     
     //need to manually regenerate the mesh (in case things want to)
     void terraformSphere(vec3 pos,float radius,float change) {
@@ -243,11 +288,11 @@ class Terrain : public Actor {
         std::cout << radiusCellSpace << std::endl;
         std::cout << posCellSpace.z-radiusCellSpace << std::endl;
         std::cout << posCellSpace.z+radiusCellSpace << std::endl;
-        for (int z = floor(std::max(0.0f,posCellSpace.z-radiusCellSpace)); z < ceil(std::min((float)size,posCellSpace.z+radiusCellSpace)); z++)
+        for (int z = floor(std::max(0.0f,posCellSpace.z-radiusCellSpace)); z <= ceil(std::min((float)size,posCellSpace.z+radiusCellSpace)); z++)
         {
-            for (int y = floor(std::max(0.0f,posCellSpace.y-radiusCellSpace)); y < ceil(std::min((float)size,posCellSpace.y+radiusCellSpace)); y++)
+            for (int y = floor(std::max(0.0f,posCellSpace.y-radiusCellSpace)); y <= ceil(std::min((float)size,posCellSpace.y+radiusCellSpace)); y++)
             {
-                for (int x = floor(std::max(0.0f,posCellSpace.x-radiusCellSpace)); x < ceil(std::min((float)size,posCellSpace.x+radiusCellSpace)); x++)
+                for (int x = floor(std::max(0.0f,posCellSpace.x-radiusCellSpace)); x <= ceil(std::min((float)size,posCellSpace.x+radiusCellSpace)); x++)
                 {
                     int i = getPointIndex(x,y,z);
                     
@@ -256,8 +301,8 @@ class Terrain : public Actor {
                     float influence = (radius-dist)/radius;
                     
                     if(influence > 0) {
-                        terrainData[i] += change * influence;
-                        terrainData[i] = std::min(std::max(terrainData[i],0.0f),1.0f);
+                        terrainData[i].amount += change * influence;
+                        terrainData[i].amount = std::min(std::max(terrainData[i].amount,0.0f),1.0f);
                     }
                     i++;
                 }

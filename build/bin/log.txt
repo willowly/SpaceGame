@@ -1,4 +1,5 @@
 [INFO] Loaded Model "plane" (models)
+[INFO] Loaded Model "sphere" (models)
 [INFO] Loaded Model "cube" (models)
 [INFO] Loaded Model "tri" (models)
 [INFO] Loaded Model "cockpit" (models)
@@ -27,6 +28,7 @@
 [INFO] Loaded Material "cow" (materials.cow)
 [INFO] Loaded Material "grid" (materials.grid)
 [INFO] Loaded Material "container" (materials.container)
+[INFO] Loaded Material "white" (materials.white)
 [INFO] Loaded Material "pickaxe" (materials.pickaxe)
 [INFO] Loaded Material "tin_block" (materials.tin_block)
 [INFO] Loaded Material "cobalt_block" (materials.cobalt_block)

@@ -14,6 +14,22 @@ class PickaxeTool : public Tool {
             
         }
 
+        enum State {
+            NEUTRAL,
+            ANTICIPATION,
+            COOLDOWN
+        };
+
+        State state;
+
+        quat anticipationRotation = glm::quat(vec3(0,0,glm::radians(50.0f)));
+        float anticipationTime = 0.3;
+        quat cooldownRotation = glm::quat(vec3(0,0,glm::radians(-50.0f)));
+        float cooldownTime = 0.5;
+
+        float stateTimer = 0;
+        float animationTimer = 0;
+
         float mineRadius = 0.75;
         float mineAmount = 0.5;
 
@@ -37,11 +53,53 @@ class PickaxeTool : public Tool {
             }
         }
 
-        virtual void step(World* world,ToolUser* user,float dt) {
-            if(clickInput) {
-                clickInput = false;
-                pickaxe(world,user->getLookRay());
+        virtual void equip(ToolUser* user) {
+            state = State::NEUTRAL;
+            stateTimer = 0;
+            Tool::equip(user);
+        }
+
+        void setState(State newState) {
+            state = newState;
+            stateTimer = 0;
+            animationTimer = 0;
+        }
+
+        virtual std::pair<quat,vec3> animate(float dt) {
+            animationTimer += dt;
+            switch (state) {
+                case State::NEUTRAL:
+                    return std::pair<quat,vec3>(glm::identity<quat>(),vec3());
+                case State::ANTICIPATION:
+                    return std::pair<quat,vec3>(glm::slerp(glm::identity<quat>(),anticipationRotation,animationTimer/anticipationTime),vec3());
+                case State::COOLDOWN:
+                    return std::pair<quat,vec3>(glm::slerp(cooldownRotation,glm::identity<quat>(),animationTimer/cooldownTime),vec3());
             }
+            
+        }
+
+        virtual void step(World* world,ToolUser* user,float dt) {
+            switch (state) {
+                case State::NEUTRAL:
+
+                    if(clickHold) {
+                        setState(State::ANTICIPATION);
+                    }
+                    break;
+                case State::ANTICIPATION:
+                    if(stateTimer > anticipationTime) {
+                        setState(State::COOLDOWN);
+                        pickaxe(world,user->getLookRay());
+                    }
+                    break;
+                case State::COOLDOWN:
+                    if(stateTimer > cooldownTime) {
+                        setState(State::NEUTRAL);
+                    }
+                    break;
+            }
+
+            stateTimer += dt;
         }
 
 

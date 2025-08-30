@@ -51,7 +51,7 @@ class World {
         float stepProcessMs;
         float renderProcessMs;
 
-        bool inStep = false; //so we dont resize the actor vector when iterating over it
+        bool iteratingActors = false; //so we dont resize the actor vector when iterating over it
 
         World() {
         }
@@ -60,7 +60,7 @@ class World {
         T* spawn(Args... args) {
             unique_ptr<T> spawned = ActorFactory::make<T>(std::forward<Args>(args)...);
             T* rawSpawned = spawned.get();
-            if(inStep) {
+            if(iteratingActors) {
                 spawnedActors.push_back(std::move(spawned));
             } else {
                 actors.push_back(std::move(spawned));
@@ -71,7 +71,6 @@ class World {
         void destroy(Actor* actor) {
 
         }
-
 
         vec3 getGravityVector(vec3 position) {
             return constantGravity;
@@ -108,12 +107,12 @@ class World {
         }
 
         void step(float dt) {
-            inStep = true;
+            iteratingActors = true;
             for (auto& actor : actors)
             {
                 actor->step(this,dt);
             }
-            inStep = false;
+            iteratingActors = false;
             for(auto& actor : spawnedActors) {
                 actors.push_back(std::move(actor));
             }
@@ -143,6 +142,18 @@ class World {
                 }
             }
             return result;
+        }
+
+        void collideBasic(Actor* actor,float radius) {
+            iteratingActors = true;
+            for (auto& colliderActor : actors)
+            {
+                if(actor != colliderActor.get()) {
+                    colliderActor->collideBasic(actor,radius);
+                }
+                
+            }
+            iteratingActors = false;
         }
 
         Camera& getCamera() {

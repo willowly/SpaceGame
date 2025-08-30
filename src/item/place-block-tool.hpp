@@ -15,8 +15,8 @@ class PlaceBlockTool: public Tool {
 
         }
 
-        float placeAnimationRotation = 30;
-        float placeAnimationTime = 0.1;
+        quat placeAnimationRotation = glm::quat(vec3(glm::radians(-50.0f),0,0));
+        float placeAnimationTime = 0.2;
 
         float placeAnimationTimer = 0;
     
@@ -43,6 +43,16 @@ class PlaceBlockTool: public Tool {
                 construction->setBlock(ivec3(0),block,BlockFacing::FORWARD);
             }
             placeAnimationTimer = placeAnimationTime;
+        }
+
+        virtual std::pair<quat,vec3> animate(float dt) {
+
+            if(placeAnimationTimer > 0) {
+                placeAnimationTimer -= dt;
+                return std::pair<quat,vec3>(glm::slerp(glm::identity<quat>(),placeAnimationRotation,placeAnimationTimer),vec3());
+            }
+
+            return std::pair<quat,vec3>(glm::identity<quat>(),vec3());
         }
 
 

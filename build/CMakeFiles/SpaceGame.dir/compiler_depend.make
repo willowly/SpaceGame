@@ -1202,6 +1202,8 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/component_wise.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/norm.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/quaternion.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/closest_point.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/closest_point.inl \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/component_wise.inl \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/norm.inl \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/quaternion.hpp \
@@ -1248,7 +1250,6 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
   /Users/willow/Documents/GitHub/SpaceGame/src/block/block.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/block/cockpit-block.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/block/thruster-block.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/collision/intersections.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/debug.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/input.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/loader.hpp \
@@ -1273,6 +1274,9 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
   /Users/willow/Documents/GitHub/SpaceGame/src/item/place-block-tool.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/tool-user.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/tool.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/physics/intersections.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/physics/resolution.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/physics/structs.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/sol/config.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/sol/sol.hpp \
   /usr/local/include/GLFW/glfw3.h \
@@ -1290,6 +1294,10 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 /Users/willow/Documents/GitHub/SpaceGame/src/sol/sol.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/src/sol/config.hpp:
+
+/Users/willow/Documents/GitHub/SpaceGame/src/physics/structs.hpp:
+
+/Users/willow/Documents/GitHub/SpaceGame/src/physics/resolution.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/src/item/tool-user.hpp:
 
@@ -1312,8 +1320,6 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 /Users/willow/Documents/GitHub/SpaceGame/src/engine/loader.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/src/engine/debug.hpp:
-
-/Users/willow/Documents/GitHub/SpaceGame/src/collision/intersections.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/src/block/thruster-block.hpp:
 
@@ -1342,6 +1348,8 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/integer.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/quaternion.inl:
+
+/Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/closest_point.inl:
 
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/type_ptr.inl:
 
@@ -2401,6 +2409,8 @@ _deps/freetype-src/include/freetype/fterrors.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__iterator/insert_iterator.h:
 
+/Users/willow/Documents/GitHub/SpaceGame/src/physics/intersections.hpp:
+
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/glm.hpp:
 
 _deps/freetype-src/include/freetype/ftimage.h:
@@ -3452,6 +3462,8 @@ _deps/freetype-src/include/freetype/freetype.h:
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/iterator_operations.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/unordered_map:
+
+/Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/closest_point.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__iterator/back_insert_iterator.h:
 

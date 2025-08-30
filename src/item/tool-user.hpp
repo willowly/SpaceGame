@@ -1,5 +1,5 @@
 #pragma once
-#include "collision/intersections.hpp"
+#include "physics/intersections.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
