@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/clang++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/usr/local/include/lua -I/Users/willow/Documents/GitHub/SpaceGame/src -I/Users/willow/Documents/GitHub/SpaceGame/include -iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks -isystem /usr/local/include -isystem /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-build/include -isystem /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-src/include
+CXX_INCLUDES = -I/usr/local/include/lua -I/Users/willow/Documents/GitHub/SpaceGame/src -I/Users/willow/Documents/GitHub/SpaceGame/include -iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks -isystem /usr/local/include -isystem /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-build/include -isystem /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-src/include -isystem /Users/willow/VulkanSDK/1.4.321.0/macOS/include
 
 CXX_FLAGS =  -fpermissive -Wall -Wextra -pedantic -fsanitize=address,undefined -Wno-unused-parameter -g -std=gnu++20 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mmacosx-version-min=14.3
 

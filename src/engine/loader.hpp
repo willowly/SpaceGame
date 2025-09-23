@@ -69,7 +69,7 @@ class Loader {
                 std::filesystem::path p(entry.path());
 
                 if(entry.is_directory()) {
-                    loadModelsFromDir(registry,entry.path().string());
+                    loadTexturesFromDir(registry,entry.path().string());
                     continue;
                 }
                 

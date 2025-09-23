@@ -1,11 +1,14 @@
 CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/share/asan_ignorelist.txt \
   /Users/willow/Documents/GitHub/SpaceGame/src/main.cpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glad/glad.h \
-  /Users/willow/Documents/GitHub/SpaceGame/include/KHR/khrplatform.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/stdint.h \
+  /Users/willow/Documents/GitHub/SpaceGame/src/engine/game-application.hpp \
+  /usr/local/include/GLFW/glfw3.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/stddef.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__config \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__config_site \
+  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/stddef.h \
+  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/__stddef_max_align_t.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/stdint.h \
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/stdint.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/stdint.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_types/_int8_t.h \
@@ -33,10 +36,27 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_types/_uintptr_t.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/_types/_intmax_t.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/_types/_uintmax_t.h \
-  /usr/local/include/GLFW/glfw3.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/stddef.h \
-  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/stddef.h \
-  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/__stddef_max_align_t.h \
+  /usr/local/include/vulkan/vulkan.h \
+  /usr/local/include/vulkan/vk_platform.h \
+  /usr/local/include/vulkan/vulkan_core.h \
+  /usr/local/include/vk_video/vulkan_video_codec_h264std.h \
+  /usr/local/include/vk_video/vulkan_video_codecs_common.h \
+  /usr/local/include/vk_video/vulkan_video_codec_h264std_encode.h \
+  /usr/local/include/vk_video/vulkan_video_codec_h265std.h \
+  /usr/local/include/vk_video/vulkan_video_codec_h265std_encode.h \
+  /usr/local/include/vk_video/vulkan_video_codec_h264std_decode.h \
+  /usr/local/include/vk_video/vulkan_video_codec_h265std_decode.h \
+  /usr/local/include/vk_video/vulkan_video_codec_av1std.h \
+  /usr/local/include/vk_video/vulkan_video_codec_av1std_decode.h \
+  /usr/local/include/vk_video/vulkan_video_codec_av1std_encode.h \
+  /usr/local/include/vk_video/vulkan_video_codec_vp9std.h \
+  /usr/local/include/vk_video/vulkan_video_codec_vp9std_decode.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/OpenGL.framework/Headers/gl.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/OpenGL.framework/Headers/gltypes.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/OpenGL.framework/Headers/OpenGLAvailability.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/os/availability.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/AvailabilityInternal.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/AvailabilityInternalLegacy.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/iostream \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__assert \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__verbose_abort \
@@ -139,8 +159,6 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/stdlib.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/Availability.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/AvailabilityVersions.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/AvailabilityInternal.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/AvailabilityInternalLegacy.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/_types.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/wait.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_types/_pid_t.h \
@@ -826,16 +844,51 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/_types/_nl_item.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__locale_dir/locale_base_api/bsd_locale_defaults.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/cstdarg \
-  /Users/willow/Documents/GitHub/SpaceGame/src/engine/loader.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/engine/registry.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/graphics/model.hpp \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/vector \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/formatter.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/format_fwd.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/formatter_bool.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/format \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/buffer.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/concepts.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/format_fwd.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/format_parse_context.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/format_error.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/format_to_n_result.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/container_adaptor.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/formatter.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/range_default_formatter.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__chrono/statically_widen.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/range_formatter.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/format_context.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/format_arg.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/format_arg_store.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/format_args.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/optional \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/formatter_output.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/parser_std_format_spec.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/format_string.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/unicode.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/extended_grapheme_cluster_table.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/width_estimation_table.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__ranges/ref_view.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/queue \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/deque \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__memory/temp_value.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__split_buffer \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/functional \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/binary_negate.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/bind.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/bind_back.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/perfect_forward.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/bind_front.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/binder1st.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/binder2nd.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/boyer_moore_searcher.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/array \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/unordered_map \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/is_transparent.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__hash_table \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__iterator/ranges_iterator_traits.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__node_handle \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/vector \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/formatter_bool.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/formatter_integral.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__charconv/to_chars_integral.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__charconv/tables.h \
@@ -843,18 +896,53 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__charconv/to_chars_result.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__charconv/traits.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__type_traits/make_32_64_or_128_bit.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/formatter_output.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/buffer.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/format_to_n_result.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/parser_std_format_spec.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/format_arg.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/format_string.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/unicode.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/extended_grapheme_cluster_table.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/width_estimation_table.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/array \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__memory/temp_value.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__split_buffer \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/compose.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/default_searcher.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/function.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__memory/builtin_new_allocator.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__type_traits/strip_signature.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/mem_fn.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/mem_fun_ref.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/not_fn.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/pointer_to_binary_function.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/pointer_to_unary_function.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/unary_negate.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/stack \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/format_functions.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/formatter_char.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/write_escaped.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/escaped_output_table.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/formatter_floating_point.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__charconv/chars_format.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__charconv/to_chars_floating_point.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/formatter_integer.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/formatter_pointer.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/formatter_string.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/formatter_tuple.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/set \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__tree \
+  /Users/willow/Documents/GitHub/SpaceGame/src/helper/file-helper.hpp \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/fstream \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/filesystem \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__filesystem/copy_options.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__filesystem/directory_entry.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__filesystem/file_status.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__filesystem/file_type.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__filesystem/perms.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__filesystem/file_time_type.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__chrono/file_clock.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__filesystem/filesystem_error.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__filesystem/path.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/iomanip \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__filesystem/operations.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__filesystem/perm_options.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__filesystem/space_info.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__filesystem/directory_iterator.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__filesystem/directory_options.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__filesystem/path_iterator.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__filesystem/recursive_directory_iterator.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__filesystem/u8path.h \
+  /Users/willow/Documents/GitHub/SpaceGame/src/engine/vulkan.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/glm.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/detail/_fixes.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/detail/setup.hpp \
@@ -1010,6 +1098,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/vector_relational.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/integer.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/detail/func_integer.inl \
+  /Users/willow/Documents/GitHub/SpaceGame/include/stb_image.h \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/matrix_transform.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../mat4x4.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../vec2.hpp \
@@ -1033,251 +1122,31 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../geometric.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../trigonometric.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../matrix.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/type_ptr.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../gtc/quaternion.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../gtc/constants.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../gtc/matrix_transform.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../ext/vector_relational.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/./ext/../detail/qualifier.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/./ext/vector_relational.inl \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/./ext/../vector_relational.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/./ext/../common.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/./ext/../detail/type_float.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../ext/quaternion_common.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/./ext/../ext/quaternion_geometric.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/./ext/../exponential.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/./ext/../ext/vector_relational.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/./ext/quaternion_geometric.inl \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/./ext/quaternion_common.inl \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../ext/quaternion_float.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/./ext/../detail/type_quat.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/detail/../detail/type_mat3x3.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/detail/../detail/type_mat4x4.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/detail/../detail/type_vec3.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/detail/../detail/type_vec4.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/detail/../ext/vector_relational.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/detail/../ext/quaternion_relational.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/./ext/quaternion_relational.inl \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/detail/../gtc/constants.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/detail/../gtc/matrix_transform.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/detail/type_quat.inl \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/detail/../trigonometric.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/detail/../ext/quaternion_common.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/detail/../ext/quaternion_geometric.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../ext/quaternion_float_precision.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../ext/quaternion_double.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../ext/quaternion_double_precision.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../ext/quaternion_relational.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../ext/quaternion_geometric.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../ext/quaternion_trigonometric.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/./ext/scalar_constants.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/./ext/vector_relational.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/./ext/quaternion_trigonometric.inl \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../ext/quaternion_transform.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/./ext/quaternion_transform.inl \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../detail/type_mat3x3.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../detail/type_mat4x4.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../detail/type_vec3.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../detail/type_vec4.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/quaternion.inl \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../exponential.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/epsilon.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../detail/setup.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../detail/qualifier.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/epsilon.inl \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../vector_relational.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../common.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../gtc/vec1.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../ext/vector_bool1.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/./ext/../detail/type_vec1.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../ext/vector_bool1_precision.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../ext/vector_float1.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../ext/vector_float1_precision.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../ext/vector_double1.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../ext/vector_double1_precision.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../ext/vector_int1.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../ext/vector_int1_sized.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/./ext/../ext/vector_int1.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../ext/vector_uint1.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../ext/vector_uint1_sized.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/./ext/../ext/vector_uint1.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../mat2x2.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../mat2x3.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../mat2x4.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../mat3x2.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../mat3x3.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../mat3x4.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../mat4x2.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../mat4x3.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/type_ptr.inl \
-  /Users/willow/Documents/GitHub/SpaceGame/src/helper/file-helper.hpp \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/fstream \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/filesystem \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__filesystem/copy_options.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__filesystem/directory_entry.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__filesystem/file_status.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__filesystem/file_type.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__filesystem/perms.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__filesystem/file_time_type.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__chrono/file_clock.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__filesystem/filesystem_error.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__filesystem/path.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/iomanip \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__filesystem/operations.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__filesystem/perm_options.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__filesystem/space_info.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__filesystem/directory_iterator.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__filesystem/directory_options.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__filesystem/path_iterator.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__filesystem/recursive_directory_iterator.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__filesystem/u8path.h \
-  /Users/willow/Documents/GitHub/SpaceGame/src/helper/string-helper.hpp \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/format \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/container_adaptor.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/range_default_formatter.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__chrono/statically_widen.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/range_formatter.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/format_context.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/format_arg_store.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/format_args.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/optional \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__ranges/ref_view.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/queue \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/deque \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/functional \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/binary_negate.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/bind.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/bind_back.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/perfect_forward.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/bind_front.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/binder1st.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/binder2nd.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/boyer_moore_searcher.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/unordered_map \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/is_transparent.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__hash_table \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__iterator/ranges_iterator_traits.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__node_handle \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/compose.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/default_searcher.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/function.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__memory/builtin_new_allocator.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__type_traits/strip_signature.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/mem_fn.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/mem_fun_ref.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/not_fn.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/pointer_to_binary_function.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/pointer_to_unary_function.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__functional/unary_negate.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/stack \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/format_functions.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/formatter_char.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/write_escaped.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/escaped_output_table.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/formatter_floating_point.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__charconv/chars_format.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__charconv/to_chars_floating_point.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/formatter_integer.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/formatter_pointer.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/formatter_string.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/formatter_tuple.h \
-  /Users/willow/Documents/GitHub/SpaceGame/src/graphics/material.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/graphics/shader.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/graphics/color.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/graphics/texture.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/stb_image.h \
-  /Users/willow/Documents/GitHub/SpaceGame/src/graphics/camera.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/quaternion.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/quaternion.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/../glm.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/../gtc/constants.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/../gtc/quaternion.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/../ext/quaternion_exponential.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/./ext/quaternion_exponential.inl \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/../gtx/norm.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/../geometric.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/../gtx/quaternion.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/../gtx/component_wise.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/../detail/setup.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/../detail/qualifier.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/component_wise.inl \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/../ext/scalar_common.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/./ext/scalar_common.inl \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/norm.inl \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/quaternion.inl \
-  /Users/willow/Documents/GitHub/SpaceGame/src/actor/actor.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/physics/intersections.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/closest_point.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/closest_point.inl \
-  /Users/willow/Documents/GitHub/SpaceGame/src/engine/debug.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/helper/math-helper.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/physics/structs.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/block/block.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/item/tool.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/engine/world.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/actor/actor-factory-fwd.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/actor/construction.hpp \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/map \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__tree \
-  /Users/willow/Documents/GitHub/SpaceGame/src/actor/rigidbody-actor.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/physics/resolution.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/block/block-state.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/item/tool-user.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/engine/input.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/api/api-all.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/sol/sol.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/sol/config.hpp \
-  /usr/local/include/lua/lua.hpp /usr/local/include/lua/lua.h \
-  /usr/local/include/lua/luaconf.h /usr/local/include/lua/lualib.h \
-  /usr/local/include/lua/lauxlib.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/forward_list \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/chrono \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__chrono/calendar.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__chrono/convert_to_tm.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__chrono/concepts.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__chrono/hh_mm_ss.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__chrono/day.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__chrono/month.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__chrono/month_weekday.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__chrono/weekday.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__chrono/monthday.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__chrono/year.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__chrono/year_month.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__chrono/year_month_day.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__chrono/year_month_weekday.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__chrono/literals.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__chrono/formatter.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__chrono/ostream.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__chrono/parser_std_format_spec.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/sstream \
-  /Users/willow/Documents/GitHub/SpaceGame/src/api/api-general.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/api/api-texture.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/api/api-material.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/api/api-actor.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/api/api-character.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/api/api-construction.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/api/api-world.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/api/api-registry.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/api/api-registry-general.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/api/api-registry-actor.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/api/api-registry-block.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/block/cockpit-block.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/actor/character.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/item/pickaxe-tool.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/actor/terrain.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/helper/terrain-helper.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/include/SimplexNoise.h \
-  /Users/willow/Documents/GitHub/SpaceGame/src/item/place-block-tool.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/block/thruster-block.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/interface/console.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/graphics/text.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-src/include/ft2build.h \
-  /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-src/include/freetype/config/ftheader.h \
-  /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-src/include/freetype/freetype.h \
-  /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-build/include/freetype/config/ftconfig.h \
-  /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-build/include/freetype/config/ftoption.h \
-  /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-src/include/freetype/config/ftstdlib.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/setjmp.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/setjmp.h \
-  /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-src/include/freetype/config/integer-types.h \
-  /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-src/include/freetype/config/public-macros.h \
-  /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-src/include/freetype/config/mac-support.h \
-  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/AvailabilityMacros.h \
-  /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-src/include/freetype/fttypes.h \
-  /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-src/include/freetype/ftsystem.h \
-  /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-src/include/freetype/ftimage.h \
-  /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-src/include/freetype/fterrors.h \
-  /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-src/include/freetype/ftmoderr.h \
-  /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-src/include/freetype/fterrdef.h \
-  /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-src/include/freetype/ftglyph.h \
-  /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-src/include/freetype/ftoutln.h \
-  /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-src/include/freetype/ftbitmap.h \
-  /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-src/include/freetype/ftcolor.h \
-  /Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-src/include/freetype/ftstroke.h \
-  /Users/willow/Documents/GitHub/SpaceGame/src/interface/interface.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/interface/toolbar-widget.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/helper/random-helper.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/actor/actor-factory.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/actor/actors-all.hpp
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/charconv \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__charconv/from_chars_integral.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__charconv/from_chars_result.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__charconv/to_chars.h \
+  /usr/local/include/shaderc/shaderc.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/stdbool.h \
+  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/stdbool.h \
+  /usr/local/include/shaderc/env.h /usr/local/include/shaderc/status.h \
+  /usr/local/include/shaderc/visibility.h

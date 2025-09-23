@@ -560,6 +560,18 @@ SpaceGame_IS_TOP_LEVEL:STATIC=ON
 //Value Computed by CMake
 SpaceGame_SOURCE_DIR:STATIC=/Users/willow/Documents/GitHub/SpaceGame
 
+//Path to a program.
+Vulkan_GLSLANG_VALIDATOR_EXECUTABLE:FILEPATH=/usr/local/bin/glslangValidator
+
+//Path to a program.
+Vulkan_GLSLC_EXECUTABLE:FILEPATH=/usr/local/bin/glslc
+
+//Path to a file.
+Vulkan_INCLUDE_DIR:PATH=Vulkan_INCLUDE_DIR-NOTFOUND
+
+//Path to a library.
+Vulkan_LIBRARY:FILEPATH=Vulkan_LIBRARY-NOTFOUND
+
 //Use any assembly optimization routines
 WITH_ASM:BOOL=ON
 
@@ -852,6 +864,8 @@ FIND_PACKAGE_MESSAGE_DETAILS_OpenGL:INTERNAL=[/Applications/Xcode.app/Contents/D
 FIND_PACKAGE_MESSAGE_DETAILS_PkgConfig:INTERNAL=[/usr/local/bin/pkg-config][v2.5.0()]
 //Details about finding Threads
 FIND_PACKAGE_MESSAGE_DETAILS_Threads:INTERNAL=[TRUE][v()]
+//Details about finding Vulkan
+FIND_PACKAGE_MESSAGE_DETAILS_Vulkan:INTERNAL=[/Users/willow/VulkanSDK/1.4.321.0/macOS/lib/libVulkan.dylib][/Users/willow/VulkanSDK/1.4.321.0/macOS/include][cfound components: glslc glslangValidator ][v1.4.321()]
 //Result of CHECK_CPU_ARCH
 FLAC__CPU_X86_64:INTERNAL=1
 //Have include arm_neon.h
@@ -982,6 +996,14 @@ UINT32_SIZE:INTERNAL=4
 U_INT16_SIZE:INTERNAL=2
 //CHECK_TYPE_SIZE: sizeof(u_int32_t)
 U_INT32_SIZE:INTERNAL=4
+//ADVANCED property for variable: Vulkan_GLSLANG_VALIDATOR_EXECUTABLE
+Vulkan_GLSLANG_VALIDATOR_EXECUTABLE-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: Vulkan_GLSLC_EXECUTABLE
+Vulkan_GLSLC_EXECUTABLE-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: Vulkan_INCLUDE_DIR
+Vulkan_INCLUDE_DIR-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: Vulkan_LIBRARY
+Vulkan_LIBRARY-ADVANCED:INTERNAL=1
 //CMAKE_INSTALL_PREFIX during last run
 _GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX:INTERNAL=/usr/local
 

@@ -56,6 +56,11 @@ class Model {
             glGenBuffers(1, &VBO);
         }
 
+        ~Model() {
+            glDeleteVertexArrays(1,&VAO);
+            glDeleteBuffers(1,&VBO);
+        }
+
         
 
         void loadFromFile(string path) {
