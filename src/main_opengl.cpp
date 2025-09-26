@@ -145,6 +145,7 @@ int main()
     World world;
     Interface interface(&registry.uiShader,glm::ivec2(width,height));
 
+
     ToolbarWidget toolbarWidget;
     toolbarWidget.solidTexture = registry.getTexture("solid");
 

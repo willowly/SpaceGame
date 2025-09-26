@@ -7,7 +7,7 @@
 #include <format>
 #include <set>
 #include "helper/file-helper.hpp"
-#include "vulkan.hpp"
+#include "graphics/vulkan.hpp"
 
 using std::string;
 
@@ -23,17 +23,19 @@ class GameApplication {
         uint32_t windowHeight = 600;
         void run() {
             initWindow();
-            initVulkan();
+            vulkan = std::make_unique<Vulkan>(name,window);
             mainLoop();
             cleanUp();
         }
+
+        Model model;
 
 
     private:
     
         GLFWwindow* window = nullptr;   
         
-        Vulkan vulkan;
+        std::unique_ptr<Vulkan> vulkan;
 
         static void errorCallback(int error, const char* description) {
             std::cout << std::format("GLFW Error: {}\n {}",error,description) << std::endl;
@@ -41,7 +43,7 @@ class GameApplication {
 
         static void framebufferResizeCallback(GLFWwindow* window, int width, int height) {
             auto app = reinterpret_cast<GameApplication*>(glfwGetWindowUserPointer(window));
-            app->vulkan.setFrameBufferResized();
+            app->vulkan->setFrameBufferResized();
         }
 
         void initWindow() {
@@ -64,27 +66,21 @@ class GameApplication {
             }
         }
 
-        void initVulkan() {
-            vulkan.init(name,window);
-        }
-
 
         void mainLoop() {
 
             while (!glfwWindowShouldClose(window)) {
                 glfwPollEvents();
-                vulkan.drawFrame();
+                vulkan->startFrame();
+                
             }
 
             
-            vulkan.waitIdle();
+            vulkan->waitIdle();
 
         }
 
         void cleanUp() {
-
-            //clean up vulkan
-            vulkan.cleanUp();
 
             glfwDestroyWindow(window);
 
