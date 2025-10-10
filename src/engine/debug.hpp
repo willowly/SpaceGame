@@ -52,8 +52,8 @@ class Debug {
         vector<Line> linesToDraw;
         vector<Cube> cubesToDraw;
 
-        std::unique_ptr<Model> _quadModel;
-        std::unique_ptr<Shader> _shader;
+        // std::unique_ptr<Model> _quadModel;
+        // std::unique_ptr<Shader> _shader;
         float pointSize = 0.05;
         
         std::ofstream logFile;
@@ -75,14 +75,14 @@ class Debug {
             return _instance.get();
         }
 
-        static Model* getQuadModel() {
-            Debug* instance = getInstance();
-            if(instance->_quadModel == nullptr) {
-                instance->_quadModel = std::make_unique<Model>();
-                instance->_quadModel->loadQuad();
-            }
-            return instance->_quadModel.get();
-        }
+        // static Model* getQuadModel() {
+        //     Debug* instance = getInstance();
+        //     if(instance->_quadModel == nullptr) {
+        //         instance->_quadModel = std::make_unique<Model>();
+        //         instance->_quadModel->loadQuad();
+        //     }
+        //     return instance->_quadModel.get();
+        // }
 
         static string getVertShaderSource() {
             return R"(
@@ -126,14 +126,14 @@ class Debug {
             )";
         }
 
-        static Shader* getShader() {
-            Debug* instance = getInstance();
-            if(instance->_shader == nullptr) {
-                instance->_shader = std::make_unique<Shader>();
-                instance->_shader->loadFromMemory(getVertShaderSource().c_str(),getFragShaderSource().c_str());
-            }
-            return instance->_shader.get();
-        }
+        // static Shader* getShader() {
+        //     Debug* instance = getInstance();
+        //     if(instance->_shader == nullptr) {
+        //         instance->_shader = std::make_unique<Shader>();
+        //         instance->_shader->loadFromMemory(getVertShaderSource().c_str(),getFragShaderSource().c_str());
+        //     }
+        //     return instance->_shader.get();
+        // }
 
         
         
@@ -198,48 +198,48 @@ class Debug {
         //actually render the shapes
         static void renderDebugShapes(Camera camera) {
 
-            Debug* instance = getInstance();
+            // Debug* instance = getInstance();
 
-            for (auto& p : instance->pointsToDraw)
-            {
-                Model* model = instance->getQuadModel();
-                Shader& shader = *instance->getShader();
-                shader.use();
-                shader.setColor("color",p.color);
-                glm::mat4 modelMatrix = glm::mat4(1.0f);
-                modelMatrix = glm::translate(modelMatrix,p.position);
-                modelMatrix = glm::scale(modelMatrix,vec3(0.1,0.1,0.1));
-                modelMatrix *= glm::inverse(camera.getViewRotationMatrix());
-                model->render(camera.getViewMatrix(),modelMatrix,camera.getProjectionMatrix(),shader);
-            }
+            // for (auto& p : instance->pointsToDraw)
+            // {
+            //     Model* model = instance->getQuadModel();
+            //     Shader& shader = *instance->getShader();
+            //     shader.use();
+            //     shader.setColor("color",p.color);
+            //     glm::mat4 modelMatrix = glm::mat4(1.0f);
+            //     modelMatrix = glm::translate(modelMatrix,p.position);
+            //     modelMatrix = glm::scale(modelMatrix,vec3(0.1,0.1,0.1));
+            //     modelMatrix *= glm::inverse(camera.getViewRotationMatrix());
+            //     model->render(camera.getViewMatrix(),modelMatrix,camera.getProjectionMatrix(),shader);
+            // }
     
 
-            for (auto& l : instance->linesToDraw)
-            {
-                Model model;
-                model.loadLine(l.a,l.b);
-                Shader& shader = *instance->getShader();
-                shader.use();
-                shader.setColor("color",l.color);
-                model.renderMode = Model::RenderMode::Wireframe;
-                model.render(camera.getViewMatrix(),glm::mat4(1.0f),camera.getProjectionMatrix(),shader);
-            }
+            // for (auto& l : instance->linesToDraw)
+            // {
+            //     Model model;
+            //     model.loadLine(l.a,l.b);
+            //     Shader& shader = *instance->getShader();
+            //     shader.use();
+            //     shader.setColor("color",l.color);
+            //     model.renderMode = Model::RenderMode::Wireframe;
+            //     model.render(camera.getViewMatrix(),glm::mat4(1.0f),camera.getProjectionMatrix(),shader);
+            // }
     
 
-            Model cubeModel;
-            cubeModel.loadFromFile("models/block.obj");
-            for (auto& c : instance->cubesToDraw)
-            {
+            // Model cubeModel;
+            // cubeModel.loadFromFile("models/block.obj");
+            // for (auto& c : instance->cubesToDraw)
+            // {
                 
-                Shader& shader = *instance->getShader();
-                shader.use();
-                shader.setColor("color",c.color);
-                cubeModel.renderMode = Model::RenderMode::Wireframe;
-                glm::mat4 modelMatrix = glm::mat4(1.0f);
-                modelMatrix = glm::translate(modelMatrix,c.origin);
-                modelMatrix = glm::scale(modelMatrix,c.size);
-                cubeModel.render(camera.getViewMatrix(),modelMatrix,camera.getProjectionMatrix(),shader);
-            }
+            //     Shader& shader = *instance->getShader();
+            //     shader.use();
+            //     shader.setColor("color",c.color);
+            //     cubeModel.renderMode = Model::RenderMode::Wireframe;
+            //     glm::mat4 modelMatrix = glm::mat4(1.0f);
+            //     modelMatrix = glm::translate(modelMatrix,c.origin);
+            //     modelMatrix = glm::scale(modelMatrix,c.size);
+            //     cubeModel.render(camera.getViewMatrix(),modelMatrix,camera.getProjectionMatrix(),shader);
+            // }
         
             
 

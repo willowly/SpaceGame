@@ -1,0 +1,87 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.28"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "SpaceGame",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "GLAD::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-GLAD-Debug-3d11666e3d46b0b8296a.json",
+					"name" : "GLAD",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "SIMPLEXNOISE::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-SIMPLEXNOISE-Debug-57d4ca42076c4ccbac79.json",
+					"name" : "SIMPLEXNOISE",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "STB::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-STB-Debug-e7735f713fbf177d9eb1.json",
+					"name" : "STB",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "SpaceGame::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-SpaceGame-Debug-4bdb5db62f7ced941f7b.json",
+					"name" : "SpaceGame",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/Users/willow/Documents/GitHub/SpaceGame/build",
+		"source" : "/Users/willow/Documents/GitHub/SpaceGame"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 7
+	}
+}

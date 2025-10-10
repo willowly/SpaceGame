@@ -8,51 +8,80 @@
 #include "helper/file-helper.hpp"
 #include "helper/string-helper.hpp"
 #include "vulkan.hpp"
+#include "engine/debug.hpp"
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/hash.hpp>
 #include <map>
+#include "helper/math-helper.hpp"
 
 using std::vector,glm::vec3,glm::vec2;
 
+struct Vertex {
+    glm::vec3 pos;
+    glm::vec3 normal;
+    glm::vec2 texCoord;
+
+    static VkVertexInputBindingDescription getBindingDescription() {
+        VkVertexInputBindingDescription bindingDescription{};
+        bindingDescription.binding = 0;
+        bindingDescription.stride = sizeof(Vertex);
+        bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+        return bindingDescription;
+    }
+
+    static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions() {
+        std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
+        attributeDescriptions[0].binding = 0;
+        attributeDescriptions[0].location = 0;
+        attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
+        attributeDescriptions[0].offset = offsetof(Vertex, pos);
+
+        attributeDescriptions[1].binding = 0;
+        attributeDescriptions[1].location = 1;
+        attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+        attributeDescriptions[1].offset = offsetof(Vertex, normal);
+
+        attributeDescriptions[2].binding = 0;
+        attributeDescriptions[2].location = 2;
+        attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
+        attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
+
+        return attributeDescriptions;
+    }
+
+    bool operator ==(const Vertex o) const {
+        if(pos != o.pos) {
+            return false;
+        }
+        if(normal != o.normal) {
+            return false;
+        }
+        if(texCoord != o.texCoord) {
+            return false;
+        }
+        return true;
+    }
+
+
+};
+
+template<>
+struct std::hash<Vertex>
+{
+    std::size_t operator()(const Vertex& v) const noexcept
+    {
+        std::hash<glm::vec3> hash3;
+        std::hash<glm::vec2> hash2;
+        auto hashPos = hash3(v.pos);
+        auto hashNormal = hash3(v.normal) << 3;
+        auto hashTexcoord = hash2(v.texCoord) >> 8;
+        return hashPos ^ hashNormal ^ hashTexcoord;
+    }
+};
+
 class Model {
     public:
-
-        struct Vertex {
-            glm::vec3 pos;
-            glm::vec3 normal;
-            glm::vec2 texCoord;
-
-            static VkVertexInputBindingDescription getBindingDescription() {
-                VkVertexInputBindingDescription bindingDescription{};
-                bindingDescription.binding = 0;
-                bindingDescription.stride = sizeof(Vertex);
-                bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
-                return bindingDescription;
-            }
-
-            static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions() {
-                std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
-                attributeDescriptions[0].binding = 0;
-                attributeDescriptions[0].location = 0;
-                attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-                attributeDescriptions[0].offset = offsetof(Vertex, pos);
-
-                attributeDescriptions[1].binding = 0;
-                attributeDescriptions[1].location = 1;
-                attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-                attributeDescriptions[1].offset = offsetof(Vertex, normal);
-
-                attributeDescriptions[2].binding = 0;
-                attributeDescriptions[2].location = 2;
-                attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
-                attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
-
-                return attributeDescriptions;
-            }
-        };
-
-        struct MeshDataConstant {
-            glm::mat4 matrix;
-        };
 
         enum RenderMode {
             Solid,
@@ -62,21 +91,15 @@ class Model {
         vector<uint16_t> indices;
         RenderMode renderMode = RenderMode::Solid;
         
-        bool vkBuffersLoaded;
-        VkDevice device;
-        VkBuffer meshBuffer;
-        VkDeviceMemory meshBufferMemory;
-        VkDeviceSize indexOffset;
+        bool buffersLoaded;
+        MeshBuffer meshBuffer;
 
         Model() {
             
         }
 
         ~Model() {
-            if(vkBuffersLoaded) {
-                vkDestroyBuffer(device, meshBuffer, nullptr);
-                vkFreeMemory(device, meshBufferMemory, nullptr);
-            }
+
         }
 
         
@@ -121,7 +144,7 @@ class Model {
                     //faces
                     if(lineSegments[0] == "f") {
 
-                        std::map<Vertex,int> vertexMap;
+                        std::unordered_map<Vertex,int> vertexMap;
 
                         if(lineSegments.size() == 4) {
                             for (int i = 1; i < 4; i++)
@@ -186,19 +209,36 @@ class Model {
         //     faces.push_back(Face(0,1,0,     0,0,0,       0,0,0));
         // }
 
-        void createBuffers(Vulkan& vulkan) {
-
-            device = vulkan.getDevice();
-            vulkan.createMeshBuffers<Vertex>(meshBuffer,meshBufferMemory,vertices,indices);
-            indexOffset = sizeof(vertices[0]) * vertices.size();
-            vkBuffersLoaded = true;
+        void createBuffers(Vulkan* vulkan) {
+            if(vertices.size() == 0) {
+                Debug::warn("Tried to load a model with no vertices");
+                return;
+            }
+            if(indices.size() == 0) {
+                Debug::warn("Tried to load a model with no indices");
+                return;
+            }
+            meshBuffer = vulkan->createMeshBuffers<Vertex>(vertices,indices);
+            buffersLoaded = true;
 
         }
 
-        void recordDraw(Vulkan& vulkan) {
-            VkCommandBuffer commandBuffer = vulkan.getCurrentCommandBuffer();
-            vkCmdBindIndexBuffer(commandBuffer, meshBuffer, indexOffset, VK_INDEX_TYPE_UINT16);
-            vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+        void recordDraw(Vulkan* vulkan,glm::mat4 matrix = glm::mat4(1.0f)) {
+            if(!buffersLoaded) {
+                Debug::warn("Tried to draw model that is not loaded");
+                return;
+            }
+            //vulkan->drawMeshSingle(meshBuffer,matrix);
+
+            
+            
+        }
+
+        void recordDraw(Vulkan* vulkan,vec3 position,quat rotation = quat(1.0f,0.0f,0.0f,0.0f),vec3 scale = vec3(1)) {
+            
+            auto matrix = MathHelper::getTransformMatrix(position,rotation,scale);
+            recordDraw(vulkan,matrix);
+
         }
 
         void setStaticDraw() {
@@ -225,6 +265,6 @@ class Model {
                 );
         }
         static void modelLoadError(string path,string error,string line) {
-            std::cout << "[WARNING] ("<<path<<") Model load error: " + error << "\n\t" << line << std::endl;
+            Debug::warn(std::format("Model didn't load: {} line {}: {}",path,line,error));
         }
 };

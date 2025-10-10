@@ -2,7 +2,7 @@
 
 #include "actor.hpp"
 #include <glm/glm.hpp>
-#include <map>
+#include <unordered_map>
 
 #include "engine/debug.hpp"
 #include "rigidbody-actor.hpp"
@@ -16,7 +16,7 @@
 #include <block/block-state.hpp>
 
 using glm::ivec3,glm::vec3;
-using std::map;
+using std::unordered_map;
 
 #define CONSTRUCTION
 class Construction : public RigidbodyActor {
@@ -184,7 +184,7 @@ class Construction : public RigidbodyActor {
             
             
             //construct a map of existing blocks
-            map<Location,BlockData> blockMap;
+            unordered_map<Location,BlockData> blockMap;
             createBlockMap(blockMap);
             min = newMin;
             max = newMax;
@@ -356,7 +356,7 @@ class Construction : public RigidbodyActor {
             return true;
         }
 
-        void createBlockMap(map<Location,BlockData>& blockMap) {
+        void createBlockMap(unordered_map<Location,BlockData>& blockMap) {
             int i = 0;
             for (int z = min.z; z <= max.z; z++)
             {

@@ -260,6 +260,12 @@ SpaceGame_IS_TOP_LEVEL:STATIC=ON
 //Value Computed by CMake
 SpaceGame_SOURCE_DIR:STATIC=/Users/willow/Documents/GitHub/SpaceGame
 
+//Path to a program.
+Vulkan_GLSLANG_VALIDATOR_EXECUTABLE:FILEPATH=/usr/local/bin/glslangValidator
+
+//Path to a program.
+Vulkan_GLSLC_EXECUTABLE:FILEPATH=/usr/local/bin/glslc
+
 
 ########################
 # INTERNAL cache entries
@@ -423,6 +429,12 @@ CMAKE_TAPI-ADVANCED:INTERNAL=1
 CMAKE_UNAME:INTERNAL=/usr/bin/uname
 //ADVANCED property for variable: CMAKE_VERBOSE_MAKEFILE
 CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
+//Details about finding Vulkan
+FIND_PACKAGE_MESSAGE_DETAILS_Vulkan:INTERNAL=[/Users/willow/VulkanSDK/1.4.321.0/macOS/lib/libVulkan.dylib][/Users/willow/VulkanSDK/1.4.321.0/macOS/include][cfound components: glslc glslangValidator ][v1.4.321()]
+//ADVANCED property for variable: Vulkan_GLSLANG_VALIDATOR_EXECUTABLE
+Vulkan_GLSLANG_VALIDATOR_EXECUTABLE-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: Vulkan_GLSLC_EXECUTABLE
+Vulkan_GLSLC_EXECUTABLE-ADVANCED:INTERNAL=1
 //linker supports push/pop state
 _CMAKE_LINKER_PUSHPOP_STATE_SUPPORTED:INTERNAL=TRUE
 

@@ -54,6 +54,13 @@ namespace MathHelper {
     float fromFloor(float a) {
         return a - floor(a);
     }
+
+    glm::mat4 getTransformMatrix(vec3 position,quat rotation = quat(1.0f,0.0f,0.0f,0.0f),vec3 scale = vec3(1)) {
+        auto matrix = glm::translate(glm::mat4(1.0f),position);
+        matrix = matrix * glm::toMat4(rotation);
+        matrix = glm::scale(matrix,scale);
+        return matrix;
+    }
 }
 
 template <>

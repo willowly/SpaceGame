@@ -36,20 +36,20 @@ class Camera {
             this->aspect = x/y;
         }
 
-        glm::mat4 getViewMatrix() {
+        glm::mat4 getViewMatrix() const {
             glm::mat4 view = glm::mat4(1.0f);
             view = glm::toMat4(glm::inverse(rotation)) * view;
             view = glm::translate(view,-position);
             return view;
         }
 
-        glm::mat4 getViewRotationMatrix() {
+        glm::mat4 getViewRotationMatrix() const {
             glm::mat4 view = glm::mat4(1.0f);
             view = glm::toMat4(glm::inverse(rotation)) * view;
             return view;
         }
 
-        glm::mat4 getProjectionMatrix() {
+        glm::mat4 getProjectionMatrix() const {
             return glm::perspective(glm::radians(fov), aspect, nearClip, farClip);
         }
 

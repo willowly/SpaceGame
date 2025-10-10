@@ -16,10 +16,10 @@ class Shader {
     public:
 
         Shader() {
-            shaderProgram = glCreateProgram();
+            
         }
         ~Shader() {
-            glDeleteProgram(shaderProgram);
+            
         }
 
         unsigned int shaderProgram;

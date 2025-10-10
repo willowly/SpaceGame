@@ -95,7 +95,6 @@ bin/SpaceGame: CMakeFiles/SpaceGame.dir/build.make
 bin/SpaceGame: /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/OpenGL.framework
 bin/SpaceGame: /usr/local/lib/libreactphysics3d.a
 bin/SpaceGame: /usr/local/lib/liblua5.4.dylib
-bin/SpaceGame: _deps/sfml-build/lib/libfreetyped.a
 bin/SpaceGame: /usr/local/lib/libglfw3.a
 bin/SpaceGame: libGLAD.a
 bin/SpaceGame: libSTB.a

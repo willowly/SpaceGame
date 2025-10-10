@@ -46,14 +46,14 @@ add_library(GLAD "src/glad.c")
 add_library(STB "include/stb_image.cpp")
 add_library(SIMPLEXNOISE "include/SimplexNoise.cpp")
 
-include(FetchContent)
-FetchContent_Declare(SFML
-    GIT_REPOSITORY https://github.com/SFML/SFML.git
-    GIT_TAG 3.0.1
-    GIT_SHALLOW ON
-    EXCLUDE_FROM_ALL
-    SYSTEM)
-FetchContent_MakeAvailable(SFML)
+# include(FetchContent)
+# FetchContent_Declare(SFML
+#     GIT_REPOSITORY https://github.com/SFML/SFML.git
+#     GIT_TAG 3.0.1
+#     GIT_SHALLOW ON
+#     EXCLUDE_FROM_ALL
+#     SYSTEM)
+# FetchContent_MakeAvailable(SFML)
 
 include_directories(src)
 
@@ -63,7 +63,7 @@ add_executable(SpaceGame
 src/main.cpp
 )
 target_compile_features(SpaceGame PRIVATE cxx_std_20 )
-target_link_libraries(SpaceGame PRIVATE OpenGL::GL ReactPhysics3D::ReactPhysics3D ${LUA_LIBRARIES} Freetype::Freetype ${GLFW3_LIBRARY} GLAD STB ${COCOA_LIBRARY} ${IOKIT_LIBRARY} SIMPLEXNOISE Vulkan::Vulkan)
+target_link_libraries(SpaceGame PRIVATE OpenGL::GL ReactPhysics3D::ReactPhysics3D ${LUA_LIBRARIES} ${GLFW3_LIBRARY} GLAD STB ${COCOA_LIBRARY} ${IOKIT_LIBRARY} SIMPLEXNOISE Vulkan::Vulkan)
 
 macro(compile_shader shader_path)
     add_custom_command(
