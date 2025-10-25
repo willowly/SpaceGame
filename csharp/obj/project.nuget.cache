@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "MNLgkv2nn5M=",
+  "success": true,
+  "projectFilePath": "/Users/willow/Documents/GitHub/SpaceGame/csharp/app.csproj",
+  "expectedPackageFiles": [
+    "/Users/willow/.nuget/packages/microsoft.netcore.app.ref/8.0.21/microsoft.netcore.app.ref.8.0.21.nupkg.sha512",
+    "/Users/willow/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.21/microsoft.aspnetcore.app.ref.8.0.21.nupkg.sha512",
+    "/Users/willow/.nuget/packages/microsoft.netcore.app.host.osx-x64/8.0.21/microsoft.netcore.app.host.osx-x64.8.0.21.nupkg.sha512"
+  ],
+  "logs": []
+}

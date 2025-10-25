@@ -1,5 +1,6 @@
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 3.8)
 project(SpaceGame LANGUAGES CXX C)
+
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
@@ -95,8 +96,6 @@ target_compile_features(SpaceGame PRIVATE cxx_std_20 )
 target_link_libraries(SpaceGame PRIVATE OpenGL::GL ReactPhysics3D::ReactPhysics3D ${LUA_LIBRARIES} ${GLFW3_LIBRARY} GLAD STB ${COCOA_LIBRARY} ${IOKIT_LIBRARY} SIMPLEXNOISE)
 
 
-add_custom_target(SHADERS)
-
 macro(compile_shader shader_path)
     add_custom_command(
         OUTPUT "${CMAKE_SOURCE_DIR}/build/bin/shaders/compiled/${shader_path}_frag.spv"
@@ -117,3 +116,17 @@ compile_shader("shader")
 
 add_custom_target(SpaceGame_Shaders DEPENDS ${SHADER_OUTPUTS})
 add_dependencies(SpaceGame SpaceGame_Shaders)
+
+
+add_custom_target(CSharp)
+add_custom_command(
+    TARGET CSharp
+    COMMAND dotnet build "${CMAKE_SOURCE_DIR}/csharp"
+)
+add_custom_command(
+    TARGET CSharp
+    COMMAND cp "${CMAKE_SOURCE_DIR}/build/libSpaceGame.dylib" "${CMAKE_SOURCE_DIR}/csharp/bin/Debug/net8.0/libSpaceGame.dylib"
+    DEPENDS SpaceGame
+)
+
+add_dependencies(SpaceGame CSharp)

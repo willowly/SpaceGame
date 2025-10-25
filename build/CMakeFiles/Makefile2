@@ -78,8 +78,8 @@ clean: CMakeFiles/GLAD.dir/clean
 clean: CMakeFiles/STB.dir/clean
 clean: CMakeFiles/SIMPLEXNOISE.dir/clean
 clean: CMakeFiles/SpaceGame.dir/clean
-clean: CMakeFiles/SHADERS.dir/clean
 clean: CMakeFiles/SpaceGame_Shaders.dir/clean
+clean: CMakeFiles/CSharp.dir/clean
 .PHONY : clean
 
 #=============================================================================
@@ -168,6 +168,7 @@ CMakeFiles/SpaceGame.dir/all: CMakeFiles/GLAD.dir/all
 CMakeFiles/SpaceGame.dir/all: CMakeFiles/STB.dir/all
 CMakeFiles/SpaceGame.dir/all: CMakeFiles/SIMPLEXNOISE.dir/all
 CMakeFiles/SpaceGame.dir/all: CMakeFiles/SpaceGame_Shaders.dir/all
+CMakeFiles/SpaceGame.dir/all: CMakeFiles/CSharp.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=7,8 "Built target SpaceGame"
@@ -188,32 +189,6 @@ SpaceGame: CMakeFiles/SpaceGame.dir/rule
 CMakeFiles/SpaceGame.dir/clean:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/clean
 .PHONY : CMakeFiles/SpaceGame.dir/clean
-
-#=============================================================================
-# Target rules for target CMakeFiles/SHADERS.dir
-
-# All Build rule for target.
-CMakeFiles/SHADERS.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/SHADERS.dir/build.make CMakeFiles/SHADERS.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/SHADERS.dir/build.make CMakeFiles/SHADERS.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num= "Built target SHADERS"
-.PHONY : CMakeFiles/SHADERS.dir/all
-
-# Build rule for subdir invocation for target.
-CMakeFiles/SHADERS.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles 0
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/SHADERS.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles 0
-.PHONY : CMakeFiles/SHADERS.dir/rule
-
-# Convenience name for target.
-SHADERS: CMakeFiles/SHADERS.dir/rule
-.PHONY : SHADERS
-
-# clean rule for target.
-CMakeFiles/SHADERS.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/SHADERS.dir/build.make CMakeFiles/SHADERS.dir/clean
-.PHONY : CMakeFiles/SHADERS.dir/clean
 
 #=============================================================================
 # Target rules for target CMakeFiles/SpaceGame_Shaders.dir
@@ -240,6 +215,32 @@ SpaceGame_Shaders: CMakeFiles/SpaceGame_Shaders.dir/rule
 CMakeFiles/SpaceGame_Shaders.dir/clean:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame_Shaders.dir/build.make CMakeFiles/SpaceGame_Shaders.dir/clean
 .PHONY : CMakeFiles/SpaceGame_Shaders.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/CSharp.dir
+
+# All Build rule for target.
+CMakeFiles/CSharp.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/CSharp.dir/build.make CMakeFiles/CSharp.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/CSharp.dir/build.make CMakeFiles/CSharp.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num= "Built target CSharp"
+.PHONY : CMakeFiles/CSharp.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/CSharp.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles 0
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/CSharp.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles 0
+.PHONY : CMakeFiles/CSharp.dir/rule
+
+# Convenience name for target.
+CSharp: CMakeFiles/CSharp.dir/rule
+.PHONY : CSharp
+
+# clean rule for target.
+CMakeFiles/CSharp.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/CSharp.dir/build.make CMakeFiles/CSharp.dir/clean
+.PHONY : CMakeFiles/CSharp.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

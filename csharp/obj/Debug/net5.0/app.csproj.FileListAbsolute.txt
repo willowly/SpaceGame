@@ -1,0 +1,5 @@
+/Users/willow/Documents/GitHub/SpaceGame/csharp/obj/Debug/net5.0/app.GeneratedMSBuildEditorConfig.editorconfig
+/Users/willow/Documents/GitHub/SpaceGame/csharp/obj/Debug/net5.0/app.AssemblyInfoInputs.cache
+/Users/willow/Documents/GitHub/SpaceGame/csharp/obj/Debug/net5.0/app.AssemblyInfo.cs
+/Users/willow/Documents/GitHub/SpaceGame/csharp/obj/Debug/net5.0/app.csproj.CoreCompileInputs.cache
+/Users/willow/Documents/GitHub/SpaceGame/csharp/obj/Debug/net5.0/app.sourcelink.json

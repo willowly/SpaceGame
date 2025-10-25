@@ -60,6 +60,6 @@ set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/STB.dir/DependInfo.cmake"
   "CMakeFiles/SIMPLEXNOISE.dir/DependInfo.cmake"
   "CMakeFiles/SpaceGame.dir/DependInfo.cmake"
-  "CMakeFiles/SHADERS.dir/DependInfo.cmake"
   "CMakeFiles/SpaceGame_Shaders.dir/DependInfo.cmake"
+  "CMakeFiles/CSharp.dir/DependInfo.cmake"
   )

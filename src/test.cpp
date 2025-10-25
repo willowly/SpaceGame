@@ -1,9 +1,9 @@
-#include <stdio.h>
+#include <iostream>
 
 #define API __attribute__((visibility("default")))
 
 extern "C" {
  API void Run() {
-    printf("HELLOOO");
+    std::cout << "hello from c++" << std::endl;
  }
 }

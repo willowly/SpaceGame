@@ -1,0 +1,105 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.8"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "SpaceGame",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "CSharp::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-CSharp-Debug-a8dacc7571ad6be1aef8.json",
+					"name" : "CSharp",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "GLAD::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-GLAD-Debug-cb4db54e5597fc2c76d9.json",
+					"name" : "GLAD",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "SIMPLEXNOISE::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-SIMPLEXNOISE-Debug-226bc7377cd783c4e284.json",
+					"name" : "SIMPLEXNOISE",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "STB::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-STB-Debug-c187f198b1f7a99a0ac4.json",
+					"name" : "STB",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "SpaceGame::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-SpaceGame-Debug-718e5d426abcddb4c0d1.json",
+					"name" : "SpaceGame",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "SpaceGame_Shaders::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-SpaceGame_Shaders-Debug-0c566c06b3503420f679.json",
+					"name" : "SpaceGame_Shaders",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/Users/willow/Documents/GitHub/SpaceGame/build",
+		"source" : "/Users/willow/Documents/GitHub/SpaceGame"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 7
+	}
+}

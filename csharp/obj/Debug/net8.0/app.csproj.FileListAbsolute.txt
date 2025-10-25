@@ -1,0 +1,15 @@
+/Users/willow/Documents/GitHub/SpaceGame/csharp/bin/Debug/net8.0/app
+/Users/willow/Documents/GitHub/SpaceGame/csharp/bin/Debug/net8.0/app.deps.json
+/Users/willow/Documents/GitHub/SpaceGame/csharp/bin/Debug/net8.0/app.runtimeconfig.json
+/Users/willow/Documents/GitHub/SpaceGame/csharp/bin/Debug/net8.0/app.dll
+/Users/willow/Documents/GitHub/SpaceGame/csharp/bin/Debug/net8.0/app.pdb
+/Users/willow/Documents/GitHub/SpaceGame/csharp/obj/Debug/net8.0/app.GeneratedMSBuildEditorConfig.editorconfig
+/Users/willow/Documents/GitHub/SpaceGame/csharp/obj/Debug/net8.0/app.AssemblyInfoInputs.cache
+/Users/willow/Documents/GitHub/SpaceGame/csharp/obj/Debug/net8.0/app.AssemblyInfo.cs
+/Users/willow/Documents/GitHub/SpaceGame/csharp/obj/Debug/net8.0/app.csproj.CoreCompileInputs.cache
+/Users/willow/Documents/GitHub/SpaceGame/csharp/obj/Debug/net8.0/app.sourcelink.json
+/Users/willow/Documents/GitHub/SpaceGame/csharp/obj/Debug/net8.0/app.dll
+/Users/willow/Documents/GitHub/SpaceGame/csharp/obj/Debug/net8.0/refint/app.dll
+/Users/willow/Documents/GitHub/SpaceGame/csharp/obj/Debug/net8.0/app.pdb
+/Users/willow/Documents/GitHub/SpaceGame/csharp/obj/Debug/net8.0/app.genruntimeconfig.cache
+/Users/willow/Documents/GitHub/SpaceGame/csharp/obj/Debug/net8.0/ref/app.dll

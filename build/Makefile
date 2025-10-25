@@ -189,19 +189,6 @@ SpaceGame/fast:
 .PHONY : SpaceGame/fast
 
 #=============================================================================
-# Target rules for targets named SHADERS
-
-# Build rule for target.
-SHADERS: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 SHADERS
-.PHONY : SHADERS
-
-# fast build rule for target.
-SHADERS/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/SHADERS.dir/build.make CMakeFiles/SHADERS.dir/build
-.PHONY : SHADERS/fast
-
-#=============================================================================
 # Target rules for targets named SpaceGame_Shaders
 
 # Build rule for target.
@@ -213,6 +200,19 @@ SpaceGame_Shaders: cmake_check_build_system
 SpaceGame_Shaders/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame_Shaders.dir/build.make CMakeFiles/SpaceGame_Shaders.dir/build
 .PHONY : SpaceGame_Shaders/fast
+
+#=============================================================================
+# Target rules for targets named CSharp
+
+# Build rule for target.
+CSharp: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CSharp
+.PHONY : CSharp
+
+# fast build rule for target.
+CSharp/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/CSharp.dir/build.make CMakeFiles/CSharp.dir/build
+.PHONY : CSharp/fast
 
 include/SimplexNoise.o: include/SimplexNoise.cpp.o
 .PHONY : include/SimplexNoise.o
@@ -320,7 +320,7 @@ help:
 	@echo "... package"
 	@echo "... package_source"
 	@echo "... rebuild_cache"
-	@echo "... SHADERS"
+	@echo "... CSharp"
 	@echo "... SpaceGame_Shaders"
 	@echo "... GLAD"
 	@echo "... SIMPLEXNOISE"

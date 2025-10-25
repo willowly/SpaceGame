@@ -557,6 +557,9 @@ SpaceGame_BINARY_DIR:STATIC=/Users/willow/Documents/GitHub/SpaceGame/build
 //Value Computed by CMake
 SpaceGame_IS_TOP_LEVEL:STATIC=ON
 
+//Dependencies for the target
+SpaceGame_LIB_DEPENDS:STATIC=general;OpenGL::GL;general;ReactPhysics3D::ReactPhysics3D;general;/usr/local/lib/liblua5.4.dylib;general;/usr/local/lib/libglfw3.a;general;GLAD;general;STB;general;/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/Cocoa.framework;general;/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/IOKit.framework;general;SIMPLEXNOISE;
+
 //Value Computed by CMake
 SpaceGame_SOURCE_DIR:STATIC=/Users/willow/Documents/GitHub/SpaceGame
 
