@@ -1,86 +1,79 @@
+-- print("Loading Materials")
 
-print("Loading Texture Settings")
+-- materials.cow = {shaders.lit,textures.cow}
 
-textures.grid:setPointFiltering()
-textures.grid_dark:setPointFiltering()
+-- materials.grid = {
+--     shader=shaders.lit,
+--     texture=textures.grid_dark,
+-- }
 
+-- materials.container = {
+--     shader="lit",
+--     texture="container",
+-- }
 
-print("Loading Materials")
+-- materials.white = {
+--     shader="lit",
+--     texture="solid",
+--     color=color(0.1,0.5,0.8)
+-- }
 
-materials.cow = {shaders.lit,textures.cow}
+-- materials.pickaxe = {"lit","pickaxe"}
 
-materials.grid = {
-    shader=shaders.lit,
-    texture=textures.grid_dark,
-}
+-- materials.tin_block = {"lit","tin_block"}
+-- materials.cobalt_block = {"lit","cobalt_block"}
+-- materials.cockpit = {"lit","cockpit"}
+-- materials.thruster = {"lit","solid",color(0.3,0.3,0.4)}
 
-materials.container = {
-    shader="lit",
-    texture="container",
-}
+-- materials.terrain = {"lit","solid",color(0.2,0.2,0.8)}
 
-materials.white = {
-    shader="lit",
-    texture="solid",
-    color=color(0.1,0.5,0.8)
-}
+-- print("Loading Actors")
 
-materials.pickaxe = {"lit","pickaxe"}
+-- actors.plane = {
+--     type="actor",
+--     model="plane",
+--     material=materials.grid
+-- }
 
-materials.tin_block = {"lit","tin_block"}
-materials.cobalt_block = {"lit","cobalt_block"}
-materials.cockpit = {"lit","cockpit"}
-materials.thruster = {"lit","solid",color(0.3,0.3,0.4)}
+-- actors.pickaxe = {
+--     type="actor",
+--     model="pickaxe",
+--     material="pickaxe"
+-- }
 
-materials.terrain = {"lit","solid",color(0.2,0.2,0.8)}
+-- actors.asteroid = {
+--     type="actor",
+--     model="asteroid",
+--     material="grid"
+-- }
 
-print("Loading Actors")
+-- print("Loading Blocks")
 
-actors.plane = {
-    type="actor",
-    model="plane",
-    material=materials.grid
-}
+-- blocks.cobalt = {"block","block","cobalt_block"}
+-- blocks.tin = {"block","block","tin_block"}
 
-actors.pickaxe = {
-    type="actor",
-    model="pickaxe",
-    material="pickaxe"
-}
+-- blocks.cockpit = {
+--     type = "cockpit",
+--     model = "cockpit",
+--     material = "cockpit"
+-- }
 
-actors.asteroid = {
-    type="actor",
-    model="asteroid",
-    material="grid"
-}
-
-print("Loading Blocks")
-
-blocks.cobalt = {"block","block","cobalt_block"}
-blocks.tin = {"block","block","tin_block"}
-
-blocks.cockpit = {
-    type = "cockpit",
-    model = "cockpit",
-    material = "cockpit"
-}
-
-blocks.thruster = {
-    type = "thruster",
-    model = "thruster",
-    material = "thruster",
-    force = 20
-}
+-- blocks.thruster = {
+--     type = "thruster",
+--     model = "thruster",
+--     material = "thruster",
+--     force = 20
+-- }
 
 
-function setBlock(x,y,z)
-    construction:setBlock(ivec3(x,y,z),1);
-end
+-- function setBlock(x,y,z)
+--     construction:setBlock(ivec3(x,y,z),1);
+-- end
 
-function setBounds(x1,y1,z1,x2,y2,z2)
-    construction:setBounds(ivec3(x1,y1,z1),ivec3(x2,y2,z2));
-end
+-- function setBounds(x1,y1,z1,x2,y2,z2)
+--     construction:setBounds(ivec3(x1,y1,z1),ivec3(x2,y2,z2));
+-- end
 
-function rotate(angle)
-    construction:rotate(vec3(0,angle,0))
-end
+-- function rotate(angle)
+--     construction:rotate(vec3(0,angle,0))
+-- end

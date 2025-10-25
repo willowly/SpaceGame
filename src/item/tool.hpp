@@ -12,9 +12,9 @@ class Character;
 class Tool {
 
     public:
-        Texture* icon;
+        TextureID icon;
         Model* heldModel = nullptr;
-        Material* heldModelMaterial = nullptr;
+        Material heldModelMaterial;
         vec3 modelOffset = vec3(0.3,-0.3,-1);
         quat modelRotation = quat(vec3(0,glm::radians(45.0f),0));
         quat lookOrientation = glm::identity<quat>(); //the rendered one, that gets lerped
@@ -27,13 +27,13 @@ class Tool {
         Tool() {
 
         }
-        Tool(Model* heldModel,Material* heldModelMaterial,vec3 modelOffset,quat modelRotation,float modelScale,float lookLerp) : heldModel(heldModel), heldModelMaterial(heldModelMaterial), modelOffset(modelOffset),modelRotation(modelRotation),modelScale(modelScale),lookLerp(lookLerp) {
+        Tool(Model* heldModel,Material heldModelMaterial,vec3 modelOffset,quat modelRotation,float modelScale,float lookLerp) : heldModel(heldModel), heldModelMaterial(heldModelMaterial), modelOffset(modelOffset),modelRotation(modelRotation),modelScale(modelScale),lookLerp(lookLerp) {
 
         }
-        Tool(Model* heldModel,Material* heldModelMaterial,vec3 modelOffset,quat modelRotation) : heldModel(heldModel), heldModelMaterial(heldModelMaterial), modelOffset(modelOffset), modelRotation(modelRotation) {
+        Tool(Model* heldModel,Material heldModelMaterial,vec3 modelOffset,quat modelRotation) : heldModel(heldModel), heldModelMaterial(heldModelMaterial), modelOffset(modelOffset), modelRotation(modelRotation) {
             
         }
-        Tool(Model* heldModel,Material* heldModelMaterial) : heldModel(heldModel), heldModelMaterial(heldModelMaterial) {
+        Tool(Model* heldModel,Material heldModelMaterial) : heldModel(heldModel), heldModelMaterial(heldModelMaterial) {
             
         }
 
@@ -63,15 +63,15 @@ class Tool {
             return std::pair<quat,vec3>(glm::identity<quat>(),vec3());
         }
 
-        virtual void render(Camera& camera,ToolUser* user,float dt) {
-            if(heldModel != nullptr && heldModelMaterial != nullptr) {
+        virtual void addRenderables(Vulkan* vulkan,ToolUser* user,float dt) {
+            if(heldModel != nullptr) {
                 lookOrientation = glm::slerp(lookOrientation,user->getEyeRotation(),lookLerp * dt);
                 auto animation = animate(dt);
                 auto matrix = glm::mat4(1.0f);
                 matrix = glm::translate(matrix,modelOffset + animation.second);
                 matrix = matrix * glm::toMat4(modelRotation * animation.first);
                 matrix = glm::scale(matrix,vec3(modelScale));
-                heldModel->render(camera.getViewRotationMatrix(),glm::toMat4(lookOrientation) * matrix,camera.getProjectionMatrix(),*heldModelMaterial);
+                heldModel->addToRender(vulkan,heldModelMaterial,user->getTransform() * matrix);
             }
         }
 

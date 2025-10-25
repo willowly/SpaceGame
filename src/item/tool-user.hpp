@@ -10,4 +10,6 @@ class ToolUser {
         virtual Ray getLookRay() = 0;
 
         virtual quat getEyeRotation() = 0;
+
+        virtual glm::mat4 getTransform() = 0;
 };

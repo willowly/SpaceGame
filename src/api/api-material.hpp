@@ -2,7 +2,7 @@
 
 #include <sol/sol.hpp>
 #include "api-general.hpp"
-#include "graphics/material.hpp"
+#include "graphics/vulkan.hpp"
 #include "graphics/color.hpp"
 
 using std::unique_ptr;
@@ -16,9 +16,9 @@ namespace API {
         
         sol::usertype<Material> material = lua.new_usertype<Material>("material",sol::no_constructor);
 
-        material["shader"] = &Material::shader;
-        material["texture"] = &Material::texture;
-        material["color"] = &Material::color;
+        // material["shader"] = &Material::shader;
+        // material["texture"] = &Material::texture;
+        // material["color"] = &Material::color;
 
     };
 

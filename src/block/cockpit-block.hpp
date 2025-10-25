@@ -8,11 +8,11 @@
 class CockpitBlock : public Block {
     public:
 
-        CockpitBlock(Model* model,Material* material) : Block(model,material) {
+        CockpitBlock(Model* model,Material material) : Block(model,material) {
 
         }
 
-        CockpitBlock() : CockpitBlock(nullptr,nullptr) {}
+        CockpitBlock() : CockpitBlock(nullptr,Material()) {}
 
         virtual void onInteract(Construction* construction,ivec3 position,BlockState& state,Character& character) {
             character.ride(construction,position,Construction::getRotationFromFacing(state.facing));

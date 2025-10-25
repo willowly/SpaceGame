@@ -8,7 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/Users/willow/Documents/GitHub/SpaceGame/src/main.cpp" "CMakeFiles/SpaceGame.dir/src/main.cpp.o" "gcc" "CMakeFiles/SpaceGame.dir/src/main.cpp.o.d"
+  "/Users/willow/Documents/GitHub/SpaceGame/src/test.cpp" "CMakeFiles/SpaceGame.dir/src/test.cpp.o" "gcc" "CMakeFiles/SpaceGame.dir/src/test.cpp.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

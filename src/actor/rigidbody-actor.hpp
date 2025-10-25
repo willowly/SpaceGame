@@ -33,7 +33,7 @@ class RigidbodyActor : public Actor {
         mat3 localInverseInertiaTensor;
         mat3 worldInverseInertiaTensor;
 
-        RigidbodyActor(Model* model,Material* material) : Actor(model,material) {
+        RigidbodyActor(Model* model,Material material) : Actor(model,material) {
             float mass = getMass();
             vec3 d = scale * 2.0f;
             vec3 d2 = vec3(d.x*d.x,d.y*d.y,d.z*d.z);
@@ -45,7 +45,7 @@ class RigidbodyActor : public Actor {
             transformInertiaTensor(worldInverseInertiaTensor,rotation,localInverseInertiaTensor);
         }
 
-        RigidbodyActor() : RigidbodyActor(nullptr,nullptr){
+        RigidbodyActor() : RigidbodyActor(nullptr,Material()){
             
         }
 
@@ -63,17 +63,17 @@ class RigidbodyActor : public Actor {
             transformInertiaTensor(worldInverseInertiaTensor,rotation,localInverseInertiaTensor);
         }
 
-        virtual void render(Camera& camera,float dt) {
-            if(model == nullptr) return; //if no model, nothing to render :)
-            if(material == nullptr) {
-                std::cout << "null material" << std::endl;
-            }
-            glm::mat4 matrix(1.0f);
-            matrix = glm::translate(matrix,position);
-            matrix = matrix * glm::toMat4(rotation);
-            matrix = glm::scale(matrix,vec3(modelScale) * scale);
-            model->render(matrix,camera,*material);
-        }
+        // virtual void addRenderables(Vulkan* vulkan,float dt) {
+        //     if(model == nullptr) return; //if no model, nothing to render :)
+        //     if(material == nullptr) {
+        //         std::cout << "null material" << std::endl;
+        //     }
+        //     glm::mat4 matrix(1.0f);
+        //     matrix = glm::translate(matrix,position);
+        //     matrix = matrix * glm::toMat4(rotation);
+        //     matrix = glm::scale(matrix,vec3(modelScale) * scale);
+        //     model->render(matrix,camera,*material);
+        // }
 
         void setScale(vec3 scale) {
             this->scale = scale;

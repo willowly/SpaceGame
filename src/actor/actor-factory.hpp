@@ -55,14 +55,14 @@ std::unique_ptr<Construction> ActorFactory::make(vec3 position) {
 }
 
 
-template<> 
-std::unique_ptr<Terrain> ActorFactory::make(Material* material,vec3 position) {
+// template<> 
+// std::unique_ptr<Terrain> ActorFactory::make(Material* material,vec3 position) {
 
-    auto newActor = std::make_unique<Terrain>();
-    newActor->material = material;
-    newActor->position = position;
-    return newActor;
+//     auto newActor = std::make_unique<Terrain>();
+//     newActor->material = material;
+//     newActor->position = position;
+//     return newActor;
 
-}
+// }
 
 

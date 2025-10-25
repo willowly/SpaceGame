@@ -2,6 +2,8 @@
 /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles/STB.dir
 /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles/SIMPLEXNOISE.dir
 /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles/SpaceGame.dir
+/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles/SHADERS.dir
+/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles/SpaceGame_Shaders.dir
 /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles/package.dir
 /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles/package_source.dir
 /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles/edit_cache.dir

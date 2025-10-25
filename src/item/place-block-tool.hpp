@@ -33,11 +33,11 @@ class PlaceBlockTool: public Tool {
                     auto facing = Construction::getFacingFromVector(construction->inverseTransformDirection(worldHit.hit.normal));
                     construction->setBlock(placePointLocalInt,block,facing);
                 }
-                Terrain* terrain = dynamic_cast<Terrain*>(worldHit.actor);
-                if(terrain != nullptr) {
-                    auto construction = world->spawn<Construction>(worldHit.hit.point,glm::quatLookAt(worldHit.hit.normal,vec3(0,1,0)));
-                    construction->setBlock(ivec3(0),block,BlockFacing::FORWARD);
-                }
+                // Terrain* terrain = dynamic_cast<Terrain*>(worldHit.actor);
+                // if(terrain != nullptr) {
+                //     auto construction = world->spawn<Construction>(worldHit.hit.point,glm::quatLookAt(worldHit.hit.normal,vec3(0,1,0)));
+                //     construction->setBlock(ivec3(0),block,BlockFacing::FORWARD);
+                // }
             } else {
                 auto construction = world->spawn<Construction>(ray.origin + ray.direction*10.0f,glm::quatLookAt(ray.direction,vec3(0,1,0)));
                 construction->setBlock(ivec3(0),block,BlockFacing::FORWARD);

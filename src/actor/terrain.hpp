@@ -68,7 +68,7 @@ class Terrain : public Actor {
         }
     }
 
-    virtual void render(Camera& camera,float dt) {
+    virtual void addRenderables(Camera& camera,float dt) {
         float clock = (float)glfwGetTime();
         if(material == nullptr) {
             std::cout << "null material" << std::endl;

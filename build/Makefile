@@ -188,6 +188,32 @@ SpaceGame/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/build
 .PHONY : SpaceGame/fast
 
+#=============================================================================
+# Target rules for targets named SHADERS
+
+# Build rule for target.
+SHADERS: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 SHADERS
+.PHONY : SHADERS
+
+# fast build rule for target.
+SHADERS/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SHADERS.dir/build.make CMakeFiles/SHADERS.dir/build
+.PHONY : SHADERS/fast
+
+#=============================================================================
+# Target rules for targets named SpaceGame_Shaders
+
+# Build rule for target.
+SpaceGame_Shaders: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 SpaceGame_Shaders
+.PHONY : SpaceGame_Shaders
+
+# fast build rule for target.
+SpaceGame_Shaders/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame_Shaders.dir/build.make CMakeFiles/SpaceGame_Shaders.dir/build
+.PHONY : SpaceGame_Shaders/fast
+
 include/SimplexNoise.o: include/SimplexNoise.cpp.o
 .PHONY : include/SimplexNoise.o
 
@@ -260,29 +286,29 @@ src/glad.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/GLAD.dir/build.make CMakeFiles/GLAD.dir/src/glad.c.s
 .PHONY : src/glad.c.s
 
-src/main.o: src/main.cpp.o
-.PHONY : src/main.o
+src/test.o: src/test.cpp.o
+.PHONY : src/test.o
 
 # target to build an object file
-src/main.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/src/main.cpp.o
-.PHONY : src/main.cpp.o
+src/test.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/src/test.cpp.o
+.PHONY : src/test.cpp.o
 
-src/main.i: src/main.cpp.i
-.PHONY : src/main.i
+src/test.i: src/test.cpp.i
+.PHONY : src/test.i
 
 # target to preprocess a source file
-src/main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/src/main.cpp.i
-.PHONY : src/main.cpp.i
+src/test.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/src/test.cpp.i
+.PHONY : src/test.cpp.i
 
-src/main.s: src/main.cpp.s
-.PHONY : src/main.s
+src/test.s: src/test.cpp.s
+.PHONY : src/test.s
 
 # target to generate assembly for a file
-src/main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/src/main.cpp.s
-.PHONY : src/main.cpp.s
+src/test.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/src/test.cpp.s
+.PHONY : src/test.cpp.s
 
 # Help Target
 help:
@@ -294,6 +320,8 @@ help:
 	@echo "... package"
 	@echo "... package_source"
 	@echo "... rebuild_cache"
+	@echo "... SHADERS"
+	@echo "... SpaceGame_Shaders"
 	@echo "... GLAD"
 	@echo "... SIMPLEXNOISE"
 	@echo "... STB"
@@ -307,9 +335,9 @@ help:
 	@echo "... src/glad.o"
 	@echo "... src/glad.i"
 	@echo "... src/glad.s"
-	@echo "... src/main.o"
-	@echo "... src/main.i"
-	@echo "... src/main.s"
+	@echo "... src/test.o"
+	@echo "... src/test.i"
+	@echo "... src/test.s"
 .PHONY : help
 
 

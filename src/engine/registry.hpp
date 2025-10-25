@@ -1,7 +1,6 @@
 #pragma once
 #include "graphics/model.hpp"
-#include "graphics/texture.hpp"
-#include "graphics/shader.hpp"
+#include "graphics/vulkan.hpp"
 #include "actor/actor.hpp"
 #include "block/block.hpp"
 #include "item/tool.hpp"
@@ -16,12 +15,14 @@ using std::map,std::unique_ptr;
 class Registry {
 
     map<string,Model> models;
-    map<string,Texture> textures;
+    map<string,TextureID> textures;
     map<string,Material> materials;
-
+    
     map<string,unique_ptr<Actor>> actors;
     map<string,unique_ptr<Block>> blocks;
     map<string,unique_ptr<Tool>> tools;
+    
+    TextureID errorTexture = 0; 
 
     public:
 
@@ -57,21 +58,21 @@ class Registry {
             }
             return nullptr;
         }
-        Texture* getTexture(string name) {
+        TextureID getTexture(string name) {
             if(textures.contains(name)) {
-                return &textures.at(name);
+                return textures.at(name);
             } else {
                 Debug::warn("no textured called " + name);
             }
-            return nullptr;
+            return errorTexture;
         }
-        Material* getMaterial(string name) {
+        Material getMaterial(string name) {
             if(materials.contains(name)) {
-                return &materials.at(name);
+                return materials.at(name);
             } else {
                 Debug::warn("no material called " + name);
             }
-            return nullptr;
+            return Material();
         }
         Actor* getActor(string name) {
             if(actors.contains(name)) {
@@ -105,13 +106,11 @@ class Registry {
             return &models.at(name);
         }
 
-        Texture* addTexture(string name) {
-            textures.emplace(name,Texture());
-            return &textures.at(name);
+        void addTexture(string name,TextureID texture) {
+            textures.emplace(name,texture);
         }
-        Material* addMaterial(string name) {
+        void addMaterial(string name,Material material) {
             materials.emplace(name,Material());
-            return &materials.at(name);
         }
 
         template <typename T>
@@ -132,8 +131,8 @@ class Registry {
             return dynamic_cast<T*>(tools.at(name).get());
         }
 
-        Shader litShader;
-        Shader textShader;
-        Shader uiShader;
+        VkPipeline litShader;
+        VkPipeline textShader;
+        VkPipeline uiShader;
 
 };

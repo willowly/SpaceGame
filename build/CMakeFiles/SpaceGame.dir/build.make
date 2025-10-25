@@ -69,45 +69,42 @@ include CMakeFiles/SpaceGame.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/SpaceGame.dir/flags.make
 
-CMakeFiles/SpaceGame.dir/src/main.cpp.o: CMakeFiles/SpaceGame.dir/flags.make
-CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGame/src/main.cpp
-CMakeFiles/SpaceGame.dir/src/main.cpp.o: CMakeFiles/SpaceGame.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/SpaceGame.dir/src/main.cpp.o"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/SpaceGame.dir/src/main.cpp.o -MF CMakeFiles/SpaceGame.dir/src/main.cpp.o.d -o CMakeFiles/SpaceGame.dir/src/main.cpp.o -c /Users/willow/Documents/GitHub/SpaceGame/src/main.cpp
+CMakeFiles/SpaceGame.dir/src/test.cpp.o: CMakeFiles/SpaceGame.dir/flags.make
+CMakeFiles/SpaceGame.dir/src/test.cpp.o: /Users/willow/Documents/GitHub/SpaceGame/src/test.cpp
+CMakeFiles/SpaceGame.dir/src/test.cpp.o: CMakeFiles/SpaceGame.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/SpaceGame.dir/src/test.cpp.o"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/SpaceGame.dir/src/test.cpp.o -MF CMakeFiles/SpaceGame.dir/src/test.cpp.o.d -o CMakeFiles/SpaceGame.dir/src/test.cpp.o -c /Users/willow/Documents/GitHub/SpaceGame/src/test.cpp
 
-CMakeFiles/SpaceGame.dir/src/main.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/SpaceGame.dir/src/main.cpp.i"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/willow/Documents/GitHub/SpaceGame/src/main.cpp > CMakeFiles/SpaceGame.dir/src/main.cpp.i
+CMakeFiles/SpaceGame.dir/src/test.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/SpaceGame.dir/src/test.cpp.i"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/willow/Documents/GitHub/SpaceGame/src/test.cpp > CMakeFiles/SpaceGame.dir/src/test.cpp.i
 
-CMakeFiles/SpaceGame.dir/src/main.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/SpaceGame.dir/src/main.cpp.s"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/willow/Documents/GitHub/SpaceGame/src/main.cpp -o CMakeFiles/SpaceGame.dir/src/main.cpp.s
+CMakeFiles/SpaceGame.dir/src/test.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/SpaceGame.dir/src/test.cpp.s"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/willow/Documents/GitHub/SpaceGame/src/test.cpp -o CMakeFiles/SpaceGame.dir/src/test.cpp.s
 
 # Object files for target SpaceGame
 SpaceGame_OBJECTS = \
-"CMakeFiles/SpaceGame.dir/src/main.cpp.o"
+"CMakeFiles/SpaceGame.dir/src/test.cpp.o"
 
 # External object files for target SpaceGame
 SpaceGame_EXTERNAL_OBJECTS =
 
-bin/SpaceGame: CMakeFiles/SpaceGame.dir/src/main.cpp.o
-bin/SpaceGame: CMakeFiles/SpaceGame.dir/build.make
-bin/SpaceGame: /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/OpenGL.framework
-bin/SpaceGame: /usr/local/lib/libreactphysics3d.a
-bin/SpaceGame: /usr/local/lib/liblua5.4.dylib
-bin/SpaceGame: /usr/local/lib/libglfw3.a
-bin/SpaceGame: libGLAD.a
-bin/SpaceGame: libSTB.a
-bin/SpaceGame: libSIMPLEXNOISE.a
-bin/SpaceGame: /Users/willow/VulkanSDK/1.4.321.0/macOS/lib/libVulkan.dylib
-bin/SpaceGame: CMakeFiles/SpaceGame.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable bin/SpaceGame"
+libSpaceGame.dylib: CMakeFiles/SpaceGame.dir/src/test.cpp.o
+libSpaceGame.dylib: CMakeFiles/SpaceGame.dir/build.make
+libSpaceGame.dylib: /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/OpenGL.framework
+libSpaceGame.dylib: /usr/local/lib/libreactphysics3d.a
+libSpaceGame.dylib: /usr/local/lib/liblua5.4.dylib
+libSpaceGame.dylib: /usr/local/lib/libglfw3.a
+libSpaceGame.dylib: libGLAD.a
+libSpaceGame.dylib: libSTB.a
+libSpaceGame.dylib: libSIMPLEXNOISE.a
+libSpaceGame.dylib: CMakeFiles/SpaceGame.dir/link.txt
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX shared library libSpaceGame.dylib"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/SpaceGame.dir/link.txt --verbose=$(VERBOSE)
-	glslc /Users/willow/Documents/GitHub/SpaceGame/build/bin/shaders/shader.frag -o /Users/willow/Documents/GitHub/SpaceGame/build/bin/shaders/compiled/shader_frag.spv
-	glslc /Users/willow/Documents/GitHub/SpaceGame/build/bin/shaders/shader.vert -o /Users/willow/Documents/GitHub/SpaceGame/build/bin/shaders/compiled/shader_vert.spv
 
 # Rule to build all files generated by this target.
-CMakeFiles/SpaceGame.dir/build: bin/SpaceGame
+CMakeFiles/SpaceGame.dir/build: libSpaceGame.dylib
 .PHONY : CMakeFiles/SpaceGame.dir/build
 
 CMakeFiles/SpaceGame.dir/clean:

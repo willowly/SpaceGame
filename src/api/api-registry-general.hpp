@@ -58,26 +58,18 @@ namespace API {
         Debug::subtractTrace();
     }
 
-    void getShader(sol::table table,std::variant<string,int> key,Shader** pointer,Registry& registry,bool required = false) {
-        Debug::addTrace(keyAsString(key));
-        sol::object obj = table[key];
-        if(obj.is<string>()) {
-            string str = obj.as<string>();
-            if(str == "lit") {
-                *pointer = &registry.litShader;
-            } 
-            else {
-                Debug::warn("no shader called " + str);
-                *pointer = &registry.litShader;
-            }
-            Debug::subtractTrace();
-            return;
-        }
-        Debug::subtractTrace();
-        get<Shader*>(table,key,pointer,required);
+    void getColorAsVec3(sol::table table,variant<string,int> key,vec3* pointer,bool required = false) {
+        Color color;
+        get<Color>(table,"color",&color,false);
+        *pointer = color.asVec3();
+    }
+    void getColorAsVec4(sol::table table,variant<string,int> key,vec4* pointer,bool required = false) {
+        Color color;
+        get<Color>(table,"color",&color,false);
+        *pointer = color.asVec4();
     }
 
-    void getTexture(sol::table table,std::variant<string,int> key,Texture** pointer,Registry& registry,bool required = false) {
+    void getTexture(sol::table table,std::variant<string,int> key,TextureID* pointer,Registry& registry,bool required = false) {
         Debug::addTrace(keyAsString(key));
         sol::object obj = table[key];
         if(obj.is<string>()) {
@@ -88,20 +80,7 @@ namespace API {
             
         }
         Debug::subtractTrace();
-        get<Texture*>(table,key,pointer,required);
-    }
-    void getMaterial(sol::table table,std::variant<string,int> key,Material** pointer,Registry& registry,bool required = false) {
-        Debug::addTrace(keyAsString(key));
-        sol::object obj = table[key];
-        if(obj.is<string>()) {
-            string str = obj.as<string>();
-            *pointer = registry.getMaterial(str);
-            Debug::subtractTrace();
-            return;
-            
-        }
-        Debug::subtractTrace();
-        get<Material*>(table,key,pointer,required);
+        get<TextureID>(table,key,pointer,required);
     }
 
     void getModel(sol::table table,std::variant<string,int> key,Model** pointer,Registry& registry,bool required = false) {
@@ -142,7 +121,7 @@ namespace API {
         TextureRegistry(Registry& registry) : registry(registry) {}
         Registry& registry;
 
-        Texture* index(string name) {
+        TextureID index(string name) {
             return registry.getTexture(name);
         }
         
@@ -151,14 +130,14 @@ namespace API {
         }
     };
 
-    struct ShaderRegistry {
-        ShaderRegistry(Registry& registry) : registry(registry) {}
-        Registry& registry;
+    // struct ShaderRegistry {
+    //     ShaderRegistry(Registry& registry) : registry(registry) {}
+    //     Registry& registry;
 
-        Shader* litShader() {
-            return &registry.litShader;
-        }
-    };
+    //     Shader* litShader() {
+    //         return &registry.litShader;
+    //     }
+    // };
 
     struct ModelRegistry {
         ModelRegistry(Registry& registry) : registry(registry) {}
@@ -166,42 +145,5 @@ namespace API {
         
     };
 
-    struct MaterialRegistry {
-        MaterialRegistry(Registry& registry) : registry(registry) {}
-        Registry& registry;
-
-        Material* index(string name) {
-            
-            return registry.getMaterial(name);
-        }
-        
-        void newindex(sol::this_state lua,string name,sol::object obj) {
-            Debug::addTrace("materials");
-            Debug::addTrace(name);
-            registry.addMaterial(name);
-            Material* material = registry.getMaterial(name);
-            sol::table table = obj; //this will be null if it doesnt work, so be careful
-            switch (getObjectLoadType(lua,obj)) {
-                case ObjLoadType::ARRAY:
-                    getShader(table,1,&material->shader,registry,true);
-                    getTexture(table,2,&material->texture,registry,true);
-                    get<Color>(table,3,&material->color,false);
-                    break;
-                case ObjLoadType::TABLE:
-                    getShader(table,"shader",&material->shader,registry,true);
-                    getTexture(table,"texture",&material->texture,registry,true);
-                    get<Color>(table,"color",&material->color,false);
-                    break;
-                case ObjLoadType::INVALID:
-                    //registry.materials.erase(name);
-                    Debug::warn("trying to load with invalid object");
-                    break;
-                    
-            }
-            Debug::info("Loaded Material \"" + name + "\"",InfoPriority::MEDIUM);
-            Debug::subtractTrace();
-            Debug::subtractTrace();
-        }
-    };
 
 }

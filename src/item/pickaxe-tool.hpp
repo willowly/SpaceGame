@@ -1,5 +1,5 @@
 #include "tool.hpp"
-#include "actor/terrain.hpp"
+//#include "actor/terrain.hpp"
 
 
 class PickaxeTool : public Tool {
@@ -10,7 +10,7 @@ class PickaxeTool : public Tool {
 
         }
 
-        PickaxeTool(Model* heldModel,Material* heldModelMaterial,vec3 modelOffset,quat modelRotation) : Tool(heldModel,heldModelMaterial,modelOffset,modelRotation) {
+        PickaxeTool(Model* heldModel,Material heldModelMaterial,vec3 modelOffset,quat modelRotation) : Tool(heldModel,heldModelMaterial,modelOffset,modelRotation) {
             
         }
 
@@ -45,11 +45,11 @@ class PickaxeTool : public Tool {
                     ivec3 placePointLocalInt = glm::round(placePointLocal);
                     construction->setBlock(placePointLocalInt,nullptr,BlockFacing::FORWARD);
                 }
-                Terrain* terrain = dynamic_cast<Terrain*>(worldHit.actor);
-                if(terrain != nullptr) {
-                    terrain->terraformSphere(worldHit.hit.point,mineRadius,-mineAmount);
-                    terrain->generateMesh();
-                }
+                // Terrain* terrain = dynamic_cast<Terrain*>(worldHit.actor);
+                // if(terrain != nullptr) {
+                //     terrain->terraformSphere(worldHit.hit.point,mineRadius,-mineAmount);
+                //     terrain->generateMesh();
+                // }
             }
         }
 

@@ -78,6 +78,8 @@ clean: CMakeFiles/GLAD.dir/clean
 clean: CMakeFiles/STB.dir/clean
 clean: CMakeFiles/SIMPLEXNOISE.dir/clean
 clean: CMakeFiles/SpaceGame.dir/clean
+clean: CMakeFiles/SHADERS.dir/clean
+clean: CMakeFiles/SpaceGame_Shaders.dir/clean
 .PHONY : clean
 
 #=============================================================================
@@ -162,9 +164,10 @@ CMakeFiles/SIMPLEXNOISE.dir/clean:
 # Target rules for target CMakeFiles/SpaceGame.dir
 
 # All Build rule for target.
+CMakeFiles/SpaceGame.dir/all: CMakeFiles/GLAD.dir/all
 CMakeFiles/SpaceGame.dir/all: CMakeFiles/STB.dir/all
 CMakeFiles/SpaceGame.dir/all: CMakeFiles/SIMPLEXNOISE.dir/all
-CMakeFiles/SpaceGame.dir/all: CMakeFiles/GLAD.dir/all
+CMakeFiles/SpaceGame.dir/all: CMakeFiles/SpaceGame_Shaders.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=7,8 "Built target SpaceGame"
@@ -172,7 +175,7 @@ CMakeFiles/SpaceGame.dir/all: CMakeFiles/GLAD.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/SpaceGame.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles 8
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles 10
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/SpaceGame.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles 0
 .PHONY : CMakeFiles/SpaceGame.dir/rule
@@ -185,6 +188,58 @@ SpaceGame: CMakeFiles/SpaceGame.dir/rule
 CMakeFiles/SpaceGame.dir/clean:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/clean
 .PHONY : CMakeFiles/SpaceGame.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/SHADERS.dir
+
+# All Build rule for target.
+CMakeFiles/SHADERS.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SHADERS.dir/build.make CMakeFiles/SHADERS.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SHADERS.dir/build.make CMakeFiles/SHADERS.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num= "Built target SHADERS"
+.PHONY : CMakeFiles/SHADERS.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/SHADERS.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles 0
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/SHADERS.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles 0
+.PHONY : CMakeFiles/SHADERS.dir/rule
+
+# Convenience name for target.
+SHADERS: CMakeFiles/SHADERS.dir/rule
+.PHONY : SHADERS
+
+# clean rule for target.
+CMakeFiles/SHADERS.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SHADERS.dir/build.make CMakeFiles/SHADERS.dir/clean
+.PHONY : CMakeFiles/SHADERS.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/SpaceGame_Shaders.dir
+
+# All Build rule for target.
+CMakeFiles/SpaceGame_Shaders.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame_Shaders.dir/build.make CMakeFiles/SpaceGame_Shaders.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame_Shaders.dir/build.make CMakeFiles/SpaceGame_Shaders.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=9,10 "Built target SpaceGame_Shaders"
+.PHONY : CMakeFiles/SpaceGame_Shaders.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/SpaceGame_Shaders.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/SpaceGame_Shaders.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles 0
+.PHONY : CMakeFiles/SpaceGame_Shaders.dir/rule
+
+# Convenience name for target.
+SpaceGame_Shaders: CMakeFiles/SpaceGame_Shaders.dir/rule
+.PHONY : SpaceGame_Shaders
+
+# clean rule for target.
+CMakeFiles/SpaceGame_Shaders.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame_Shaders.dir/build.make CMakeFiles/SpaceGame_Shaders.dir/clean
+.PHONY : CMakeFiles/SpaceGame_Shaders.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

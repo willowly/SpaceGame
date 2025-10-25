@@ -2,7 +2,6 @@
 
 
 #include <graphics/model.hpp>
-#include <graphics/material.hpp>
 
 
 
@@ -16,14 +15,14 @@ class Block {
 
     public:
         Model* model;
-        Material* material;
+        Material material;
         bool canRide;
 
         
-        Block(Model* model,Material* material) : model(model), material(material) {
+        Block(Model* model,Material material) : model(model), material(material) {
             
         }
-        Block() : Block(nullptr,nullptr) {}
+        Block() : Block(nullptr,Material()) {}
         
         virtual ~Block() = default;
 

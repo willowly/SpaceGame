@@ -41,8 +41,6 @@ class Text {
 
         std::map<char, Character> Characters;
 
-        unsigned int VBO = -1;
-        unsigned int VAO = -1;
         glm::vec2 position = glm::vec2(1.0f);
         Color color = Color::white;
         string text = "";
@@ -65,8 +63,7 @@ class Text {
             FT_Set_Pixel_Sizes(face, 0, characterSize);
 
 
-            glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // because the texture will not be a multiple of 4 with single byte colors
-            
+
             //load all the characters
             for (unsigned char c = 0; c < 128; c++)
             {

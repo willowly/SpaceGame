@@ -77,10 +77,10 @@ class World {
         }
         
         // do rendering, step and everything else
-        void frame(float dt) {
+        void frame(Vulkan* vulkan,float dt) {
             
             float clock = glfwGetTime();
-            render(camera,dt);
+            addRenderables(vulkan,dt);
             renderProcessMs = ((float)glfwGetTime() - clock) * 1000;
 
             sinceLastStep += dt;
@@ -98,10 +98,10 @@ class World {
             }
         }
 
-        void render(Camera& camera,float dt) {
+        void addRenderables(Vulkan* vulkan,float dt) {
             for (auto& actor : actors)
             {
-                actor->render(camera,dt);
+                actor->addRenderables(vulkan,dt);
             }
             
         }

@@ -1,0 +1,4 @@
+# Hashes of file build rules.
+3ed835bf0b586db14d23d048ad4b15c7 CMakeFiles/SpaceGame_Shaders
+60018677eabf344131a6edae93d03d74 bin/shaders/compiled/shader_frag.spv
+a6d7e5fbdc878e9908b23f2ee12ae16f bin/shaders/compiled/shader_vert.spv

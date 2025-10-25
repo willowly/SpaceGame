@@ -83,13 +83,8 @@ struct std::hash<Vertex>
 class Model {
     public:
 
-        enum RenderMode {
-            Solid,
-            Wireframe
-        };
         vector<Vertex> vertices;
         vector<uint16_t> indices;
-        RenderMode renderMode = RenderMode::Solid;
         
         bool buffersLoaded;
         MeshBuffer meshBuffer;
@@ -223,21 +218,21 @@ class Model {
 
         }
 
-        void recordDraw(Vulkan* vulkan,glm::mat4 matrix = glm::mat4(1.0f)) {
+        void addToRender(Vulkan* vulkan,Material material,glm::mat4 matrix = glm::mat4(1.0f)) {
             if(!buffersLoaded) {
                 Debug::warn("Tried to draw model that is not loaded");
                 return;
             }
-            //vulkan->drawMeshSingle(meshBuffer,matrix);
+            vulkan->addMesh(meshBuffer,material,matrix);
 
             
             
         }
 
-        void recordDraw(Vulkan* vulkan,vec3 position,quat rotation = quat(1.0f,0.0f,0.0f,0.0f),vec3 scale = vec3(1)) {
+        void addToRender(Vulkan* vulkan,Material material,vec3 position,quat rotation = quat(1.0f,0.0f,0.0f,0.0f),vec3 scale = vec3(1)) {
             
             auto matrix = MathHelper::getTransformMatrix(position,rotation,scale);
-            recordDraw(vulkan,matrix);
+            addToRender(vulkan,material,matrix);
 
         }
 

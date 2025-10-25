@@ -6,6 +6,7 @@
 #include "engine/debug.hpp"
 #include <graphics/color.hpp>
 #include <api/api-registry-general.hpp>
+#include <api/api-registry-material.hpp>
 #include <api/api-registry-actor.hpp>
 #include <api/api-registry-block.hpp>
 
@@ -20,9 +21,9 @@ namespace API {
         textureRegistry["__index"] = &TextureRegistry::index;
         textureRegistry["__newindex"] = &TextureRegistry::newindex;
 
-        sol::usertype<ShaderRegistry> shaderRegistry = lua.new_usertype<ShaderRegistry>("shaderRegistry",sol::no_constructor);
+        // sol::usertype<ShaderRegistry> shaderRegistry = lua.new_usertype<ShaderRegistry>("shaderRegistry",sol::no_constructor);
 
-        shaderRegistry["lit"] = sol::property(&ShaderRegistry::litShader);
+        // shaderRegistry["lit"] = sol::property(&ShaderRegistry::litShader);
 
         sol::usertype<MaterialRegistry> materialRegistry = lua.new_usertype<MaterialRegistry>("materialRegistry",sol::no_constructor);
 

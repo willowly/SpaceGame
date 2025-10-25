@@ -1,6 +1,5 @@
 #pragma once
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
+#define VULKAN_NO_PROTOTYPES
 #include <iostream>
 #include <stdexcept>
 #include <cstdlib>
@@ -13,6 +12,12 @@
 #include "helper/string-helper.hpp"
 #include "helper/random-helper.hpp"
 #include "graphics/camera.hpp"
+#include "world.hpp"
+#include "actor/character.hpp"
+#include "actor/actor-factory.hpp"
+#include "engine/registry.hpp"
+#include "engine/loader.hpp"
+#include "sol/sol.hpp"
 
 using std::string;
 
@@ -26,10 +31,8 @@ class GameApplication {
             
             initWindow();
             vulkan = new Vulkan(name,window);
-
-            model = new Model();
-
-            pipeline = vulkan->createGraphicsPipeline<Vertex>();
+                                                                
+            pipeline = vulkan->createGraphicsPipeline<Vertex>("shaders/compiled/shader_vert.spv","shaders/compiled/shader_frag.spv");
 
         }
 
@@ -58,11 +61,25 @@ class GameApplication {
 
         }
 
+        
+        
+        private:
+
+        World world;
+        
+        //Registry
         Model* model;
+        TextureID cowTexture;
+        TextureID gridTexture;
+        Material cowMaterial;
+        Material gridMaterial;
 
+        Registry registry;
 
-    private:
-    
+        Loader loader;
+        
+        sol::state lua;
+
         GLFWwindow* window = nullptr;   
         
         Vulkan* vulkan;
@@ -76,6 +93,10 @@ class GameApplication {
         vec3 rotation = vec3(0);
         
         Camera camera;
+
+        std::vector<float> frameTimes;
+
+        Character* player;
 
         float lastTime = 0; //tells how long its been since the last update
 
@@ -141,7 +162,6 @@ class GameApplication {
             glfwSetErrorCallback(errorCallback);
             window = glfwCreateWindow(windowWidth, windowHeight, name.c_str(), nullptr, nullptr);
             glfwSetWindowUserPointer(window, this);
-            std::cout << "pointer = " << this << std::endl;
             glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
 
             //Inputs
@@ -163,10 +183,42 @@ class GameApplication {
 
         void setup() {
 
+            model = new Model();
             model->loadFromFile("models/monkey.obj");
-            model->createBuffers(vulkan);
+
+            lua.open_libraries(sol::lib::base, sol::lib::package);
+            API::loadAPIAll(lua);
+
+            loader.loadAll(registry,lua,vulkan);
 
             lastTime = (float)glfwGetTime();
+
+            cowTexture = registry.getTexture("cow");
+
+            gridTexture = registry.getTexture("grid_dark");
+
+            cowMaterial = vulkan->createMaterial(pipeline,LitMaterialData(cowTexture,vec3(1)));
+
+            gridMaterial = vulkan->createMaterial(pipeline,LitMaterialData(gridTexture,vec3(1)));
+
+            Actor monkeyPrototype = Actor(model,gridMaterial);
+
+            Character playerPrototype = Character();
+
+            world.spawn<Actor>(&monkeyPrototype,vec3(0,0,0));
+
+            player = world.spawn<Character>(&playerPrototype,vec3(0.0,0.0,5.0));
+
+
+            // for (size_t i = 0; i < 5000; i++)
+            // {
+            //     auto position = vec3(Random::random(-3,3),Random::random(-3,3),Random::random(-3,3));
+            //     auto quaternion = quat(vec3(Random::random(0,360),Random::random(0,360),Random::random(0,360)));
+            //     auto scale = vec3(Random::random(0.01,0.1));
+            //     monkeys.push_back(MathHelper::getTransformMatrix(position,quaternion,scale));
+            // }
+
+            
             
 
         }
@@ -185,32 +237,39 @@ class GameApplication {
             lastTime = glfwGetTime();
 
             camera.setAspect(frameWidth,frameHeight);
-
-            vec2 mouseDelta = -input.getMouseDelta();
-            // test inputs
-            camera.rotate(vec3(mouseDelta.y * dt,mouseDelta.x * dt,0));
             
-            // set up vulkan to start rendering. It can return false if we need to try again (bc of window resize)
-            if(!vulkan->startFrame(camera)) return;
+            // test inputs
+            //camera.rotate(vec3(mouseDelta.y * dt,mouseDelta.x * dt,0));
+            camera.rotate(vec3(0,dt*-10,0));
 
-            // test render
-            vkCmdBindPipeline(vulkan->getCurrentCommandBuffer(),VK_PIPELINE_BIND_POINT_GRAPHICS,pipeline);
+            frameTimes.push_back(dt);
 
+            if(frameTimes.size() >= 10) {
+                float average = 0;
+                for (size_t i = 0; i < frameTimes.size(); i++)
+                {
+                    average += frameTimes[i];
+                }
 
-            auto position = vec3(Random::random(-3,3),Random::random(-3,3),Random::random(-3,3));
-            auto quaternion = quat(vec3(Random::random(0,360),Random::random(0,360),Random::random(0,360)));
-            auto scale = vec3(Random::random(0.01,0.1));
-            monkeys.push_back(MathHelper::getTransformMatrix(position,quaternion,scale));
+                average /= frameTimes.size();
+                std::cout << "fps: " << (1/average) << std::endl;
+                
+                frameTimes.clear();
+            }
 
-            for (auto mat : monkeys)
-            {
-                vulkan->drawMeshSingle(model->meshBuffer,mat);
+            player->setCamera(camera);
+            player->processInput(input);
+
+            if(input.getKey(GLFW_KEY_RIGHT)) {
+                input.currentMousePosition.x += 10000;
+                input.lastMousePosition.x += 10000;
             }
             
-            
+            world.frame(vulkan,dt);
 
             // do all the end of frame code in vulkan
-            vulkan->submitFrame();
+            vulkan->render(camera);
+            vulkan->clearObjects();
 
             input.clearInputBuffers();
 

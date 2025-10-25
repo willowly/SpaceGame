@@ -116,11 +116,11 @@ class Construction : public RigidbodyActor {
 
         };
 
-        Construction(Model* model,Material* material) : RigidbodyActor(model,material) {
+        Construction(Model* model,Material material) : RigidbodyActor(model,material) {
             blockData.push_back(BlockData()); //starting block
             blockCountX.push_back(0);
         }
-        Construction() : Construction(nullptr,nullptr) {
+        Construction() : Construction(nullptr,Material()) {
             
         }
 
@@ -152,7 +152,7 @@ class Construction : public RigidbodyActor {
             
         }
 
-        void render(Camera& camera,float dt) {
+        void addRenderables(Vulkan* vulkan,float dt) {
             size_t i = 0;
             for (int z = min.z; z <= max.z; z++)
             {
@@ -163,7 +163,8 @@ class Construction : public RigidbodyActor {
                         
                         if(blockData.size() > i && blockData[i].block != nullptr) {
                             quat rotation = getRotationFromFacing(blockData[i].state.facing);
-                            blockData[i].block->model->render(glm::translate(transform(),vec3(x,y,z)) * glm::mat4(rotation),camera,*blockData[i].block->material);
+                            glm::mat4 blockMatrix = glm::translate(getTransform(),vec3(x,y,z)) * glm::mat4(rotation);
+                            blockData[i].block->model->addToRender(vulkan,blockData[i].block->material,blockMatrix);
                         } else {
                             // model->renderMode = Model::RenderMode::Wireframe;
                             // model->render(transformPoint(vec3(x,y,z)),camera,*Debug::getShader());
@@ -184,7 +185,7 @@ class Construction : public RigidbodyActor {
             
             
             //construct a map of existing blocks
-            unordered_map<Location,BlockData> blockMap;
+            map<Location,BlockData> blockMap;
             createBlockMap(blockMap);
             min = newMin;
             max = newMax;
@@ -356,7 +357,7 @@ class Construction : public RigidbodyActor {
             return true;
         }
 
-        void createBlockMap(unordered_map<Location,BlockData>& blockMap) {
+        void createBlockMap(map<Location,BlockData>& blockMap) {
             int i = 0;
             for (int z = min.z; z <= max.z; z++)
             {

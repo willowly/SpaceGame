@@ -1,8 +1,8 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/SpaceGame.dir/src/main.cpp.o"
-  "CMakeFiles/SpaceGame.dir/src/main.cpp.o.d"
-  "bin/SpaceGame"
-  "bin/SpaceGame.pdb"
+  "CMakeFiles/SpaceGame.dir/src/test.cpp.o"
+  "CMakeFiles/SpaceGame.dir/src/test.cpp.o.d"
+  "libSpaceGame.dylib"
+  "libSpaceGame.pdb"
 )
 
 # Per-language clean rules from dependency scanning.

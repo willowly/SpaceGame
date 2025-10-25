@@ -3,8 +3,8 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include "graphics/model.hpp"
-#include "graphics/material.hpp"
 #include "physics/intersections.hpp"
+#include "graphics/vulkan.hpp"
 
 
 using glm::vec3, glm::quat;
@@ -19,7 +19,7 @@ class Actor {
         vec3 position = vec3(0);
         quat rotation = vec3(0);
         Model* model = nullptr;
-        Material* material = nullptr;
+        Material material;
         float modelScale = 1;
 
         bool destroyed = false;
@@ -30,14 +30,14 @@ class Actor {
 
         }
 
-        Actor(Model* model,Material* material) : model(model), material(material) {
+        Actor(Model* model,Material material) : model(model), material(material) {
 
         }
 
+        virtual ~Actor() {}
 
 
-
-        glm::mat4 transform() {
+        virtual glm::mat4 getTransform() {
             glm::mat4 matrix = glm::translate(glm::mat4(1.0f),position);
             matrix *= glm::toMat4(rotation);
             return matrix;
@@ -85,17 +85,10 @@ class Actor {
 
         }
 
-        virtual void render(Camera& camera,float dt) {
+        virtual void addRenderables(Vulkan* vulkan,float dt) {
             if(model == nullptr) return; //if no model, nothing to render :)
-            if(material == nullptr) {
-                std::cout << "null material" << std::endl;
-                return;
-            }
             glm::mat4 matrix(1.0f);
-            matrix = glm::translate(matrix,position);
-            matrix = matrix * glm::toMat4(rotation);
-            matrix = glm::scale(matrix,vec3(modelScale));
-            model->render(matrix,camera,*material);
+            model->addToRender(vulkan,material,position,rotation,vec3(modelScale));
         }
 
         //for now to get the player to move differently than the physics sim :)

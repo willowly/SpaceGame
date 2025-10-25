@@ -4,7 +4,7 @@
 # compile C with /usr/bin/clang
 C_DEFINES = 
 
-C_INCLUDES = -I/usr/local/include -I/usr/local/include/lua -I/Users/willow/Documents/GitHub/SpaceGame/src -I/Users/willow/Documents/GitHub/SpaceGame/include
+C_INCLUDES = -I/usr/local/include -I/usr/local/include/lua -I/Users/willow/Documents/GitHub/SpaceGame/src -I/Users/willow/Documents/GitHub/SpaceGame/include -I/Users/willow/Documents/GitHub/SpaceGame/include/imgui
 
 C_FLAGS = -g -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mmacosx-version-min=14.3
 

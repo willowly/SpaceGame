@@ -1,4 +1,9 @@
 #pragma once
+#include "glm/glm.hpp"
+
+using glm::vec3, glm::vec4;
+
+
 class Color {
 
     
@@ -14,6 +19,8 @@ class Color {
             this->g = g;
             this->b = b;
             this->a = 1;
+        }
+        Color(){
         }
         float r;
         float g;
@@ -31,6 +38,14 @@ class Color {
         static Color white;
         static Color black;
         static Color clear;
+
+        vec3 asVec3() {
+            return vec3(r,g,b);
+        }
+
+        vec4 asVec4() {
+            return vec4(r,g,b,a);
+        }
     
 };
 

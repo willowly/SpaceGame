@@ -5,7 +5,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -Wall -Wextra -pedantic -fsanitize=address,undefined -Wno-unused-parameter")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -Wall -Wextra -pedantic -Wno-unused-parameter")
 
 if(WIN32)
     add_library(GLF3 "lib/win/glfw-win.lib")
@@ -55,26 +55,65 @@ add_library(SIMPLEXNOISE "include/SimplexNoise.cpp")
 #     SYSTEM)
 # FetchContent_MakeAvailable(SFML)
 
+# add_library(IMGUI 
+# "include/imgui/imgui.cpp"
+
+# "include/imgui/imgui_demo.cpp"
+# "include/imgui/imgui_draw.cpp"
+# "include/imgui/imgui_widgets.cpp"
+# "include/imgui/imgui_tables.cpp"
+
+# "include/imgui/backends/imgui_impl_vulkan.cpp"
+# "include/imgui/backends/imgui_impl_glfw.cpp"
+# )
+
+# target_compile_features(IMGUI PRIVATE cxx_std_20)
+# target_include_directories(IMGUI PRIVATE include/imgui)
+
+
 include_directories(src)
 
 include_directories(include)
 
-add_executable(SpaceGame 
-src/main.cpp
-)
+include_directories(include/imgui)
+
+# add_executable(SpaceGame 
+# src/main.cpp
+# include/volk.c
+# include/imgui/imgui.cpp
+
+# include/imgui/imgui_demo.cpp
+# include/imgui/imgui_draw.cpp
+# include/imgui/imgui_widgets.cpp
+# include/imgui/imgui_tables.cpp
+
+# include/imgui/backends/imgui_impl_vulkan.cpp
+# include/imgui/backends/imgui_impl_glfw.cpp
+# )
+add_library(SpaceGame SHARED src/test.cpp)
 target_compile_features(SpaceGame PRIVATE cxx_std_20 )
-target_link_libraries(SpaceGame PRIVATE OpenGL::GL ReactPhysics3D::ReactPhysics3D ${LUA_LIBRARIES} ${GLFW3_LIBRARY} GLAD STB ${COCOA_LIBRARY} ${IOKIT_LIBRARY} SIMPLEXNOISE Vulkan::Vulkan)
+target_link_libraries(SpaceGame PRIVATE OpenGL::GL ReactPhysics3D::ReactPhysics3D ${LUA_LIBRARIES} ${GLFW3_LIBRARY} GLAD STB ${COCOA_LIBRARY} ${IOKIT_LIBRARY} SIMPLEXNOISE)
+
+
+add_custom_target(SHADERS)
 
 macro(compile_shader shader_path)
     add_custom_command(
-        TARGET SpaceGame
+        OUTPUT "${CMAKE_SOURCE_DIR}/build/bin/shaders/compiled/${shader_path}_frag.spv"
         COMMAND glslc "${CMAKE_SOURCE_DIR}/build/bin/shaders/${shader_path}.frag" -o "${CMAKE_SOURCE_DIR}/build/bin/shaders/compiled/${shader_path}_frag.spv"
+        DEPENDS "${CMAKE_SOURCE_DIR}/build/bin/shaders/${shader_path}.frag"
     )
+    list(APPEND SHADER_OUTPUTS "${CMAKE_SOURCE_DIR}/build/bin/shaders/compiled/${shader_path}_frag.spv")
     add_custom_command(
-        TARGET SpaceGame
+        OUTPUT "${CMAKE_SOURCE_DIR}/build/bin/shaders/compiled/${shader_path}_vert.spv"
         COMMAND glslc "${CMAKE_SOURCE_DIR}/build/bin/shaders/${shader_path}.vert" -o "${CMAKE_SOURCE_DIR}/build/bin/shaders/compiled/${shader_path}_vert.spv"
+        DEPENDS "${CMAKE_SOURCE_DIR}/build/bin/shaders/${shader_path}.vert"
     )
+    list(APPEND SHADER_OUTPUTS "${CMAKE_SOURCE_DIR}/build/bin/shaders/compiled/${shader_path}_vert.spv")
 endmacro()
 
 
 compile_shader("shader")
+
+add_custom_target(SpaceGame_Shaders DEPENDS ${SHADER_OUTPUTS})
+add_dependencies(SpaceGame SpaceGame_Shaders)

@@ -24,10 +24,10 @@ class Character : public RigidbodyActor, public ToolUser {
     public: 
 
         // Prototype constructors
-        Character() : Character(nullptr,nullptr) {
+        Character() : Character(nullptr,Material()) {
             
         }
-        Character(Model* model,Material* material) : RigidbodyActor(model,material) {
+        Character(Model* model,Material material) : RigidbodyActor(model,material) {
             useGravity = false;
         }
 
@@ -57,15 +57,15 @@ class Character : public RigidbodyActor, public ToolUser {
         quat ridingConstructionRotation;
 
         vec3 thirdPersonCameraOffset = vec3(0,3,20);
-        //vec3 thirdPersonCameraRot;
+        vec3 thirdPersonCameraRot;
 
 
-        void render(Camera& camera,float dt) {
+        void addRenderables(Vulkan* vulkan,float dt) {
             if(currentTool != nullptr && ridingConstruction == nullptr) {
-                currentTool->render(camera,this,dt);
+                currentTool->addRenderables(vulkan,this,dt);
             }
             if(thirdPerson) {
-                Actor::render(camera,dt);
+                Actor::addRenderables(vulkan,dt);
             }
         }
 
@@ -75,22 +75,22 @@ class Character : public RigidbodyActor, public ToolUser {
             
             
 
-            if(interactInput) {
-                interact(world);
-            }
+            // if(interactInput) {
+            //     interact(world);
+            // }
 
-            if(currentTool != nullptr) {
-                currentTool->step(world,this,dt);
-            }
+            // if(currentTool != nullptr) {
+            //     currentTool->step(world,this,dt);
+            // }
 
-            if(ridingConstruction != nullptr) {
-                ridingConstruction->setMoveControl(ridingConstructionRotation * moveInput);
-                ridingConstruction->setTargetRotation(getEyeRotation() * glm::inverse(ridingConstructionRotation) * glm::angleAxis(glm::radians(180.0f),vec3(0,1,0)));
-                position = ridingConstruction->transformPoint(ridingConstructionPoint);
-            } else {
-                vec3 targetVelocity = rotation * moveInput * moveSpeed;
-                velocity = MathHelper::lerp(velocity,targetVelocity,acceleration*dt);
-            }
+            // if(ridingConstruction != nullptr) {
+            //     ridingConstruction->setMoveControl(ridingConstructionRotation * moveInput);
+            //     ridingConstruction->setTargetRotation(getEyeRotation() * glm::inverse(ridingConstructionRotation) * glm::angleAxis(glm::radians(180.0f),vec3(0,1,0)));
+            //     position = ridingConstruction->transformPoint(ridingConstructionPoint);
+            // } else {
+            vec3 targetVelocity = rotation * moveInput * moveSpeed;
+            velocity = MathHelper::lerp(velocity,targetVelocity,acceleration*dt);
+            // }
 
 
 
@@ -101,9 +101,10 @@ class Character : public RigidbodyActor, public ToolUser {
             clickInput = false;
             interactInput = false;
 
-            if(ridingConstruction == nullptr) { //dont collide with anything if we are riding
-                world->collideBasic(this,radius);
-            }
+            // if(ridingConstruction == nullptr) { //dont collide with anything if we are riding
+            //     world->collideBasic(this,radius);
+            // }
+            world->collideBasic(this,radius);
 
         }
 
@@ -234,14 +235,18 @@ class Character : public RigidbodyActor, public ToolUser {
         }
 
         void setCamera(Camera& camera) {
-            if(ridingConstruction == nullptr && !thirdPerson) {
-                camera.position = getEyePosition();
-                camera.rotation = getEyeRotation();
-            } else {
-                camera.position = position + getEyeRotation() * thirdPersonCameraOffset;
-                camera.rotation = getEyeRotation();
-            }
+            // if(ridingConstruction == nullptr && !thirdPerson) {
+                 camera.position = getEyePosition();
+                 camera.rotation = getEyeRotation();
+            // } else {
+                // camera.position = position + getEyeRotation() * thirdPersonCameraOffset;
+                // camera.rotation = getEyeRotation();
+            //}
             
+        }
+
+        glm::mat4 getTransform() {
+            return Actor::getTransform();
         }
 
         vec3 getEyePosition() {
