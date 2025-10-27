@@ -238,6 +238,174 @@ include/SimplexNoise.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/SIMPLEXNOISE.dir/build.make CMakeFiles/SIMPLEXNOISE.dir/include/SimplexNoise.cpp.s
 .PHONY : include/SimplexNoise.cpp.s
 
+include/imgui/backends/imgui_impl_glfw.o: include/imgui/backends/imgui_impl_glfw.cpp.o
+.PHONY : include/imgui/backends/imgui_impl_glfw.o
+
+# target to build an object file
+include/imgui/backends/imgui_impl_glfw.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_glfw.cpp.o
+.PHONY : include/imgui/backends/imgui_impl_glfw.cpp.o
+
+include/imgui/backends/imgui_impl_glfw.i: include/imgui/backends/imgui_impl_glfw.cpp.i
+.PHONY : include/imgui/backends/imgui_impl_glfw.i
+
+# target to preprocess a source file
+include/imgui/backends/imgui_impl_glfw.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_glfw.cpp.i
+.PHONY : include/imgui/backends/imgui_impl_glfw.cpp.i
+
+include/imgui/backends/imgui_impl_glfw.s: include/imgui/backends/imgui_impl_glfw.cpp.s
+.PHONY : include/imgui/backends/imgui_impl_glfw.s
+
+# target to generate assembly for a file
+include/imgui/backends/imgui_impl_glfw.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_glfw.cpp.s
+.PHONY : include/imgui/backends/imgui_impl_glfw.cpp.s
+
+include/imgui/backends/imgui_impl_vulkan.o: include/imgui/backends/imgui_impl_vulkan.cpp.o
+.PHONY : include/imgui/backends/imgui_impl_vulkan.o
+
+# target to build an object file
+include/imgui/backends/imgui_impl_vulkan.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_vulkan.cpp.o
+.PHONY : include/imgui/backends/imgui_impl_vulkan.cpp.o
+
+include/imgui/backends/imgui_impl_vulkan.i: include/imgui/backends/imgui_impl_vulkan.cpp.i
+.PHONY : include/imgui/backends/imgui_impl_vulkan.i
+
+# target to preprocess a source file
+include/imgui/backends/imgui_impl_vulkan.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_vulkan.cpp.i
+.PHONY : include/imgui/backends/imgui_impl_vulkan.cpp.i
+
+include/imgui/backends/imgui_impl_vulkan.s: include/imgui/backends/imgui_impl_vulkan.cpp.s
+.PHONY : include/imgui/backends/imgui_impl_vulkan.s
+
+# target to generate assembly for a file
+include/imgui/backends/imgui_impl_vulkan.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_vulkan.cpp.s
+.PHONY : include/imgui/backends/imgui_impl_vulkan.cpp.s
+
+include/imgui/imgui.o: include/imgui/imgui.cpp.o
+.PHONY : include/imgui/imgui.o
+
+# target to build an object file
+include/imgui/imgui.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/include/imgui/imgui.cpp.o
+.PHONY : include/imgui/imgui.cpp.o
+
+include/imgui/imgui.i: include/imgui/imgui.cpp.i
+.PHONY : include/imgui/imgui.i
+
+# target to preprocess a source file
+include/imgui/imgui.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/include/imgui/imgui.cpp.i
+.PHONY : include/imgui/imgui.cpp.i
+
+include/imgui/imgui.s: include/imgui/imgui.cpp.s
+.PHONY : include/imgui/imgui.s
+
+# target to generate assembly for a file
+include/imgui/imgui.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/include/imgui/imgui.cpp.s
+.PHONY : include/imgui/imgui.cpp.s
+
+include/imgui/imgui_demo.o: include/imgui/imgui_demo.cpp.o
+.PHONY : include/imgui/imgui_demo.o
+
+# target to build an object file
+include/imgui/imgui_demo.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/include/imgui/imgui_demo.cpp.o
+.PHONY : include/imgui/imgui_demo.cpp.o
+
+include/imgui/imgui_demo.i: include/imgui/imgui_demo.cpp.i
+.PHONY : include/imgui/imgui_demo.i
+
+# target to preprocess a source file
+include/imgui/imgui_demo.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/include/imgui/imgui_demo.cpp.i
+.PHONY : include/imgui/imgui_demo.cpp.i
+
+include/imgui/imgui_demo.s: include/imgui/imgui_demo.cpp.s
+.PHONY : include/imgui/imgui_demo.s
+
+# target to generate assembly for a file
+include/imgui/imgui_demo.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/include/imgui/imgui_demo.cpp.s
+.PHONY : include/imgui/imgui_demo.cpp.s
+
+include/imgui/imgui_draw.o: include/imgui/imgui_draw.cpp.o
+.PHONY : include/imgui/imgui_draw.o
+
+# target to build an object file
+include/imgui/imgui_draw.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/include/imgui/imgui_draw.cpp.o
+.PHONY : include/imgui/imgui_draw.cpp.o
+
+include/imgui/imgui_draw.i: include/imgui/imgui_draw.cpp.i
+.PHONY : include/imgui/imgui_draw.i
+
+# target to preprocess a source file
+include/imgui/imgui_draw.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/include/imgui/imgui_draw.cpp.i
+.PHONY : include/imgui/imgui_draw.cpp.i
+
+include/imgui/imgui_draw.s: include/imgui/imgui_draw.cpp.s
+.PHONY : include/imgui/imgui_draw.s
+
+# target to generate assembly for a file
+include/imgui/imgui_draw.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/include/imgui/imgui_draw.cpp.s
+.PHONY : include/imgui/imgui_draw.cpp.s
+
+include/imgui/imgui_tables.o: include/imgui/imgui_tables.cpp.o
+.PHONY : include/imgui/imgui_tables.o
+
+# target to build an object file
+include/imgui/imgui_tables.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/include/imgui/imgui_tables.cpp.o
+.PHONY : include/imgui/imgui_tables.cpp.o
+
+include/imgui/imgui_tables.i: include/imgui/imgui_tables.cpp.i
+.PHONY : include/imgui/imgui_tables.i
+
+# target to preprocess a source file
+include/imgui/imgui_tables.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/include/imgui/imgui_tables.cpp.i
+.PHONY : include/imgui/imgui_tables.cpp.i
+
+include/imgui/imgui_tables.s: include/imgui/imgui_tables.cpp.s
+.PHONY : include/imgui/imgui_tables.s
+
+# target to generate assembly for a file
+include/imgui/imgui_tables.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/include/imgui/imgui_tables.cpp.s
+.PHONY : include/imgui/imgui_tables.cpp.s
+
+include/imgui/imgui_widgets.o: include/imgui/imgui_widgets.cpp.o
+.PHONY : include/imgui/imgui_widgets.o
+
+# target to build an object file
+include/imgui/imgui_widgets.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/include/imgui/imgui_widgets.cpp.o
+.PHONY : include/imgui/imgui_widgets.cpp.o
+
+include/imgui/imgui_widgets.i: include/imgui/imgui_widgets.cpp.i
+.PHONY : include/imgui/imgui_widgets.i
+
+# target to preprocess a source file
+include/imgui/imgui_widgets.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/include/imgui/imgui_widgets.cpp.i
+.PHONY : include/imgui/imgui_widgets.cpp.i
+
+include/imgui/imgui_widgets.s: include/imgui/imgui_widgets.cpp.s
+.PHONY : include/imgui/imgui_widgets.s
+
+# target to generate assembly for a file
+include/imgui/imgui_widgets.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/include/imgui/imgui_widgets.cpp.s
+.PHONY : include/imgui/imgui_widgets.cpp.s
+
 include/stb_image.o: include/stb_image.cpp.o
 .PHONY : include/stb_image.o
 
@@ -261,6 +429,30 @@ include/stb_image.s: include/stb_image.cpp.s
 include/stb_image.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/STB.dir/build.make CMakeFiles/STB.dir/include/stb_image.cpp.s
 .PHONY : include/stb_image.cpp.s
+
+include/volk.o: include/volk.c.o
+.PHONY : include/volk.o
+
+# target to build an object file
+include/volk.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/include/volk.c.o
+.PHONY : include/volk.c.o
+
+include/volk.i: include/volk.c.i
+.PHONY : include/volk.i
+
+# target to preprocess a source file
+include/volk.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/include/volk.c.i
+.PHONY : include/volk.c.i
+
+include/volk.s: include/volk.c.s
+.PHONY : include/volk.s
+
+# target to generate assembly for a file
+include/volk.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/include/volk.c.s
+.PHONY : include/volk.c.s
 
 src/glad.o: src/glad.c.o
 .PHONY : src/glad.o
@@ -286,29 +478,29 @@ src/glad.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/GLAD.dir/build.make CMakeFiles/GLAD.dir/src/glad.c.s
 .PHONY : src/glad.c.s
 
-src/test.o: src/test.cpp.o
-.PHONY : src/test.o
+src/main.o: src/main.cpp.o
+.PHONY : src/main.o
 
 # target to build an object file
-src/test.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/src/test.cpp.o
-.PHONY : src/test.cpp.o
+src/main.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/src/main.cpp.o
+.PHONY : src/main.cpp.o
 
-src/test.i: src/test.cpp.i
-.PHONY : src/test.i
+src/main.i: src/main.cpp.i
+.PHONY : src/main.i
 
 # target to preprocess a source file
-src/test.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/src/test.cpp.i
-.PHONY : src/test.cpp.i
+src/main.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/src/main.cpp.i
+.PHONY : src/main.cpp.i
 
-src/test.s: src/test.cpp.s
-.PHONY : src/test.s
+src/main.s: src/main.cpp.s
+.PHONY : src/main.s
 
 # target to generate assembly for a file
-src/test.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/src/test.cpp.s
-.PHONY : src/test.cpp.s
+src/main.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/src/main.cpp.s
+.PHONY : src/main.cpp.s
 
 # Help Target
 help:
@@ -329,15 +521,39 @@ help:
 	@echo "... include/SimplexNoise.o"
 	@echo "... include/SimplexNoise.i"
 	@echo "... include/SimplexNoise.s"
+	@echo "... include/imgui/backends/imgui_impl_glfw.o"
+	@echo "... include/imgui/backends/imgui_impl_glfw.i"
+	@echo "... include/imgui/backends/imgui_impl_glfw.s"
+	@echo "... include/imgui/backends/imgui_impl_vulkan.o"
+	@echo "... include/imgui/backends/imgui_impl_vulkan.i"
+	@echo "... include/imgui/backends/imgui_impl_vulkan.s"
+	@echo "... include/imgui/imgui.o"
+	@echo "... include/imgui/imgui.i"
+	@echo "... include/imgui/imgui.s"
+	@echo "... include/imgui/imgui_demo.o"
+	@echo "... include/imgui/imgui_demo.i"
+	@echo "... include/imgui/imgui_demo.s"
+	@echo "... include/imgui/imgui_draw.o"
+	@echo "... include/imgui/imgui_draw.i"
+	@echo "... include/imgui/imgui_draw.s"
+	@echo "... include/imgui/imgui_tables.o"
+	@echo "... include/imgui/imgui_tables.i"
+	@echo "... include/imgui/imgui_tables.s"
+	@echo "... include/imgui/imgui_widgets.o"
+	@echo "... include/imgui/imgui_widgets.i"
+	@echo "... include/imgui/imgui_widgets.s"
 	@echo "... include/stb_image.o"
 	@echo "... include/stb_image.i"
 	@echo "... include/stb_image.s"
+	@echo "... include/volk.o"
+	@echo "... include/volk.i"
+	@echo "... include/volk.s"
 	@echo "... src/glad.o"
 	@echo "... src/glad.i"
 	@echo "... src/glad.s"
-	@echo "... src/test.o"
-	@echo "... src/test.i"
-	@echo "... src/test.s"
+	@echo "... src/main.o"
+	@echo "... src/main.i"
+	@echo "... src/main.s"
 .PHONY : help
 
 

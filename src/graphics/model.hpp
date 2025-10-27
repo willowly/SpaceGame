@@ -86,7 +86,7 @@ class Model {
         vector<Vertex> vertices;
         vector<uint16_t> indices;
         
-        bool buffersLoaded;
+        bool buffersLoaded = false;
         MeshBuffer meshBuffer;
 
         Model() {

@@ -1,5 +1,4 @@
 CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
-  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/share/asan_ignorelist.txt \
   /Users/willow/Documents/GitHub/SpaceGame/src/main.cpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/game-application.hpp \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/iostream \
@@ -1313,7 +1312,8 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-registry-block.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/block/cockpit-block.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/block/thruster-block.hpp \
-  /usr/local/include/shaderc/shaderc.h \
+  /Users/willow/Documents/GitHub/SpaceGame/src/helper/clock.hpp \
+  /usr/local/include/glfw/glfw3.h /usr/local/include/shaderc/shaderc.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/stdbool.h \
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/stdbool.h \
   /usr/local/include/shaderc/env.h /usr/local/include/shaderc/status.h \

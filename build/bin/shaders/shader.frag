@@ -2,8 +2,8 @@
 
 #include "scene_data.hlsl"
 
-layout(location = 0) in vec3 fragColor;
-layout(location = 1) in vec2 fragTexCoord;
+layout(location = 0) in vec3 normal;
+layout(location = 1) in vec2 texCoord;
 
 layout(location = 0) out vec4 outColor;
 
@@ -17,7 +17,17 @@ void main() {
 
     
     MaterialData material = push.material;
-    //outColor = colors[sceneData[push.frameIndex].testIndex];
-    //outColor = push.frameIndex == 0 ? vec4(0,0,1,1) : vec4(0,1,0,1);
-    outColor = texture(texSampler[material.textureID], fragTexCoord);
+    //sampler2D texture = texSampler[material.textureID];
+
+    vec3 lightDir = normalize(vec3(0.5,1.0,0.1));
+    vec3 lightColor = vec3(1,1,1);
+    vec3 ambient = vec3(0.3,0.3,0.5);
+
+    float diff = max(dot(normal, lightDir), 0.0);
+
+    vec3 diffuse = diff * lightColor;
+    vec3 objectColor = texture(texSampler[material.textureID],texCoord).rgb;
+    vec3 result = (ambient + diffuse) * objectColor;
+    outColor = vec4(result, 1.0);
+
 }

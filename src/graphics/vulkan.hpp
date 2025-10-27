@@ -158,6 +158,10 @@ class Vulkan {
             for(auto texture : textures) {
                 destroyTextureResources(texture);
             }
+
+            for(auto pipeline : managedPipelines) {
+                vkDestroyPipeline(device,pipeline,nullptr);
+            }
             
             
 
@@ -249,7 +253,7 @@ class Vulkan {
             renderPassInfo.renderArea.extent = swapChainExtent;
 
             std::array<VkClearValue, 2> clearValues{};
-            clearValues[0].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
+            clearValues[0].color = {{0.0f, 0.0f, 0.01f, 1.0f}};
             clearValues[1].depthStencil = {1.0f, 0};
 
             renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
@@ -440,7 +444,7 @@ class Vulkan {
         }
 
         template<typename Vertex>
-        VkPipeline createGraphicsPipeline(string vertCodePath,string fragCodePath) {
+        VkPipeline createManagedPipeline(string vertCodePath,string fragCodePath) {
 
             auto vertShaderCode = FileHelper::readBinary(vertCodePath);
             auto fragShaderCode = FileHelper::readBinary(fragCodePath);
@@ -595,6 +599,8 @@ class Vulkan {
 
             vkDestroyShaderModule(device, fragShaderModule, nullptr);
             vkDestroyShaderModule(device, vertShaderModule, nullptr);
+            
+            managedPipelines.push_back(pipeline);
 
             return pipeline;
         }
@@ -627,7 +633,7 @@ class Vulkan {
         };
 
         const std::vector<const char*> validationLayers = {
-            "VK_LAYER_KHRONOS_validation"
+            //"VK_LAYER_KHRONOS_validation"
         };
 
         std::vector<const char*> deviceExtensions = {
@@ -691,6 +697,8 @@ class Vulkan {
 
         std::vector<std::optional<Buffer>> allocatedBuffers;
         int totalAllocatedBuffersCount = 0; //for the unique ids
+
+        std::vector<VkPipeline> managedPipelines;
 
         std::vector<RenderObject> renderObjects;
 
@@ -850,6 +858,13 @@ class Vulkan {
         }
 
         VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) {
+            for (VkPresentModeKHR mode : availablePresentModes)
+            {
+                if(mode == VK_PRESENT_MODE_MAILBOX_KHR) {
+                    return mode;
+                }
+            }
+            
             return VK_PRESENT_MODE_FIFO_KHR;
         }
 
@@ -943,7 +958,6 @@ class Vulkan {
             for (size_t i = 0; i < swapChainImages.size(); i++) {
                 swapChainImageViews[i] = createImageView(swapChainImages[i], swapChainImageFormat,VK_IMAGE_ASPECT_COLOR_BIT);
             }
-
         }
 
         void updateUniformBuffer(uint32_t currentFrame,const Camera& camera) {
@@ -1052,6 +1066,8 @@ class Vulkan {
             if (glfwCreateWindowSurface(vkInstance, window, nullptr, &vkSurface) != VK_SUCCESS) {
                 throw std::runtime_error("failed to create window surface!");
             }
+
+            
 
         }
 

@@ -77,20 +77,20 @@ include_directories(include)
 
 include_directories(include/imgui)
 
-# add_executable(SpaceGame 
-# src/main.cpp
-# include/volk.c
-# include/imgui/imgui.cpp
+add_executable(SpaceGame 
+src/main.cpp
+include/volk.c
+include/imgui/imgui.cpp
 
-# include/imgui/imgui_demo.cpp
-# include/imgui/imgui_draw.cpp
-# include/imgui/imgui_widgets.cpp
-# include/imgui/imgui_tables.cpp
+include/imgui/imgui_demo.cpp
+include/imgui/imgui_draw.cpp
+include/imgui/imgui_widgets.cpp
+include/imgui/imgui_tables.cpp
 
-# include/imgui/backends/imgui_impl_vulkan.cpp
-# include/imgui/backends/imgui_impl_glfw.cpp
-# )
-add_library(SpaceGame SHARED src/test.cpp)
+include/imgui/backends/imgui_impl_vulkan.cpp
+include/imgui/backends/imgui_impl_glfw.cpp
+)
+
 target_compile_features(SpaceGame PRIVATE cxx_std_20 )
 target_link_libraries(SpaceGame PRIVATE OpenGL::GL ReactPhysics3D::ReactPhysics3D ${LUA_LIBRARIES} ${GLFW3_LIBRARY} GLAD STB ${COCOA_LIBRARY} ${IOKIT_LIBRARY} SIMPLEXNOISE)
 

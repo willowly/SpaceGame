@@ -69,42 +69,170 @@ include CMakeFiles/SpaceGame.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/SpaceGame.dir/flags.make
 
-CMakeFiles/SpaceGame.dir/src/test.cpp.o: CMakeFiles/SpaceGame.dir/flags.make
-CMakeFiles/SpaceGame.dir/src/test.cpp.o: /Users/willow/Documents/GitHub/SpaceGame/src/test.cpp
-CMakeFiles/SpaceGame.dir/src/test.cpp.o: CMakeFiles/SpaceGame.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/SpaceGame.dir/src/test.cpp.o"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/SpaceGame.dir/src/test.cpp.o -MF CMakeFiles/SpaceGame.dir/src/test.cpp.o.d -o CMakeFiles/SpaceGame.dir/src/test.cpp.o -c /Users/willow/Documents/GitHub/SpaceGame/src/test.cpp
+CMakeFiles/SpaceGame.dir/src/main.cpp.o: CMakeFiles/SpaceGame.dir/flags.make
+CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGame/src/main.cpp
+CMakeFiles/SpaceGame.dir/src/main.cpp.o: CMakeFiles/SpaceGame.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/SpaceGame.dir/src/main.cpp.o"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/SpaceGame.dir/src/main.cpp.o -MF CMakeFiles/SpaceGame.dir/src/main.cpp.o.d -o CMakeFiles/SpaceGame.dir/src/main.cpp.o -c /Users/willow/Documents/GitHub/SpaceGame/src/main.cpp
 
-CMakeFiles/SpaceGame.dir/src/test.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/SpaceGame.dir/src/test.cpp.i"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/willow/Documents/GitHub/SpaceGame/src/test.cpp > CMakeFiles/SpaceGame.dir/src/test.cpp.i
+CMakeFiles/SpaceGame.dir/src/main.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/SpaceGame.dir/src/main.cpp.i"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/willow/Documents/GitHub/SpaceGame/src/main.cpp > CMakeFiles/SpaceGame.dir/src/main.cpp.i
 
-CMakeFiles/SpaceGame.dir/src/test.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/SpaceGame.dir/src/test.cpp.s"
-	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/willow/Documents/GitHub/SpaceGame/src/test.cpp -o CMakeFiles/SpaceGame.dir/src/test.cpp.s
+CMakeFiles/SpaceGame.dir/src/main.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/SpaceGame.dir/src/main.cpp.s"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/willow/Documents/GitHub/SpaceGame/src/main.cpp -o CMakeFiles/SpaceGame.dir/src/main.cpp.s
+
+CMakeFiles/SpaceGame.dir/include/volk.c.o: CMakeFiles/SpaceGame.dir/flags.make
+CMakeFiles/SpaceGame.dir/include/volk.c.o: /Users/willow/Documents/GitHub/SpaceGame/include/volk.c
+CMakeFiles/SpaceGame.dir/include/volk.c.o: CMakeFiles/SpaceGame.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/SpaceGame.dir/include/volk.c.o"
+	/usr/bin/clang $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/SpaceGame.dir/include/volk.c.o -MF CMakeFiles/SpaceGame.dir/include/volk.c.o.d -o CMakeFiles/SpaceGame.dir/include/volk.c.o -c /Users/willow/Documents/GitHub/SpaceGame/include/volk.c
+
+CMakeFiles/SpaceGame.dir/include/volk.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing C source to CMakeFiles/SpaceGame.dir/include/volk.c.i"
+	/usr/bin/clang $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /Users/willow/Documents/GitHub/SpaceGame/include/volk.c > CMakeFiles/SpaceGame.dir/include/volk.c.i
+
+CMakeFiles/SpaceGame.dir/include/volk.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling C source to assembly CMakeFiles/SpaceGame.dir/include/volk.c.s"
+	/usr/bin/clang $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /Users/willow/Documents/GitHub/SpaceGame/include/volk.c -o CMakeFiles/SpaceGame.dir/include/volk.c.s
+
+CMakeFiles/SpaceGame.dir/include/imgui/imgui.cpp.o: CMakeFiles/SpaceGame.dir/flags.make
+CMakeFiles/SpaceGame.dir/include/imgui/imgui.cpp.o: /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui.cpp
+CMakeFiles/SpaceGame.dir/include/imgui/imgui.cpp.o: CMakeFiles/SpaceGame.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/SpaceGame.dir/include/imgui/imgui.cpp.o"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/SpaceGame.dir/include/imgui/imgui.cpp.o -MF CMakeFiles/SpaceGame.dir/include/imgui/imgui.cpp.o.d -o CMakeFiles/SpaceGame.dir/include/imgui/imgui.cpp.o -c /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui.cpp
+
+CMakeFiles/SpaceGame.dir/include/imgui/imgui.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/SpaceGame.dir/include/imgui/imgui.cpp.i"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui.cpp > CMakeFiles/SpaceGame.dir/include/imgui/imgui.cpp.i
+
+CMakeFiles/SpaceGame.dir/include/imgui/imgui.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/SpaceGame.dir/include/imgui/imgui.cpp.s"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui.cpp -o CMakeFiles/SpaceGame.dir/include/imgui/imgui.cpp.s
+
+CMakeFiles/SpaceGame.dir/include/imgui/imgui_demo.cpp.o: CMakeFiles/SpaceGame.dir/flags.make
+CMakeFiles/SpaceGame.dir/include/imgui/imgui_demo.cpp.o: /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui_demo.cpp
+CMakeFiles/SpaceGame.dir/include/imgui/imgui_demo.cpp.o: CMakeFiles/SpaceGame.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/SpaceGame.dir/include/imgui/imgui_demo.cpp.o"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/SpaceGame.dir/include/imgui/imgui_demo.cpp.o -MF CMakeFiles/SpaceGame.dir/include/imgui/imgui_demo.cpp.o.d -o CMakeFiles/SpaceGame.dir/include/imgui/imgui_demo.cpp.o -c /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui_demo.cpp
+
+CMakeFiles/SpaceGame.dir/include/imgui/imgui_demo.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/SpaceGame.dir/include/imgui/imgui_demo.cpp.i"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui_demo.cpp > CMakeFiles/SpaceGame.dir/include/imgui/imgui_demo.cpp.i
+
+CMakeFiles/SpaceGame.dir/include/imgui/imgui_demo.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/SpaceGame.dir/include/imgui/imgui_demo.cpp.s"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui_demo.cpp -o CMakeFiles/SpaceGame.dir/include/imgui/imgui_demo.cpp.s
+
+CMakeFiles/SpaceGame.dir/include/imgui/imgui_draw.cpp.o: CMakeFiles/SpaceGame.dir/flags.make
+CMakeFiles/SpaceGame.dir/include/imgui/imgui_draw.cpp.o: /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui_draw.cpp
+CMakeFiles/SpaceGame.dir/include/imgui/imgui_draw.cpp.o: CMakeFiles/SpaceGame.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/SpaceGame.dir/include/imgui/imgui_draw.cpp.o"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/SpaceGame.dir/include/imgui/imgui_draw.cpp.o -MF CMakeFiles/SpaceGame.dir/include/imgui/imgui_draw.cpp.o.d -o CMakeFiles/SpaceGame.dir/include/imgui/imgui_draw.cpp.o -c /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui_draw.cpp
+
+CMakeFiles/SpaceGame.dir/include/imgui/imgui_draw.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/SpaceGame.dir/include/imgui/imgui_draw.cpp.i"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui_draw.cpp > CMakeFiles/SpaceGame.dir/include/imgui/imgui_draw.cpp.i
+
+CMakeFiles/SpaceGame.dir/include/imgui/imgui_draw.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/SpaceGame.dir/include/imgui/imgui_draw.cpp.s"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui_draw.cpp -o CMakeFiles/SpaceGame.dir/include/imgui/imgui_draw.cpp.s
+
+CMakeFiles/SpaceGame.dir/include/imgui/imgui_widgets.cpp.o: CMakeFiles/SpaceGame.dir/flags.make
+CMakeFiles/SpaceGame.dir/include/imgui/imgui_widgets.cpp.o: /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui_widgets.cpp
+CMakeFiles/SpaceGame.dir/include/imgui/imgui_widgets.cpp.o: CMakeFiles/SpaceGame.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/SpaceGame.dir/include/imgui/imgui_widgets.cpp.o"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/SpaceGame.dir/include/imgui/imgui_widgets.cpp.o -MF CMakeFiles/SpaceGame.dir/include/imgui/imgui_widgets.cpp.o.d -o CMakeFiles/SpaceGame.dir/include/imgui/imgui_widgets.cpp.o -c /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui_widgets.cpp
+
+CMakeFiles/SpaceGame.dir/include/imgui/imgui_widgets.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/SpaceGame.dir/include/imgui/imgui_widgets.cpp.i"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui_widgets.cpp > CMakeFiles/SpaceGame.dir/include/imgui/imgui_widgets.cpp.i
+
+CMakeFiles/SpaceGame.dir/include/imgui/imgui_widgets.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/SpaceGame.dir/include/imgui/imgui_widgets.cpp.s"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui_widgets.cpp -o CMakeFiles/SpaceGame.dir/include/imgui/imgui_widgets.cpp.s
+
+CMakeFiles/SpaceGame.dir/include/imgui/imgui_tables.cpp.o: CMakeFiles/SpaceGame.dir/flags.make
+CMakeFiles/SpaceGame.dir/include/imgui/imgui_tables.cpp.o: /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui_tables.cpp
+CMakeFiles/SpaceGame.dir/include/imgui/imgui_tables.cpp.o: CMakeFiles/SpaceGame.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/SpaceGame.dir/include/imgui/imgui_tables.cpp.o"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/SpaceGame.dir/include/imgui/imgui_tables.cpp.o -MF CMakeFiles/SpaceGame.dir/include/imgui/imgui_tables.cpp.o.d -o CMakeFiles/SpaceGame.dir/include/imgui/imgui_tables.cpp.o -c /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui_tables.cpp
+
+CMakeFiles/SpaceGame.dir/include/imgui/imgui_tables.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/SpaceGame.dir/include/imgui/imgui_tables.cpp.i"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui_tables.cpp > CMakeFiles/SpaceGame.dir/include/imgui/imgui_tables.cpp.i
+
+CMakeFiles/SpaceGame.dir/include/imgui/imgui_tables.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/SpaceGame.dir/include/imgui/imgui_tables.cpp.s"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui_tables.cpp -o CMakeFiles/SpaceGame.dir/include/imgui/imgui_tables.cpp.s
+
+CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_vulkan.cpp.o: CMakeFiles/SpaceGame.dir/flags.make
+CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_vulkan.cpp.o: /Users/willow/Documents/GitHub/SpaceGame/include/imgui/backends/imgui_impl_vulkan.cpp
+CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_vulkan.cpp.o: CMakeFiles/SpaceGame.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_vulkan.cpp.o"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_vulkan.cpp.o -MF CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_vulkan.cpp.o.d -o CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_vulkan.cpp.o -c /Users/willow/Documents/GitHub/SpaceGame/include/imgui/backends/imgui_impl_vulkan.cpp
+
+CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_vulkan.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_vulkan.cpp.i"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/willow/Documents/GitHub/SpaceGame/include/imgui/backends/imgui_impl_vulkan.cpp > CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_vulkan.cpp.i
+
+CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_vulkan.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_vulkan.cpp.s"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/willow/Documents/GitHub/SpaceGame/include/imgui/backends/imgui_impl_vulkan.cpp -o CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_vulkan.cpp.s
+
+CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_glfw.cpp.o: CMakeFiles/SpaceGame.dir/flags.make
+CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_glfw.cpp.o: /Users/willow/Documents/GitHub/SpaceGame/include/imgui/backends/imgui_impl_glfw.cpp
+CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_glfw.cpp.o: CMakeFiles/SpaceGame.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_glfw.cpp.o"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_glfw.cpp.o -MF CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_glfw.cpp.o.d -o CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_glfw.cpp.o -c /Users/willow/Documents/GitHub/SpaceGame/include/imgui/backends/imgui_impl_glfw.cpp
+
+CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_glfw.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_glfw.cpp.i"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/willow/Documents/GitHub/SpaceGame/include/imgui/backends/imgui_impl_glfw.cpp > CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_glfw.cpp.i
+
+CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_glfw.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_glfw.cpp.s"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/willow/Documents/GitHub/SpaceGame/include/imgui/backends/imgui_impl_glfw.cpp -o CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_glfw.cpp.s
 
 # Object files for target SpaceGame
 SpaceGame_OBJECTS = \
-"CMakeFiles/SpaceGame.dir/src/test.cpp.o"
+"CMakeFiles/SpaceGame.dir/src/main.cpp.o" \
+"CMakeFiles/SpaceGame.dir/include/volk.c.o" \
+"CMakeFiles/SpaceGame.dir/include/imgui/imgui.cpp.o" \
+"CMakeFiles/SpaceGame.dir/include/imgui/imgui_demo.cpp.o" \
+"CMakeFiles/SpaceGame.dir/include/imgui/imgui_draw.cpp.o" \
+"CMakeFiles/SpaceGame.dir/include/imgui/imgui_widgets.cpp.o" \
+"CMakeFiles/SpaceGame.dir/include/imgui/imgui_tables.cpp.o" \
+"CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_vulkan.cpp.o" \
+"CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_glfw.cpp.o"
 
 # External object files for target SpaceGame
 SpaceGame_EXTERNAL_OBJECTS =
 
-libSpaceGame.dylib: CMakeFiles/SpaceGame.dir/src/test.cpp.o
-libSpaceGame.dylib: CMakeFiles/SpaceGame.dir/build.make
-libSpaceGame.dylib: /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/OpenGL.framework
-libSpaceGame.dylib: /usr/local/lib/libreactphysics3d.a
-libSpaceGame.dylib: /usr/local/lib/liblua5.4.dylib
-libSpaceGame.dylib: /usr/local/lib/libglfw3.a
-libSpaceGame.dylib: libGLAD.a
-libSpaceGame.dylib: libSTB.a
-libSpaceGame.dylib: libSIMPLEXNOISE.a
-libSpaceGame.dylib: CMakeFiles/SpaceGame.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX shared library libSpaceGame.dylib"
+bin/SpaceGame: CMakeFiles/SpaceGame.dir/src/main.cpp.o
+bin/SpaceGame: CMakeFiles/SpaceGame.dir/include/volk.c.o
+bin/SpaceGame: CMakeFiles/SpaceGame.dir/include/imgui/imgui.cpp.o
+bin/SpaceGame: CMakeFiles/SpaceGame.dir/include/imgui/imgui_demo.cpp.o
+bin/SpaceGame: CMakeFiles/SpaceGame.dir/include/imgui/imgui_draw.cpp.o
+bin/SpaceGame: CMakeFiles/SpaceGame.dir/include/imgui/imgui_widgets.cpp.o
+bin/SpaceGame: CMakeFiles/SpaceGame.dir/include/imgui/imgui_tables.cpp.o
+bin/SpaceGame: CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_vulkan.cpp.o
+bin/SpaceGame: CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_glfw.cpp.o
+bin/SpaceGame: CMakeFiles/SpaceGame.dir/build.make
+bin/SpaceGame: /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/OpenGL.framework
+bin/SpaceGame: /usr/local/lib/libreactphysics3d.a
+bin/SpaceGame: /usr/local/lib/liblua5.4.dylib
+bin/SpaceGame: /usr/local/lib/libglfw3.a
+bin/SpaceGame: libGLAD.a
+bin/SpaceGame: libSTB.a
+bin/SpaceGame: libSIMPLEXNOISE.a
+bin/SpaceGame: CMakeFiles/SpaceGame.dir/link.txt
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Linking CXX executable bin/SpaceGame"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/SpaceGame.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
-CMakeFiles/SpaceGame.dir/build: libSpaceGame.dylib
+CMakeFiles/SpaceGame.dir/build: bin/SpaceGame
 .PHONY : CMakeFiles/SpaceGame.dir/build
 
 CMakeFiles/SpaceGame.dir/clean:

@@ -18,6 +18,7 @@
 #include "engine/registry.hpp"
 #include "engine/loader.hpp"
 #include "sol/sol.hpp"
+#include "helper/clock.hpp"
 
 using std::string;
 
@@ -31,14 +32,10 @@ class GameApplication {
             
             initWindow();
             vulkan = new Vulkan(name,window);
-                                                                
-            pipeline = vulkan->createGraphicsPipeline<Vertex>("shaders/compiled/shader_vert.spv","shaders/compiled/shader_frag.spv");
 
         }
 
         ~GameApplication() {
-
-            vkDestroyPipeline(vulkan->getDevice(),pipeline,nullptr);
             
             delete vulkan;
 
@@ -84,8 +81,6 @@ class GameApplication {
         
         Vulkan* vulkan;
 
-        VkPipeline pipeline;
-
         Input input;
 
         std::vector<glm::mat4> monkeys; 
@@ -97,6 +92,9 @@ class GameApplication {
         std::vector<float> frameTimes;
 
         Character* player;
+
+
+        
 
         float lastTime = 0; //tells how long its been since the last update
 
@@ -183,13 +181,14 @@ class GameApplication {
 
         void setup() {
 
-            model = new Model();
-            model->loadFromFile("models/monkey.obj");
-
+            // Load
             lua.open_libraries(sol::lib::base, sol::lib::package);
             API::loadAPIAll(lua);
-
             loader.loadAll(registry,lua,vulkan);
+
+
+            
+            model = registry.getModel("monkey");
 
             lastTime = (float)glfwGetTime();
 
@@ -197,9 +196,11 @@ class GameApplication {
 
             gridTexture = registry.getTexture("grid_dark");
 
-            cowMaterial = vulkan->createMaterial(pipeline,LitMaterialData(cowTexture,vec3(1)));
+            auto litShader = registry.litShader;
 
-            gridMaterial = vulkan->createMaterial(pipeline,LitMaterialData(gridTexture,vec3(1)));
+            cowMaterial = vulkan->createMaterial(litShader,LitMaterialData(cowTexture,vec3(1)));
+
+            gridMaterial = vulkan->createMaterial(litShader,LitMaterialData(gridTexture,vec3(1)));
 
             Actor monkeyPrototype = Actor(model,gridMaterial);
 
@@ -217,7 +218,8 @@ class GameApplication {
             //     auto scale = vec3(Random::random(0.01,0.1));
             //     monkeys.push_back(MathHelper::getTransformMatrix(position,quaternion,scale));
             // }
-
+            glfwPollEvents();
+            input.clearInputBuffers(); // reset mouse position;
             
             
 
@@ -259,17 +261,15 @@ class GameApplication {
 
             player->setCamera(camera);
             player->processInput(input);
-
-            if(input.getKey(GLFW_KEY_RIGHT)) {
-                input.currentMousePosition.x += 10000;
-                input.lastMousePosition.x += 10000;
-            }
             
             world.frame(vulkan,dt);
 
+            
             // do all the end of frame code in vulkan
             vulkan->render(camera);
             vulkan->clearObjects();
+
+            //std::cout << (int)(renderClock.reset() * 1000) << "ms" << std::endl;
 
             input.clearInputBuffers();
 

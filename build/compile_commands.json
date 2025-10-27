@@ -19,8 +19,56 @@
 },
 {
   "directory": "/Users/willow/Documents/GitHub/SpaceGame/build",
-  "command": "/usr/bin/clang++ -DSpaceGame_EXPORTS -I/usr/local/include/lua -I/Users/willow/Documents/GitHub/SpaceGame/src -I/Users/willow/Documents/GitHub/SpaceGame/include -I/Users/willow/Documents/GitHub/SpaceGame/include/imgui -iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks -isystem /usr/local/include  -fpermissive -Wall -Wextra -pedantic -Wno-unused-parameter -g -std=gnu++20 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mmacosx-version-min=14.3 -fPIC -o CMakeFiles/SpaceGame.dir/src/test.cpp.o -c /Users/willow/Documents/GitHub/SpaceGame/src/test.cpp",
-  "file": "/Users/willow/Documents/GitHub/SpaceGame/src/test.cpp",
-  "output": "CMakeFiles/SpaceGame.dir/src/test.cpp.o"
+  "command": "/usr/bin/clang++  -I/usr/local/include/lua -I/Users/willow/Documents/GitHub/SpaceGame/src -I/Users/willow/Documents/GitHub/SpaceGame/include -I/Users/willow/Documents/GitHub/SpaceGame/include/imgui -iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks -isystem /usr/local/include  -fpermissive -Wall -Wextra -pedantic -Wno-unused-parameter -g -std=gnu++20 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mmacosx-version-min=14.3 -o CMakeFiles/SpaceGame.dir/src/main.cpp.o -c /Users/willow/Documents/GitHub/SpaceGame/src/main.cpp",
+  "file": "/Users/willow/Documents/GitHub/SpaceGame/src/main.cpp",
+  "output": "CMakeFiles/SpaceGame.dir/src/main.cpp.o"
+},
+{
+  "directory": "/Users/willow/Documents/GitHub/SpaceGame/build",
+  "command": "/usr/bin/clang  -I/usr/local/include/lua -I/Users/willow/Documents/GitHub/SpaceGame/src -I/Users/willow/Documents/GitHub/SpaceGame/include -I/Users/willow/Documents/GitHub/SpaceGame/include/imgui -iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks -isystem /usr/local/include -g -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mmacosx-version-min=14.3 -o CMakeFiles/SpaceGame.dir/include/volk.c.o -c /Users/willow/Documents/GitHub/SpaceGame/include/volk.c",
+  "file": "/Users/willow/Documents/GitHub/SpaceGame/include/volk.c",
+  "output": "CMakeFiles/SpaceGame.dir/include/volk.c.o"
+},
+{
+  "directory": "/Users/willow/Documents/GitHub/SpaceGame/build",
+  "command": "/usr/bin/clang++  -I/usr/local/include/lua -I/Users/willow/Documents/GitHub/SpaceGame/src -I/Users/willow/Documents/GitHub/SpaceGame/include -I/Users/willow/Documents/GitHub/SpaceGame/include/imgui -iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks -isystem /usr/local/include  -fpermissive -Wall -Wextra -pedantic -Wno-unused-parameter -g -std=gnu++20 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mmacosx-version-min=14.3 -o CMakeFiles/SpaceGame.dir/include/imgui/imgui.cpp.o -c /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui.cpp",
+  "file": "/Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui.cpp",
+  "output": "CMakeFiles/SpaceGame.dir/include/imgui/imgui.cpp.o"
+},
+{
+  "directory": "/Users/willow/Documents/GitHub/SpaceGame/build",
+  "command": "/usr/bin/clang++  -I/usr/local/include/lua -I/Users/willow/Documents/GitHub/SpaceGame/src -I/Users/willow/Documents/GitHub/SpaceGame/include -I/Users/willow/Documents/GitHub/SpaceGame/include/imgui -iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks -isystem /usr/local/include  -fpermissive -Wall -Wextra -pedantic -Wno-unused-parameter -g -std=gnu++20 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mmacosx-version-min=14.3 -o CMakeFiles/SpaceGame.dir/include/imgui/imgui_demo.cpp.o -c /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui_demo.cpp",
+  "file": "/Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui_demo.cpp",
+  "output": "CMakeFiles/SpaceGame.dir/include/imgui/imgui_demo.cpp.o"
+},
+{
+  "directory": "/Users/willow/Documents/GitHub/SpaceGame/build",
+  "command": "/usr/bin/clang++  -I/usr/local/include/lua -I/Users/willow/Documents/GitHub/SpaceGame/src -I/Users/willow/Documents/GitHub/SpaceGame/include -I/Users/willow/Documents/GitHub/SpaceGame/include/imgui -iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks -isystem /usr/local/include  -fpermissive -Wall -Wextra -pedantic -Wno-unused-parameter -g -std=gnu++20 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mmacosx-version-min=14.3 -o CMakeFiles/SpaceGame.dir/include/imgui/imgui_draw.cpp.o -c /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui_draw.cpp",
+  "file": "/Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui_draw.cpp",
+  "output": "CMakeFiles/SpaceGame.dir/include/imgui/imgui_draw.cpp.o"
+},
+{
+  "directory": "/Users/willow/Documents/GitHub/SpaceGame/build",
+  "command": "/usr/bin/clang++  -I/usr/local/include/lua -I/Users/willow/Documents/GitHub/SpaceGame/src -I/Users/willow/Documents/GitHub/SpaceGame/include -I/Users/willow/Documents/GitHub/SpaceGame/include/imgui -iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks -isystem /usr/local/include  -fpermissive -Wall -Wextra -pedantic -Wno-unused-parameter -g -std=gnu++20 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mmacosx-version-min=14.3 -o CMakeFiles/SpaceGame.dir/include/imgui/imgui_widgets.cpp.o -c /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui_widgets.cpp",
+  "file": "/Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui_widgets.cpp",
+  "output": "CMakeFiles/SpaceGame.dir/include/imgui/imgui_widgets.cpp.o"
+},
+{
+  "directory": "/Users/willow/Documents/GitHub/SpaceGame/build",
+  "command": "/usr/bin/clang++  -I/usr/local/include/lua -I/Users/willow/Documents/GitHub/SpaceGame/src -I/Users/willow/Documents/GitHub/SpaceGame/include -I/Users/willow/Documents/GitHub/SpaceGame/include/imgui -iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks -isystem /usr/local/include  -fpermissive -Wall -Wextra -pedantic -Wno-unused-parameter -g -std=gnu++20 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mmacosx-version-min=14.3 -o CMakeFiles/SpaceGame.dir/include/imgui/imgui_tables.cpp.o -c /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui_tables.cpp",
+  "file": "/Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui_tables.cpp",
+  "output": "CMakeFiles/SpaceGame.dir/include/imgui/imgui_tables.cpp.o"
+},
+{
+  "directory": "/Users/willow/Documents/GitHub/SpaceGame/build",
+  "command": "/usr/bin/clang++  -I/usr/local/include/lua -I/Users/willow/Documents/GitHub/SpaceGame/src -I/Users/willow/Documents/GitHub/SpaceGame/include -I/Users/willow/Documents/GitHub/SpaceGame/include/imgui -iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks -isystem /usr/local/include  -fpermissive -Wall -Wextra -pedantic -Wno-unused-parameter -g -std=gnu++20 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mmacosx-version-min=14.3 -o CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_vulkan.cpp.o -c /Users/willow/Documents/GitHub/SpaceGame/include/imgui/backends/imgui_impl_vulkan.cpp",
+  "file": "/Users/willow/Documents/GitHub/SpaceGame/include/imgui/backends/imgui_impl_vulkan.cpp",
+  "output": "CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_vulkan.cpp.o"
+},
+{
+  "directory": "/Users/willow/Documents/GitHub/SpaceGame/build",
+  "command": "/usr/bin/clang++  -I/usr/local/include/lua -I/Users/willow/Documents/GitHub/SpaceGame/src -I/Users/willow/Documents/GitHub/SpaceGame/include -I/Users/willow/Documents/GitHub/SpaceGame/include/imgui -iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks -isystem /usr/local/include  -fpermissive -Wall -Wextra -pedantic -Wno-unused-parameter -g -std=gnu++20 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mmacosx-version-min=14.3 -o CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_glfw.cpp.o -c /Users/willow/Documents/GitHub/SpaceGame/include/imgui/backends/imgui_impl_glfw.cpp",
+  "file": "/Users/willow/Documents/GitHub/SpaceGame/include/imgui/backends/imgui_impl_glfw.cpp",
+  "output": "CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_glfw.cpp.o"
 }
 ]
