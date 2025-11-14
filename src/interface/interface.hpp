@@ -15,7 +15,7 @@ using glm::ivec2, glm::vec2;
 class Interface {
     public:
         Shader* shader;
-        Model quadModel;
+        Mesh quadModel;
         ivec2 screenSize;
 
         Interface(Shader* shader,ivec2 screenSize) : shader(shader), screenSize(screenSize) {

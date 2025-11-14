@@ -12,4 +12,6 @@ class ToolUser {
         virtual quat getEyeRotation() = 0;
 
         virtual glm::mat4 getTransform() = 0;
+
+        virtual glm::vec3 getEyePosition() = 0;
 };

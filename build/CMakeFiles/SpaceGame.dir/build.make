@@ -220,11 +220,8 @@ bin/SpaceGame: CMakeFiles/SpaceGame.dir/include/imgui/imgui_tables.cpp.o
 bin/SpaceGame: CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_vulkan.cpp.o
 bin/SpaceGame: CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_glfw.cpp.o
 bin/SpaceGame: CMakeFiles/SpaceGame.dir/build.make
-bin/SpaceGame: /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/OpenGL.framework
-bin/SpaceGame: /usr/local/lib/libreactphysics3d.a
 bin/SpaceGame: /usr/local/lib/liblua5.4.dylib
 bin/SpaceGame: /usr/local/lib/libglfw3.a
-bin/SpaceGame: libGLAD.a
 bin/SpaceGame: libSTB.a
 bin/SpaceGame: libSIMPLEXNOISE.a
 bin/SpaceGame: CMakeFiles/SpaceGame.dir/link.txt

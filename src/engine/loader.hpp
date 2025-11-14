@@ -46,7 +46,7 @@ class Loader {
                 
                 string name = p.stem().string();
                 registry.addModel(name);
-                Model* model = registry.getModel(name);
+                Mesh* model = registry.getModel(name);
                 model->loadFromFile(entry.path().string());
                 model->createBuffers(vulkan);
                 Debug::info("Loaded Model \"" + name + "\"",InfoPriority::MEDIUM);
@@ -94,7 +94,7 @@ class Loader {
         void loadShaders(Registry& registry,Vulkan* vulkan) {
             Debug::addTrace("shaders");
             std::cout << "Loading Shaders" << std::endl;
-            registry.litShader = vulkan->createManagedPipeline<Vertex>("shaders/compiled/shader_vert.spv","shaders/compiled/shader_frag.spv");
+            registry.litShader = vulkan->createManagedPipeline<Vertex>("shaders/compiled/lit_vert.spv","shaders/compiled/lit_frag.spv");
             // registry.textShader.loadFromFiles("shaders/text.vert","shaders/text.frag");
             // registry.uiShader.loadFromFiles("shaders/ui.vert","shaders/ui.frag");
             Debug::subtractTrace();

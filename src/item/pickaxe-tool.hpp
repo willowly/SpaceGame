@@ -10,7 +10,7 @@ class PickaxeTool : public Tool {
 
         }
 
-        PickaxeTool(Model* heldModel,Material heldModelMaterial,vec3 modelOffset,quat modelRotation) : Tool(heldModel,heldModelMaterial,modelOffset,modelRotation) {
+        PickaxeTool(Mesh* heldModel,Material heldModelMaterial,vec3 modelOffset,quat modelRotation) : Tool(heldModel,heldModelMaterial,modelOffset,modelRotation) {
             
         }
 

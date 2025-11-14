@@ -1,7 +1,7 @@
 #pragma once
 
 #include <engine/world.hpp>
-#include <actor/construction.hpp>
+//#include <actor/construction.hpp>
 #include "tool-user.hpp"
 #include "engine/input.hpp"
 
@@ -13,8 +13,8 @@ class Tool {
 
     public:
         TextureID icon;
-        Model* heldModel = nullptr;
-        Material heldModelMaterial;
+        Mesh* heldModel = nullptr;
+        Material heldModelMaterial = Material::none;
         vec3 modelOffset = vec3(0.3,-0.3,-1);
         quat modelRotation = quat(vec3(0,glm::radians(45.0f),0));
         quat lookOrientation = glm::identity<quat>(); //the rendered one, that gets lerped
@@ -27,13 +27,13 @@ class Tool {
         Tool() {
 
         }
-        Tool(Model* heldModel,Material heldModelMaterial,vec3 modelOffset,quat modelRotation,float modelScale,float lookLerp) : heldModel(heldModel), heldModelMaterial(heldModelMaterial), modelOffset(modelOffset),modelRotation(modelRotation),modelScale(modelScale),lookLerp(lookLerp) {
+        Tool(Mesh* heldModel,Material heldModelMaterial,vec3 modelOffset,quat modelRotation,float modelScale,float lookLerp) : heldModel(heldModel), heldModelMaterial(heldModelMaterial), modelOffset(modelOffset),modelRotation(modelRotation),modelScale(modelScale),lookLerp(lookLerp) {
 
         }
-        Tool(Model* heldModel,Material heldModelMaterial,vec3 modelOffset,quat modelRotation) : heldModel(heldModel), heldModelMaterial(heldModelMaterial), modelOffset(modelOffset), modelRotation(modelRotation) {
+        Tool(Mesh* heldModel,Material heldModelMaterial,vec3 modelOffset,quat modelRotation) : heldModel(heldModel), heldModelMaterial(heldModelMaterial), modelOffset(modelOffset), modelRotation(modelRotation) {
             
         }
-        Tool(Model* heldModel,Material heldModelMaterial) : heldModel(heldModel), heldModelMaterial(heldModelMaterial) {
+        Tool(Mesh* heldModel,Material heldModelMaterial) : heldModel(heldModel), heldModelMaterial(heldModelMaterial) {
             
         }
 
@@ -68,10 +68,12 @@ class Tool {
                 lookOrientation = glm::slerp(lookOrientation,user->getEyeRotation(),lookLerp * dt);
                 auto animation = animate(dt);
                 auto matrix = glm::mat4(1.0f);
+                matrix = glm::translate(matrix,user->getEyePosition());
+                matrix = matrix * glm::toMat4(lookOrientation);
                 matrix = glm::translate(matrix,modelOffset + animation.second);
                 matrix = matrix * glm::toMat4(modelRotation * animation.first);
                 matrix = glm::scale(matrix,vec3(modelScale));
-                heldModel->addToRender(vulkan,heldModelMaterial,user->getTransform() * matrix);
+                heldModel->addToRender(vulkan,heldModelMaterial,matrix);
             }
         }
 

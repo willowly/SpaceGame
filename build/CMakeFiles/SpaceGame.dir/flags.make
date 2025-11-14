@@ -5,13 +5,13 @@
 # compile CXX with /usr/bin/clang++
 C_DEFINES = 
 
-C_INCLUDES = -I/usr/local/include/lua -I/Users/willow/Documents/GitHub/SpaceGame/src -I/Users/willow/Documents/GitHub/SpaceGame/include -I/Users/willow/Documents/GitHub/SpaceGame/include/imgui -iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks -isystem /usr/local/include
+C_INCLUDES = -I/usr/local/include -I/usr/local/include/lua -I/Users/willow/Documents/GitHub/SpaceGame/src -I/Users/willow/Documents/GitHub/SpaceGame/include -I/Users/willow/Documents/GitHub/SpaceGame/include/imgui -F/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks
 
 C_FLAGS = -g -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mmacosx-version-min=14.3
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/usr/local/include/lua -I/Users/willow/Documents/GitHub/SpaceGame/src -I/Users/willow/Documents/GitHub/SpaceGame/include -I/Users/willow/Documents/GitHub/SpaceGame/include/imgui -iframework /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks -isystem /usr/local/include
+CXX_INCLUDES = -I/usr/local/include -I/usr/local/include/lua -I/Users/willow/Documents/GitHub/SpaceGame/src -I/Users/willow/Documents/GitHub/SpaceGame/include -I/Users/willow/Documents/GitHub/SpaceGame/include/imgui -F/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks
 
 CXX_FLAGS =  -fpermissive -Wall -Wextra -pedantic -Wno-unused-parameter -g -std=gnu++20 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mmacosx-version-min=14.3
 

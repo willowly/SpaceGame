@@ -14,7 +14,7 @@ using std::map,std::unique_ptr;
 
 class Registry {
 
-    map<string,Model> models;
+    map<string,Mesh> models;
     map<string,TextureID> textures;
     map<string,Material> materials;
     
@@ -50,11 +50,11 @@ class Registry {
             return tools.contains(name);
         }
 
-        Model* getModel(string name) {
+        Mesh* getModel(string name) {
             if(models.contains(name)) {
                 return &models.at(name);
             } else {
-                Debug::warn("no model called " + name);
+                Debug::warn("no model called " + name + "\"");
             }
             return nullptr;
         }
@@ -62,7 +62,7 @@ class Registry {
             if(textures.contains(name)) {
                 return textures.at(name);
             } else {
-                Debug::warn("no textured called " + name);
+                Debug::warn("no texture called " + name + "\"");
             }
             return errorTexture;
         }
@@ -70,15 +70,15 @@ class Registry {
             if(materials.contains(name)) {
                 return materials.at(name);
             } else {
-                Debug::warn("no material called " + name);
+                Debug::warn("no material called \"" + name + "\"");
             }
-            return Material();
+            return Material::none;
         }
         Actor* getActor(string name) {
             if(actors.contains(name)) {
                 return actors.at(name).get();
             } else {
-                Debug::warn("no actor prototype called " + name);
+                Debug::warn("no actor prototype called \"" + name + "\"");
             }
             return nullptr;
         }
@@ -87,7 +87,7 @@ class Registry {
             if(blocks.contains(name)) {
                 return blocks.at(name).get();
             } else {
-                Debug::warn("no block prototype called " + name);
+                Debug::warn("no block prototype called \"" + name + "\"");
             }
             return nullptr;
         }
@@ -96,13 +96,13 @@ class Registry {
             if(tools.contains(name)) {
                 return tools.at(name).get();
             } else {
-                Debug::warn("no tool prototype called " + name);
+                Debug::warn("no tool prototype called \"" + name + "\"");
             }
             return nullptr;
         }
 
-        Model* addModel(string name) {
-            models.emplace(name,Model());
+        Mesh* addModel(string name) {
+            models.emplace(name,Mesh());
             return &models.at(name);
         }
 
@@ -110,12 +110,12 @@ class Registry {
             textures.emplace(name,texture);
         }
         void addMaterial(string name,Material material) {
-            materials.emplace(name,Material());
+            materials.emplace(name,material);
         }
 
         template <typename T>
         T* addActor(string name) {
-            actors.emplace(name,std::make_unique<T>());
+            actors.emplace(name,T::makeDefaultPrototype());
             return dynamic_cast<T*>(actors.at(name).get());
         }
 

@@ -3880,13 +3880,9 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
   /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui.h \
   /Users/willow/Documents/GitHub/SpaceGame/include/stb_image.h \
   /Users/willow/Documents/GitHub/SpaceGame/include/volk.h \
-  /Users/willow/Documents/GitHub/SpaceGame/src/actor/actor-factory-fwd.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/actor/actor-factory.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/actor.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/actor/actors-all.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/character.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/construction.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/actor/rigidbody-actor.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-actor.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-all.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-character.hpp \
@@ -3929,7 +3925,6 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
   /Users/willow/Documents/GitHub/SpaceGame/src/sol/config.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/sol/sol.hpp \
   /usr/local/include/GLFW/glfw3.h \
-  /usr/local/include/glfw/glfw3.h \
   /usr/local/include/lua/lauxlib.h \
   /usr/local/include/lua/lua.h \
   /usr/local/include/lua/lua.hpp \
@@ -3959,8 +3954,6 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 /usr/local/include/shaderc/status.h:
 
 /usr/local/include/lua/luaconf.h:
-
-/usr/local/include/glfw/glfw3.h:
 
 /Users/willow/Documents/GitHub/SpaceGame/src/sol/sol.hpp:
 
@@ -4020,13 +4013,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 
 /Users/willow/Documents/GitHub/SpaceGame/src/api/api-actor.hpp:
 
-/Users/willow/Documents/GitHub/SpaceGame/src/actor/rigidbody-actor.hpp:
-
 /Users/willow/Documents/GitHub/SpaceGame/src/actor/construction.hpp:
-
-/Users/willow/Documents/GitHub/SpaceGame/src/actor/actor-factory.hpp:
-
-/Users/willow/Documents/GitHub/SpaceGame/src/actor/actor-factory-fwd.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/include/stb_image.h:
 
@@ -7033,8 +7020,6 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/CoreServices.framework/Frameworks/OSServices.framework/Headers/WSMethodInvocation.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/CoreServices.framework/Frameworks/OSServices.framework/Headers/CSIdentityBase.h:
-
-/Users/willow/Documents/GitHub/SpaceGame/src/actor/actors-all.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/ApplicationServices.framework/Frameworks/PrintCore.framework/Headers/PMPrintingDialogExtensions.h:
 

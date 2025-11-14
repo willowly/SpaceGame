@@ -8,7 +8,7 @@
 #include <iostream>
 #include "helper/math-helper.hpp"
 #include "helper/string-helper.hpp"
-#include "rigidbody-actor.hpp"
+//#include "rigidbody-actor.hpp"
 #include "engine/input.hpp"
 #include "engine/world.hpp"
 #include "construction.hpp"
@@ -20,16 +20,13 @@
 #include <GLFW/glfw3.h>
 
 
-class Character : public RigidbodyActor, public ToolUser {
+class Character : public Actor, public ToolUser {
+
+
     public: 
 
         // Prototype constructors
-        Character() : Character(nullptr,Material()) {
-            
-        }
-        Character(Model* model,Material material) : RigidbodyActor(model,material) {
-            useGravity = false;
-        }
+        
 
 
 
@@ -46,6 +43,8 @@ class Character : public RigidbodyActor, public ToolUser {
         bool thirdPerson = true;
 
         vec3 moveInput;
+
+        vec3 velocity;
 
         Tool* currentTool = nullptr;
         int selectedTool;
@@ -75,13 +74,13 @@ class Character : public RigidbodyActor, public ToolUser {
             
             
 
-            // if(interactInput) {
-            //     interact(world);
-            // }
+            if(interactInput) {
+                interact(world);
+            }
 
-            // if(currentTool != nullptr) {
-            //     currentTool->step(world,this,dt);
-            // }
+            if(currentTool != nullptr) {
+                currentTool->step(world,this,dt);
+            }
 
             // if(ridingConstruction != nullptr) {
             //     ridingConstruction->setMoveControl(ridingConstructionRotation * moveInput);
@@ -90,13 +89,7 @@ class Character : public RigidbodyActor, public ToolUser {
             // } else {
             vec3 targetVelocity = rotation * moveInput * moveSpeed;
             velocity = MathHelper::lerp(velocity,targetVelocity,acceleration*dt);
-            // }
-
-
-
-            
-
-            RigidbodyActor::step(world,dt);
+            position += velocity * dt;
 
             clickInput = false;
             interactInput = false;
@@ -245,6 +238,15 @@ class Character : public RigidbodyActor, public ToolUser {
             
         }
 
+        static std::unique_ptr<Character> makeDefaultPrototype() {
+            auto ptr = new Character();
+            return std::unique_ptr<Character>(ptr);
+        }
+
+        static std::unique_ptr<Character> makeInstance(Character* prototype,vec3 position = vec3(0),quat rotation = glm::identity<quat>()) {
+            return makeInstanceFromPrototype<Character>(prototype,position,rotation);
+        }
+
         glm::mat4 getTransform() {
             return Actor::getTransform();
         }
@@ -267,6 +269,11 @@ class Character : public RigidbodyActor, public ToolUser {
 
         bool playerStep() {
             return true;
+        }
+
+    protected:
+        Character() : Actor() {
+            
         }
 
 };

@@ -18,21 +18,11 @@ class Actor {
     public:
         vec3 position = vec3(0);
         quat rotation = vec3(0);
-        Model* model = nullptr;
-        Material material;
+        Mesh* model = nullptr;
+        Material material = Material::none;
         float modelScale = 1;
 
         bool destroyed = false;
-
-
-        // Prototype constructors
-        Actor() {
-
-        }
-
-        Actor(Model* model,Material material) : model(model), material(material) {
-
-        }
 
         virtual ~Actor() {}
 
@@ -87,7 +77,6 @@ class Actor {
 
         virtual void addRenderables(Vulkan* vulkan,float dt) {
             if(model == nullptr) return; //if no model, nothing to render :)
-            glm::mat4 matrix(1.0f);
             model->addToRender(vulkan,material,position,rotation,vec3(modelScale));
         }
 
@@ -99,6 +88,35 @@ class Actor {
         virtual void destroy() {
             destroyed = true;
         }
+
+        static std::unique_ptr<Actor> makeDefaultPrototype() {
+            auto ptr = new Actor();
+            return std::unique_ptr<Actor>(ptr);
+        }
+
+        static std::unique_ptr<Actor> makeInstance(Actor* prototype,vec3 position = vec3(0),quat rotation = glm::identity<quat>()) {
+            return makeInstanceFromPrototype<Actor>(prototype,position,rotation);
+        }
+
+    protected:
+
+        Actor() {
+
+        }
+
+        template<typename T>
+        static std::unique_ptr<T> makeInstanceFromPrototype(T* prototype,vec3 position = vec3(0),quat rotation = glm::identity<quat>()) {
+            if(prototype == nullptr) {
+                Debug::warn("tried to make an actor with a null prototype");
+                return nullptr;
+            }
+            auto newActor = new T(*prototype);
+            std::unique_ptr<T> actor = std::unique_ptr<T>(newActor);
+            actor->position = position;
+            actor->rotation = rotation;
+            return actor;
+        }
+        
 
 };
 

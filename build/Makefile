@@ -137,19 +137,6 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named GLAD
-
-# Build rule for target.
-GLAD: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 GLAD
-.PHONY : GLAD
-
-# fast build rule for target.
-GLAD/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/GLAD.dir/build.make CMakeFiles/GLAD.dir/build
-.PHONY : GLAD/fast
-
-#=============================================================================
 # Target rules for targets named STB
 
 # Build rule for target.
@@ -454,30 +441,6 @@ include/volk.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/include/volk.c.s
 .PHONY : include/volk.c.s
 
-src/glad.o: src/glad.c.o
-.PHONY : src/glad.o
-
-# target to build an object file
-src/glad.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/GLAD.dir/build.make CMakeFiles/GLAD.dir/src/glad.c.o
-.PHONY : src/glad.c.o
-
-src/glad.i: src/glad.c.i
-.PHONY : src/glad.i
-
-# target to preprocess a source file
-src/glad.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/GLAD.dir/build.make CMakeFiles/GLAD.dir/src/glad.c.i
-.PHONY : src/glad.c.i
-
-src/glad.s: src/glad.c.s
-.PHONY : src/glad.s
-
-# target to generate assembly for a file
-src/glad.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/GLAD.dir/build.make CMakeFiles/GLAD.dir/src/glad.c.s
-.PHONY : src/glad.c.s
-
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -514,7 +477,6 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... SHADERS"
 	@echo "... SpaceGame_Shaders"
-	@echo "... GLAD"
 	@echo "... SIMPLEXNOISE"
 	@echo "... STB"
 	@echo "... SpaceGame"
@@ -548,9 +510,6 @@ help:
 	@echo "... include/volk.o"
 	@echo "... include/volk.i"
 	@echo "... include/volk.s"
-	@echo "... src/glad.o"
-	@echo "... src/glad.i"
-	@echo "... src/glad.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"

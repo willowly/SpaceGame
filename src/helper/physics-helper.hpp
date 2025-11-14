@@ -26,7 +26,7 @@ namespace PhysicsHelper {
         return glm::quat(q.w,q.x,q.y,q.z);
     }
 
-    rp3d::TriangleMesh* applyTriangleMesh(rp3d::PhysicsCommon* common,Model* model) {
+    rp3d::TriangleMesh* applyTriangleMesh(rp3d::PhysicsCommon* common,Mesh* model) {
         int vertexCount = 3 * model->vertices.size();
         float vertices[vertexCount];
         int i = 0;
@@ -39,7 +39,7 @@ namespace PhysicsHelper {
         i = 0;
         int indexCount = 3 * model->faces.size();
         int indices[indexCount];
-        for(Model::Face& face : model->faces) {
+        for(Mesh::Face& face : model->faces) {
             indices[i] = face.vertexIndices[0];
             indices[i+1] = face.vertexIndices[1];
             indices[i+2] = face.vertexIndices[2];

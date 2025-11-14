@@ -56,7 +56,6 @@ set(CMAKE_MAKEFILE_PRODUCTS
 
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
-  "CMakeFiles/GLAD.dir/DependInfo.cmake"
   "CMakeFiles/STB.dir/DependInfo.cmake"
   "CMakeFiles/SIMPLEXNOISE.dir/DependInfo.cmake"
   "CMakeFiles/SpaceGame.dir/DependInfo.cmake"

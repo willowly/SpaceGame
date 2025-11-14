@@ -83,7 +83,7 @@ namespace API {
         get<TextureID>(table,key,pointer,required);
     }
 
-    void getModel(sol::table table,std::variant<string,int> key,Model** pointer,Registry& registry,bool required = false) {
+    void getModel(sol::table table,std::variant<string,int> key,Mesh** pointer,Registry& registry,bool required = false) {
         Debug::addTrace(keyAsString(key));
         sol::object obj = table[key];
         if(obj.is<string>()) {
@@ -94,7 +94,7 @@ namespace API {
             
         }
         Debug::subtractTrace();
-        get<Model*>(table,key,pointer,required);
+        get<Mesh*>(table,key,pointer,required);
     }
 
     string getType(sol::this_state& thisState,sol::object obj) {

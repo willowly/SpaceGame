@@ -951,6 +951,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/OpenGL.framework/Headers/gltypes.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/OpenGL.framework/Headers/OpenGLAvailability.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/os/availability.h \
+  /Users/willow/Documents/GitHub/SpaceGame/src/helper/string-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/glm.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/detail/_fixes.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/detail/setup.hpp \
@@ -1246,7 +1247,6 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../mat4x2.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../mat4x3.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/type_ptr.inl \
-  /Users/willow/Documents/GitHub/SpaceGame/src/helper/string-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/debug.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/graphics/color.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/hash.hpp \
@@ -1276,9 +1276,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/closest_point.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/closest_point.inl \
   /Users/willow/Documents/GitHub/SpaceGame/src/physics/structs.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/actor/actor-factory-fwd.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/character.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/actor/rigidbody-actor.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/construction.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/physics/resolution.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/block/block.hpp \
@@ -1287,8 +1285,6 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/pickaxe-tool.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/tool.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/place-block-tool.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/actor/actor-factory.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/actor/actors-all.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/registry.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/loader.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-all.hpp \
@@ -1313,7 +1309,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Users/willow/Documents/GitHub/SpaceGame/src/block/cockpit-block.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/block/thruster-block.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/clock.hpp \
-  /usr/local/include/glfw/glfw3.h /usr/local/include/shaderc/shaderc.h \
+  /usr/local/include/shaderc/shaderc.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/stdbool.h \
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/stdbool.h \
   /usr/local/include/shaderc/env.h /usr/local/include/shaderc/status.h \

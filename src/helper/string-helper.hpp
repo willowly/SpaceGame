@@ -5,7 +5,7 @@
 
 #include <glm/glm.hpp>
 
-using glm::vec4, glm::vec3, glm::vec2,glm::ivec3;
+using glm::vec4, glm::vec3, glm::vec2,glm::ivec3,glm::mat4;
 
 namespace StringHelper {
 
@@ -33,5 +33,20 @@ namespace StringHelper {
     }
     std::string toString(vec2 v) {
         return std::format("<{},{}>",v.x,v.y);
+    }
+
+    std::string toString(mat4 v) {
+        string s = "[";
+        for (size_t j = 0; j < 4; j++)
+        {
+            for (size_t i = 0; i < 4; i++)
+            {
+                s += std::to_string(v[i][j]) + ",";
+            }
+            s += "\n";
+        }
+        s += "]";
+        return s;
+        
     }
 }

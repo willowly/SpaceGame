@@ -1,15 +1,7 @@
-#version 410
+#version 450
 
-in vec2 texCoord;
-in vec3 normal;
+layout(location = 0) out vec4 outColor;
 
-out vec4 FragColor;
-
-uniform sampler2D mainTex;
-uniform vec4 color;
-
-void main()
-{
-    vec4 result = texture(mainTex,texCoord) * color;
-    FragColor = result;
+void main() {
+    outColor = vec4(1.0,1.0,1.0,1.0);
 }

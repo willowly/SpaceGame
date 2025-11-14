@@ -66,20 +66,32 @@ include CMakeFiles/SpaceGame_Shaders.dir/compiler_depend.make
 # Include the progress variables for this target.
 include CMakeFiles/SpaceGame_Shaders.dir/progress.make
 
-CMakeFiles/SpaceGame_Shaders: bin/shaders/compiled/shader_frag.spv
-CMakeFiles/SpaceGame_Shaders: bin/shaders/compiled/shader_vert.spv
+CMakeFiles/SpaceGame_Shaders: bin/shaders/compiled/lit_frag.spv
+CMakeFiles/SpaceGame_Shaders: bin/shaders/compiled/lit_vert.spv
+CMakeFiles/SpaceGame_Shaders: bin/shaders/compiled/ui_frag.spv
+CMakeFiles/SpaceGame_Shaders: bin/shaders/compiled/ui_vert.spv
 
-bin/shaders/compiled/shader_frag.spv: bin/shaders/shader.frag
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating bin/shaders/compiled/shader_frag.spv"
-	glslc /Users/willow/Documents/GitHub/SpaceGame/build/bin/shaders/shader.frag -o /Users/willow/Documents/GitHub/SpaceGame/build/bin/shaders/compiled/shader_frag.spv
+bin/shaders/compiled/lit_frag.spv: bin/shaders/lit.frag
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating bin/shaders/compiled/lit_frag.spv"
+	glslc /Users/willow/Documents/GitHub/SpaceGame/build/bin/shaders/lit.frag -o /Users/willow/Documents/GitHub/SpaceGame/build/bin/shaders/compiled/lit_frag.spv
 
-bin/shaders/compiled/shader_vert.spv: bin/shaders/shader.vert
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Generating bin/shaders/compiled/shader_vert.spv"
-	glslc /Users/willow/Documents/GitHub/SpaceGame/build/bin/shaders/shader.vert -o /Users/willow/Documents/GitHub/SpaceGame/build/bin/shaders/compiled/shader_vert.spv
+bin/shaders/compiled/lit_vert.spv: bin/shaders/lit.vert
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Generating bin/shaders/compiled/lit_vert.spv"
+	glslc /Users/willow/Documents/GitHub/SpaceGame/build/bin/shaders/lit.vert -o /Users/willow/Documents/GitHub/SpaceGame/build/bin/shaders/compiled/lit_vert.spv
+
+bin/shaders/compiled/ui_frag.spv: bin/shaders/ui.frag
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Generating bin/shaders/compiled/ui_frag.spv"
+	glslc /Users/willow/Documents/GitHub/SpaceGame/build/bin/shaders/ui.frag -o /Users/willow/Documents/GitHub/SpaceGame/build/bin/shaders/compiled/ui_frag.spv
+
+bin/shaders/compiled/ui_vert.spv: bin/shaders/ui.vert
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Generating bin/shaders/compiled/ui_vert.spv"
+	glslc /Users/willow/Documents/GitHub/SpaceGame/build/bin/shaders/ui.vert -o /Users/willow/Documents/GitHub/SpaceGame/build/bin/shaders/compiled/ui_vert.spv
 
 SpaceGame_Shaders: CMakeFiles/SpaceGame_Shaders
-SpaceGame_Shaders: bin/shaders/compiled/shader_frag.spv
-SpaceGame_Shaders: bin/shaders/compiled/shader_vert.spv
+SpaceGame_Shaders: bin/shaders/compiled/lit_frag.spv
+SpaceGame_Shaders: bin/shaders/compiled/lit_vert.spv
+SpaceGame_Shaders: bin/shaders/compiled/ui_frag.spv
+SpaceGame_Shaders: bin/shaders/compiled/ui_vert.spv
 SpaceGame_Shaders: CMakeFiles/SpaceGame_Shaders.dir/build.make
 .PHONY : SpaceGame_Shaders
 

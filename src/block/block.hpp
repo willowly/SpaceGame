@@ -14,15 +14,15 @@ class Character;
 class Block {
 
     public:
-        Model* model;
+        Mesh* model;
         Material material;
         bool canRide;
 
         
-        Block(Model* model,Material material) : model(model), material(material) {
+        Block(Mesh* model,Material material) : model(model), material(material) {
             
         }
-        Block() : Block(nullptr,Material()) {}
+        Block() : Block(nullptr,Material::none) {}
         
         virtual ~Block() = default;
 

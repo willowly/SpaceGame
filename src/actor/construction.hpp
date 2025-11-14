@@ -5,7 +5,6 @@
 #include <unordered_map>
 
 #include "engine/debug.hpp"
-#include "rigidbody-actor.hpp"
 #include "physics/resolution.hpp"
 #include "physics/intersections.hpp"
 
@@ -19,7 +18,7 @@ using glm::ivec3,glm::vec3;
 using std::unordered_map;
 
 #define CONSTRUCTION
-class Construction : public RigidbodyActor {
+class Construction : public Actor {
 
 
     struct BlockData {
@@ -41,6 +40,11 @@ class Construction : public RigidbodyActor {
     float turnForce = 1.5;
 
     int blockCount; //block count
+
+    Construction() : Actor() {
+        blockData.push_back(BlockData()); //starting block
+        blockCountX.push_back(0);
+    }
 
     
     public:
@@ -115,14 +119,6 @@ class Construction : public RigidbodyActor {
             constexpr auto operator<=>(const Location&) const = default;
 
         };
-
-        Construction(Model* model,Material material) : RigidbodyActor(model,material) {
-            blockData.push_back(BlockData()); //starting block
-            blockCountX.push_back(0);
-        }
-        Construction() : Construction(nullptr,Material()) {
-            
-        }
 
         void step(World* world,float dt) {
             
@@ -372,6 +368,19 @@ class Construction : public RigidbodyActor {
                     }
                 }
             }
+        }
+
+        static std::unique_ptr<Construction> makeInstance(vec3 position,quat rotation = glm::identity<quat>()) {
+            auto ptr = new Construction();
+            ptr->position = position;
+            ptr->rotation = rotation;
+            return std::unique_ptr<Construction>(ptr);
+        }
+
+        static std::unique_ptr<Construction> makeInstance(Block* block,vec3 position,quat rotation = glm::identity<quat>()) {
+            auto ptr = makeInstance(position,rotation);
+            ptr->setBlock(ivec3(0),block,BlockFacing::FORWARD);
+            return ptr;
         }
 };
 

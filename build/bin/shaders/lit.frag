@@ -1,23 +1,32 @@
-#version 410
+#version 450
 
-in vec2 texCoord;
-in vec3 normal;
+#include "scene_data.hlsl"
 
-out vec4 FragColor;
+layout(location = 0) in vec3 normal;
+layout(location = 1) in vec2 texCoord;
 
-uniform sampler2D mainTex;
-uniform vec3 color;
+layout(location = 0) out vec4 outColor;
 
-void main()
-{
+layout(binding = 1) uniform sampler2D texSampler[];
+
+#include "lit_material_data.hlsl"
+
+#include "push_constant.hlsl"
+
+void main() {
+    MaterialData material = push.material;
+
     vec3 lightDir = normalize(vec3(0.5,1.0,0.1));
-    vec3 lightColor = vec3(1,1,1);
+    vec3 lightColor = vec3(3,3,3);
     vec3 ambient = vec3(0.3,0.3,0.5);
 
     float diff = max(dot(normal, lightDir), 0.0);
 
     vec3 diffuse = diff * lightColor;
-    vec3 objectColor = texture(mainTex,texCoord).rgb * color;
+    vec3 objectColor = texture(texSampler[material.textureID],texCoord).rgb * material.color;
     vec3 result = (ambient + diffuse) * objectColor;
-    FragColor = vec4(result, 1.0);
+    outColor = vec4(result, 1.0);
+    
+    //outColor = vec4(texCoord,0,0);
+
 }

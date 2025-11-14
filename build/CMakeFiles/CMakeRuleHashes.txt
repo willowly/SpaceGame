@@ -1,4 +1,6 @@
 # Hashes of file build rules.
 3ed835bf0b586db14d23d048ad4b15c7 CMakeFiles/SpaceGame_Shaders
-60018677eabf344131a6edae93d03d74 bin/shaders/compiled/shader_frag.spv
-a6d7e5fbdc878e9908b23f2ee12ae16f bin/shaders/compiled/shader_vert.spv
+1e50b9e483f37e13ddcba9ea8e1a6400 bin/shaders/compiled/lit_frag.spv
+e9ab2d7780739cb251b6229c55b3aecc bin/shaders/compiled/lit_vert.spv
+5fcfa855142f8142c5b6cf74d57e58a9 bin/shaders/compiled/ui_frag.spv
+b9f5379672fdd476c6a8f1dde97776a5 bin/shaders/compiled/ui_vert.spv

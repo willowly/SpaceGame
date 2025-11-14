@@ -1,9 +1,10 @@
 #extension GL_EXT_buffer_reference : require
+#extension GL_EXT_scalar_block_layout : require
 
 #define MATERIAL_DATA
 
-layout(std430, buffer_reference, buffer_reference_align = 8) readonly buffer MaterialData
+layout(scalar, buffer_reference, buffer_reference_align = 4) readonly buffer MaterialData
 {
-    uint textureID;
+    uint textureID; 
     vec3 color;
 };

@@ -14,11 +14,12 @@
 #include "graphics/camera.hpp"
 #include "world.hpp"
 #include "actor/character.hpp"
-#include "actor/actor-factory.hpp"
 #include "engine/registry.hpp"
 #include "engine/loader.hpp"
 #include "sol/sol.hpp"
 #include "helper/clock.hpp"
+
+#include "item/place-block-tool.hpp"
 
 using std::string;
 
@@ -64,12 +65,6 @@ class GameApplication {
 
         World world;
         
-        //Registry
-        Model* model;
-        TextureID cowTexture;
-        TextureID gridTexture;
-        Material cowMaterial;
-        Material gridMaterial;
 
         Registry registry;
 
@@ -82,16 +77,22 @@ class GameApplication {
         Vulkan* vulkan;
 
         Input input;
-
-        std::vector<glm::mat4> monkeys; 
-
-        vec3 rotation = vec3(0);
         
         Camera camera;
 
         std::vector<float> frameTimes;
 
         Character* player;
+
+
+        PlaceBlockTool placeTin;
+        PlaceBlockTool placeCockpit;
+        PlaceBlockTool placeThruster;
+        PickaxeTool pickaxe;
+
+        MeshBuffer uiBuffer;
+        VkPipeline uiPipeline;
+        Material uiMaterial = Material::none;
 
 
         
@@ -168,7 +169,7 @@ class GameApplication {
             glfwSetCharCallback(window, characterCallback);
             glfwSetMouseButtonCallback(window, mouseButtonCallback);
 
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
             
             
             if (window == NULL) {
@@ -187,37 +188,47 @@ class GameApplication {
             loader.loadAll(registry,lua,vulkan);
 
 
-            
-            model = registry.getModel("monkey");
-
             lastTime = (float)glfwGetTime();
 
-            cowTexture = registry.getTexture("cow");
+            Actor* planePrototype = registry.getActor("plane");
 
-            gridTexture = registry.getTexture("grid_dark");
+            auto playerPrototype = Character::makeDefaultPrototype();
 
-            auto litShader = registry.litShader;
+            world.spawn(Actor::makeInstance(planePrototype,vec3(0,-3,0)));
 
-            cowMaterial = vulkan->createMaterial(litShader,LitMaterialData(cowTexture,vec3(1)));
+            placeTin = PlaceBlockTool(registry.getBlock("tin"));
+            placeTin.icon = registry.getTexture("tin_plate");
 
-            gridMaterial = vulkan->createMaterial(litShader,LitMaterialData(gridTexture,vec3(1)));
+            placeCockpit = PlaceBlockTool(registry.getBlock("cockpit"));
+            placeCockpit.icon = registry.getTexture("cockpit_item");
 
-            Actor monkeyPrototype = Actor(model,gridMaterial);
+            placeThruster = PlaceBlockTool(registry.getBlock("thruster"));
+            placeThruster.icon = registry.getTexture("thruster_item");
 
-            Character playerPrototype = Character();
+            pickaxe = PickaxeTool(registry.getModel("pickaxe"),registry.getMaterial("pickaxe"),vec3(0.2,-0.4,-0.5),quat(vec3(glm::radians(-5.0f),glm::radians(90.0f),glm::radians(-5.0f))));
+            pickaxe.icon = registry.getTexture("pickaxe_item");
 
-            world.spawn<Actor>(&monkeyPrototype,vec3(0,0,0));
+            //world.spawn(Construction::makeInstance(tin,vec3(0)));
 
-            player = world.spawn<Character>(&playerPrototype,vec3(0.0,0.0,5.0));
+            playerPrototype->toolbar[0] = &placeTin;
+            playerPrototype->toolbar[1] = &placeCockpit;
+            playerPrototype->toolbar[2] = &placeThruster;
+            playerPrototype->toolbar[3] = &pickaxe;
 
+            std::vector<Vertex> verticies{
+                Vertex(vec3(0.0,0.0,0.0))
+            };
+            std::vector<uint16_t> indicies{
+                0,1,2,1,2,3
+            };
+            uiBuffer = vulkan->createMeshBuffers(verticies,indicies);
 
-            // for (size_t i = 0; i < 5000; i++)
-            // {
-            //     auto position = vec3(Random::random(-3,3),Random::random(-3,3),Random::random(-3,3));
-            //     auto quaternion = quat(vec3(Random::random(0,360),Random::random(0,360),Random::random(0,360)));
-            //     auto scale = vec3(Random::random(0.01,0.1));
-            //     monkeys.push_back(MathHelper::getTransformMatrix(position,quaternion,scale));
-            // }
+            player = world.spawn(Character::makeInstance(playerPrototype.get(),vec3(0.0,0.0,0.0)));
+
+            uiPipeline = vulkan->createManagedPipeline<Vertex>("shaders/compiled/ui_vert.spv","shaders/compiled/ui_frag.spv");
+
+            uiMaterial = vulkan->createMaterial(uiPipeline,LitMaterialData());
+
             glfwPollEvents();
             input.clearInputBuffers(); // reset mouse position;
             
@@ -264,6 +275,7 @@ class GameApplication {
             
             world.frame(vulkan,dt);
 
+            vulkan->addMesh(uiBuffer,uiMaterial,glm::mat4(1.0f));
             
             // do all the end of frame code in vulkan
             vulkan->render(camera);

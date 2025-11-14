@@ -21,6 +21,10 @@ struct Vertex {
     glm::vec3 normal;
     glm::vec2 texCoord;
 
+    Vertex() {}
+
+    Vertex(glm::vec3 pos) : pos(pos) {}
+
     static VkVertexInputBindingDescription getBindingDescription() {
         VkVertexInputBindingDescription bindingDescription{};
         bindingDescription.binding = 0;
@@ -80,7 +84,7 @@ struct std::hash<Vertex>
     }
 };
 
-class Model {
+class Mesh {
     public:
 
         vector<Vertex> vertices;
@@ -89,11 +93,11 @@ class Model {
         bool buffersLoaded = false;
         MeshBuffer meshBuffer;
 
-        Model() {
+        Mesh() {
             
         }
 
-        ~Model() {
+        ~Mesh() {
 
         }
 

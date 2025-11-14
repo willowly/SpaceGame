@@ -1,18 +1,20 @@
-#version 410
-layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec3 aNormal;
-layout (location = 2) in vec2 aTexCoord;
+#version 450
 
-out vec3 normal;
-out vec2 texCoord;
+vec2 positions[4] = vec2[](
+    vec2(-1,  1),
+    vec2( 1,  1),
+    vec2(-1, -1),
+    vec2( 1, -1)
+);
 
-uniform mat4 view;
-uniform mat4 model;
-uniform mat4 projection;
 
-void main()
-{
-    gl_Position = projection * view * model * vec4(aPos.x, aPos.y, aPos.z, 1.0);
-    texCoord = aTexCoord;
-    normal = normalize(mat3(transpose(inverse(model))) * aNormal);
+#include "scene_data.hlsl"
+
+#include "push_constant.hlsl"
+
+
+void main() {
+    uint frameIndex = push.frameIndex;
+
+    gl_Position = sceneData[frameIndex].screen * vec4(positions[gl_VertexIndex], 0.0, 1.0);
 }

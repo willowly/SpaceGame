@@ -33,7 +33,7 @@ class RigidbodyActor : public Actor {
         mat3 localInverseInertiaTensor;
         mat3 worldInverseInertiaTensor;
 
-        RigidbodyActor(Model* model,Material material) : Actor(model,material) {
+        RigidbodyActor(Mesh* model,Material material) : Actor(model,material) {
             float mass = getMass();
             vec3 d = scale * 2.0f;
             vec3 d2 = vec3(d.x*d.x,d.y*d.y,d.z*d.z);
@@ -45,7 +45,7 @@ class RigidbodyActor : public Actor {
             transformInertiaTensor(worldInverseInertiaTensor,rotation,localInverseInertiaTensor);
         }
 
-        RigidbodyActor() : RigidbodyActor(nullptr,Material()){
+        RigidbodyActor() : RigidbodyActor(nullptr,Material::none){
             
         }
 

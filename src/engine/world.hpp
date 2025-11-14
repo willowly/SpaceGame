@@ -4,7 +4,6 @@
 
 #include "actor/actor.hpp"
 #include <memory>
-#include <actor/actor-factory-fwd.hpp>
 
 using glm::vec3, glm::quat,std::unique_ptr;
 
@@ -56,9 +55,8 @@ class World {
         World() {
         }
 
-        template<typename T,typename... Args>
-        T* spawn(Args... args) {
-            unique_ptr<T> spawned = ActorFactory::make<T>(std::forward<Args>(args)...);
+        template<typename T>
+        T* spawn(unique_ptr<T> spawned) {
             T* rawSpawned = spawned.get();
             if(iteratingActors) {
                 spawnedActors.push_back(std::move(spawned));

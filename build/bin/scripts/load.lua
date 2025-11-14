@@ -1,11 +1,11 @@
--- print("Loading Materials")
+print("Loading Materials")
 
 -- materials.cow = {shaders.lit,textures.cow}
 
--- materials.grid = {
---     shader=shaders.lit,
---     texture=textures.grid_dark,
--- }
+materials.grid = {
+    --shader=shaders.lit,
+    texture=textures.grid_dark,
+}
 
 -- materials.container = {
 --     shader="lit",
@@ -18,22 +18,26 @@
 --     color=color(0.1,0.5,0.8)
 -- }
 
--- materials.pickaxe = {"lit","pickaxe"}
+materials.pickaxe = {
+    texture=textures.pickaxe,
+}
 
--- materials.tin_block = {"lit","tin_block"}
+materials.tin_block = {
+    texture=textures.tin_block,
+}
 -- materials.cobalt_block = {"lit","cobalt_block"}
--- materials.cockpit = {"lit","cockpit"}
--- materials.thruster = {"lit","solid",color(0.3,0.3,0.4)}
+materials.cockpit = {"lit","cockpit"}
+materials.thruster = {"lit","solid",color(0.1,0.1,0.2)}
 
 -- materials.terrain = {"lit","solid",color(0.2,0.2,0.8)}
 
 -- print("Loading Actors")
 
--- actors.plane = {
---     type="actor",
---     model="plane",
---     material=materials.grid
--- }
+actors.plane = {
+    type="actor",
+    model="plane",
+    material=materials.grid
+}
 
 -- actors.pickaxe = {
 --     type="actor",
@@ -41,29 +45,33 @@
 --     material="pickaxe"
 -- }
 
--- actors.asteroid = {
---     type="actor",
---     model="asteroid",
---     material="grid"
--- }
+actors.asteroid = {
+    type="actor",
+    model="asteroid",
+    material="grid"
+}
 
--- print("Loading Blocks")
+print("Loading Blocks")
 
 -- blocks.cobalt = {"block","block","cobalt_block"}
--- blocks.tin = {"block","block","tin_block"}
+blocks.tin = {
+    type="block",
+    model="block",
+    material="tin_block"
+}
 
--- blocks.cockpit = {
---     type = "cockpit",
---     model = "cockpit",
---     material = "cockpit"
--- }
+blocks.cockpit = {
+    type = "cockpit",
+    model = "cockpit",
+    material = "cockpit"
+}
 
--- blocks.thruster = {
---     type = "thruster",
---     model = "thruster",
---     material = "thruster",
---     force = 20
--- }
+blocks.thruster = {
+    type = "thruster",
+    model = "thruster",
+    material = "thruster",
+    force = 20
+}
 
 
 -- function setBlock(x,y,z)

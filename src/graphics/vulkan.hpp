@@ -9,6 +9,8 @@
 
 #include <GLFW/glfw3.h>
 
+#include "helper/string-helper.hpp"
+
 
 
 #include <iostream>
@@ -39,7 +41,9 @@ using std::string,glm::vec3,glm::mat4,glm::quat;
 struct SceneDataBufferObject {
     glm::mat4 view;
     glm::mat4 proj;
+    glm::mat4 screen;
 };
+
  
 class Vulkan;
 
@@ -79,12 +83,17 @@ struct LitMaterialData {
     
 };
 
-struct Material {
+class Material {
+    friend Vulkan;
     VkPipeline pipeline = VK_NULL_HANDLE;
     MaterialHandle data = 0;
     Material(VkPipeline pipeline, MaterialHandle data) : pipeline(pipeline), data(data) {}
     Material() {}
+    public:
+        static const Material none;
 };
+
+const Material Material::none = Material();
 
 struct MeshBuffer : Buffer {
     VkDeviceSize indexOffset = 0;
@@ -350,6 +359,7 @@ class Vulkan {
 
         TextureID loadTextureFile(string path) {
             int texWidth, texHeight, texChannels;
+            stbi_set_flip_vertically_on_load(true);
             stbi_uc* pixels = stbi_load(path.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
             if (!pixels) {
                 throw std::runtime_error("failed to load texture image!");
@@ -642,6 +652,7 @@ class Vulkan {
             VK_KHR_MAINTENANCE_3_EXTENSION_NAME,
             VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
             VK_KHR_DEVICE_GROUP_EXTENSION_NAME,
+            VK_EXT_SCALAR_BLOCK_LAYOUT_EXTENSION_NAME
             
         };
 
@@ -689,8 +700,8 @@ class Vulkan {
 
         std::vector<TextureResources> textures;
 
-        Buffer uniformBuffers[FRAMES_IN_FLIGHT];
-        void* uniformBuffersMapped[FRAMES_IN_FLIGHT];
+        Buffer uniformBuffers[FRAMES_IN_FLIGHT+1];
+        void* uniformBuffersMapped[FRAMES_IN_FLIGHT+1];
 
         Image depthImage;
         VkImageView depthImageView;
@@ -970,6 +981,8 @@ class Vulkan {
             ubo.proj = camera.getProjectionMatrix();
 
             ubo.proj[1][1] *= -1; //flip the y because theres discrepancy
+            
+            ubo.screen = glm::ortho(-100.0f*camera.aspect,100.0f*camera.aspect,100.0f,-100.0f);
 
             memcpy(uniformBuffersMapped[currentFrame], &ubo, sizeof(ubo)); //uniform buffer is always mapped
         }
@@ -1086,11 +1099,15 @@ class Vulkan {
                 queueCreateInfo.pQueuePriorities = &queuePriority;
                 queueCreateInfos.push_back(queueCreateInfo);
             }
+            
+            VkPhysicalDeviceScalarBlockLayoutFeaturesEXT deviceScaleBlockLayoutFeatures{};
+            deviceScaleBlockLayoutFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SCALAR_BLOCK_LAYOUT_FEATURES_EXT;
+            deviceScaleBlockLayoutFeatures.scalarBlockLayout = true;
 
             VkPhysicalDeviceFeatures2 deviceFeatures2{};
             deviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-
             deviceFeatures2.features.samplerAnisotropy = VK_TRUE;
+            deviceFeatures2.pNext = &deviceScaleBlockLayoutFeatures;
 
             VkPhysicalDeviceVulkan12Features deviceFeatures{};
             deviceFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
@@ -1502,7 +1519,7 @@ class Vulkan {
 
             std::vector<VkWriteDescriptorSet> descriptorWrites{};
 
-            VkDescriptorBufferInfo bufferInfo[FRAMES_IN_FLIGHT];
+            VkDescriptorBufferInfo bufferInfo[FRAMES_IN_FLIGHT+1];
 
             for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
             {
@@ -1925,9 +1942,6 @@ class Vulkan {
             
             VkPhysicalDeviceProperties properties;
             vkGetPhysicalDeviceProperties(init_info.PhysicalDevice, &properties);
-            
-            printf("pfn1: %p\n", vkGetPhysicalDeviceProperties);
-            printf("device1: %p\n", init_info.PhysicalDevice);
 
             ImGui_ImplVulkan_Init(&init_info);
 

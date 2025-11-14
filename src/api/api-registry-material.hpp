@@ -47,8 +47,9 @@ namespace API {
             switch (getObjectLoadType(lua,obj)) {
                 
                 case ObjLoadType::ARRAY:
-                    getTexture(table,1,&materialData.texture,registry,true);
-                    getColorAsVec3(table,2,&materialData.color,false);
+                    getTexture(table,2,&materialData.texture,registry,true);
+                    getColorAsVec3(table,3,&materialData.color,false);
+                    registry.addMaterial(name,vulkan->createMaterial(pipeline,materialData));
                     break;
                 case ObjLoadType::TABLE:
                     getTexture(table,"texture",&materialData.texture,registry,true);

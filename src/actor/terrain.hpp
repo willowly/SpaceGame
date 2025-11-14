@@ -21,7 +21,7 @@ class Terrain : public Actor {
 
 
     public:
-        unique_ptr<Model> dynamicModel;
+        unique_ptr<Mesh> dynamicModel;
         int size = 30;
         float noiseScale = 100;
         float surfaceLevel = 0.5;
@@ -31,7 +31,7 @@ class Terrain : public Actor {
 
     Terrain() : Actor(nullptr,nullptr) {
         
-        dynamicModel = std::make_unique<Model>();
+        dynamicModel = std::make_unique<Mesh>();
         dynamicModel->setDynamicDraw();
         model = dynamicModel.get();
 
@@ -143,7 +143,7 @@ class Terrain : public Actor {
         const int* tris = TerrainHelper::triTable[config];
         int i = 0;
         int startIndex = model->vertices.size();
-        Model::Face face;
+        Mesh::Face face;
         int cellIndex = getPointIndex(cellPos.x,cellPos.y,cellPos.z);
         terrainData[cellIndex].verticiesStart = startIndex;
         while(i < 100) //break out if theres a problem lol

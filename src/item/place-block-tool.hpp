@@ -1,3 +1,4 @@
+#pragma once
 #include "tool.hpp"
 
 
@@ -39,8 +40,7 @@ class PlaceBlockTool: public Tool {
                 //     construction->setBlock(ivec3(0),block,BlockFacing::FORWARD);
                 // }
             } else {
-                auto construction = world->spawn<Construction>(ray.origin + ray.direction*10.0f,glm::quatLookAt(ray.direction,vec3(0,1,0)));
-                construction->setBlock(ivec3(0),block,BlockFacing::FORWARD);
+                auto construction = world->spawn(Construction::makeInstance(block,ray.origin + ray.direction*10.0f,glm::quatLookAt(ray.direction,vec3(0,1,0))));
             }
             placeAnimationTimer = placeAnimationTime;
         }
