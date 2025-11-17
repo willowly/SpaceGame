@@ -214,7 +214,7 @@ class GameApplication {
             //world.spawn(Construction::makeInstance(tin,vec3(0)));
 
             VkPipeline terrainPipeline = vulkan->createManagedPipeline<Vertex>(Loader::vertCodePath("terrain"),Loader::fragCodePath("terrain"));
-            terrainMaterial = vulkan->createMaterial(terrainPipeline,LitMaterialData(registry.getTexture("terrain")));
+            terrainMaterial = vulkan->createMaterial(terrainPipeline,LitMaterialData(registry.getTexture("rock")));
 
             playerPrototype->toolbar[0] = &placeTin;
             playerPrototype->toolbar[1] = &placeCockpit;

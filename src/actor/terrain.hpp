@@ -123,6 +123,37 @@ class Terrain : public Actor {
                 }
             }
         }
+
+        // consolodate vertices
+        std::vector<Vertex> newVertices;
+        unordered_map<vec3,std::pair<int,std::vector<vec3>>> vertexMap;
+        for(auto& i : indices) {
+            auto vertex = vertices[i];
+            if(vertexMap.contains(vertex.pos)) {
+                i = vertexMap[vertex.pos].first;
+            } else {
+                Vertex newVertex;
+                newVertex.pos = vertex.pos;
+                newVertex.normal = vec3(0,1,0);
+                newVertices.push_back(Vertex(vertex.pos));
+                i = newVertices.size() - 1;
+                vertexMap[vertex.pos].first = i;
+            }
+            vertexMap[vertex.pos].second.push_back(vertex.normal);
+        }
+        // smooth normals
+        for (auto p : vertexMap)
+        {
+            auto& data = p.second;
+            vec3 normal = vec3(0);
+            for(auto n : data.second) {
+                normal += n;
+            }
+            normal /= data.second.size();
+            newVertices[data.first].normal = normal;
+        }
+        
+        vertices = std::move(newVertices);
         meshOutOfDate = true;
         std::cout << "generate time: " << (float)glfwGetTime() - clock << std::endl;
     }
@@ -138,7 +169,7 @@ class Terrain : public Actor {
         }
         const int* tris = TerrainHelper::triTable[config];
         int i = 0;
-        int startIndex = vertices.size();
+        int startIndex = indices.size();
         int cellIndex = getPointIndex(cellPos.x,cellPos.y,cellPos.z);
         terrainData[cellIndex].verticesStart = startIndex;
         int face[3];
@@ -167,7 +198,7 @@ class Terrain : public Actor {
             }
             i++;
         }
-        terrainData[cellIndex].verticesEnd = vertices.size();
+        terrainData[cellIndex].verticesEnd = indices.size();
         
         
     }
@@ -253,9 +284,9 @@ class Terrain : public Actor {
                     auto voxel = terrainData[getPointIndex(x,y,z)];
                     for (int i = voxel.verticesStart;i < voxel.verticesEnd;i += 3)
                     {
-                        vec3 a = vertices[i].pos;
-                        vec3 b = vertices[i+1].pos;
-                        vec3 c = vertices[i+2].pos;
+                        vec3 a = vertices[indices[i]].pos;
+                        vec3 b = vertices[indices[i+1]].pos;
+                        vec3 c = vertices[indices[i+2]].pos;
 
                         auto contact_opt = Physics::intersectSphereTri(localActorPosition,radius,a,b,c);
                         if(contact_opt) {

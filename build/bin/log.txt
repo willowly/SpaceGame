@@ -17,6 +17,7 @@
 [INFO] Loaded Texture "pickaxe_item" (textures)
 [INFO] Loaded Texture "cow" (textures)
 [INFO] Loaded Texture "grid_dark" (textures)
+[INFO] Loaded Texture "rock" (textures)
 [INFO] Loaded Texture "cockpit_item" (textures)
 [INFO] Loaded Texture "grid" (textures)
 [INFO] Loaded Texture "thruster_item" (textures)
