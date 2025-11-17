@@ -59,13 +59,13 @@ namespace API {
     }
 
     void getColorAsVec3(sol::table table,variant<string,int> key,vec3* pointer,bool required = false) {
-        Color color;
-        get<Color>(table,"color",&color,false);
+        Color color(*pointer);
+        get<Color>(table,key,&color,false);
         *pointer = color.asVec3();
     }
     void getColorAsVec4(sol::table table,variant<string,int> key,vec4* pointer,bool required = false) {
-        Color color;
-        get<Color>(table,"color",&color,false);
+        Color color(*pointer);
+        get<Color>(table,key,&color,false);
         *pointer = color.asVec4();
     }
 
@@ -83,7 +83,7 @@ namespace API {
         get<TextureID>(table,key,pointer,required);
     }
 
-    void getModel(sol::table table,std::variant<string,int> key,Mesh** pointer,Registry& registry,bool required = false) {
+    void getModel(sol::table table,std::variant<string,int> key,Mesh<Vertex>** pointer,Registry& registry,bool required = false) {
         Debug::addTrace(keyAsString(key));
         sol::object obj = table[key];
         if(obj.is<string>()) {
@@ -94,7 +94,7 @@ namespace API {
             
         }
         Debug::subtractTrace();
-        get<Mesh*>(table,key,pointer,required);
+        get<Mesh<Vertex>*>(table,key,pointer,required);
     }
 
     string getType(sol::this_state& thisState,sol::object obj) {

@@ -1,6 +1,6 @@
 
 #pragma once
-#include "graphics/model.hpp"
+#include "graphics/mesh.hpp"
 #include "actor/actor.hpp"
 #include "helper/terrain-helper.hpp"
 #include "engine/debug.hpp"
@@ -13,36 +13,29 @@ class Terrain : public Actor {
 
     struct VoxelData {
         float amount = 0;
-        int verticiesStart = 0;
-        int verticiesEnd = 0;
+        int verticesStart = 0;
+        int verticesEnd = 0;
     };
 
     std::vector<VoxelData> terrainData;
+    std::vector<Vertex> vertices;
+    std::vector<uint16_t> indices;
 
+    Terrain() : Actor() {
+
+    }
 
     public:
-        unique_ptr<Mesh> dynamicModel;
+        int meshState = -1;
+        MeshBuffer meshBuffer[FRAMES_IN_FLIGHT];
+        bool meshOutOfDate;
+        Material material = Material::none;
         int size = 30;
         float noiseScale = 100;
         float surfaceLevel = 0.5;
         float cellSize = 0.5f;
 
     
-
-    Terrain() : Actor(nullptr,nullptr) {
-        
-        dynamicModel = std::make_unique<Mesh>();
-        dynamicModel->setDynamicDraw();
-        model = dynamicModel.get();
-
-        generateData();
-        generateMesh();
-    }
-
-    Terrain(vec3 position,quat rotation) : Terrain() {
-        this->position = position;
-        this->rotation = rotation;
-    }
 
     void generateData() {
         terrainData.resize(size*size*size);
@@ -61,20 +54,29 @@ class Terrain : public Actor {
                     float noise = simplex.fractal(5,x/noiseScale,y/noiseScale,z/noiseScale);
                     float distance = glm::length(vec3(x-radius,y-radius,z-radius));
                     float radiusInfluence = (radius-distance)/radius;
-                    terrainData[i].amount = noise;//(noise * (radiusInfluence+0.5f));
+                    terrainData[i].amount = noise * (radiusInfluence+0.5f);
                     i++;
                 }
             }
         }
     }
 
-    virtual void addRenderables(Camera& camera,float dt) {
-        float clock = (float)glfwGetTime();
-        if(material == nullptr) {
-            std::cout << "null material" << std::endl;
-            return;
+    virtual void addRenderables(Vulkan* vulkan,float dt) {
+        if(vertices.size() == 0 || indices.size() == 0) return;
+        if(meshState == -1) {
+            meshBuffer[0] = vulkan->createMeshBuffers(vertices,indices);
+            meshBuffer[1] = vulkan->createMeshBuffers(vertices,indices);
+            meshOutOfDate = false;
+            meshState = 0;
+        } else {
+            if(meshOutOfDate) {
+                meshState++;
+                if(meshState >= FRAMES_IN_FLIGHT) meshState = 0;
+                vulkan->updateMeshBuffer(meshBuffer[meshState],vertices,indices);
+                meshOutOfDate = false;
+            }
         }
-        model->render(position,camera,*material);
+        vulkan->addMesh(meshBuffer[meshState],material,glm::translate(glm::mat4(1.0f),position));
         //std::cout << "render time: " << (float)glfwGetTime() - clock << std::endl;
     }
 
@@ -97,11 +99,8 @@ class Terrain : public Actor {
 
     void generateMesh() {
         float clock = (float)glfwGetTime();
-        model->vertices.clear();
-        model->faces.clear();
-        model->normals.clear();
-        model->uvs.clear();
-        model->uvs.push_back(glm::vec2(0,0));
+        vertices.clear();
+        indices.clear();
 
         int i = 0;
         for (int z = 0; z < size; z++)
@@ -124,10 +123,7 @@ class Terrain : public Actor {
                 }
             }
         }
-
-
-        model->updateData();
-        model->bindData();
+        meshOutOfDate = true;
         std::cout << "generate time: " << (float)glfwGetTime() - clock << std::endl;
     }
 
@@ -142,10 +138,10 @@ class Terrain : public Actor {
         }
         const int* tris = TerrainHelper::triTable[config];
         int i = 0;
-        int startIndex = model->vertices.size();
-        Mesh::Face face;
+        int startIndex = vertices.size();
         int cellIndex = getPointIndex(cellPos.x,cellPos.y,cellPos.z);
-        terrainData[cellIndex].verticiesStart = startIndex;
+        terrainData[cellIndex].verticesStart = startIndex;
+        int face[3];
         while(i < 100) //break out if theres a problem lol
         {
             int edge = tris[i];
@@ -154,25 +150,24 @@ class Terrain : public Actor {
             vec3 bPos = getEdgePos(edge,1)+cellPos;
             float a = getPoint((int)aPos.x,(int)aPos.y,(int)aPos.z);
             float b = getPoint((int)bPos.x,(int)bPos.y,(int)bPos.z);
-           
+            
+            
+            
             float t = (surfaceLevel - a)/(b-a);
             t = std::min(std::max(t,0.0f),1.0f);
-            model->vertices.push_back((getEdgePos(edge,t) + cellPos)*cellSize);
+            vertices.push_back(Vertex((getEdgePos(edge,t) + cellPos)*cellSize));
             int vertIndex = i % 3;
-            face.vertexIndices[vertIndex] =  i + startIndex;
-            face.normalIndicies[vertIndex] = 0;
-            face.uvIndicies[vertIndex] = 0;
+            face[vertIndex] = vertices.size()-1;
+            indices.push_back(vertices.size()-1);
             if(vertIndex == 2) {
-                vec3 normal = MathHelper::normalFromPlanePoints(model->vertices[face.vertexIndices[0]],model->vertices[face.vertexIndices[1]],model->vertices[face.vertexIndices[2]]);
-                model->normals.push_back(normal);
-                face.normalIndicies[0] = model->normals.size() - 1;
-                face.normalIndicies[1] = model->normals.size() - 1;
-                face.normalIndicies[2] = model->normals.size() - 1;
-                model->faces.push_back(face);
+                vec3 normal = MathHelper::normalFromPlanePoints(vertices[face[0]].pos,vertices[face[1]].pos,vertices[face[2]].pos);
+                vertices[face[0]].normal = normal;
+                vertices[face[1]].normal = normal;
+                vertices[face[2]].normal = normal;
             }
             i++;
         }
-        terrainData[cellIndex].verticiesEnd = model->vertices.size();
+        terrainData[cellIndex].verticesEnd = vertices.size();
         
         
     }
@@ -219,15 +214,14 @@ class Terrain : public Actor {
     }
 
     virtual std::optional<RaycastHit> raycast(Ray ray, float dist) {
-        int i = 0;
-        float clock = (float)glfwGetTime();
+
         std::optional<RaycastHit> result = std::nullopt;
         Ray localRay = Ray(inverseTransformPoint(ray.origin),inverseTransformDirection(ray.direction));
-        for (auto& face : model->faces)
+        for(size_t i = 0;i+2 < indices.size();i += 3)
         {
-            vec3 a = model->vertices[face.vertexIndices[0]];
-            vec3 b = model->vertices[face.vertexIndices[1]];
-            vec3 c = model->vertices[face.vertexIndices[2]];
+            vec3 a = vertices[indices[i]].pos;
+            vec3 b = vertices[indices[i+1]].pos;
+            vec3 c = vertices[indices[i+2]].pos;
 
             auto hitopt = Physics::intersectRayTriangle(a,b,c,localRay);
             if(hitopt) {
@@ -240,7 +234,6 @@ class Terrain : public Actor {
                     dist = hit.distance; //distance stays the same when transformed
                 }
             }
-            i++;
                 
         }
         //std::cout << "raycast time: " << (float)glfwGetTime() - clock << std::endl;
@@ -258,11 +251,11 @@ class Terrain : public Actor {
                 for (int x = std::max(0,(int)floor(posCellSpace.x-radiusCellSpace)); x <= std::min(size-1,(int)ceil(posCellSpace.x+radiusCellSpace)); x++)
                 {
                     auto voxel = terrainData[getPointIndex(x,y,z)];
-                    for (int i = voxel.verticiesStart;i < voxel.verticiesEnd;i += 3)
+                    for (int i = voxel.verticesStart;i < voxel.verticesEnd;i += 3)
                     {
-                        vec3 a = model->vertices[i];
-                        vec3 b = model->vertices[i+1];
-                        vec3 c = model->vertices[i+2];
+                        vec3 a = vertices[i].pos;
+                        vec3 b = vertices[i+1].pos;
+                        vec3 c = vertices[i+2].pos;
 
                         auto contact_opt = Physics::intersectSphereTri(localActorPosition,radius,a,b,c);
                         if(contact_opt) {
@@ -309,6 +302,14 @@ class Terrain : public Actor {
             }
         }
         std::cout << "terraform time: " << (float)glfwGetTime() - clock << std::endl;
+    }
+
+    static std::unique_ptr<Terrain> makeInstance(Material material,vec3 position = vec3(0)) {
+        auto ptr = new Terrain();
+        ptr->material = material;
+        ptr->generateData();
+        ptr->generateMesh();
+        return std::unique_ptr<Terrain>(ptr);
     }
 
 

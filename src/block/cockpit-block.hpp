@@ -8,7 +8,7 @@
 class CockpitBlock : public Block {
     public:
 
-        CockpitBlock(Mesh* model,Material material) : Block(model,material) {
+        CockpitBlock(Mesh<Vertex>* model,Material material) : Block(model,material) {
 
         }
 

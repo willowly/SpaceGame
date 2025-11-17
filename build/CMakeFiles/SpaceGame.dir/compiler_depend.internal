@@ -3597,6 +3597,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/stdbool.h
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/stddef.h
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/stdint.h
+ /Users/willow/Documents/GitHub/SpaceGame/include/SimplexNoise.h
  /Users/willow/Documents/GitHub/SpaceGame/include/glm/common.hpp
  /Users/willow/Documents/GitHub/SpaceGame/include/glm/detail/qualifier.hpp
  /Users/willow/Documents/GitHub/SpaceGame/include/glm/detail/setup.hpp
@@ -3890,8 +3891,10 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o
  /Users/willow/Documents/GitHub/SpaceGame/include/stb_image.h
  /Users/willow/Documents/GitHub/SpaceGame/include/volk.h
  /Users/willow/Documents/GitHub/SpaceGame/src/actor/actor.hpp
+ /Users/willow/Documents/GitHub/SpaceGame/src/actor/actors-all.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/actor/character.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/actor/construction.hpp
+ /Users/willow/Documents/GitHub/SpaceGame/src/actor/terrain.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/api/api-actor.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/api/api-all.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/api/api-character.hpp
@@ -3917,13 +3920,15 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o
  /Users/willow/Documents/GitHub/SpaceGame/src/engine/world.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/graphics/camera.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/graphics/color.hpp
- /Users/willow/Documents/GitHub/SpaceGame/src/graphics/model.hpp
+ /Users/willow/Documents/GitHub/SpaceGame/src/graphics/mesh-data.hpp
+ /Users/willow/Documents/GitHub/SpaceGame/src/graphics/mesh.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/graphics/vulkan.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/helper/clock.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/helper/file-helper.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/helper/math-helper.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/helper/random-helper.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/helper/string-helper.hpp
+ /Users/willow/Documents/GitHub/SpaceGame/src/helper/terrain-helper.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/item/pickaxe-tool.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/item/place-block-tool.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/item/tool-user.hpp

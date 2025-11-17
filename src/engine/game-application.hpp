@@ -7,13 +7,13 @@
 #include <set>
 #include "helper/file-helper.hpp"
 #include "graphics/vulkan.hpp"
-#include "graphics/model.hpp"
+#include "graphics/mesh.hpp"
 #include "engine/input.hpp"
 #include "helper/string-helper.hpp"
 #include "helper/random-helper.hpp"
 #include "graphics/camera.hpp"
 #include "world.hpp"
-#include "actor/character.hpp"
+#include "actor/actors-all.hpp"
 #include "engine/registry.hpp"
 #include "engine/loader.hpp"
 #include "sol/sol.hpp"
@@ -83,6 +83,9 @@ class GameApplication {
         std::vector<float> frameTimes;
 
         Character* player;
+
+
+        Material terrainMaterial = Material::none;
 
 
         PlaceBlockTool placeTin;
@@ -210,6 +213,9 @@ class GameApplication {
 
             //world.spawn(Construction::makeInstance(tin,vec3(0)));
 
+            VkPipeline terrainPipeline = vulkan->createManagedPipeline<Vertex>(Loader::vertCodePath("terrain"),Loader::fragCodePath("terrain"));
+            terrainMaterial = vulkan->createMaterial(terrainPipeline,LitMaterialData(registry.getTexture("terrain")));
+
             playerPrototype->toolbar[0] = &placeTin;
             playerPrototype->toolbar[1] = &placeCockpit;
             playerPrototype->toolbar[2] = &placeThruster;
@@ -225,12 +231,15 @@ class GameApplication {
 
             player = world.spawn(Character::makeInstance(playerPrototype.get(),vec3(0.0,0.0,0.0)));
 
-            uiPipeline = vulkan->createManagedPipeline<Vertex>("shaders/compiled/ui_vert.spv","shaders/compiled/ui_frag.spv");
+            world.spawn(Terrain::makeInstance(terrainMaterial,vec3(0,0,20)));
 
+            uiPipeline = vulkan->createManagedPipeline<Vertex>("shaders/compiled/ui_vert.spv","shaders/compiled/ui_frag.spv");
             uiMaterial = vulkan->createMaterial(uiPipeline,LitMaterialData());
 
             glfwPollEvents();
             input.clearInputBuffers(); // reset mouse position;
+
+            Debug::loadRenderResources(*vulkan);
             
             
 
@@ -255,31 +264,30 @@ class GameApplication {
             //camera.rotate(vec3(mouseDelta.y * dt,mouseDelta.x * dt,0));
             camera.rotate(vec3(0,dt*-10,0));
 
-            frameTimes.push_back(dt);
-
-            if(frameTimes.size() >= 10) {
-                float average = 0;
-                for (size_t i = 0; i < frameTimes.size(); i++)
-                {
-                    average += frameTimes[i];
-                }
-
-                average /= frameTimes.size();
-                std::cout << "fps: " << (1/average) << std::endl;
-                
-                frameTimes.clear();
-            }
-
             player->setCamera(camera);
             player->processInput(input);
+
+            world.raycast(player->getLookRay(),10);
             
             world.frame(vulkan,dt);
 
             vulkan->addMesh(uiBuffer,uiMaterial,glm::mat4(1.0f));
+
+
+            auto hitOpt = world.raycast(player->getLookRay(),10);
+            if(hitOpt) {
+                auto hit = hitOpt.value();
+                
+                Debug::drawRay(hit.hit.point,hit.hit.normal,Color::green);
+            }
+
+            Debug::addRenderables(*vulkan);
             
             // do all the end of frame code in vulkan
             vulkan->render(camera);
             vulkan->clearObjects();
+
+            Debug::clearDebugShapes();
 
             //std::cout << (int)(renderClock.reset() * 1000) << "ms" << std::endl;
 

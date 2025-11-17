@@ -50,6 +50,7 @@ class Vulkan;
 struct Buffer {
 
     friend class Vulkan;
+        int allocationIndex = -1;
         VkBuffer buffer;
         VkDeviceMemory memory;
 };
@@ -73,12 +74,12 @@ struct LitMaterialData {
         
     }
 
-    LitMaterialData(TextureID texture,vec3 color = vec3(1)) : texture(texture), color(color) {
+    LitMaterialData(TextureID texture,vec4 color = vec4(1)) : texture(texture), color(color) {
 
     }
         
     TextureID texture;
-    vec3 color = vec3(1);
+    vec4 color = vec4(1);
 
     
 };
@@ -104,6 +105,7 @@ struct MeshBuffer : Buffer {
     }
 
     MeshBuffer(const Buffer& o) {
+        allocationIndex = o.allocationIndex;
         buffer = o.buffer;
         memory = o.memory;
     }
@@ -117,6 +119,11 @@ struct MeshPushConstant {
     MeshPushConstant(glm::mat4 matrix) : matrix(matrix) {
 
     }
+};
+
+struct PipelineOptions {
+    VkPolygonMode polygonMode = VK_POLYGON_MODE_FILL;
+    VkPrimitiveTopology topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 };
 
 class Vulkan {
@@ -454,10 +461,22 @@ class Vulkan {
         }
 
         template<typename Vertex>
-        VkPipeline createManagedPipeline(string vertCodePath,string fragCodePath) {
+        void updateMeshBuffer(MeshBuffer& meshBuffer,std::vector<Vertex>& vertices,std::vector<uint16_t>& indices) {
 
+            destroyBuffer(meshBuffer);
+            meshBuffer = createMeshBuffers(vertices,indices);
+
+        }
+
+        template<typename Vertex>
+        VkPipeline createManagedPipeline(string vertCodePath,string fragCodePath,PipelineOptions pipelineOptions = PipelineOptions()) {
             auto vertShaderCode = FileHelper::readBinary(vertCodePath);
             auto fragShaderCode = FileHelper::readBinary(fragCodePath);
+            return createManagedPipelineFromMemory<Vertex>(vertShaderCode,fragShaderCode,pipelineOptions);
+        }
+
+        template<typename Vertex>
+        VkPipeline createManagedPipelineFromMemory(std::vector<char> vertShaderCode,std::vector<char> fragShaderCode,PipelineOptions pipelineOptions = PipelineOptions()) {
 
             VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
             VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
@@ -510,7 +529,7 @@ class Vulkan {
 
             VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
             inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-            inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+            inputAssembly.topology = pipelineOptions.topology;
             inputAssembly.primitiveRestartEnable = VK_FALSE;
 
             VkViewport viewport{};
@@ -536,7 +555,7 @@ class Vulkan {
             VkPipelineRasterizationStateCreateInfo rasterizer{};
             rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
             rasterizer.depthClampEnable = VK_FALSE;
-            rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
+            rasterizer.polygonMode = pipelineOptions.polygonMode;
             rasterizer.lineWidth = 1.0f;
             rasterizer.cullMode = VK_CULL_MODE_NONE;
             rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
@@ -635,7 +654,7 @@ class Vulkan {
             MeshBuffer& meshBuffer;
             glm::mat4 matrix;
             VkPipeline pipeline;
-            MaterialHandle materialData; // eventually will be material id
+            MaterialHandle materialData;
 
             RenderObject(MeshBuffer& meshBuffer,glm::mat4 matrix,VkPipeline pipeline,MaterialHandle materialData) : meshBuffer(meshBuffer), matrix(matrix), pipeline(pipeline), materialData(materialData) {
 
@@ -1100,19 +1119,20 @@ class Vulkan {
                 queueCreateInfos.push_back(queueCreateInfo);
             }
             
-            VkPhysicalDeviceScalarBlockLayoutFeaturesEXT deviceScaleBlockLayoutFeatures{};
-            deviceScaleBlockLayoutFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SCALAR_BLOCK_LAYOUT_FEATURES_EXT;
-            deviceScaleBlockLayoutFeatures.scalarBlockLayout = true;
 
             VkPhysicalDeviceFeatures2 deviceFeatures2{};
             deviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
             deviceFeatures2.features.samplerAnisotropy = VK_TRUE;
-            deviceFeatures2.pNext = &deviceScaleBlockLayoutFeatures;
+            deviceFeatures2.features.fillModeNonSolid = VK_TRUE;
+            //deviceFeatures2.pNext = &deviceScaleBlockLayoutFeatures;
+
 
             VkPhysicalDeviceVulkan12Features deviceFeatures{};
             deviceFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
 
             deviceFeatures.pNext = &deviceFeatures2;
+
+            deviceFeatures.scalarBlockLayout = VK_TRUE;
 
             deviceFeatures.descriptorIndexing = VK_TRUE;
             deviceFeatures.runtimeDescriptorArray = VK_TRUE;
@@ -1343,6 +1363,9 @@ class Vulkan {
         }
 
         void destroyBuffer(Buffer buffer) {
+            if(buffer.allocationIndex != -1) {
+                allocatedBuffers[buffer.allocationIndex] = std::nullopt;
+            }
             vkDestroyBuffer(device,buffer.buffer,nullptr);
             vkFreeMemory(device,buffer.memory,nullptr);
         }
@@ -1406,6 +1429,7 @@ class Vulkan {
             if(memoryAllocateFlags != 0) {
                 VkMemoryAllocateFlagsInfoKHR flagsInfo{VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO_KHR};
                 flagsInfo.flags = VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT_KHR;
+                flagsInfo.pNext = VK_NULL_HANDLE;
                 allocInfo.pNext = &flagsInfo;
             }
             allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
@@ -1422,6 +1446,7 @@ class Vulkan {
 
         Buffer createManagedBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,VkMemoryAllocateFlags memoryAllocateFlags = 0) {
             Buffer buffer = createBuffer(size,usage,properties,memoryAllocateFlags);
+            buffer.allocationIndex = totalAllocatedBuffersCount;
             totalAllocatedBuffersCount++;
             allocatedBuffers.push_back(std::optional(buffer));
             return buffer;

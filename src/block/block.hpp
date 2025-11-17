@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include <graphics/model.hpp>
+#include <graphics/mesh.hpp>
 
 
 
@@ -14,12 +14,12 @@ class Character;
 class Block {
 
     public:
-        Mesh* model;
+        Mesh<Vertex>* model;
         Material material;
         bool canRide;
 
         
-        Block(Mesh* model,Material material) : model(model), material(material) {
+        Block(Mesh<Vertex>* model,Material material) : model(model), material(material) {
             
         }
         Block() : Block(nullptr,Material::none) {}

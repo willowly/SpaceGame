@@ -1221,7 +1221,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__charconv/from_chars_result.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__charconv/to_chars.h \
   /Users/willow/Documents/GitHub/SpaceGame/src/graphics/camera.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/graphics/model.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/graphics/mesh.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/type_ptr.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../gtc/quaternion.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../gtc/vec1.hpp \
@@ -1248,6 +1248,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/../mat4x3.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/type_ptr.inl \
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/debug.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/graphics/mesh-data.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/graphics/color.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/hash.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/../vec2.hpp \
@@ -1276,6 +1277,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/closest_point.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/closest_point.inl \
   /Users/willow/Documents/GitHub/SpaceGame/src/physics/structs.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/actor/actors-all.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/character.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/construction.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/physics/resolution.hpp \
@@ -1284,6 +1286,9 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/tool-user.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/pickaxe-tool.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/tool.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/actor/terrain.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/helper/terrain-helper.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/include/SimplexNoise.h \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/place-block-tool.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/registry.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/loader.hpp \

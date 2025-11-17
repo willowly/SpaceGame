@@ -48,12 +48,12 @@ namespace API {
                 
                 case ObjLoadType::ARRAY:
                     getTexture(table,2,&materialData.texture,registry,true);
-                    getColorAsVec3(table,3,&materialData.color,false);
+                    getColorAsVec4(table,3,&materialData.color,false);
                     registry.addMaterial(name,vulkan->createMaterial(pipeline,materialData));
                     break;
                 case ObjLoadType::TABLE:
                     getTexture(table,"texture",&materialData.texture,registry,true);
-                    getColorAsVec3(table,"color",&materialData.color,false);
+                    getColorAsVec4(table,"color",&materialData.color,false);
                     registry.addMaterial(name,vulkan->createMaterial(pipeline,materialData));
                     break;
                 case ObjLoadType::INVALID:

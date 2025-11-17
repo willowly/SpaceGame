@@ -146,7 +146,7 @@ CMakeFiles/SpaceGame.dir/all: CMakeFiles/SpaceGame_Shaders.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/SpaceGame.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles 18
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles 22
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/SpaceGame.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles 0
 .PHONY : CMakeFiles/SpaceGame.dir/rule
@@ -193,12 +193,12 @@ CMakeFiles/SHADERS.dir/clean:
 CMakeFiles/SpaceGame_Shaders.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame_Shaders.dir/build.make CMakeFiles/SpaceGame_Shaders.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame_Shaders.dir/build.make CMakeFiles/SpaceGame_Shaders.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=15,16,17,18 "Built target SpaceGame_Shaders"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=15,16,17,18,19,20,21,22 "Built target SpaceGame_Shaders"
 .PHONY : CMakeFiles/SpaceGame_Shaders.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/SpaceGame_Shaders.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles 4
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles 8
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/SpaceGame_Shaders.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles 0
 .PHONY : CMakeFiles/SpaceGame_Shaders.dir/rule

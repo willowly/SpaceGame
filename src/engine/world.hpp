@@ -53,6 +53,7 @@ class World {
         bool iteratingActors = false; //so we dont resize the actor vector when iterating over it
 
         World() {
+
         }
 
         template<typename T>

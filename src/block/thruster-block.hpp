@@ -8,7 +8,7 @@ class ThrusterBlock : public Block {
     public:
 
     
-        ThrusterBlock(Mesh* model,Material material,float force) : Block(model,material), force(force) {
+        ThrusterBlock(Mesh<Vertex>* model,Material material,float force) : Block(model,material), force(force) {
             
         }
         ThrusterBlock() : ThrusterBlock(nullptr,Material::none,0) {}

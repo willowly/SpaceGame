@@ -27,9 +27,9 @@ materials.tin_block = {
 }
 -- materials.cobalt_block = {"lit","cobalt_block"}
 materials.cockpit = {"lit","cockpit"}
-materials.thruster = {"lit","solid",color(0.1,0.1,0.2)}
+materials.thruster = {"lit","solid",color(0.15,0.15,0.2)}
 
--- materials.terrain = {"lit","solid",color(0.2,0.2,0.8)}
+materials.terrain = {"lit","solid",color(0.2,0.2,0.8)}
 
 -- print("Loading Actors")
 

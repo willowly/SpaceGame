@@ -2,7 +2,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
-#include "graphics/model.hpp"
+#include "graphics/mesh.hpp"
 #include "physics/intersections.hpp"
 #include "graphics/vulkan.hpp"
 
@@ -18,7 +18,7 @@ class Actor {
     public:
         vec3 position = vec3(0);
         quat rotation = vec3(0);
-        Mesh* model = nullptr;
+        Mesh<Vertex>* model = nullptr;
         Material material = Material::none;
         float modelScale = 1;
 

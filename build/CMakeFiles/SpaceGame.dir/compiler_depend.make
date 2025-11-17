@@ -3588,6 +3588,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/stdbool.h \
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/stddef.h \
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/stdint.h \
+  /Users/willow/Documents/GitHub/SpaceGame/include/SimplexNoise.h \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/common.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/detail/qualifier.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/glm/detail/setup.hpp \
@@ -3881,8 +3882,10 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
   /Users/willow/Documents/GitHub/SpaceGame/include/stb_image.h \
   /Users/willow/Documents/GitHub/SpaceGame/include/volk.h \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/actor.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/actor/actors-all.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/character.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/construction.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/actor/terrain.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-actor.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-all.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-character.hpp \
@@ -3908,13 +3911,15 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/world.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/graphics/camera.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/graphics/color.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/graphics/model.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/graphics/mesh-data.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/graphics/mesh.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/graphics/vulkan.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/clock.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/file-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/math-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/random-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/string-helper.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/helper/terrain-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/pickaxe-tool.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/place-block-tool.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/tool-user.hpp \
@@ -3969,13 +3974,13 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 
 /Users/willow/Documents/GitHub/SpaceGame/src/item/pickaxe-tool.hpp:
 
+/Users/willow/Documents/GitHub/SpaceGame/src/helper/terrain-helper.hpp:
+
 /Users/willow/Documents/GitHub/SpaceGame/src/helper/string-helper.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/src/helper/clock.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/src/graphics/vulkan.hpp:
-
-/Users/willow/Documents/GitHub/SpaceGame/src/graphics/model.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/src/graphics/color.hpp:
 
@@ -4034,8 +4039,6 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/dual_quaternion.inl:
 
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/norm.hpp:
-
-/Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/dual_quaternion.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/component_wise.hpp:
 
@@ -4261,6 +4264,10 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/detail/qualifier.hpp:
 
+/Users/willow/Documents/GitHub/SpaceGame/include/glm/gtx/dual_quaternion.hpp:
+
+/Users/willow/Documents/GitHub/SpaceGame/include/SimplexNoise.h:
+
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/xlocale/_wctype.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/xlocale/_time.h:
@@ -4392,6 +4399,8 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 /usr/local/include/vk_video/vulkan_video_codec_h264std_encode.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__type_traits/operation_traits.h:
+
+/Users/willow/Documents/GitHub/SpaceGame/src/graphics/mesh-data.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__iterator/sortable.h:
 
@@ -6789,6 +6798,8 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/Security.framework/Headers/SecStaticCode.h:
 
+/Users/willow/Documents/GitHub/SpaceGame/src/actor/terrain.hpp:
+
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/Security.framework/Headers/CMSEncoder.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__format/unicode.h:
@@ -7020,6 +7031,8 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/CoreServices.framework/Frameworks/OSServices.framework/Headers/WSMethodInvocation.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/CoreServices.framework/Frameworks/OSServices.framework/Headers/CSIdentityBase.h:
+
+/Users/willow/Documents/GitHub/SpaceGame/src/actor/actors-all.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/ApplicationServices.framework/Frameworks/PrintCore.framework/Headers/PMPrintingDialogExtensions.h:
 
@@ -7284,6 +7297,8 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/i386/_param.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Headers/IntlResources.h:
+
+/Users/willow/Documents/GitHub/SpaceGame/src/graphics/mesh.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/ApplicationServices.framework/Frameworks/HIServices.framework/Headers/AXValueConstants.h:
 

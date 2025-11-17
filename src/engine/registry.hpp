@@ -1,5 +1,5 @@
 #pragma once
-#include "graphics/model.hpp"
+#include "graphics/mesh.hpp"
 #include "graphics/vulkan.hpp"
 #include "actor/actor.hpp"
 #include "block/block.hpp"
@@ -14,7 +14,7 @@ using std::map,std::unique_ptr;
 
 class Registry {
 
-    map<string,Mesh> models;
+    map<string,Mesh<Vertex>> models;
     map<string,TextureID> textures;
     map<string,Material> materials;
     
@@ -50,7 +50,7 @@ class Registry {
             return tools.contains(name);
         }
 
-        Mesh* getModel(string name) {
+        Mesh<Vertex>* getModel(string name) {
             if(models.contains(name)) {
                 return &models.at(name);
             } else {
@@ -101,8 +101,8 @@ class Registry {
             return nullptr;
         }
 
-        Mesh* addModel(string name) {
-            models.emplace(name,Mesh());
+        Mesh<Vertex>* addModel(string name) {
+            models.emplace(name,Mesh<Vertex>());
             return &models.at(name);
         }
 

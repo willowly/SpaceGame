@@ -13,7 +13,7 @@ class Tool {
 
     public:
         TextureID icon;
-        Mesh* heldModel = nullptr;
+        Mesh<Vertex>* heldModel = nullptr;
         Material heldModelMaterial = Material::none;
         vec3 modelOffset = vec3(0.3,-0.3,-1);
         quat modelRotation = quat(vec3(0,glm::radians(45.0f),0));
@@ -27,13 +27,13 @@ class Tool {
         Tool() {
 
         }
-        Tool(Mesh* heldModel,Material heldModelMaterial,vec3 modelOffset,quat modelRotation,float modelScale,float lookLerp) : heldModel(heldModel), heldModelMaterial(heldModelMaterial), modelOffset(modelOffset),modelRotation(modelRotation),modelScale(modelScale),lookLerp(lookLerp) {
+        Tool(Mesh<Vertex>* heldModel,Material heldModelMaterial,vec3 modelOffset,quat modelRotation,float modelScale,float lookLerp) : heldModel(heldModel), heldModelMaterial(heldModelMaterial), modelOffset(modelOffset),modelRotation(modelRotation),modelScale(modelScale),lookLerp(lookLerp) {
 
         }
-        Tool(Mesh* heldModel,Material heldModelMaterial,vec3 modelOffset,quat modelRotation) : heldModel(heldModel), heldModelMaterial(heldModelMaterial), modelOffset(modelOffset), modelRotation(modelRotation) {
+        Tool(Mesh<Vertex>* heldModel,Material heldModelMaterial,vec3 modelOffset,quat modelRotation) : heldModel(heldModel), heldModelMaterial(heldModelMaterial), modelOffset(modelOffset), modelRotation(modelRotation) {
             
         }
-        Tool(Mesh* heldModel,Material heldModelMaterial) : heldModel(heldModel), heldModelMaterial(heldModelMaterial) {
+        Tool(Mesh<Vertex>* heldModel,Material heldModelMaterial) : heldModel(heldModel), heldModelMaterial(heldModelMaterial) {
             
         }
 
