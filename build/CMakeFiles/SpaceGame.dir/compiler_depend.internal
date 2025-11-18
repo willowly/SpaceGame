@@ -3929,6 +3929,8 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o
  /Users/willow/Documents/GitHub/SpaceGame/src/helper/random-helper.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/helper/string-helper.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/helper/terrain-helper.hpp
+ /Users/willow/Documents/GitHub/SpaceGame/src/interface/interface.hpp
+ /Users/willow/Documents/GitHub/SpaceGame/src/interface/toolbar-widget.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/item/pickaxe-tool.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/item/place-block-tool.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/item/tool-user.hpp

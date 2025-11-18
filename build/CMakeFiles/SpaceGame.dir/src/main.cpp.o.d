@@ -1313,7 +1313,9 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-registry-block.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/block/cockpit-block.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/block/thruster-block.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/interface/interface.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/clock.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/interface/toolbar-widget.hpp \
   /usr/local/include/shaderc/shaderc.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/stdbool.h \
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/stdbool.h \

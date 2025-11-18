@@ -17,7 +17,10 @@
 #include "engine/registry.hpp"
 #include "engine/loader.hpp"
 #include "sol/sol.hpp"
+#include "interface/interface.hpp"
 #include "helper/clock.hpp"
+
+#include "interface/toolbar-widget.hpp"
 
 #include "item/place-block-tool.hpp"
 
@@ -84,6 +87,10 @@ class GameApplication {
 
         Character* player;
 
+        Interface interface;
+
+        ToolbarWidget toolbarWidget;
+
 
         Material terrainMaterial = Material::none;
 
@@ -92,10 +99,6 @@ class GameApplication {
         PlaceBlockTool placeCockpit;
         PlaceBlockTool placeThruster;
         PickaxeTool pickaxe;
-
-        MeshBuffer uiBuffer;
-        VkPipeline uiPipeline;
-        Material uiMaterial = Material::none;
 
 
         
@@ -213,7 +216,7 @@ class GameApplication {
 
             //world.spawn(Construction::makeInstance(tin,vec3(0)));
 
-            VkPipeline terrainPipeline = vulkan->createManagedPipeline<Vertex>(Loader::vertCodePath("terrain"),Loader::fragCodePath("terrain"));
+            VkPipeline terrainPipeline = vulkan->createManagedPipeline<Vertex>(Vulkan::vertCodePath("terrain"),Vulkan::fragCodePath("terrain"));
             terrainMaterial = vulkan->createMaterial(terrainPipeline,LitMaterialData(registry.getTexture("rock")));
 
             playerPrototype->toolbar[0] = &placeTin;
@@ -221,25 +224,16 @@ class GameApplication {
             playerPrototype->toolbar[2] = &placeThruster;
             playerPrototype->toolbar[3] = &pickaxe;
 
-            std::vector<Vertex> verticies{
-                Vertex(vec3(0.0,0.0,0.0))
-            };
-            std::vector<uint16_t> indicies{
-                0,1,2,1,2,3
-            };
-            uiBuffer = vulkan->createMeshBuffers(verticies,indicies);
-
             player = world.spawn(Character::makeInstance(playerPrototype.get(),vec3(0.0,0.0,0.0)));
-
-            world.spawn(Terrain::makeInstance(terrainMaterial,vec3(0,0,20)));
-
-            uiPipeline = vulkan->createManagedPipeline<Vertex>("shaders/compiled/ui_vert.spv","shaders/compiled/ui_frag.spv");
-            uiMaterial = vulkan->createMaterial(uiPipeline,LitMaterialData());
 
             glfwPollEvents();
             input.clearInputBuffers(); // reset mouse position;
 
             Debug::loadRenderResources(*vulkan);
+            interface.loadRenderResources(*vulkan);
+
+            toolbarWidget.player = player;
+            toolbarWidget.solidTexture = registry.getTexture("solid");
             
             
 
@@ -271,17 +265,21 @@ class GameApplication {
             
             world.frame(vulkan,dt);
 
-            vulkan->addMesh(uiBuffer,uiMaterial,glm::mat4(1.0f));
+            // cursor
+            interface.drawRectCentered(*vulkan,vec2(0.0f),vec2(4,0.5),vec2(0.5,0.5),Color::white,0);
+            interface.drawRectCentered(*vulkan,vec2(0.0f),vec2(0.5,4),vec2(0.5,0.5),Color::white,0);
 
 
-            auto hitOpt = world.raycast(player->getLookRay(),10);
-            if(hitOpt) {
-                auto hit = hitOpt.value();
+            toolbarWidget.draw(interface,*vulkan);
+
+            // auto hitOpt = world.raycast(player->getLookRay(),10);
+            // if(hitOpt) {
+            //     auto hit = hitOpt.value();
                 
-                Debug::drawRay(hit.hit.point,hit.hit.normal,Color::green);
-            }
+            //     Debug::drawRay(hit.hit.point,hit.hit.normal,Color::green);
+            // }
 
-            Debug::addRenderables(*vulkan);
+            //Debug::addRenderables(*vulkan);
             
             // do all the end of frame code in vulkan
             vulkan->render(camera);

@@ -110,12 +110,4 @@ class Loader {
             lua.do_file("scripts/load.lua");
         }
 
-        static string vertCodePath(string name) {
-            return "shaders/compiled/" + name + "_vert.spv";
-        }
-
-        static string fragCodePath(string name) {
-            return "shaders/compiled/" + name + "_frag.spv";
-        }
-
 };

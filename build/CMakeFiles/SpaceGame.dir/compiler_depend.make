@@ -3920,6 +3920,8 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/random-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/string-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/terrain-helper.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/interface/interface.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/interface/toolbar-widget.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/pickaxe-tool.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/place-block-tool.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/tool-user.hpp \
@@ -3973,6 +3975,8 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 /Users/willow/Documents/GitHub/SpaceGame/src/item/place-block-tool.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/src/item/pickaxe-tool.hpp:
+
+/Users/willow/Documents/GitHub/SpaceGame/src/interface/interface.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/src/helper/terrain-helper.hpp:
 
@@ -7307,6 +7311,8 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/launch.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__type_traits/underlying_type.h:
+
+/Users/willow/Documents/GitHub/SpaceGame/src/interface/toolbar-widget.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/fstream:
 

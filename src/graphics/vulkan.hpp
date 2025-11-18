@@ -36,7 +36,7 @@
 #define FRAMES_IN_FLIGHT 2
 #define DESCRIPTOR_COUNT 128
 
-using std::string,glm::vec3,glm::mat4,glm::quat;
+using std::string,glm::vec3,glm::vec2,glm::ivec2,glm::mat4,glm::quat;
 
 struct SceneDataBufferObject {
     glm::mat4 view;
@@ -115,6 +115,7 @@ struct MeshPushConstant {
     glm::mat4 matrix = glm::mat4(1.0f);
     uint frameIndex;
     MaterialHandle materialData;
+    char extraData[48];
 
     MeshPushConstant(glm::mat4 matrix) : matrix(matrix) {
 
@@ -124,6 +125,9 @@ struct MeshPushConstant {
 struct PipelineOptions {
     VkPolygonMode polygonMode = VK_POLYGON_MODE_FILL;
     VkPrimitiveTopology topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    VkBool32 depthTestEnabled = VK_TRUE;
+    VkBlendOp blendOp = VK_BLEND_OP_ADD;
+    VkBool32 blend = VK_FALSE;
 };
 
 class Vulkan {
@@ -226,6 +230,20 @@ class Vulkan {
 
         }
 
+        template<typename T>
+        void addMeshWithData(MeshBuffer& mesh,Material material,T data, glm::mat4 matrix = glm::mat4(1.0f)) {
+
+            static_assert(sizeof(T) <= 48);
+            auto renderObject = RenderObject(mesh,matrix,material.pipeline,material.data);
+            std::memcpy(&renderObject.extraData,&data,sizeof(T));
+            renderObjects.push_back(renderObject);
+
+        }
+
+        vec2 getScreenSize() {
+            return screenSize;
+        }
+
         void render(const Camera& camera) {
 
            
@@ -316,6 +334,7 @@ class Vulkan {
                 MeshPushConstant pushConstant(renderObject.matrix);
                 pushConstant.frameIndex = frameIndex;
                 pushConstant.materialData = renderObject.materialData;
+                std::copy(std::begin(renderObject.extraData),std::end(renderObject.extraData),std::begin(pushConstant.extraData));
                 //std::cout << sizeof(MeshPushConstant) << std::endl;
                 vkCmdPushConstants(commandBuffer,pipelineLayout,VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,0,sizeof(MeshPushConstant),&pushConstant);
                 
@@ -497,7 +516,7 @@ class Vulkan {
 
             VkPipelineDepthStencilStateCreateInfo depthStencil{};
             depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-            depthStencil.depthTestEnable = VK_TRUE;
+            depthStencil.depthTestEnable = pipelineOptions.depthTestEnabled;
             depthStencil.depthWriteEnable = VK_TRUE;
             depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
             depthStencil.depthBoundsTestEnable = VK_FALSE;
@@ -560,9 +579,9 @@ class Vulkan {
             rasterizer.cullMode = VK_CULL_MODE_NONE;
             rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
             rasterizer.depthBiasEnable = VK_FALSE;
-            rasterizer.depthBiasConstantFactor = 0.0f; // Optional
-            rasterizer.depthBiasClamp = 0.0f; // Optional
-            rasterizer.depthBiasSlopeFactor = 0.0f; // Optional
+            rasterizer.depthBiasConstantFactor = 0.0f;  // Optional
+            rasterizer.depthBiasClamp = 0.0f;           // Optional
+            rasterizer.depthBiasSlopeFactor = 0.0f;     // Optional
 
             VkPipelineMultisampleStateCreateInfo multisampling{};
             multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
@@ -575,13 +594,13 @@ class Vulkan {
 
             VkPipelineColorBlendAttachmentState colorBlendAttachment{};
             colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-            colorBlendAttachment.blendEnable = VK_FALSE;
-            colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE; // Optional
-            colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO; // Optional
-            colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD; // Optional
+            colorBlendAttachment.blendEnable = pipelineOptions.blend;
+            colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA; // Optional
+            colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA; // Optional
+            colorBlendAttachment.colorBlendOp = pipelineOptions.blendOp; // Optional
             colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE; // Optional
             colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO; // Optional
-            colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD; // Optional
+            colorBlendAttachment.alphaBlendOp = pipelineOptions.blendOp; // Optional
 
             VkPipelineColorBlendStateCreateInfo colorBlending{};
             colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
@@ -634,6 +653,14 @@ class Vulkan {
             return pipeline;
         }
 
+        static string vertCodePath(string name) {
+            return "shaders/compiled/" + name + "_vert.spv";
+        }
+
+        static string fragCodePath(string name) {
+            return "shaders/compiled/" + name + "_frag.spv";
+        }
+
         
     private:
         struct QueueFamilies {
@@ -655,6 +682,7 @@ class Vulkan {
             glm::mat4 matrix;
             VkPipeline pipeline;
             MaterialHandle materialData;
+            char extraData[48];
 
             RenderObject(MeshBuffer& meshBuffer,glm::mat4 matrix,VkPipeline pipeline,MaterialHandle materialData) : meshBuffer(meshBuffer), matrix(matrix), pipeline(pipeline), materialData(materialData) {
 
@@ -671,7 +699,7 @@ class Vulkan {
             VK_KHR_MAINTENANCE_3_EXTENSION_NAME,
             VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
             VK_KHR_DEVICE_GROUP_EXTENSION_NAME,
-            VK_EXT_SCALAR_BLOCK_LAYOUT_EXTENSION_NAME
+            VK_EXT_SCALAR_BLOCK_LAYOUT_EXTENSION_NAME,
             
         };
 
@@ -724,6 +752,8 @@ class Vulkan {
 
         Image depthImage;
         VkImageView depthImageView;
+
+        vec2 screenSize;
 
         std::vector<std::optional<Buffer>> allocatedBuffers;
         int totalAllocatedBuffersCount = 0; //for the unique ids
@@ -1001,7 +1031,9 @@ class Vulkan {
 
             ubo.proj[1][1] *= -1; //flip the y because theres discrepancy
             
-            ubo.screen = glm::ortho(-100.0f*camera.aspect,100.0f*camera.aspect,100.0f,-100.0f);
+            ubo.screen = glm::ortho(0.0f,100.0f*camera.aspect,0.0f,100.0f);
+
+            screenSize = vec2(100.0f*camera.aspect,100.0f);
 
             memcpy(uniformBuffersMapped[currentFrame], &ubo, sizeof(ubo)); //uniform buffer is always mapped
         }
@@ -1120,11 +1152,14 @@ class Vulkan {
             }
             
 
+            VkPhysicalDeviceBlendOperationAdvancedFeaturesEXT blendOperationFeatures{};
+            blendOperationFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BLEND_OPERATION_ADVANCED_FEATURES_EXT;
+
             VkPhysicalDeviceFeatures2 deviceFeatures2{};
             deviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
             deviceFeatures2.features.samplerAnisotropy = VK_TRUE;
             deviceFeatures2.features.fillModeNonSolid = VK_TRUE;
-            //deviceFeatures2.pNext = &deviceScaleBlockLayoutFeatures;
+            deviceFeatures2.pNext = &blendOperationFeatures;
 
 
             VkPhysicalDeviceVulkan12Features deviceFeatures{};

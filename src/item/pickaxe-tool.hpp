@@ -33,9 +33,11 @@ class PickaxeTool : public Tool {
         float mineRadius = 0.75;
         float mineAmount = 0.5;
 
+        float reach = 3;
+
         void pickaxe(World* world,Ray ray) {
             
-            auto worldHitOpt = world->raycast(ray,10);
+            auto worldHitOpt = world->raycast(ray,reach);
             if(worldHitOpt) {
                 auto worldHit = worldHitOpt.value();
                 Construction* construction = dynamic_cast<Construction*>(worldHit.actor);
