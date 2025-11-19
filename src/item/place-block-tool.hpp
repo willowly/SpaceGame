@@ -45,7 +45,7 @@ class PlaceBlockTool: public Tool {
             placeAnimationTimer = placeAnimationTime;
         }
 
-        virtual std::pair<quat,vec3> animate(float dt) {
+        virtual std::pair<quat,vec3> animate(Character& user,float dt) {
 
             if(placeAnimationTimer > 0) {
                 placeAnimationTimer -= dt;
@@ -56,10 +56,10 @@ class PlaceBlockTool: public Tool {
         }
 
 
-        virtual void step(World* world,ToolUser* user,float dt) {
+        virtual void step(World* world,Character& user,float dt) {
             if(clickInput) {
                 clickInput = false;
-                place(world,user->getLookRay());
+                place(world,user.getLookRay());
             }
         }
 

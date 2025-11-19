@@ -3914,6 +3914,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
   /Users/willow/Documents/GitHub/SpaceGame/src/graphics/mesh-data.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/graphics/mesh.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/graphics/vulkan.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/helper/anim.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/clock.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/file-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/math-helper.hpp \
@@ -3921,10 +3922,13 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/string-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/terrain-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/interface/interface.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/interface/inventory-widget.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/interface/toolbar-widget.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/item/item.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/item/items-all.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/pickaxe-tool.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/place-block-tool.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/item/tool-user.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/item/resource-item.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/tool.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/physics/intersections.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/physics/resolution.hpp \
@@ -3970,11 +3974,17 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 
 /Users/willow/Documents/GitHub/SpaceGame/src/item/tool.hpp:
 
-/Users/willow/Documents/GitHub/SpaceGame/src/item/tool-user.hpp:
+/Users/willow/Documents/GitHub/SpaceGame/src/item/resource-item.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/src/item/place-block-tool.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/src/item/pickaxe-tool.hpp:
+
+/Users/willow/Documents/GitHub/SpaceGame/src/item/items-all.hpp:
+
+/Users/willow/Documents/GitHub/SpaceGame/src/item/item.hpp:
+
+/Users/willow/Documents/GitHub/SpaceGame/src/interface/inventory-widget.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/src/interface/interface.hpp:
 
@@ -3983,6 +3993,8 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 /Users/willow/Documents/GitHub/SpaceGame/src/helper/string-helper.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/src/helper/clock.hpp:
+
+/Users/willow/Documents/GitHub/SpaceGame/src/helper/anim.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/src/graphics/vulkan.hpp:
 

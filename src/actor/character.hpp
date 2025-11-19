@@ -12,15 +12,13 @@
 #include "engine/input.hpp"
 #include "engine/world.hpp"
 #include "construction.hpp"
-#include "item/tool-user.hpp"
 
-#include <item/pickaxe-tool.hpp>
-#include <item/place-block-tool.hpp>
+#include <item/item.hpp>
 
 #include <GLFW/glfw3.h>
 
 
-class Character : public Actor, public ToolUser {
+class Character : public Actor {
 
 
     public: 
@@ -33,8 +31,8 @@ class Character : public Actor, public ToolUser {
         float moveSpeed = 5.0f;
         float lookPitch = 0;
         float lookSensitivity = 5;
-        float height = 0.0f;
-        float radius = 0.5;
+        float height = 0.4f;
+        float radius = 1;
         float acceleration = 10;
         float jumpForce = 10;
         bool clickInput = false;
@@ -46,10 +44,28 @@ class Character : public Actor, public ToolUser {
 
         vec3 velocity;
 
-        Tool* currentTool = nullptr;
+        Item* currentTool = nullptr;
         int selectedTool;
 
-        Tool* toolbar[9] = {};
+        Item* toolbar[9] = {};
+
+        struct ItemStack {
+            Item& item;
+            int amount;
+        };
+
+        std::vector<ItemStack> inventory;
+
+        struct HeldItemData {
+            float actionTimer;
+            float animationTimer;
+            int action;
+            void setAction(int newAction) {
+                action = newAction;
+                actionTimer = 0;
+                animationTimer = 0;
+            }
+        } heldItemData;
 
         Construction* ridingConstruction = nullptr;
         ivec3 ridingConstructionPoint;
@@ -61,7 +77,8 @@ class Character : public Actor, public ToolUser {
 
         void addRenderables(Vulkan* vulkan,float dt) {
             if(currentTool != nullptr && ridingConstruction == nullptr) {
-                currentTool->addRenderables(vulkan,this,dt);
+                heldItemData.animationTimer += dt;
+                currentTool->addRenderables(vulkan,*this,dt);
             }
             if(thirdPerson) {
                 Actor::addRenderables(vulkan,dt);
@@ -79,7 +96,8 @@ class Character : public Actor, public ToolUser {
             }
 
             if(currentTool != nullptr) {
-                currentTool->step(world,this,dt);
+                currentTool->step(world,*this,dt);
+                heldItemData.actionTimer += dt;
             }
 
             // if(ridingConstruction != nullptr) {
@@ -140,6 +158,35 @@ class Character : public Actor, public ToolUser {
                     }
                 }
             }
+        }
+
+        void giveItem(Item& item,int amount) {
+            auto stack = getInventoryItem(item);
+            if(stack != nullptr) {
+                stack->amount += amount;
+            } else {
+                inventory.push_back(ItemStack{item,amount});
+            }
+            
+
+            std::cout << "inventory: \n";
+            for (auto& stack : inventory)
+            {
+                std::cout << "- " << stack.item.name + " x" << stack.amount << "\n";
+            }
+            std::cout << std::endl;
+            
+        }
+
+        ItemStack* getInventoryItem(Item& item) {
+            for (auto& stack : inventory)
+            {
+                if(&stack.item == &item) {
+                    return &stack;
+                }
+            }
+            return nullptr;
+            
         }
 
         //could layer be abstracted to a controller
@@ -211,12 +258,13 @@ class Character : public Actor, public ToolUser {
 
         void setCurrentTool(int index) {
             if(currentTool != nullptr) {
-                currentTool->unequip(this);
+                currentTool->unequip(*this);
             }
             selectedTool = index;
             currentTool = toolbar[index];
             if(currentTool != nullptr) {
-                currentTool->equip(this);
+                currentTool->equip(*this);
+                heldItemData.setAction(0); // reset actions
             }
         }
 

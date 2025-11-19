@@ -17,6 +17,8 @@ class Registry {
     map<string,Mesh<Vertex>> models;
     map<string,TextureID> textures;
     map<string,Material> materials;
+
+    map<string,unique_ptr<Item>> item;
     
     map<string,unique_ptr<Actor>> actors;
     map<string,unique_ptr<Block>> blocks;

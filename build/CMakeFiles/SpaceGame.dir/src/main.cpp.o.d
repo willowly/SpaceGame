@@ -1283,14 +1283,12 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Users/willow/Documents/GitHub/SpaceGame/src/physics/resolution.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/block/block.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/block/block-state.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/item/tool-user.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/item/pickaxe-tool.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/item/tool.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/item/item.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/terrain.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/terrain-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/SimplexNoise.h \
-  /Users/willow/Documents/GitHub/SpaceGame/src/item/place-block-tool.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/registry.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/item/tool.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/loader.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-all.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/sol/sol.hpp \
@@ -1316,6 +1314,12 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Users/willow/Documents/GitHub/SpaceGame/src/interface/interface.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/clock.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/interface/toolbar-widget.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/interface/inventory-widget.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/item/items-all.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/item/place-block-tool.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/item/pickaxe-tool.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/helper/anim.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/item/resource-item.hpp \
   /usr/local/include/shaderc/shaderc.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/stdbool.h \
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/stdbool.h \

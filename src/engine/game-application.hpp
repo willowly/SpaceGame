@@ -20,9 +20,11 @@
 #include "interface/interface.hpp"
 #include "helper/clock.hpp"
 
-#include "interface/toolbar-widget.hpp"
 
-#include "item/place-block-tool.hpp"
+#include "interface/toolbar-widget.hpp"
+#include "interface/inventory-widget.hpp"
+
+#include "item/items-all.hpp"
 
 using std::string;
 
@@ -90,6 +92,7 @@ class GameApplication {
         Interface interface;
 
         ToolbarWidget toolbarWidget;
+        InventoryWidget inventoryWidget;
 
 
         Material terrainMaterial = Material::none;
@@ -99,6 +102,11 @@ class GameApplication {
         PlaceBlockTool placeCockpit;
         PlaceBlockTool placeThruster;
         PickaxeTool pickaxe;
+
+
+        ResourceItem stoneItem;
+        ResourceItem copperItem;
+        ResourceItem rubyItem;
 
 
         
@@ -218,6 +226,20 @@ class GameApplication {
 
             VkPipeline terrainPipeline = vulkan->createManagedPipeline<Vertex>(Vulkan::vertCodePath("terrain"),Vulkan::fragCodePath("terrain"));
             terrainMaterial = vulkan->createMaterial(terrainPipeline,LitMaterialData(registry.getTexture("rock")));
+            
+            Terrain* terrain = world.spawn(Terrain::makeInstance(terrainMaterial,vec3(0,0,10)));
+
+            stoneItem.icon = registry.getTexture("stone_item");
+            stoneItem.name = "Stone";
+            terrain->item1 = &stoneItem;
+
+            copperItem.icon = registry.getTexture("copper_item");
+            copperItem.name = "Copper";
+            terrain->item2 = &copperItem;
+
+            rubyItem.icon = registry.getTexture("ruby_item");
+            rubyItem.name = "Ruby";
+            terrain->item3 = &rubyItem;
 
             playerPrototype->toolbar[0] = &placeTin;
             playerPrototype->toolbar[1] = &placeCockpit;
@@ -234,6 +256,9 @@ class GameApplication {
 
             toolbarWidget.player = player;
             toolbarWidget.solidTexture = registry.getTexture("solid");
+
+            inventoryWidget.player = player;
+            inventoryWidget.solidTexture = registry.getTexture("solid");
             
             
 
@@ -271,6 +296,7 @@ class GameApplication {
 
 
             toolbarWidget.draw(interface,*vulkan);
+            inventoryWidget.draw(interface,*vulkan);
 
             // auto hitOpt = world.raycast(player->getLookRay(),10);
             // if(hitOpt) {

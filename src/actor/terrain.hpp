@@ -5,6 +5,7 @@
 #include "helper/terrain-helper.hpp"
 #include "engine/debug.hpp"
 #include "SimplexNoise.h"
+#include "item/item.hpp"
 
 using std::unique_ptr;
 
@@ -21,11 +22,17 @@ class Terrain : public Actor {
     std::vector<Vertex> vertices;
     std::vector<uint16_t> indices;
 
+    
+
     Terrain() : Actor() {
 
     }
 
     public:
+
+        Item* item1;
+        Item* item2;
+        Item* item3;
         int meshState = -1;
         MeshBuffer meshBuffer[FRAMES_IN_FLIGHT];
         bool meshOutOfDate;
@@ -35,7 +42,17 @@ class Terrain : public Actor {
         float surfaceLevel = 0.5;
         float cellSize = 0.5f;
 
-    
+    Item* getItem() {
+        int r = (int)(glfwGetTime()*100);
+        std::cout << "r:" << r << std::endl;
+        if(r % 5 == 0) {
+            return item2;
+        }
+        if(r % 8 == 0) {
+            return item3;
+        }
+        return item1;
+    }
 
     void generateData() {
         terrainData.resize(size*size*size);

@@ -18,9 +18,9 @@ class ToolbarWidget {
             {
                 interface.drawRect(vulkan,glm::vec2((i*10)-50,-11),glm::vec2(10,10),glm::vec2(0.5,1),vec2(0,0),player->selectedTool == i ? selected : unselected,solidTexture);
 
-                Tool* tool = player->toolbar[i];
+                Item* tool = player->toolbar[i];
                 if(tool != nullptr) {
-                    interface.drawRect(vulkan,glm::vec2((i*10)-50,-11),glm::vec2(10,10),glm::vec2(0.5,1),vec2(0,0),Color::white,tool->icon);
+                    interface.drawRect(vulkan,glm::vec2((i*10)-50,-11),glm::vec2(10,10),glm::vec2(0.5,1),vec2(0,0),Color::white,tool->getIcon());
                 }
             }
             

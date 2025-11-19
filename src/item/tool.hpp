@@ -1,15 +1,13 @@
 #pragma once
 
 #include <engine/world.hpp>
-//#include <actor/construction.hpp>
-#include "tool-user.hpp"
 #include "engine/input.hpp"
+#include "actor/character.hpp"
+#include "item.hpp"
 
 using glm::vec3,glm::quat,glm::mat4;
 
-class Character;
-
-class Tool {
+class Tool : public Item {
 
     public:
         TextureID icon;
@@ -40,12 +38,16 @@ class Tool {
         virtual ~Tool() {}
 
 
-        virtual void equip(ToolUser* user) {
-            lookOrientation = user->getEyeRotation();
+        virtual void equip(Character& user) {
+            lookOrientation = user.getEyeRotation();
         }
 
-        virtual void unequip(ToolUser* user) {
+        virtual void unequip(Character& user) {
+            
+        }
 
+        virtual TextureID getIcon() {
+            return icon;
         }
 
         virtual void processInput(Input& input) {
@@ -55,20 +57,20 @@ class Tool {
             clickHold = input.getMouseButton(GLFW_MOUSE_BUTTON_1);
         }
 
-        virtual void step(World* world,ToolUser* user,float dt) {
+        virtual void step(World* world,Character& user,float dt) {
 
         }
 
-        virtual std::pair<quat,vec3> animate(float dt) {
+        virtual std::pair<quat,vec3> animate(Character& user,float dt) {
             return std::pair<quat,vec3>(glm::identity<quat>(),vec3());
         }
 
-        virtual void addRenderables(Vulkan* vulkan,ToolUser* user,float dt) {
+        virtual void addRenderables(Vulkan* vulkan,Character& user,float dt) {
             if(heldModel != nullptr) {
-                lookOrientation = glm::slerp(lookOrientation,user->getEyeRotation(),lookLerp * dt);
-                auto animation = animate(dt);
+                lookOrientation = glm::slerp(lookOrientation,user.getEyeRotation(),lookLerp * dt);
+                auto animation = animate(user,dt);
                 auto matrix = glm::mat4(1.0f);
-                matrix = glm::translate(matrix,user->getEyePosition());
+                matrix = glm::translate(matrix,user.getEyePosition());
                 matrix = matrix * glm::toMat4(lookOrientation);
                 matrix = glm::translate(matrix,modelOffset + animation.second);
                 matrix = matrix * glm::toMat4(modelRotation * animation.first);
