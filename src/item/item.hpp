@@ -2,6 +2,7 @@
 #include <engine/world.hpp>
 #include "engine/input.hpp"
 #include "graphics/vulkan.hpp"
+#include "helper/sprite.hpp"
 
 using std::string;
 
@@ -23,7 +24,7 @@ class Item {
 
         virtual ~Item() {}
 
-        virtual TextureID getIcon() = 0;
+        virtual Sprite getIcon() = 0;
 
 
         virtual void equip(Character& user) {

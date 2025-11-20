@@ -1,14 +1,15 @@
 #pragma once
 #include "item.hpp"
 #include "graphics/vulkan.hpp"
+#include "helper/sprite.hpp"
 
 
 class ResourceItem : public Item {
 
     public:
-        TextureID icon;
+        Sprite icon;
 
-        virtual TextureID getIcon() {
+        virtual Sprite getIcon() {
             return icon;
         }
 

@@ -9,17 +9,60 @@
 
 using std::unique_ptr;
 
+struct TerrainVertex {
+    vec3 pos;
+    vec3 normal;
+    int textureID;
+    float oreBlend;
+    TerrainVertex(vec3 pos,float oreBlend,int textureID) : pos(pos),textureID(textureID),oreBlend(oreBlend)  {}
+
+    static VkVertexInputBindingDescription getBindingDescription() {
+        VkVertexInputBindingDescription bindingDescription{};
+        bindingDescription.binding = 0;
+        bindingDescription.stride = sizeof(TerrainVertex);
+        bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+        return bindingDescription;
+    }
+
+    static std::array<VkVertexInputAttributeDescription, 4> getAttributeDescriptions() {
+        std::array<VkVertexInputAttributeDescription, 4> attributeDescriptions{};
+        attributeDescriptions[0].binding = 0;
+        attributeDescriptions[0].location = 0;
+        attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
+        attributeDescriptions[0].offset = offsetof(TerrainVertex, pos);
+
+        attributeDescriptions[1].binding = 0;
+        attributeDescriptions[1].location = 1;
+        attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+        attributeDescriptions[1].offset = offsetof(TerrainVertex, normal);
+
+        attributeDescriptions[2].binding = 0;
+        attributeDescriptions[2].location = 2;
+        attributeDescriptions[2].format = VK_FORMAT_R32_SINT;
+        attributeDescriptions[2].offset = offsetof(TerrainVertex, textureID);
+
+        attributeDescriptions[3].binding = 0;
+        attributeDescriptions[3].location = 3;
+        attributeDescriptions[3].format = VK_FORMAT_R32_SFLOAT;
+        attributeDescriptions[3].offset = offsetof(TerrainVertex, oreBlend);
+
+        return attributeDescriptions;
+    }
+};
+
 class Terrain : public Actor {
 
 
     struct VoxelData {
         float amount = 0;
+        float ore = 0;
         int verticesStart = 0;
         int verticesEnd = 0;
     };
 
     std::vector<VoxelData> terrainData;
-    std::vector<Vertex> vertices;
+    std::vector<TerrainVertex> vertices;
     std::vector<uint16_t> indices;
 
     
@@ -33,18 +76,20 @@ class Terrain : public Actor {
         Item* item1;
         Item* item2;
         Item* item3;
+        TextureID rockTexture;
+        TextureID oreTexture;
         int meshState = -1;
         MeshBuffer meshBuffer[FRAMES_IN_FLIGHT];
         bool meshOutOfDate;
         Material material = Material::none;
         int size = 30;
         float noiseScale = 100;
+        float oreNoiseScale = 30;
         float surfaceLevel = 0.5;
         float cellSize = 0.5f;
 
     Item* getItem() {
         int r = (int)(glfwGetTime()*100);
-        std::cout << "r:" << r << std::endl;
         if(r % 5 == 0) {
             return item2;
         }
@@ -72,6 +117,15 @@ class Terrain : public Actor {
                     float distance = glm::length(vec3(x-radius,y-radius,z-radius));
                     float radiusInfluence = (radius-distance)/radius;
                     terrainData[i].amount = noise * (radiusInfluence+0.5f);
+
+                    float oreNoise = simplex.fractal(5,x/oreNoiseScale,y/oreNoiseScale,z/oreNoiseScale);
+                    if(oreNoise > 0.4f) {
+                        oreNoise = 1;
+                    } else {
+                        oreNoise = 0;
+                    }
+                    oreNoise = fmin(fmax(oreNoise,0),1);
+                    terrainData[i].ore = oreNoise;
                     i++;
                 }
             }
@@ -142,17 +196,14 @@ class Terrain : public Actor {
         }
 
         // consolodate vertices
-        std::vector<Vertex> newVertices;
+        std::vector<TerrainVertex> newVertices;
         unordered_map<vec3,std::pair<int,std::vector<vec3>>> vertexMap;
         for(auto& i : indices) {
             auto vertex = vertices[i];
             if(vertexMap.contains(vertex.pos)) {
                 i = vertexMap[vertex.pos].first;
             } else {
-                Vertex newVertex;
-                newVertex.pos = vertex.pos;
-                newVertex.normal = vec3(0,1,0);
-                newVertices.push_back(Vertex(vertex.pos));
+                newVertices.push_back(vertex);
                 i = newVertices.size() - 1;
                 vertexMap[vertex.pos].first = i;
             }
@@ -203,7 +254,8 @@ class Terrain : public Actor {
             
             float t = (surfaceLevel - a)/(b-a);
             t = std::min(std::max(t,0.0f),1.0f);
-            vertices.push_back(Vertex((getEdgePos(edge,t) + cellPos)*cellSize));
+            float oreBlend = terrainData[cellIndex].ore;
+            vertices.push_back(TerrainVertex((getEdgePos(edge,t) + cellPos)*cellSize,oreBlend,oreTexture));
             int vertIndex = i % 3;
             face[vertIndex] = vertices.size()-1;
             indices.push_back(vertices.size()-1);

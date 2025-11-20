@@ -4,6 +4,8 @@
 
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 normal;
+layout(location = 2) flat in int oreTextureID;
+layout(location = 3) in float oreBlend;
 
 layout(location = 0) out vec4 outColor;
 
@@ -33,8 +35,14 @@ void main() {
     vec3 albedoX = texture(texSampler[material.textureID],position.yz*texScale).rgb * absNormal.x;
     vec3 albedoY = texture(texSampler[material.textureID],position.xz*texScale).rgb * absNormal.y;
     vec3 albedoZ = texture(texSampler[material.textureID],position.xy*texScale).rgb * absNormal.z;
+    vec3 albedo = ((albedoX+albedoY+albedoZ)/(absNormal.x+absNormal.y+absNormal.z));
 
-    vec3 objectColor = ((albedoX+albedoY+albedoZ)/(absNormal.x+absNormal.y+absNormal.z)) * toLinear(material.color.rgb);
+    vec3 oreAlbedoX = texture(texSampler[oreTextureID],position.yz*texScale).rgb * absNormal.x;
+    vec3 oreAlbedoY = texture(texSampler[oreTextureID],position.xz*texScale).rgb * absNormal.y;
+    vec3 oreAlbedoZ = texture(texSampler[oreTextureID],position.xy*texScale).rgb * absNormal.z;
+    vec3 oreAlbedo = ((oreAlbedoX+oreAlbedoY+oreAlbedoZ)/(absNormal.x+absNormal.y+absNormal.z));
+
+    vec3 objectColor = mix(albedo,oreAlbedo,oreBlend) * toLinear(material.color.rgb);
     vec3 result = (ambient + diffuse) * objectColor;
     outColor = vec4(result, 1.0);
     

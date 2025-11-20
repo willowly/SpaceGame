@@ -6,6 +6,9 @@
 
 #include "engine/debug.hpp"
 
+#include "helper/rect.hpp"
+#include "helper/sprite.hpp"
+
 
 using glm::ivec2, glm::vec2;
 
@@ -45,8 +48,10 @@ struct UIMaterialData {
 
 struct UIExtraPushData {
     vec4 color;
-    TextureID texture;
-    UIExtraPushData(vec4 color,TextureID texture) : color(color), texture(texture) {}
+    vec2 spriteOffset;
+    vec2 spriteSize;
+    TextureID texture; // at the end for alignment
+    UIExtraPushData(vec4 color,Sprite sprite) : color(color), spriteOffset(sprite.rect.position),spriteSize(sprite.rect.size),texture(sprite.texture) {}
 };
 
 class Interface {
@@ -82,30 +87,17 @@ class Interface {
             readyToRender = true;
         }
 
-        void drawRectCentered(Vulkan& vulkan,vec2 position,vec2 size,vec2 anchor,Color color,TextureID texture) {
-            drawRect(vulkan,position,size,anchor,vec2(0.5,0.5),color,texture);
-        }
-        
-        void drawRect(Vulkan& vulkan,vec2 position,vec2 size,vec2 anchor,Color color,TextureID texture) {
-            drawRect(vulkan,position,size,anchor,vec2(0,0),color,texture);
-        }
 
-        void drawRect(Vulkan& vulkan,vec2 position,vec2 size,vec2 anchor,vec2 pivot,Color color,TextureID texture) {
+        void drawRect(Vulkan& vulkan,Rect rect,vec2 anchor,Color color,Sprite sprite) {
             if(!readyToRender) {
                 Debug::warn("Interface not ready to render");
                 return;
-            }
+            } 
 
-            position += (vec2)vulkan.getScreenSize() * anchor; 
-            position -= pivot * size;
+            rect.position += (vec2)vulkan.getScreenSize() * anchor;
 
-            glm::mat4 model = glm::translate(glm::mat4(1.0f),vec3(position,1));
-            model = glm::scale(model,vec3(size,1));
-            vulkan.addMeshWithData<UIExtraPushData>(quadMesh,material,UIExtraPushData(color.asVec4(),texture),model);
+            glm::mat4 model = glm::translate(glm::mat4(1.0f),vec3(rect.position,1));
+            model = glm::scale(model,vec3(rect.size,1));
+            vulkan.addMeshWithData<UIExtraPushData>(quadMesh,material,UIExtraPushData(color.asVec4(),sprite),model);
         }
-
-
-
-
-
 };

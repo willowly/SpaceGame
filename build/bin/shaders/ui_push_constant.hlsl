@@ -11,5 +11,9 @@ layout( push_constant ) uniform constants
     uint frameIndex;
     MaterialData material;
     vec4 color;
+    vec2 spriteOffset;
+    vec2 spriteSize;
     uint textureID;
+    // extra gap here?
+    
 } push;

@@ -9,7 +9,9 @@ layout(binding = 1) uniform sampler2D texSampler[];
 #include "ui_push_constant.hlsl"
 
 void main() {
-    outColor = texture(texSampler[push.textureID],texCoord) * push.color;
+    vec2 spriteCoord = texCoord * push.spriteSize;
+    spriteCoord += push.spriteOffset;
+    outColor = texture(texSampler[push.textureID],spriteCoord) * push.color;
 
     //outColor = vec4(1,1,1,0.5);
 }

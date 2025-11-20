@@ -3919,8 +3919,11 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/file-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/math-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/random-helper.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/helper/rect.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/helper/sprite.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/string-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/terrain-helper.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/interface/font.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/interface/interface.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/interface/inventory-widget.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/interface/toolbar-widget.hpp \
@@ -3991,6 +3994,8 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 /Users/willow/Documents/GitHub/SpaceGame/src/helper/terrain-helper.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/src/helper/string-helper.hpp:
+
+/Users/willow/Documents/GitHub/SpaceGame/src/helper/sprite.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/src/helper/clock.hpp:
 
@@ -4919,6 +4924,8 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/mach/task.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__algorithm/sample.h:
+
+/Users/willow/Documents/GitHub/SpaceGame/src/helper/rect.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/gtc/matrix_transform.hpp:
 
@@ -7495,6 +7502,8 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/Security.framework/Headers/SecAccessControl.h:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/Security.framework/Headers/SecCertificateOIDs.h:
+
+/Users/willow/Documents/GitHub/SpaceGame/src/interface/font.hpp:
 
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/os/clock.h:
 

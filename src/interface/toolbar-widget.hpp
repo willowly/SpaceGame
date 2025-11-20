@@ -2,11 +2,12 @@
 
 #include <interface/interface.hpp>
 #include <actor/character.hpp>
+#include "helper/rect.hpp"
 
 class ToolbarWidget {
     
     public:
-        TextureID solidTexture;
+        Sprite solidSprite;
         Character* player;
 
         void draw(Interface& interface,Vulkan& vulkan) {
@@ -16,11 +17,12 @@ class ToolbarWidget {
             //interface.drawRect(vulkan,glm::vec2(0,-3),glm::vec2(101,12),glm::vec2(0.5,1),vec2(0.5,1),Color(0.5,0.5,0.5),solidTexture);
             for (int i = 0; i < 9; i++)
             {
-                interface.drawRect(vulkan,glm::vec2((i*10)-50,-11),glm::vec2(10,10),glm::vec2(0.5,1),vec2(0,0),player->selectedTool == i ? selected : unselected,solidTexture);
+                auto rect = Rect((i*10)-50,-11,10,10);
+                interface.drawRect(vulkan,rect,glm::vec2(0.5,1),player->selectedTool == i ? selected : unselected,solidSprite);
 
                 Item* tool = player->toolbar[i];
                 if(tool != nullptr) {
-                    interface.drawRect(vulkan,glm::vec2((i*10)-50,-11),glm::vec2(10,10),glm::vec2(0.5,1),vec2(0,0),Color::white,tool->getIcon());
+                    interface.drawRect(vulkan,rect,glm::vec2(0.5,1),Color::white,tool->getIcon().texture);
                 }
             }
             

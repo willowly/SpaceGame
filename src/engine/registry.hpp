@@ -4,6 +4,7 @@
 #include "actor/actor.hpp"
 #include "block/block.hpp"
 #include "item/tool.hpp"
+#include "helper/sprite.hpp"
 #include <map>
 #include <memory>
 
@@ -16,6 +17,7 @@ class Registry {
 
     map<string,Mesh<Vertex>> models;
     map<string,TextureID> textures;
+    map<string,Sprite> sprites;
     map<string,Material> materials;
 
     map<string,unique_ptr<Item>> item;
@@ -34,6 +36,10 @@ class Registry {
 
         bool hasTexture(string name) {
             return textures.contains(name);
+        }
+
+        bool hasSprite(string name) {
+            return sprites.contains(name);
         }
 
         bool hasMaterial(string name) {
@@ -67,6 +73,17 @@ class Registry {
                 Debug::warn("no texture called " + name + "\"");
             }
             return errorTexture;
+        }
+        Sprite getSprite(string name) {
+            if(sprites.contains(name)) {
+                return sprites.at(name);
+            } else {
+                if(textures.contains(name)) {
+                    return Sprite(textures.at(name));
+                }
+                Debug::warn("no sprite called " + name + "\"");
+            }
+            return Sprite(errorTexture);
         }
         Material getMaterial(string name) {
             if(materials.contains(name)) {
@@ -110,6 +127,9 @@ class Registry {
 
         void addTexture(string name,TextureID texture) {
             textures.emplace(name,texture);
+        }
+        void addSprite(string name,Sprite sprite) {
+            sprites.emplace(name,sprite);
         }
         void addMaterial(string name,Material material) {
             materials.emplace(name,material);

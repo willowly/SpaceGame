@@ -10,7 +10,7 @@ using glm::vec3,glm::quat,glm::mat4;
 class Tool : public Item {
 
     public:
-        TextureID icon;
+        Sprite icon;
         Mesh<Vertex>* heldModel = nullptr;
         Material heldModelMaterial = Material::none;
         vec3 modelOffset = vec3(0.3,-0.3,-1);
@@ -46,7 +46,7 @@ class Tool : public Item {
             
         }
 
-        virtual TextureID getIcon() {
+        virtual Sprite getIcon() {
             return icon;
         }
 

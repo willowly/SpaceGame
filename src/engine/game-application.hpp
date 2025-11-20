@@ -94,6 +94,8 @@ class GameApplication {
         ToolbarWidget toolbarWidget;
         InventoryWidget inventoryWidget;
 
+        Font font;
+
 
         Material terrainMaterial = Material::none;
 
@@ -224,20 +226,23 @@ class GameApplication {
 
             //world.spawn(Construction::makeInstance(tin,vec3(0)));
 
-            VkPipeline terrainPipeline = vulkan->createManagedPipeline<Vertex>(Vulkan::vertCodePath("terrain"),Vulkan::fragCodePath("terrain"));
+            VkPipeline terrainPipeline = vulkan->createManagedPipeline<TerrainVertex>(Vulkan::vertCodePath("terrain"),Vulkan::fragCodePath("terrain"));
             terrainMaterial = vulkan->createMaterial(terrainPipeline,LitMaterialData(registry.getTexture("rock")));
             
             Terrain* terrain = world.spawn(Terrain::makeInstance(terrainMaterial,vec3(0,0,10)));
+            terrain->rockTexture = registry.getTexture("rock");
+            terrain->oreTexture = registry.getTexture("ore");
+            terrain->generateMesh(); // needs to generate after the texture is applied. information for this should be passed into the terrain material
 
-            stoneItem.icon = registry.getTexture("stone_item");
+            stoneItem.icon = registry.getSprite("stone_item");
             stoneItem.name = "Stone";
             terrain->item1 = &stoneItem;
 
-            copperItem.icon = registry.getTexture("copper_item");
+            copperItem.icon = registry.getSprite("copper_item");
             copperItem.name = "Copper";
             terrain->item2 = &copperItem;
 
-            rubyItem.icon = registry.getTexture("ruby_item");
+            rubyItem.icon = registry.getSprite("ruby_item");
             rubyItem.name = "Ruby";
             terrain->item3 = &rubyItem;
 
@@ -255,11 +260,16 @@ class GameApplication {
             interface.loadRenderResources(*vulkan);
 
             toolbarWidget.player = player;
-            toolbarWidget.solidTexture = registry.getTexture("solid");
+            toolbarWidget.solidSprite = registry.getSprite("solid");
 
             inventoryWidget.player = player;
-            inventoryWidget.solidTexture = registry.getTexture("solid");
-            
+            inventoryWidget.solid = registry.getSprite("solid");
+            inventoryWidget.font = &font;
+
+            font.texture = registry.getTexture("numbers");
+            font.start = '0';
+            font.charSize = vec2(8,12);
+            font.textureSize = vec2(88,12);
             
 
         }
@@ -291,8 +301,8 @@ class GameApplication {
             world.frame(vulkan,dt);
 
             // cursor
-            interface.drawRectCentered(*vulkan,vec2(0.0f),vec2(4,0.5),vec2(0.5,0.5),Color::white,0);
-            interface.drawRectCentered(*vulkan,vec2(0.0f),vec2(0.5,4),vec2(0.5,0.5),Color::white,0);
+            interface.drawRect(*vulkan,Rect::centered(vec2(4,0.5)),vec2(0.5,0.5),Color::white,0);
+            interface.drawRect(*vulkan,Rect::centered(vec2(0.5,4)),vec2(0.5,0.5),Color::white,0);
 
 
             toolbarWidget.draw(interface,*vulkan);
