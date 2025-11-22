@@ -73,6 +73,11 @@ class Terrain : public Actor {
 
     public:
 
+        struct TerraformResults {
+            int stone = 0;
+            int ore = 0;
+        };
+
         Item* item1;
         Item* item2;
         Item* item3;
@@ -86,6 +91,7 @@ class Terrain : public Actor {
         float noiseScale = 100;
         float oreNoiseScale = 30;
         float surfaceLevel = 0.5;
+        float oreSurfaceLevel = 0.4f;
         float cellSize = 0.5f;
 
     Item* getItem() {
@@ -119,7 +125,7 @@ class Terrain : public Actor {
                     terrainData[i].amount = noise * (radiusInfluence+0.5f);
 
                     float oreNoise = simplex.fractal(5,x/oreNoiseScale,y/oreNoiseScale,z/oreNoiseScale);
-                    if(oreNoise > 0.4f) {
+                    if(oreNoise > oreSurfaceLevel) {
                         oreNoise = 1;
                     } else {
                         oreNoise = 0;
@@ -254,6 +260,7 @@ class Terrain : public Actor {
             
             float t = (surfaceLevel - a)/(b-a);
             t = std::min(std::max(t,0.0f),1.0f);
+
             float oreBlend = terrainData[cellIndex].ore;
             vertices.push_back(TerrainVertex((getEdgePos(edge,t) + cellPos)*cellSize,oreBlend,oreTexture));
             int vertIndex = i % 3;
@@ -372,8 +379,11 @@ class Terrain : public Actor {
         actor->position = transformPoint(localActorPosition);
     }
     
-    //need to manually regenerate the mesh (in case things want to)
-    void terraformSphere(vec3 pos,float radius,float change) {
+    //need to manually regenerate the mesh (in case things want to do multiple)
+    TerraformResults terraformSphere(vec3 pos,float radius,float change) {
+
+
+        TerraformResults results;
 
         float clock = (float)glfwGetTime();
         auto posCellSpace = getCellAtWorldPos(pos);
@@ -394,13 +404,22 @@ class Terrain : public Actor {
                     float influence = (radius-dist)/radius;
                     
                     if(influence > 0) {
+                        float old = terrainData[i].amount;
                         terrainData[i].amount += change * influence;
                         terrainData[i].amount = std::min(std::max(terrainData[i].amount,0.0f),1.0f);
+                        if(old > surfaceLevel && terrainData[i].amount < surfaceLevel) {
+                            if(terrainData[i].ore > oreSurfaceLevel) {
+                                results.ore++;
+                            } else {
+                                results.stone++;
+                            }
+                        }
                     }
                     i++;
                 }
             }
         }
+        return results;
         std::cout << "terraform time: " << (float)glfwGetTime() - clock << std::endl;
     }
 

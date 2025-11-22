@@ -1031,9 +1031,11 @@ class Vulkan {
 
             ubo.proj[1][1] *= -1; //flip the y because theres discrepancy
             
-            ubo.screen = glm::ortho(0.0f,100.0f*camera.aspect,0.0f,100.0f);
-
-            screenSize = vec2(100.0f*camera.aspect,100.0f);
+            int width, height;
+            glfwGetFramebufferSize(window,&width,&height);
+            screenSize = vec2(width,height);
+            
+            ubo.screen = glm::ortho(0.0f,screenSize.x,0.0f,screenSize.y);
 
             memcpy(uniformBuffersMapped[currentFrame], &ubo, sizeof(ubo)); //uniform buffer is always mapped
         }
@@ -1045,6 +1047,8 @@ class Vulkan {
                 glfwGetFramebufferSize(window, &width, &height);
                 glfwWaitEvents();
             } while  (width == 0 || height == 0);
+
+            screenSize = vec2(width,height);
             
             vkDeviceWaitIdle(device);
 

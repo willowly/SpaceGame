@@ -6,6 +6,10 @@ using glm::vec2;
 struct Rect {
     vec2 position;
     vec2 size;
+
+    Rect(vec2 size) : position(vec2(0)), size(size) {
+
+    }
     Rect(vec2 position,vec2 size) : position(position), size(size) {
 
     }
@@ -44,6 +48,11 @@ struct Rect {
 
     static Rect squareCenteres(vec2 position,float size) {
         return Rect(position,vec2(size));
+    }
+
+    static Rect anchored(Rect rect,Rect parent,vec2 anchor) {
+        rect.position += parent.position + parent.size * anchor;
+        return rect;
     }
 
 

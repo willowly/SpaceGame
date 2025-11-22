@@ -13,9 +13,12 @@
 #include "engine/world.hpp"
 #include "construction.hpp"
 
-#include <item/item.hpp>
+#include "item/item-stack.hpp"
+#include "item/recipe.hpp"
+#include "components/inventory.hpp"
 
 #include <GLFW/glfw3.h>
+
 
 
 class Character : public Actor {
@@ -25,7 +28,10 @@ class Character : public Actor {
 
         // Prototype constructors
         
-
+        enum Action {
+            Neutral,
+            InMenu
+        } action = Action::Neutral;
 
 
         float moveSpeed = 5.0f;
@@ -44,17 +50,10 @@ class Character : public Actor {
 
         vec3 velocity;
 
-        Item* currentTool = nullptr;
+        Item* currentToolItem;
         int selectedTool;
 
         Item* toolbar[9] = {};
-
-        struct ItemStack {
-            Item& item;
-            int amount;
-        };
-
-        std::vector<ItemStack> inventory;
 
         struct HeldItemData {
             float actionTimer;
@@ -74,11 +73,16 @@ class Character : public Actor {
         vec3 thirdPersonCameraOffset = vec3(0,3,20);
         vec3 thirdPersonCameraRot;
 
+        Inventory inventory;
+
+        std::vector<Recipe*> recipes;
+
 
         void addRenderables(Vulkan* vulkan,float dt) {
+            ItemStack* currentTool = inventory.getStack(currentToolItem);
             if(currentTool != nullptr && ridingConstruction == nullptr) {
                 heldItemData.animationTimer += dt;
-                currentTool->addRenderables(vulkan,*this,dt);
+                currentTool->item->addRenderables(vulkan,*this,dt);
             }
             if(thirdPerson) {
                 Actor::addRenderables(vulkan,dt);
@@ -87,35 +91,51 @@ class Character : public Actor {
 
         void step(World* world,float dt) {
 
-            float moveSpeed = 5.0f;
+            
+
+            if(ridingConstruction != nullptr) {
+                ridingConstruction->setMoveControl(ridingConstructionRotation * moveInput);
+                ridingConstruction->setTargetRotation(getEyeRotation() * glm::inverse(ridingConstructionRotation) * glm::angleAxis(glm::radians(180.0f),vec3(0,1,0)));
+                position = ridingConstruction->transformPoint(ridingConstructionPoint);
+            } else {
+                vec3 targetVelocity = rotation * moveInput * moveSpeed;
+                velocity = MathHelper::lerp(velocity,targetVelocity,acceleration*dt);
+                position += velocity * dt;
+
+                switch(action) {
+                    case Action::InMenu:
+                        stepInventory(world,dt);
+                        break;
+                    case Action::Neutral:
+                        stepNeutral(world,dt);
+                    break;
+                } 
+
+                clickInput = false;
+                interactInput = false;
+
+                world->collideBasic(this,radius);
+            }
+
+            
+
+        }
+
+        void stepNeutral(World* world,float dt) {
             
             
 
             if(interactInput) {
                 interact(world);
             }
-
+            ItemStack* currentTool = inventory.getStack(currentToolItem);
             if(currentTool != nullptr) {
-                currentTool->step(world,*this,dt);
+                currentTool->item->step(world,*this,*currentTool,dt);
                 heldItemData.actionTimer += dt;
             }
+        }
 
-            // if(ridingConstruction != nullptr) {
-            //     ridingConstruction->setMoveControl(ridingConstructionRotation * moveInput);
-            //     ridingConstruction->setTargetRotation(getEyeRotation() * glm::inverse(ridingConstructionRotation) * glm::angleAxis(glm::radians(180.0f),vec3(0,1,0)));
-            //     position = ridingConstruction->transformPoint(ridingConstructionPoint);
-            // } else {
-            vec3 targetVelocity = rotation * moveInput * moveSpeed;
-            velocity = MathHelper::lerp(velocity,targetVelocity,acceleration*dt);
-            position += velocity * dt;
-
-            clickInput = false;
-            interactInput = false;
-
-            // if(ridingConstruction == nullptr) { //dont collide with anything if we are riding
-            //     world->collideBasic(this,radius);
-            // }
-            world->collideBasic(this,radius);
+        void stepInventory(World* world,float dt) {
 
         }
 
@@ -160,39 +180,23 @@ class Character : public Actor {
             }
         }
 
-        void giveItem(Item& item,int amount) {
-            auto stack = getInventoryItem(item);
-            if(stack != nullptr) {
-                stack->amount += amount;
-            } else {
-                inventory.push_back(ItemStack{item,amount});
-            }
-            
-
-            std::cout << "inventory: \n";
-            for (auto& stack : inventory)
-            {
-                std::cout << "- " << stack.item.name + " x" << stack.amount << "\n";
-            }
-            std::cout << std::endl;
-            
-        }
-
-        ItemStack* getInventoryItem(Item& item) {
-            for (auto& stack : inventory)
-            {
-                if(&stack.item == &item) {
-                    return &stack;
-                }
-            }
-            return nullptr;
-            
-        }
-
         //could layer be abstracted to a controller
         void processInput(Input& input) {
 
             // eventually we want an enum for keys instead of using the defines
+            
+
+            switch(action) {
+                case Action::InMenu:
+                    processInputInventory(input);
+                    break;
+                case Action::Neutral:
+                    processInputNeutral(input);
+                break;
+            } 
+        }
+
+        void processInputNeutral(Input& input) {
             moveInput = vec3(0,0,0);
             if(input.getKey(GLFW_KEY_W)) {
                 moveInput.z -= 1; //im not sure why this exists :shrug:
@@ -213,7 +217,7 @@ class Character : public Actor {
                 moveInput.y -= 1;
             }
 
-            if(input.getKeyPressed(GLFW_KEY_E)) {
+            if(input.getKeyPressed(GLFW_KEY_F)) {
                 interactInput = true;
             }
 
@@ -244,28 +248,71 @@ class Character : public Actor {
             if(input.getKeyPressed(GLFW_KEY_9)) {
                 setCurrentTool(8);
             }
-
             if(input.getKeyPressed(GLFW_KEY_Z)) {
                 thirdPerson = !thirdPerson;
             }
 
+            ItemStack* currentTool = inventory.getStack(currentToolItem);
             if(currentTool != nullptr) {
-                currentTool->processInput(input);
+                currentTool->item->processInput(input);
             }
 
+            if(input.getKeyPressed(GLFW_KEY_TAB)) {
+                setActionInventory();
+            }
             moveMouse(input.getMouseDelta() * 0.01f);
         }
 
+        void processInputInventory(Input& input) {
+            moveInput = vec3(0,0,0);
+            if(input.getKeyPressed(GLFW_KEY_TAB)) {
+                setActionNeutral();
+            }
+            input.getMouseDelta();
+        }
+
         void setCurrentTool(int index) {
+
+            auto newTool = inventory.getStack(toolbar[index]);
+            auto currentTool = inventory.getStack(currentToolItem);
+            if(newTool == currentTool) return; //dont do anything if its the same tool
+
             if(currentTool != nullptr) {
-                currentTool->unequip(*this);
+                currentTool->item->unequip(*this);
             }
             selectedTool = index;
-            currentTool = toolbar[index];
-            if(currentTool != nullptr) {
-                currentTool->equip(*this);
+            if(newTool != nullptr) {
+                newTool->item->equip(*this);
                 heldItemData.setAction(0); // reset actions
+                currentToolItem = newTool->item;
+            } else {
+                currentToolItem = nullptr;
             }
+            
+            
+        }
+
+        void setToolbar(int index,Item* item) {
+            for(auto&& itemInBar : toolbar) {
+                if(itemInBar == item) {
+                    itemInBar = nullptr;
+                }
+            }
+            toolbar[index] = item;
+        }
+
+        // for tools to do when they reduce count etc
+        void refreshTool() {
+            setCurrentTool(selectedTool);
+        }
+
+        void setActionNeutral() {
+            action = Action::Neutral;
+        }
+
+        void setActionInventory() {
+            heldItemData.setAction(0);
+            action = Action::InMenu;
         }
 
         void moveMouse(vec2 delta) {

@@ -50,7 +50,7 @@ class World {
         float stepProcessMs;
         float renderProcessMs;
 
-        bool iteratingActors = false; //so we dont resize the actor vector when iterating over it
+        int iteratingActors = 0; //so we dont resize the actor vector when iterating over it. int so that we can have nested iterations
 
         World() {
 
@@ -59,7 +59,7 @@ class World {
         template<typename T>
         T* spawn(unique_ptr<T> spawned) {
             T* rawSpawned = spawned.get();
-            if(iteratingActors) {
+            if(iteratingActors > 0) {
                 spawnedActors.push_back(std::move(spawned));
             } else {
                 actors.push_back(std::move(spawned));
@@ -106,12 +106,12 @@ class World {
         }
 
         void step(float dt) {
-            iteratingActors = true;
+            iteratingActors++;
             for (auto& actor : actors)
             {
                 actor->step(this,dt);
             }
-            iteratingActors = false;
+            iteratingActors--;
             for(auto& actor : spawnedActors) {
                 actors.push_back(std::move(actor));
             }
@@ -124,6 +124,7 @@ class World {
 
         std::optional<WorldRaycastHit> raycast(Ray ray,float dist) {
             std::optional<WorldRaycastHit> result = std::nullopt;
+            iteratingActors++;
             for (auto& actor : actors)
             {
                 auto hitopt = actor->raycast(ray,dist);
@@ -140,11 +141,12 @@ class World {
                     }
                 }
             }
+            iteratingActors--;
             return result;
         }
 
         void collideBasic(Actor* actor,float radius) {
-            iteratingActors = true;
+            iteratingActors++;
             for (auto& colliderActor : actors)
             {
                 if(actor != colliderActor.get()) {
@@ -152,7 +154,7 @@ class World {
                 }
                 
             }
-            iteratingActors = false;
+            iteratingActors--;
         }
 
         Camera& getCamera() {

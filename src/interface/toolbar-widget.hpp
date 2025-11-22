@@ -3,14 +3,18 @@
 #include <interface/interface.hpp>
 #include <actor/character.hpp>
 #include "helper/rect.hpp"
+#include "item-slot-widget.hpp"
 
 class ToolbarWidget {
     
     public:
         Sprite solidSprite;
         Character* player;
+        ItemSlotWidget itemSlot;
 
-        void draw(Interface& interface,Vulkan& vulkan) {
+        void draw(DrawContext context) {
+
+            Rect screen = context.getScreenSize();
 
             auto unselected = Color(0.2,0.2,0.2);
             auto selected = Color(0.2,0.3,0.7);
@@ -18,11 +22,17 @@ class ToolbarWidget {
             for (int i = 0; i < 9; i++)
             {
                 auto rect = Rect((i*10)-50,-11,10,10);
-                interface.drawRect(vulkan,rect,glm::vec2(0.5,1),player->selectedTool == i ? selected : unselected,solidSprite);
+                rect = Rect::anchored(rect,screen,vec2(0.5,1));
+                context.drawRect(rect,player->selectedTool == i ? selected : unselected,solidSprite);
 
                 Item* tool = player->toolbar[i];
-                if(tool != nullptr) {
-                    interface.drawRect(vulkan,rect,glm::vec2(0.5,1),Color::white,tool->getIcon().texture);
+                ItemStack* stack = player->inventory.getStack(tool);
+                if(stack != nullptr) {
+                    if(itemSlot.draw(context,rect,*stack)) {
+                        if(context.mouseLeftClicked()) {
+                            player->setToolbar(i,nullptr);
+                        }
+                    }
                 }
             }
             

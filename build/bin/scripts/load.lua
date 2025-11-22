@@ -19,7 +19,7 @@ materials.grid = {
 -- }
 
 materials.pickaxe = {
-    texture=textures.pickaxe,
+    texture=textures.pickaxe_smooth,
 }
 
 materials.tin_block = {
@@ -71,6 +71,12 @@ blocks.thruster = {
     model = "thruster",
     material = "thruster",
     force = 20
+}
+
+blocks.furnace = {
+    type = "furnace",
+    model = "block",
+    material = "thruster"
 }
 
 

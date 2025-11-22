@@ -57,7 +57,7 @@ class Tool : public Item {
             clickHold = input.getMouseButton(GLFW_MOUSE_BUTTON_1);
         }
 
-        virtual void step(World* world,Character& user,float dt) {
+        virtual void step(World* world,Character& user,ItemStack& stack,float dt) {
 
         }
 

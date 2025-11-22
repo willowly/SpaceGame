@@ -42,15 +42,26 @@ class PickaxeTool : public Tool {
                     vec3 placePointWorld = worldHit.hit.point - worldHit.hit.normal * 0.5f;
                     vec3 placePointLocal = construction->inverseTransformPoint(placePointWorld);
                     ivec3 placePointLocalInt = glm::round(placePointLocal);
+                    auto blockPair = construction->getBlock(placePointLocalInt);
+                    if(blockPair.first != nullptr) {
+                        auto stackOpt = blockPair.first->getDrop(blockPair.second);
+                        if(stackOpt) {
+                            auto stack = stackOpt.value();
+                            user.inventory.give(stack);
+                        }
+                    }
                     construction->setBlock(placePointLocalInt,nullptr,BlockFacing::FORWARD);
                 }
                 Terrain* terrain = dynamic_cast<Terrain*>(worldHit.actor);
                 if(terrain != nullptr) {
-                    terrain->terraformSphere(worldHit.hit.point,mineRadius,-mineAmount);
+                    auto results = terrain->terraformSphere(worldHit.hit.point,mineRadius,-mineAmount);
                     terrain->generateMesh();
-                    auto item = terrain->getItem();
-                    if(item != nullptr) {
-                        user.giveItem(*item,1);
+                    
+                    if((results.stone) > 0) {
+                        user.inventory.give(terrain->item1,results.stone);
+                    }
+                    if((results.ore) > 0) {
+                        user.inventory.give(terrain->item2,results.ore);
                     }
                 }
             }
@@ -96,7 +107,7 @@ class PickaxeTool : public Tool {
             
         }
 
-        virtual void step(World* world,Character& user,float dt) {
+        virtual void step(World* world,Character& user,ItemStack& stack,float dt) {
             switch ((State)user.heldItemData.action) {
                 case State::NEUTRAL:
 

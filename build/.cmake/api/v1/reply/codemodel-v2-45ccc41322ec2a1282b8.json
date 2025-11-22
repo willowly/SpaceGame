@@ -1,0 +1,96 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.28"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "SpaceGame",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "SHADERS::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-SHADERS-Debug-1130bf984a8717cf0967.json",
+					"name" : "SHADERS",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "SIMPLEXNOISE::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-SIMPLEXNOISE-Debug-9c51461fc18c88480bdb.json",
+					"name" : "SIMPLEXNOISE",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "STB::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-STB-Debug-7078adeff70d3a237b4c.json",
+					"name" : "STB",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "SpaceGame::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-SpaceGame-Debug-b02d26e2e4012ead40f6.json",
+					"name" : "SpaceGame",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "SpaceGame_Shaders::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-SpaceGame_Shaders-Debug-59848be80fa119d40cdd.json",
+					"name" : "SpaceGame_Shaders",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/Users/willow/Documents/GitHub/SpaceGame/build",
+		"source" : "/Users/willow/Documents/GitHub/SpaceGame"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 7
+	}
+}

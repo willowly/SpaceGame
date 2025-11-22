@@ -1,4 +1,5 @@
 CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
+  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/share/asan_ignorelist.txt \
   /Users/willow/Documents/GitHub/SpaceGame/src/main.cpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/game-application.hpp \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/iostream \
@@ -1282,10 +1283,13 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/construction.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/physics/resolution.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/block/block.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/block/block-state.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/item/item-stack.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/item.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/sprite.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/rect.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/block/block-state.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/item/recipe.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/actor/components/inventory.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/terrain.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/terrain-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/SimplexNoise.h \
@@ -1313,11 +1317,14 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-registry-block.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/block/cockpit-block.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/block/thruster-block.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/block/furnace-block.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/interface/interface.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/clock.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/interface/toolbar-widget.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/interface/inventory-widget.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/interface/item-slot-widget.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/interface/text-widget.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/interface/font.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/interface/inventory-widget.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/items-all.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/place-block-tool.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/pickaxe-tool.hpp \

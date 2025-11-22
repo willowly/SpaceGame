@@ -25,6 +25,7 @@
 #include "interface/inventory-widget.hpp"
 
 #include "item/items-all.hpp"
+#include "item/recipe.hpp"
 
 using std::string;
 
@@ -103,12 +104,16 @@ class GameApplication {
         PlaceBlockTool placeTin;
         PlaceBlockTool placeCockpit;
         PlaceBlockTool placeThruster;
+        PlaceBlockTool placeFurnace;
         PickaxeTool pickaxe;
 
 
         ResourceItem stoneItem;
-        ResourceItem copperItem;
+        ResourceItem aluminumOreItem;
         ResourceItem rubyItem;
+
+        Recipe makeAluminumPlate = Recipe(ItemStack(&placeTin,1));
+        Recipe makeFurnace = Recipe(ItemStack(&placeFurnace,1));
 
 
         
@@ -212,8 +217,17 @@ class GameApplication {
 
             world.spawn(Actor::makeInstance(planePrototype,vec3(0,-3,0)));
 
+            registry.getBlock("tin")->drop = &placeTin;
+
             placeTin = PlaceBlockTool(registry.getBlock("tin"));
             placeTin.icon = registry.getTexture("tin_plate");
+            placeTin.name = "Aluminum Plate";
+
+            registry.getBlock("furnace")->drop = &placeFurnace;
+
+            placeFurnace = PlaceBlockTool(registry.getBlock("furnace"));
+            placeFurnace.icon = registry.getSprite("furnace_item");
+            placeFurnace.name = "Furnace";
 
             placeCockpit = PlaceBlockTool(registry.getBlock("cockpit"));
             placeCockpit.icon = registry.getTexture("cockpit_item");
@@ -238,18 +252,24 @@ class GameApplication {
             stoneItem.name = "Stone";
             terrain->item1 = &stoneItem;
 
-            copperItem.icon = registry.getSprite("copper_item");
-            copperItem.name = "Copper";
-            terrain->item2 = &copperItem;
+            aluminumOreItem.icon = registry.getSprite("aluminum_ore_item");
+            aluminumOreItem.name = "Aluminum Ore";
+            terrain->item2 = &aluminumOreItem;
+
+            makeAluminumPlate.result = ItemStack(&placeTin,1);
+
+            makeAluminumPlate.ingredients.push_back(ItemStack(&aluminumOreItem,5));
+
+            makeFurnace.ingredients.push_back(ItemStack(&stoneItem,5));
+            
 
             rubyItem.icon = registry.getSprite("ruby_item");
             rubyItem.name = "Ruby";
             terrain->item3 = &rubyItem;
 
-            playerPrototype->toolbar[0] = &placeTin;
-            playerPrototype->toolbar[1] = &placeCockpit;
-            playerPrototype->toolbar[2] = &placeThruster;
-            playerPrototype->toolbar[3] = &pickaxe;
+            playerPrototype->toolbar[0] = &pickaxe;
+            playerPrototype->toolbar[1] = &placeFurnace;
+            playerPrototype->toolbar[2] = &placeTin;
 
             player = world.spawn(Character::makeInstance(playerPrototype.get(),vec3(0.0,0.0,0.0)));
 
@@ -265,11 +285,29 @@ class GameApplication {
             inventoryWidget.player = player;
             inventoryWidget.solid = registry.getSprite("solid");
             inventoryWidget.font = &font;
+            inventoryWidget.tooltipTextTitle.font = &font;
+            inventoryWidget.itemSlot.sprite = registry.getSprite("solid");
+            inventoryWidget.itemSlot.font = &font;
+            inventoryWidget.itemSlot.color = Color(0.1,0.1,0.1);
 
-            font.texture = registry.getTexture("numbers");
+            toolbarWidget.itemSlot.sprite = registry.getSprite("solid");
+            toolbarWidget.itemSlot.font = &font;
+            toolbarWidget.itemSlot.color = Color(0.0,0.0,0.0,0.0);
+
+            font.texture = registry.getTexture("characters");
             font.start = '0';
             font.charSize = vec2(8,12);
-            font.textureSize = vec2(88,12);
+            font.textureSize = vec2(312,12);
+            font.characters = "0123456789x.ABCDEFGHIJKLMNOPQRSTUVWXYZ ";
+
+            player->inventory.give(&stoneItem,5);
+            player->inventory.give(&aluminumOreItem,1);
+            player->inventory.give(&pickaxe,1);
+            player->inventory.give(&placeTin,5);
+            player->inventory.give(&placeFurnace,1);
+
+            player->recipes.push_back(&makeAluminumPlate);
+            player->recipes.push_back(&makeFurnace);
             
 
         }
@@ -300,13 +338,23 @@ class GameApplication {
             
             world.frame(vulkan,dt);
 
+            DrawContext drawContext(interface,*vulkan,input);
+
+            Rect screenRect = Rect(drawContext.getScreenSize());
+
+            Sprite solidSprite = registry.getSprite("solid");
             // cursor
-            interface.drawRect(*vulkan,Rect::centered(vec2(4,0.5)),vec2(0.5,0.5),Color::white,0);
-            interface.drawRect(*vulkan,Rect::centered(vec2(0.5,4)),vec2(0.5,0.5),Color::white,0);
+            interface.drawRect(*vulkan,Rect::anchored(Rect::centered(vec2(4,0.5)),screenRect,vec2(0.5,0.5)),Color::white,solidSprite);
+            interface.drawRect(*vulkan,Rect::anchored(Rect::centered(vec2(0.5,4)),screenRect,vec2(0.5,0.5)),Color::white,solidSprite);
 
 
-            toolbarWidget.draw(interface,*vulkan);
-            inventoryWidget.draw(interface,*vulkan);
+            toolbarWidget.draw(drawContext);
+            if(player->action == Character::Action::InMenu) {
+                inventoryWidget.draw(drawContext);
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            } else {
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            }
 
             // auto hitOpt = world.raycast(player->getLookRay(),10);
             // if(hitOpt) {

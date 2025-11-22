@@ -6,6 +6,8 @@
 
 using std::string;
 
+struct ItemStack;
+
 class Character;
 
 class Item {
@@ -27,6 +29,7 @@ class Item {
         virtual Sprite getIcon() = 0;
 
 
+
         virtual void equip(Character& user) {
 
         }
@@ -39,7 +42,7 @@ class Item {
 
         }
 
-        virtual void step(World* world,Character& user,float dt) {
+        virtual void step(World* world,Character& user,ItemStack& stack,float dt) {
 
         }
 

@@ -59,8 +59,8 @@ class Interface {
 
         MeshBuffer quadMesh;
         Material material = Material::none;
-        ivec2 screenSize;
         bool readyToRender = false;
+        float scale = 10;
 
         Interface() {
 
@@ -88,16 +88,57 @@ class Interface {
         }
 
 
-        void drawRect(Vulkan& vulkan,Rect rect,vec2 anchor,Color color,Sprite sprite) {
+        void drawRect(Vulkan& vulkan,Rect rect,Color color,Sprite sprite) {
             if(!readyToRender) {
                 Debug::warn("Interface not ready to render");
                 return;
             } 
-
-            rect.position += (vec2)vulkan.getScreenSize() * anchor;
+            rect.position *= scale;
 
             glm::mat4 model = glm::translate(glm::mat4(1.0f),vec3(rect.position,1));
-            model = glm::scale(model,vec3(rect.size,1));
+            model = glm::scale(model,vec3(rect.size * scale,1));
             vulkan.addMeshWithData<UIExtraPushData>(quadMesh,material,UIExtraPushData(color.asVec4(),sprite),model);
+        }
+
+};
+
+struct DrawContext {
+    private:
+        Interface& interface;
+        Vulkan& vulkan;
+        Input& input;
+    public:
+        DrawContext(Interface& interface,Vulkan& vulkan,Input& input) : interface(interface), vulkan(vulkan), input(input) {}
+
+        void drawRect(Rect rect,Color color,Sprite sprite) {
+            interface.drawRect(vulkan,rect,color,sprite);
+        }
+
+        vec2 getScreenSize() {
+            return vulkan.getScreenSize() / interface.scale;
+        }
+
+        vec2 getMousePosition() {
+            return (input.currentMousePosition / interface.scale) * 2.0f; // double size because of mac retina lol;
+        }
+
+        Input& getInput() {
+            return input;
+        }
+
+        bool mouseInside(Rect rect) {
+            vec2 mouse = getMousePosition();
+            if(mouse.x < rect.position.x) return false;
+            if(mouse.y < rect.position.y) return false;
+            if(mouse.x > rect.position.x + rect.size.x) return false;
+            if(mouse.y > rect.position.y + rect.size.y) return false;
+            return true;
+        }
+
+        bool mouseLeftClicked() {
+            return input.getMouseButtonPressed(GLFW_MOUSE_BUTTON_1);
+        }
+        bool mouseRightClicked() {
+            return input.getMouseButtonPressed(GLFW_MOUSE_BUTTON_2);
         }
 };

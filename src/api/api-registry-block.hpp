@@ -8,6 +8,7 @@
 #include "api/api-registry.hpp"
 #include <block/cockpit-block.hpp>
 #include <block/thruster-block.hpp>
+#include <block/furnace-block.hpp>
 
 using std::string,std::variant;
 
@@ -46,7 +47,11 @@ namespace API {
                 break;
         }
     }
+    
     void loadBlockCockpit(ObjLoadType loadType,sol::table table,CockpitBlock* block,Registry& registry) {
+        loadBlockBaseType(loadType,table,block,registry);
+    }
+    void loadBlockFurnace(ObjLoadType loadType,sol::table table,FurnaceBlock* block,Registry& registry) {
         loadBlockBaseType(loadType,table,block,registry);
     }
 
@@ -61,6 +66,12 @@ namespace API {
             ThrusterBlock* block = registry.addBlock<ThrusterBlock>(name);
             loadBlockThruster(loadType,table,block,registry);
             Debug::info("Loaded Thruster Block \"" + name + "\"",InfoPriority::MEDIUM);
+            return;
+        }
+        if(type == "furnace") {
+            FurnaceBlock* block = registry.addBlock<FurnaceBlock>(name);
+            loadBlockFurnace(loadType,table,block,registry);
+            Debug::info("Loaded Furnace Block \"" + name + "\"",InfoPriority::MEDIUM);
             return;
         }
         Block* block = registry.addBlock<Block>(name);
