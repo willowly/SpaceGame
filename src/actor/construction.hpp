@@ -14,6 +14,8 @@
 #include <block/block.hpp>
 #include <block/block-state.hpp>
 
+#include <block/actor/block-actor.hpp>
+
 using glm::ivec3,glm::vec3;
 using std::unordered_map;
 
@@ -115,14 +117,21 @@ class Construction : public Actor {
             Location(ivec3 i) : x(i.x), y(i.y), z(i.z) {
                 
             }
+            ivec3 asVec3() const {
+                return ivec3(x,y,z);
+            }
 
             constexpr auto operator<=>(const Location&) const = default;
 
         };
 
+        std::map<Location,std::unique_ptr<BlockActor>> blockActors;
+
         void step(World* world,float dt) {
             
-            
+            for(auto& pair : blockActors) {
+                pair.second->step(world,this,pair.first.asVec3(),dt);
+            }
 
             // i have no idea why z and x are inverted :shrug:
             // if(moveControl.z > 0) {
@@ -278,6 +287,10 @@ class Construction : public Actor {
                 blockData[index].block->onBreak(this,location,blockData[index].state);
                 blockCount--;
                 blockCountX[location.x - min.x]--;
+
+                if(blockActors.contains(Location(location))) {
+                    blockActors.erase(Location(location));
+                }
             }
             //Debug::info("index: " + std::to_string(index) + " " + StringHelper::toString(location),InfoPriority::LOW);
             if(block != nullptr) {
@@ -351,6 +364,12 @@ class Construction : public Actor {
             if(location.y < min.y) return false;
             if(location.z < min.z) return false;
             return true;
+        }
+
+        template<typename T,typename... Args> 
+        BlockActor* spawnBlockActor(ivec3 location,Args... args) {
+            blockActors[location] = std::make_unique<T>(std::forward<Args>(args)...);
+            return blockActors[location].get();
         }
 
         void createBlockMap(map<Location,BlockData>& blockMap) {

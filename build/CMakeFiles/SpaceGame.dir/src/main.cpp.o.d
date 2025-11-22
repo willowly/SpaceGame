@@ -1288,6 +1288,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/sprite.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/rect.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/block/block-state.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/block/actor/block-actor.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/recipe.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/components/inventory.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/terrain.hpp \
@@ -1318,6 +1319,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Users/willow/Documents/GitHub/SpaceGame/src/block/cockpit-block.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/block/thruster-block.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/block/furnace-block.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/block/actor/furnace-block-actor.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/interface/interface.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/clock.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/interface/toolbar-widget.hpp \

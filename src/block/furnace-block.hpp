@@ -4,6 +4,8 @@
 #include "actor/construction.hpp"
 #include "actor/character.hpp"
 
+#include "actor/furnace-block-actor.hpp"
+
 
 class FurnaceBlock : public Block {
     public:
@@ -13,6 +15,10 @@ class FurnaceBlock : public Block {
             
         }
         FurnaceBlock() : FurnaceBlock(nullptr,Material::none) {}
+
+        virtual void onPlace(Construction* construction,ivec3 position,BlockState& state) {
+            construction->spawnBlockActor<FurnaceBlockActor>(position);
+        }
 
         virtual void onInteract(Construction* construction,ivec3 position,BlockState& state,Character& character) {
             std::cout << "wow" << std::endl;
