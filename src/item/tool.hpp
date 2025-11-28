@@ -10,7 +10,6 @@ using glm::vec3,glm::quat,glm::mat4;
 class Tool : public Item {
 
     public:
-        Sprite icon;
         Mesh<Vertex>* heldModel = nullptr;
         Material heldModelMaterial = Material::none;
         vec3 modelOffset = vec3(0.3,-0.3,-1);
@@ -18,7 +17,7 @@ class Tool : public Item {
         quat lookOrientation = glm::identity<quat>(); //the rendered one, that gets lerped
         float modelScale =  0.3f;
         float lookLerp = 10;
-
+    
         bool clickInput = false;
         bool clickHold = false;
 
@@ -46,9 +45,6 @@ class Tool : public Item {
             
         }
 
-        virtual Sprite getIcon() {
-            return icon;
-        }
 
         virtual void processInput(Input& input) {
             if(input.getMouseButtonPressed(GLFW_MOUSE_BUTTON_1)) {

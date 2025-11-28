@@ -11,20 +11,6 @@ using std::string,std::variant;
 
 namespace API {
 
-    
-    void getMaterial(sol::table table,std::variant<string,int> key,Material* pointer,Registry& registry,bool required = false) {
-        Debug::addTrace(keyAsString(key)); 
-        sol::object obj = table[key];
-        if(obj.is<string>()) {
-            string str = obj.as<string>();
-            *pointer = registry.getMaterial(str);
-            Debug::subtractTrace();
-            return;
-            
-        }
-        Debug::subtractTrace();
-        get<Material>(table,key,pointer,required);
-    }
 
     struct MaterialRegistry {
         MaterialRegistry(Registry& registry,Vulkan* vulkan) : registry(registry), vulkan(vulkan) {}

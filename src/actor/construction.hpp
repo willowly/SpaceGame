@@ -14,7 +14,7 @@
 #include <block/block.hpp>
 #include <block/block-state.hpp>
 
-#include <block/actor/block-actor.hpp>
+#include "helper/generic-storage.hpp"
 
 using glm::ivec3,glm::vec3;
 using std::unordered_map;
@@ -125,12 +125,25 @@ class Construction : public Actor {
 
         };
 
-        std::map<Location,std::unique_ptr<BlockActor>> blockActors;
+        std::map<Location,GenericStorage> blockStorage;
+        std::map<Location,bool> stepCallbacks;
 
         void step(World* world,float dt) {
             
-            for(auto& pair : blockActors) {
-                pair.second->step(world,this,pair.first.asVec3(),dt);
+            for(auto& pair : stepCallbacks) {
+
+                ivec3 location = pair.first.asVec3();
+                bool enabled = pair.second;
+                if(enabled) {
+
+                    Block* block;
+                    BlockState blockState;
+                    std::tie(block,blockState) = getBlock(location);
+
+                    if(block != nullptr) {
+                        block->onStep(world,this,location,blockState,dt);
+                    }
+                }
             }
 
             // i have no idea why z and x are inverted :shrug:
@@ -288,8 +301,11 @@ class Construction : public Actor {
                 blockCount--;
                 blockCountX[location.x - min.x]--;
 
-                if(blockActors.contains(Location(location))) {
-                    blockActors.erase(Location(location));
+                if(blockStorage.contains(Location(location))) {
+                    blockStorage.erase(Location(location));
+                }
+                if(stepCallbacks.contains(Location(location))) {
+                    stepCallbacks[Location(location)] = false;
                 }
             }
             //Debug::info("index: " + std::to_string(index) + " " + StringHelper::toString(location),InfoPriority::LOW);
@@ -366,10 +382,21 @@ class Construction : public Actor {
             return true;
         }
 
-        template<typename T,typename... Args> 
-        BlockActor* spawnBlockActor(ivec3 location,Args... args) {
-            blockActors[location] = std::make_unique<T>(std::forward<Args>(args)...);
-            return blockActors[location].get();
+        
+        GenericStorage* addStorage(ivec3 location) {
+            blockStorage[Location(location)] = GenericStorage();
+            return &blockStorage[Location(location)];
+        }
+
+        void addStepCallback(ivec3 location) {
+            stepCallbacks[Location(location)] = true;
+        }
+
+        GenericStorage* getStorage(ivec3 location) {
+            if(blockStorage.contains(Location(location))) {
+                return &blockStorage[Location(location)];
+            }
+            return nullptr;
         }
 
         void createBlockMap(map<Location,BlockData>& blockMap) {

@@ -23,10 +23,13 @@ class Item {
         }
 
         string name;
+        Sprite defaultSprite;
 
         virtual ~Item() {}
 
-        virtual Sprite getIcon() = 0;
+        virtual Sprite getIcon() {
+            return defaultSprite;
+        }
 
 
 

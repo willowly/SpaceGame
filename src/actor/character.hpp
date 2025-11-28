@@ -20,6 +20,9 @@
 #include <GLFW/glfw3.h>
 
 
+#include "interface/actor/actor-widget.hpp"
+#include "interface/i-has-menu.hpp"
+
 
 class Character : public Actor {
 
@@ -28,10 +31,10 @@ class Character : public Actor {
 
         // Prototype constructors
         
-        enum Action {
-            Neutral,
-            InMenu
-        } action = Action::Neutral;
+        // enum Action {
+        //     Neutral,
+        //     InMenu
+        // } action = Action::Neutral;
 
 
         float moveSpeed = 5.0f;
@@ -75,7 +78,13 @@ class Character : public Actor {
 
         Inventory inventory;
 
+        IHasMenu* openMenuObject;
+
         std::vector<Recipe*> recipes;
+
+        bool inMenu;
+
+        ActorWidget<Character>* widget;
 
 
         void addRenderables(Vulkan* vulkan,float dt) {
@@ -102,14 +111,16 @@ class Character : public Actor {
                 velocity = MathHelper::lerp(velocity,targetVelocity,acceleration*dt);
                 position += velocity * dt;
 
-                switch(action) {
-                    case Action::InMenu:
-                        stepInventory(world,dt);
-                        break;
-                    case Action::Neutral:
-                        stepNeutral(world,dt);
-                    break;
-                } 
+                if(!inMenu) {
+                    if(interactInput) {
+                        interact(world);
+                    }
+                    ItemStack* currentTool = inventory.getStack(currentToolItem);
+                    if(currentTool != nullptr) {
+                        currentTool->item->step(world,*this,*currentTool,dt);
+                        heldItemData.actionTimer += dt;
+                    }
+                }
 
                 clickInput = false;
                 interactInput = false;
@@ -118,24 +129,6 @@ class Character : public Actor {
             }
 
             
-
-        }
-
-        void stepNeutral(World* world,float dt) {
-            
-            
-
-            if(interactInput) {
-                interact(world);
-            }
-            ItemStack* currentTool = inventory.getStack(currentToolItem);
-            if(currentTool != nullptr) {
-                currentTool->item->step(world,*this,*currentTool,dt);
-                heldItemData.actionTimer += dt;
-            }
-        }
-
-        void stepInventory(World* world,float dt) {
 
         }
 
@@ -186,17 +179,14 @@ class Character : public Actor {
             // eventually we want an enum for keys instead of using the defines
             
 
-            switch(action) {
-                case Action::InMenu:
-                    processInputInventory(input);
-                    break;
-                case Action::Neutral:
-                    processInputNeutral(input);
-                break;
-            } 
+            if(inMenu) {
+                processInputInventory(input);
+            } else {
+                processInputNormal(input);
+            }
         }
 
-        void processInputNeutral(Input& input) {
+        void processInputNormal(Input& input) {
             moveInput = vec3(0,0,0);
             if(input.getKey(GLFW_KEY_W)) {
                 moveInput.z -= 1; //im not sure why this exists :shrug:
@@ -258,7 +248,7 @@ class Character : public Actor {
             }
 
             if(input.getKeyPressed(GLFW_KEY_TAB)) {
-                setActionInventory();
+                openMenu();
             }
             moveMouse(input.getMouseDelta() * 0.01f);
         }
@@ -266,7 +256,10 @@ class Character : public Actor {
         void processInputInventory(Input& input) {
             moveInput = vec3(0,0,0);
             if(input.getKeyPressed(GLFW_KEY_TAB)) {
-                setActionNeutral();
+                closeMenu();
+            }
+            if(input.getKeyPressed(GLFW_KEY_F)) {
+                closeMenu();
             }
             input.getMouseDelta();
         }
@@ -306,13 +299,20 @@ class Character : public Actor {
             setCurrentTool(selectedTool);
         }
 
-        void setActionNeutral() {
-            action = Action::Neutral;
+        void closeMenu() {
+            inMenu = false;
+            openMenuObject = nullptr;
         }
 
-        void setActionInventory() {
+        void openMenu() {
+            openMenu(nullptr);
+        }
+
+        void openMenu(IHasMenu* menuObject) {
             heldItemData.setAction(0);
-            action = Action::InMenu;
+            inMenu = true;
+            openMenuObject = menuObject;
+            
         }
 
         void moveMouse(vec2 delta) {

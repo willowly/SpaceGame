@@ -2,6 +2,7 @@
 #include "actor/terrain.hpp"
 #include "helper/anim.hpp"
 #include "math.h"
+#pragma once
 
 
 class PickaxeTool : public Tool {

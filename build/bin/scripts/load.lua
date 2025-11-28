@@ -1,22 +1,11 @@
 print("Loading Materials")
 
--- materials.cow = {shaders.lit,textures.cow}
 
 materials.grid = {
     --shader=shaders.lit,
     texture=textures.grid_dark,
 }
 
--- materials.container = {
---     shader="lit",
---     texture="container",
--- }
-
--- materials.white = {
---     shader="lit",
---     texture="solid",
---     color=color(0.1,0.5,0.8)
--- }
 
 materials.pickaxe = {
     texture=textures.pickaxe_smooth,
@@ -75,19 +64,41 @@ blocks.thruster = {
 
 blocks.furnace = {
     type = "furnace",
-    model = "block",
+    model = "furnace",
     material = "thruster"
 }
 
+print("Loading Items")
 
--- function setBlock(x,y,z)
---     construction:setBlock(ivec3(x,y,z),1);
--- end
+items.stone = {
+    type = "resource",
+    name = "Stone",
+    icon = "stone_item"
+}
 
--- function setBounds(x1,y1,z1,x2,y2,z2)
---     construction:setBounds(ivec3(x1,y1,z1),ivec3(x2,y2,z2));
--- end
+items.tin_plate = {
+    type = "placetool",
+    name = "Tin Plate",
+    icon = "tin_plate",
+    model = "block",
+    material = "tin_block",
+    block = "tin"
+}
 
--- function rotate(angle)
---     construction:rotate(vec3(0,angle,0))
--- end
+items.tin_ore = {
+    type = "resource",
+    name = "Tin Ore",
+    icon = "tin_ore_item"
+}
+
+items.furnace = {
+    type = "placetool",
+    name = "Furnace",
+    icon = "furnace_item",
+    model = "furnace",
+    material = "thruster",
+    block = "furnace"
+}
+
+blocks.furnace.drop = items.furnace
+blocks.tin.drop = items.tin_plate

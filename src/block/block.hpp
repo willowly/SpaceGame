@@ -35,6 +35,11 @@ class Block {
 
         }
 
+        // needs to use construction.addStepCallback() to make work
+        virtual void onStep(World* world,Construction* construction,ivec3 position,BlockState& state,float dt) {
+
+        }
+
         virtual optional<ItemStack> getDrop(BlockState& state) {
             if(drop == nullptr) {
                 return std::nullopt;

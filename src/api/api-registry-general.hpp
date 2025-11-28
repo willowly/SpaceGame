@@ -83,6 +83,21 @@ namespace API {
         get<TextureID>(table,key,pointer,required);
     }
 
+    void getSprite(sol::table table,std::variant<string,int> key,Sprite* pointer,Registry& registry,bool required = false) {
+        Debug::addTrace(keyAsString(key));
+        sol::object obj = table[key];
+        if(obj.is<string>()) {
+            string str = obj.as<string>();
+            *pointer = registry.getSprite(str);
+            Debug::subtractTrace();
+            return;
+            
+        }
+        //TODO add extra here
+        Debug::subtractTrace();
+        get<Sprite>(table,key,pointer,required);
+    }
+
     void getModel(sol::table table,std::variant<string,int> key,Mesh<Vertex>** pointer,Registry& registry,bool required = false) {
         Debug::addTrace(keyAsString(key));
         sol::object obj = table[key];
@@ -96,6 +111,37 @@ namespace API {
         Debug::subtractTrace();
         get<Mesh<Vertex>*>(table,key,pointer,required);
     }
+
+    //i actually think these should go in here, otherwise theres a dependancy nightmare
+    void getMaterial(sol::table table,std::variant<string,int> key,Material* pointer,Registry& registry,bool required = false) {
+        Debug::addTrace(keyAsString(key)); 
+        sol::object obj = table[key];
+        if(obj.is<string>()) {
+            string str = obj.as<string>();
+            *pointer = registry.getMaterial(str);
+            Debug::subtractTrace();
+            return;
+            
+        }
+        Debug::subtractTrace();
+        get<Material>(table,key,pointer,required);
+    }
+
+    void getBlock(sol::table table,std::variant<string,int> key,Block** pointer,Registry& registry,bool required = false) {
+        Debug::addTrace(keyAsString(key)); 
+        sol::object obj = table[key];
+        if(obj.is<string>()) {
+            string str = obj.as<string>();
+            *pointer = registry.getBlock(str);
+            Debug::subtractTrace();
+            return;
+            
+        }
+        Debug::subtractTrace();
+        get<Block*>(table,key,pointer,required);
+    }
+
+
 
     string getType(sol::this_state& thisState,sol::object obj) {
         string type;
@@ -127,6 +173,19 @@ namespace API {
         
         void newindex(string name,sol::object obj) {
             throw std::runtime_error("Cannot modify texture registry");
+        }
+    };
+
+    struct SpriteRegistry {
+        SpriteRegistry(Registry& registry) : registry(registry) {}
+        Registry& registry;
+
+        Sprite index(string name) {
+            return registry.getSprite(name);
+        }
+        
+        void newindex(string name,sol::object obj) {
+            throw std::runtime_error("Cannot modify sprite registry (just yet)");
         }
     };
 

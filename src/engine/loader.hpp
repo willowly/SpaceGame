@@ -107,6 +107,7 @@ class Loader {
             lua["materials"] = API::MaterialRegistry(registry,vulkan);
             lua["actors"] = API::ActorRegistry(registry);
             lua["blocks"] = API::BlockRegistry(registry);
+            lua["items"] = API::ItemRegistry(registry);
             lua.do_file("scripts/load.lua");
         }
 

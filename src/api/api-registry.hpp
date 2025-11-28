@@ -9,6 +9,7 @@
 #include <api/api-registry-material.hpp>
 #include <api/api-registry-actor.hpp>
 #include <api/api-registry-block.hpp>
+#include <api/api-registry-item.hpp>
 
 using std::string,std::variant;
 
@@ -40,6 +41,11 @@ namespace API {
 
         blockRegistry["__index"] = &BlockRegistry::index;
         blockRegistry["__newindex"] = &BlockRegistry::newindex;
+
+        sol::usertype<ItemRegistry> itemRegistry = lua.new_usertype<ItemRegistry>("itemRegistry",sol::no_constructor);
+
+        itemRegistry["__index"] = &ItemRegistry::index;
+        itemRegistry["__newindex"] = &ItemRegistry::newindex;
 
     }
 

@@ -21,8 +21,8 @@
 #include "helper/clock.hpp"
 
 
-#include "interface/toolbar-widget.hpp"
-#include "interface/inventory-widget.hpp"
+#include "interface/actor/player-widget.hpp"
+#include "interface/block/furnace-widget.hpp"
 
 #include "item/items-all.hpp"
 #include "item/recipe.hpp"
@@ -92,28 +92,23 @@ class GameApplication {
 
         Interface interface;
 
+        PlayerWidget playerWidget;
         ToolbarWidget toolbarWidget;
         InventoryWidget inventoryWidget;
+        ItemSlotWidget itemSlotWidget;
+
+        FurnaceWidget furnaceWidget;
 
         Font font;
+
+        PickaxeTool pickaxe;
 
 
         Material terrainMaterial = Material::none;
 
 
-        PlaceBlockTool placeTin;
-        PlaceBlockTool placeCockpit;
-        PlaceBlockTool placeThruster;
-        PlaceBlockTool placeFurnace;
-        PickaxeTool pickaxe;
-
-
-        ResourceItem stoneItem;
-        ResourceItem aluminumOreItem;
-        ResourceItem rubyItem;
-
-        Recipe makeAluminumPlate = Recipe(ItemStack(&placeTin,1));
-        Recipe makeFurnace = Recipe(ItemStack(&placeFurnace,1));
+        Recipe makeAluminumPlate = Recipe(ItemStack(registry.getItem("tin_plate"),1));
+        Recipe makeFurnace = Recipe(ItemStack(registry.getItem("furnace_item"),1));
 
 
         
@@ -217,26 +212,10 @@ class GameApplication {
 
             world.spawn(Actor::makeInstance(planePrototype,vec3(0,-3,0)));
 
-            registry.getBlock("tin")->drop = &placeTin;
-
-            placeTin = PlaceBlockTool(registry.getBlock("tin"));
-            placeTin.icon = registry.getTexture("tin_plate");
-            placeTin.name = "Aluminum Plate";
-
-            registry.getBlock("furnace")->drop = &placeFurnace;
-
-            placeFurnace = PlaceBlockTool(registry.getBlock("furnace"));
-            placeFurnace.icon = registry.getSprite("furnace_item");
-            placeFurnace.name = "Furnace";
-
-            placeCockpit = PlaceBlockTool(registry.getBlock("cockpit"));
-            placeCockpit.icon = registry.getTexture("cockpit_item");
-
-            placeThruster = PlaceBlockTool(registry.getBlock("thruster"));
-            placeThruster.icon = registry.getTexture("thruster_item");
+            
 
             pickaxe = PickaxeTool(registry.getModel("pickaxe"),registry.getMaterial("pickaxe"),vec3(0.2,-0.4,-0.5),quat(vec3(glm::radians(-5.0f),glm::radians(90.0f),glm::radians(-5.0f))));
-            pickaxe.icon = registry.getTexture("pickaxe_item");
+            pickaxe.defaultSprite = registry.getTexture("pickaxe_item");
 
             //world.spawn(Construction::makeInstance(tin,vec3(0)));
 
@@ -248,28 +227,25 @@ class GameApplication {
             terrain->oreTexture = registry.getTexture("ore");
             terrain->generateMesh(); // needs to generate after the texture is applied. information for this should be passed into the terrain material
 
-            stoneItem.icon = registry.getSprite("stone_item");
-            stoneItem.name = "Stone";
-            terrain->item1 = &stoneItem;
+            auto stoneItem = registry.getItem("stone");
+            terrain->item1 = stoneItem;
 
-            aluminumOreItem.icon = registry.getSprite("aluminum_ore_item");
-            aluminumOreItem.name = "Aluminum Ore";
-            terrain->item2 = &aluminumOreItem;
+            auto tinOre = registry.getItem("tin_ore");
+            terrain->item2 = tinOre;
 
-            makeAluminumPlate.result = ItemStack(&placeTin,1);
+            makeAluminumPlate.result = ItemStack(registry.getItem("tin_plate"),1);
 
-            makeAluminumPlate.ingredients.push_back(ItemStack(&aluminumOreItem,5));
+            makeAluminumPlate.ingredients.push_back(ItemStack(tinOre,5));
 
-            makeFurnace.ingredients.push_back(ItemStack(&stoneItem,5));
+            makeFurnace.result = ItemStack(registry.getItem("furnace"),1);
+
+            makeFurnace.ingredients.push_back(ItemStack(stoneItem,10));
             
 
-            rubyItem.icon = registry.getSprite("ruby_item");
-            rubyItem.name = "Ruby";
-            terrain->item3 = &rubyItem;
 
             playerPrototype->toolbar[0] = &pickaxe;
-            playerPrototype->toolbar[1] = &placeFurnace;
-            playerPrototype->toolbar[2] = &placeTin;
+            playerPrototype->toolbar[1] = registry.getItem("furnace");
+            playerPrototype->toolbar[2] = registry.getItem("tin_plate");
 
             player = world.spawn(Character::makeInstance(playerPrototype.get(),vec3(0.0,0.0,0.0)));
 
@@ -279,20 +255,28 @@ class GameApplication {
             Debug::loadRenderResources(*vulkan);
             interface.loadRenderResources(*vulkan);
 
-            toolbarWidget.player = player;
+
             toolbarWidget.solidSprite = registry.getSprite("solid");
 
-            inventoryWidget.player = player;
+
             inventoryWidget.solid = registry.getSprite("solid");
             inventoryWidget.font = &font;
             inventoryWidget.tooltipTextTitle.font = &font;
-            inventoryWidget.itemSlot.sprite = registry.getSprite("solid");
-            inventoryWidget.itemSlot.font = &font;
-            inventoryWidget.itemSlot.color = Color(0.1,0.1,0.1);
 
-            toolbarWidget.itemSlot.sprite = registry.getSprite("solid");
-            toolbarWidget.itemSlot.font = &font;
-            toolbarWidget.itemSlot.color = Color(0.0,0.0,0.0,0.0);
+            furnaceWidget.solid = registry.getSprite("solid");
+            furnaceWidget.font = &font;
+            furnaceWidget.tooltipTextTitle.font = &font;
+
+            itemSlotWidget.sprite = registry.getSprite("solid");
+            itemSlotWidget.font = &font;
+            itemSlotWidget.color = Color(0.0,0.0,0.0,0.0);
+
+            inventoryWidget.itemSlot = &itemSlotWidget;
+            toolbarWidget.itemSlot = &itemSlotWidget;
+
+            playerWidget.inventoryWidget = &inventoryWidget;
+            playerWidget.toolbarWidget = &toolbarWidget;
+
 
             font.texture = registry.getTexture("characters");
             font.start = '0';
@@ -300,19 +284,25 @@ class GameApplication {
             font.textureSize = vec2(312,12);
             font.characters = "0123456789x.ABCDEFGHIJKLMNOPQRSTUVWXYZ ";
 
-            player->inventory.give(&stoneItem,5);
-            player->inventory.give(&aluminumOreItem,1);
+            player->inventory.give(stoneItem,5);
+            player->inventory.give(registry.getItem("tin_ore"),1);
             player->inventory.give(&pickaxe,1);
-            player->inventory.give(&placeTin,5);
-            player->inventory.give(&placeFurnace,1);
+            player->inventory.give(registry.getItem("tin_plate"),5);
+            player->inventory.give(registry.getItem("furnace"),1);
 
-            player->recipes.push_back(&makeAluminumPlate);
             player->recipes.push_back(&makeFurnace);
+            
+            FurnaceBlock* furnace = static_cast<FurnaceBlock*>(registry.getBlock("furnace"));
+            furnace->recipes.push_back(&makeAluminumPlate);
+            furnace->widget = &furnaceWidget;
+
+            player->widget = &playerWidget;
             
 
         }
 
-        void loop() {
+        void loop() 
+        {
 
             // Get inputs, window resize, and more
             glfwPollEvents();
@@ -347,12 +337,16 @@ class GameApplication {
             interface.drawRect(*vulkan,Rect::anchored(Rect::centered(vec2(4,0.5)),screenRect,vec2(0.5,0.5)),Color::white,solidSprite);
             interface.drawRect(*vulkan,Rect::anchored(Rect::centered(vec2(0.5,4)),screenRect,vec2(0.5,0.5)),Color::white,solidSprite);
 
-
-            toolbarWidget.draw(drawContext);
-            if(player->action == Character::Action::InMenu) {
-                inventoryWidget.draw(drawContext);
+            if(player->widget != nullptr) {
+                player->widget->draw(drawContext,*player);
+            }
+            
+            if(player->inMenu) 
+            {
                 glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-            } else {
+            } 
+            else 
+            {
                 glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
             }
 
