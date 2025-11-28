@@ -14,6 +14,10 @@ materials.pickaxe = {
 materials.tin_block = {
     texture=textures.tin_block,
 }
+
+materials.furnace = {
+    texture="furnace"
+}
 -- materials.cobalt_block = {"lit","cobalt_block"}
 materials.cockpit = {"lit","cockpit"}
 materials.thruster = {"lit","solid",color(0.15,0.15,0.2)}
@@ -65,7 +69,7 @@ blocks.thruster = {
 blocks.furnace = {
     type = "furnace",
     model = "furnace",
-    material = "thruster"
+    material = "furnace"
 }
 
 print("Loading Items")
@@ -98,6 +102,24 @@ items.furnace = {
     model = "furnace",
     material = "thruster",
     block = "furnace"
+}
+
+items.thruster = {
+    type = "placetool",
+    name = "Thruster",
+    icon = "thruster_item",
+    model = "block",
+    material = "thruster",
+    block = "thruster"
+}
+
+items.cockpit = {
+    type = "placetool",
+    name = "Cockpit",
+    icon = "cockpit_item",
+    model = "cockpit",
+    material = "cockpit",
+    block = "cockpit"
 }
 
 blocks.furnace.drop = items.furnace

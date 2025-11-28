@@ -24,7 +24,7 @@ class FurnaceWidget : public BlockWidget<FurnaceBlock> {
 
         TextWidget tooltipTextTitle;
 
-        void draw(DrawContext context,Character& user,FurnaceBlock& furnace) {
+        void draw(DrawContext context,Character& user,FurnaceBlock& furnace,GenericStorage& storage,BlockState& state) {
 
             Rect screen = context.getScreenSize();
 
@@ -42,40 +42,47 @@ class FurnaceWidget : public BlockWidget<FurnaceBlock> {
             float padding = 0.1f;
 
             
+            auto inputStackOpt = storage.getStack(furnace.INPUTSTACK_VAR);
 
+            auto inputRect = Rect::anchored(Rect(vec2(padding),slotSize),mainPanel,vec2(0,0));
+            itemSlot->draw(context,inputRect,inputStackOpt);
 
-            Rect item = Rect::anchored(Rect(vec2(padding),slotSize),mainPanel,vec2(0,0));
+            Rect item = Rect::anchored(Rect::withPivot(vec2(padding,-padding),slotSize,vec2(1,0)),mainPanel,vec2(1,0));
 
             Recipe* selectedRecipe = nullptr;
 
             for (auto& recipe : furnace.recipes)
             {
-                context.drawRect(item,slots,solid);
-                context.drawRect(item,Color::white,recipe->result.item->getIcon());
-                if(context.mouseInside(item)) {
+
+                if(itemSlot->draw(context,item,recipe->result)) {
                     selectedRecipe = recipe;
                 }
+                // context.drawRect(item,slots,solid);
+                // context.drawRect(item,Color::white,recipe->result.item->getIcon());
+                // if(context.mouseInside(item)) {
+                //     selectedRecipe = recipe;
+                // }
 
-                if(recipe->result.amount > 1) {
-                    std::string str = "" + std::to_string((int)recipe->result.amount);
+                // if(recipe->result.amount > 1) {
+                //     std::string str = "" + std::to_string((int)recipe->result.amount);
 
-                    vec2 position = vec2(0.0f);
-                    std::reverse(str.begin(),str.end());
-                    for(char c : str) {
-                        context.drawRect(Rect::anchored(Rect::withPivot(position,vec2(width,width*ratio),vec2(1,1)),item,vec2(1,1)),Color::white,font->getSprite(c));
-                        position.x -= width + padding;
+                //     vec2 position = vec2(0.0f);
+                //     std::reverse(str.begin(),str.end());
+                //     for(char c : str) {
+                //         context.drawRect(Rect::anchored(Rect::withPivot(position,vec2(width,width*ratio),vec2(1,1)),item,vec2(1,1)),Color::white,font->getSprite(c));
+                //         position.x -= width + padding;
                         
-                    }
-                }
+                //     }
+                // }
                 
-                item.position.x += slotSize.x + spacing;
+                item.position.x -= slotSize.x + spacing;
                 
             }
 
             if(selectedRecipe != nullptr) {
                 drawTooltip(context,*selectedRecipe);
                 if(context.mouseLeftClicked()) {
-                    user.inventory.tryCraft(*selectedRecipe);
+                    furnace.tryStartCraft(*selectedRecipe,user,storage,state);
                 }
                 
             }

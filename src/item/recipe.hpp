@@ -6,6 +6,7 @@
 struct Recipe {
     ItemStack result;
     std::vector<ItemStack> ingredients;
+    float time;
 
     Recipe(ItemStack result) : result(result) {
         

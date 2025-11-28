@@ -94,15 +94,18 @@ class Inventory {
             return true;
         }
 
-
-
-        bool tryCraft(Recipe& recipe) {
+        bool hasIngredients(Recipe& recipe) {
             for (auto& ingredient : recipe.ingredients)
             {
                 if(!has(ingredient)) {
                     return false;
                 }
             }
+            return true;
+        }
+
+        bool tryCraft(Recipe& recipe) {
+            if(!hasIngredients(recipe)) return false;
             for (auto& ingredient : recipe.ingredients)
             {
                 take(ingredient);

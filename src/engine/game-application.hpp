@@ -96,6 +96,7 @@ class GameApplication {
         ToolbarWidget toolbarWidget;
         InventoryWidget inventoryWidget;
         ItemSlotWidget itemSlotWidget;
+        ItemSlotWidget clearItemSlotWidget;
 
         FurnaceWidget furnaceWidget;
 
@@ -236,16 +237,13 @@ class GameApplication {
             makeAluminumPlate.result = ItemStack(registry.getItem("tin_plate"),1);
 
             makeAluminumPlate.ingredients.push_back(ItemStack(tinOre,5));
+            makeAluminumPlate.time = 1;
 
             makeFurnace.result = ItemStack(registry.getItem("furnace"),1);
 
             makeFurnace.ingredients.push_back(ItemStack(stoneItem,10));
+            makeFurnace.time = 3;
             
-
-
-            playerPrototype->toolbar[0] = &pickaxe;
-            playerPrototype->toolbar[1] = registry.getItem("furnace");
-            playerPrototype->toolbar[2] = registry.getItem("tin_plate");
 
             player = world.spawn(Character::makeInstance(playerPrototype.get(),vec3(0.0,0.0,0.0)));
 
@@ -269,11 +267,16 @@ class GameApplication {
 
             itemSlotWidget.sprite = registry.getSprite("solid");
             itemSlotWidget.font = &font;
-            itemSlotWidget.color = Color(0.0,0.0,0.0,0.0);
+            itemSlotWidget.color = Color(0.1,0.1,0.1);
+
+            clearItemSlotWidget.sprite = registry.getSprite("solid");
+            clearItemSlotWidget.font = &font;
+            clearItemSlotWidget.color = Color::clear;
 
             inventoryWidget.itemSlot = &itemSlotWidget;
-            toolbarWidget.itemSlot = &itemSlotWidget;
-
+            furnaceWidget.itemSlot = &itemSlotWidget;
+            toolbarWidget.itemSlot = &clearItemSlotWidget;
+            
             playerWidget.inventoryWidget = &inventoryWidget;
             playerWidget.toolbarWidget = &toolbarWidget;
 
@@ -284,11 +287,17 @@ class GameApplication {
             font.textureSize = vec2(312,12);
             font.characters = "0123456789x.ABCDEFGHIJKLMNOPQRSTUVWXYZ ";
 
-            player->inventory.give(stoneItem,5);
-            player->inventory.give(registry.getItem("tin_ore"),1);
+            player->inventory.give(stoneItem,10);
+            player->inventory.give(registry.getItem("tin_ore"),5);
             player->inventory.give(&pickaxe,1);
-            player->inventory.give(registry.getItem("tin_plate"),5);
+            player->inventory.give(registry.getItem("tin_plate"),100);
             player->inventory.give(registry.getItem("furnace"),1);
+            player->inventory.give(registry.getItem("thruster"),10);
+            player->inventory.give(registry.getItem("cockpit"),1);
+
+            player->toolbar[0] = &pickaxe;
+            player->toolbar[1] = registry.getItem("furnace");
+            player->toolbar[2] = registry.getItem("tin_plate");
 
             player->recipes.push_back(&makeFurnace);
             

@@ -40,6 +40,7 @@ class Construction : public Actor {
     vec3 moveControl;
     quat targetRotation = glm::identity<quat>();
     float turnForce = 1.5;
+    vec3 velocity;
 
     int blockCount; //block count
 
@@ -146,28 +147,33 @@ class Construction : public Actor {
                 }
             }
 
-            // i have no idea why z and x are inverted :shrug:
-            // if(moveControl.z > 0) {
-            //     applyForce(vec3(0,0,-1) * thrustForces[BlockFacing::FORWARD] * moveControl.z);
-            // }
-            // if(moveControl.z < 0) {
-            //     applyForce(vec3(0,0,-1) * thrustForces[BlockFacing::BACKWARD] * moveControl.z);
-            // }
-            // if(moveControl.x < 0) {
-            //     applyForce(vec3(-1,0,0) * thrustForces[BlockFacing::LEFT] * moveControl.x);
-            // }
-            // if(moveControl.x > 0) {
-            //     applyForce(vec3(-1,0,0) * thrustForces[BlockFacing::RIGHT] * moveControl.x);
-            // }
-            // if(moveControl.y < 0) {
-            //     applyForce(vec3(0,1,0) * thrustForces[BlockFacing::UP] * moveControl.y);
-            // }
-            // if(moveControl.y > 0) {
-            //     applyForce(vec3(0,1,0) * thrustForces[BlockFacing::DOWN] * moveControl.y);
-            // }
-            // //velocity = MathHelper::moveTowards(velocity,rotation * targetVelocity,thrustForce * dt);
-            // rotation = glm::slerp(rotation,targetRotation,turnForce * dt);
+            //i have no idea why z and x are inverted :shrug:
+            if(moveControl.z > 0) {
+                applyForce(vec3(0,0,-1) * thrustForces[BlockFacing::FORWARD] * moveControl.z * dt);
+            }
+            if(moveControl.z < 0) {
+                applyForce(vec3(0,0,-1) * thrustForces[BlockFacing::BACKWARD] * moveControl.z * dt);
+            }
+            if(moveControl.x < 0) {
+                applyForce(vec3(-1,0,0) * thrustForces[BlockFacing::LEFT] * moveControl.x * dt);
+            }
+            if(moveControl.x > 0) {
+                applyForce(vec3(-1,0,0) * thrustForces[BlockFacing::RIGHT] * moveControl.x * dt);
+            }
+            if(moveControl.y < 0) {
+                applyForce(vec3(0,1,0) * thrustForces[BlockFacing::UP] * moveControl.y * dt);
+            }
+            if(moveControl.y > 0) {
+                applyForce(vec3(0,1,0) * thrustForces[BlockFacing::DOWN] * moveControl.y * dt);
+            }
+            //velocity = MathHelper::moveTowards(velocity,rotation * targetVelocity,thrustForce * dt);
+            rotation = glm::slerp(rotation,targetRotation,turnForce * dt);
+            position += velocity * dt;
             
+        }
+
+        void applyForce(vec3 force) {
+            velocity += transformDirection(force);
         }
 
         void addRenderables(Vulkan* vulkan,float dt) {

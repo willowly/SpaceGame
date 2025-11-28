@@ -1292,7 +1292,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/components/inventory.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/interface/actor/actor-widget.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/interface/interface.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/interface/i-has-menu.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/interface/menu-object.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/terrain.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/terrain-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/SimplexNoise.h \
@@ -1321,6 +1321,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Users/willow/Documents/GitHub/SpaceGame/src/block/cockpit-block.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/block/thruster-block.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/block/furnace-block.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/interface/block/block-menu-object.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/interface/block/block-widget.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-registry-item.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/items-all.hpp \

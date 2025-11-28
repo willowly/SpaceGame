@@ -21,7 +21,7 @@
 
 
 #include "interface/actor/actor-widget.hpp"
-#include "interface/i-has-menu.hpp"
+#include "interface/menu-object.hpp"
 
 
 class Character : public Actor {
@@ -37,6 +37,7 @@ class Character : public Actor {
         // } action = Action::Neutral;
 
 
+        // prototype
         float moveSpeed = 5.0f;
         float lookPitch = 0;
         float lookSensitivity = 5;
@@ -44,10 +45,13 @@ class Character : public Actor {
         float radius = 1;
         float acceleration = 10;
         float jumpForce = 10;
+        float craftSpeed = 1;
+
+
         bool clickInput = false;
         bool interactInput = false;
 
-        bool thirdPerson = true;
+        bool thirdPerson = false;
 
         vec3 moveInput;
 
@@ -78,9 +82,24 @@ class Character : public Actor {
 
         Inventory inventory;
 
-        IHasMenu* openMenuObject;
+        std::unique_ptr<MenuObject> openMenuObject;
 
         std::vector<Recipe*> recipes;
+
+        Recipe* currentRecipe;
+        float recipeTimer; //
+
+        Character(const Character& character) {
+            moveSpeed = character.moveSpeed;
+            lookPitch = character.lookPitch;
+            lookSensitivity = character.lookSensitivity;
+            height = character.height;
+            radius = character.radius;
+            acceleration = character.acceleration;
+            jumpForce = character.jumpForce;
+        }
+
+    
 
         bool inMenu;
 
@@ -100,12 +119,14 @@ class Character : public Actor {
 
         void step(World* world,float dt) {
 
-            
-
             if(ridingConstruction != nullptr) {
+                
                 ridingConstruction->setMoveControl(ridingConstructionRotation * moveInput);
                 ridingConstruction->setTargetRotation(getEyeRotation() * glm::inverse(ridingConstructionRotation) * glm::angleAxis(glm::radians(180.0f),vec3(0,1,0)));
                 position = ridingConstruction->transformPoint(ridingConstructionPoint);
+                if(interactInput) {
+                    dismount();
+                }
             } else {
                 vec3 targetVelocity = rotation * moveInput * moveSpeed;
                 velocity = MathHelper::lerp(velocity,targetVelocity,acceleration*dt);
@@ -128,6 +149,15 @@ class Character : public Actor {
                 world->collideBasic(this,radius);
             }
 
+            if(currentRecipe != nullptr) {
+                recipeTimer += dt * craftSpeed;
+                if(recipeTimer > currentRecipe->time) {
+                    if(inventory.tryCraft(*currentRecipe)) {
+                        cancelCraft();
+                    }
+                }
+            }
+
             
 
         }
@@ -136,6 +166,7 @@ class Character : public Actor {
             if(ridingConstruction != nullptr) {
                 dismount();
             }
+            thirdPerson = true;
             ridingConstruction = construction;
             ridingConstructionPoint = point;
             ridingConstructionRotation = rotation;
@@ -146,6 +177,7 @@ class Character : public Actor {
             position += ridingConstruction->transformDirection(vec3(0,1,0));
             ridingConstruction->resetTargets();
             ridingConstruction = nullptr;
+            thirdPerson = false;
             //body->getCollider(0)->setIsSimulationCollider(true);
         }
 
@@ -308,11 +340,25 @@ class Character : public Actor {
             openMenu(nullptr);
         }
 
-        void openMenu(IHasMenu* menuObject) {
+        void openMenu(std::unique_ptr<MenuObject> menuObject) {
             heldItemData.setAction(0);
             inMenu = true;
-            openMenuObject = menuObject;
+            openMenuObject = std::move(menuObject);
             
+        }
+
+        void startCraft(Recipe& recipe) {
+            if(!inventory.hasIngredients(recipe)) {
+                // dont even start it
+                return;
+            }
+            currentRecipe = &recipe;
+            recipeTimer = 0;
+        }
+
+        void cancelCraft() {
+            currentRecipe = nullptr;
+            recipeTimer = 0;
         }
 
         void moveMouse(vec2 delta) {
@@ -323,13 +369,13 @@ class Character : public Actor {
         }
 
         void setCamera(Camera& camera) {
-            // if(ridingConstruction == nullptr && !thirdPerson) {
-                 camera.position = getEyePosition();
-                 camera.rotation = getEyeRotation();
-            // } else {
-                // camera.position = position + getEyeRotation() * thirdPersonCameraOffset;
-                // camera.rotation = getEyeRotation();
-            //}
+            if(ridingConstruction == nullptr && !thirdPerson) {
+                camera.position = getEyePosition();
+                camera.rotation = getEyeRotation();
+            } else {
+                camera.position = position + getEyeRotation() * thirdPersonCameraOffset;
+                camera.rotation = getEyeRotation();
+            }
             
         }
 

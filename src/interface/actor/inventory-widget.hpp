@@ -60,8 +60,12 @@ class InventoryWidget {
 
             item = Rect::anchored(Rect::withPivot(vec2(padding,-padding),slotSize,vec2(1,0)),mainPanel,vec2(1,0));
 
-            for (auto& recipe : player.recipes)
+            for (auto recipe : player.recipes)
             {
+                if(recipe == nullptr) {
+                    Debug::warn("null recipe in player");
+                    continue;
+                }
                 context.drawRect(item,slots,solid);
                 context.drawRect(item,Color::white,recipe->result.item->getIcon());
                 if(context.mouseInside(item)) {
@@ -79,6 +83,14 @@ class InventoryWidget {
                         
                     }
                 }
+
+                if(player.currentRecipe == recipe) {
+                    float progressPercent = player.recipeTimer/recipe->time;
+                    //context.drawRect(item,slots,solid);
+                    Rect fill(item.position + vec2(0,(1-progressPercent)*item.size.y),vec2(item.size.x,item.size.y * progressPercent));
+                    context.drawRect(fill,Color(1,1,1,0.2),solid);
+                    std::cout << "crafting this recipe " << progressPercent << std::endl;
+                }
                 
                 item.position.x -= slotSize.x + spacing;
                 
@@ -87,7 +99,7 @@ class InventoryWidget {
             if(selectedRecipe != nullptr) {
                 drawTooltip(context,*selectedRecipe);
                 if(context.mouseLeftClicked()) {
-                    player.inventory.tryCraft(*selectedRecipe);
+                    player.startCraft(*selectedRecipe);
                 }
                 
             } else {

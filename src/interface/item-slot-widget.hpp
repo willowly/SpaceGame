@@ -12,11 +12,26 @@ class ItemSlotWidget {
         Color color;
         Font* font;
 
+        bool draw(DrawContext context,Rect rect,std::optional<ItemStack>& stackOpt) {
+            if(stackOpt) {
+                return draw(context,rect,stackOpt.value());
+            } else {
+                return drawEmpty(context,rect);
+            }
+        }
+
+        bool drawEmpty(DrawContext context,Rect rect) {
+            context.drawRect(rect,color,sprite);
+            if(context.mouseInside(rect)) {
+                return true;
+            }
+            return false;
+        }
     
         // returns if mouse inside
         bool draw(DrawContext context,Rect rect,ItemStack& stack) {
 
-            context.drawRect(rect,color,sprite);
+            drawEmpty(context,rect);
             context.drawRect(rect,Color::white,stack.item->getIcon());
 
             if(stack.amount) {
