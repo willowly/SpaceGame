@@ -17,6 +17,8 @@ class PlaceBlockTool: public Tool {
 
         }
 
+        BlockFacing placeDirection = BlockFacing::FORWARD;
+
         quat placeAnimationRotation = glm::quat(vec3(glm::radians(-50.0f),0,0));
         float placeAnimationTime = 0.2;
 
@@ -33,12 +35,12 @@ class PlaceBlockTool: public Tool {
                     vec3 placePointWorld = worldHit.hit.point + worldHit.hit.normal * 0.5f;
                     vec3 placePointLocal = construction->inverseTransformPoint(placePointWorld);
                     ivec3 placePointLocalInt = glm::round(placePointLocal);
-                    auto facing = Construction::getFacingFromVector(construction->inverseTransformDirection(worldHit.hit.normal));
+                    auto facing = Construction::getFacingFromVector(Construction::getRotationFromFacing(placeDirection) * construction->inverseTransformDirection(worldHit.hit.normal));
                     construction->setBlock(placePointLocalInt,block,facing);
                 }
                 Terrain* terrain = dynamic_cast<Terrain*>(worldHit.actor);
                 if(terrain != nullptr) {
-                    world->spawn(Construction::makeInstance(block,worldHit.hit.point,user.rotation));
+                    world->spawn(Construction::makeInstance(block,worldHit.hit.point+glm::vec3(0,0.4,0),user.rotation));
                 }
             } else {
                 world->spawn(Construction::makeInstance(block,ray.origin + ray.direction*10.0f,glm::quatLookAt(ray.direction,vec3(0,1,0))));

@@ -16,6 +16,7 @@
 namespace API {
 
     void loadAPIAll(sol::state& lua) {
+        loadAPIGeneral(lua);
         loadAPITexture(lua);
         loadAPIMaterial(lua);
         loadAPIActor(lua);

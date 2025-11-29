@@ -14,7 +14,7 @@
 #include <block/block.hpp>
 #include <block/block-state.hpp>
 
-#include "helper/generic-storage.hpp"
+#include "helper/block-storage.hpp"
 
 using glm::ivec3,glm::vec3;
 using std::unordered_map;
@@ -126,7 +126,7 @@ class Construction : public Actor {
 
         };
 
-        std::map<Location,GenericStorage> blockStorage;
+        std::map<Location,BlockStorage> blockStorage;
         std::map<Location,bool> stepCallbacks;
 
         void step(World* world,float dt) {
@@ -389,8 +389,8 @@ class Construction : public Actor {
         }
 
         
-        GenericStorage* addStorage(ivec3 location) {
-            blockStorage[Location(location)] = GenericStorage();
+        BlockStorage* addStorage(ivec3 location) {
+            blockStorage[Location(location)] = BlockStorage();
             return &blockStorage[Location(location)];
         }
 
@@ -398,7 +398,7 @@ class Construction : public Actor {
             stepCallbacks[Location(location)] = true;
         }
 
-        GenericStorage* getStorage(ivec3 location) {
+        BlockStorage* getStorage(ivec3 location) {
             if(blockStorage.contains(Location(location))) {
                 return &blockStorage[Location(location)];
             }
@@ -426,6 +426,7 @@ class Construction : public Actor {
             auto ptr = new Construction();
             ptr->position = position;
             ptr->rotation = rotation;
+            ptr->targetRotation = rotation;
             return std::unique_ptr<Construction>(ptr);
         }
 

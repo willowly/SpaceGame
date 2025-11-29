@@ -101,7 +101,8 @@ items.furnace = {
     icon = "furnace_item",
     model = "furnace",
     material = "thruster",
-    block = "furnace"
+    block = "furnace",
+    placeDirection = 2,
 }
 
 items.thruster = {
@@ -120,6 +121,17 @@ items.cockpit = {
     model = "cockpit",
     material = "cockpit",
     block = "cockpit"
+}
+
+items.pickaxe = {
+    type = "pickaxe",
+    name = "Pickaxe",
+    icon = "pickaxe_item",
+    model = "pickaxe",
+    material = "pickaxe",
+    durability = 100,
+    offset = vec3(0.2,-0.4,-0.5),
+    rotation = quat(-5,90,-5)
 }
 
 blocks.furnace.drop = items.furnace

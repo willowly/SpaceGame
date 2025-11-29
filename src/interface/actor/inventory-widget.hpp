@@ -13,7 +13,7 @@ class InventoryWidget {
     public:
         Sprite solid;
         Font* font;
-        vec2 size = vec2(80,50);
+        vec2 size = vec2(80,30);
         float padding = 3;
         vec2 slotSize = vec2(10,10);
         float spacing = 2;
@@ -31,7 +31,7 @@ class InventoryWidget {
             auto slotsHover = Color(0.1,0.1,1);
             //interface.drawRect(vulkan,glm::vec2(0,-3),glm::vec2(101,12),glm::vec2(0.5,1),vec2(0.5,1),Color(0.5,0.5,0.5),solidTexture);
             
-            Rect mainPanel = Rect::anchored(Rect::centered(size),screen,vec2(0.5,0.5));
+            Rect mainPanel = Rect::anchored(Rect::withPivot(vec2(0,3),size,vec2(0.5f,0)),screen,vec2(0.5,0.5));
             context.drawRect(mainPanel,background,solid);
 
 

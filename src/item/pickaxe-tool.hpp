@@ -33,8 +33,13 @@ class PickaxeTool : public Tool {
 
         float reach = 5;
 
-        void pickaxe(World* world,Character& user,Ray ray) {
+        int durability = 10;
+
+        const int DAMAGE_VAR = 0;
+
+        void pickaxe(World* world,Character& user,ItemStack& stack,Ray ray) {
             
+            int damage = stack.storage.getInt(DAMAGE_VAR,0);
             auto worldHitOpt = world->raycast(ray,reach);
             if(worldHitOpt) {
                 auto worldHit = worldHitOpt.value();
@@ -52,6 +57,7 @@ class PickaxeTool : public Tool {
                         }
                     }
                     construction->setBlock(placePointLocalInt,nullptr,BlockFacing::FORWARD);
+                    damage++;
                 }
                 Terrain* terrain = dynamic_cast<Terrain*>(worldHit.actor);
                 if(terrain != nullptr) {
@@ -64,12 +70,23 @@ class PickaxeTool : public Tool {
                     if((results.ore) > 0) {
                         user.inventory.give(terrain->item2,results.ore);
                     }
+                    damage++;
                 }
+            }
+            std::cout << "damage: " << damage << std::endl;
+            stack.storage.setInt(DAMAGE_VAR,damage);
+            if(damage >= durability) {
+                stack.clear();
             }
         }
 
         virtual void equip(Character& user) {
             Tool::equip(user);
+        }
+
+        virtual ItemDisplayData getItemDisplay(ItemStack& stack) {
+            float damage = stack.storage.getInt(DAMAGE_VAR,0);
+            return ItemDisplayData(1-(damage/durability));
         }
 
         
@@ -119,7 +136,7 @@ class PickaxeTool : public Tool {
                 case State::ANTICIPATION:
                     if(user.heldItemData.actionTimer > anticipationTime) {
                         user.heldItemData.setAction(State::COOLDOWN);
-                        pickaxe(world,user,user.getLookRay());
+                        pickaxe(world,user,stack,user.getLookRay());
                     }
                     break;
                 case State::COOLDOWN:

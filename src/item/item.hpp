@@ -10,6 +10,14 @@ struct ItemStack;
 
 class Character;
 
+// just the durability bar for now, but maybe there will be more idk
+struct ItemDisplayData {
+    bool bar = false;
+    float barPercent = 0;
+    ItemDisplayData() {}
+    ItemDisplayData(float barPercent) : bar(true), barPercent(barPercent) {}
+};
+
 class Item {
     public:
         
@@ -29,6 +37,10 @@ class Item {
 
         virtual Sprite getIcon() {
             return defaultSprite;
+        }
+
+        virtual ItemDisplayData getItemDisplay(ItemStack& stack) {
+            return ItemDisplayData();
         }
 
 

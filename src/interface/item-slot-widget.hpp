@@ -12,6 +12,8 @@ class ItemSlotWidget {
         Color color;
         Font* font;
 
+        float barWidth = 1.0;
+
         bool draw(DrawContext context,Rect rect,std::optional<ItemStack>& stackOpt) {
             if(stackOpt) {
                 return draw(context,rect,stackOpt.value());
@@ -32,6 +34,9 @@ class ItemSlotWidget {
         bool draw(DrawContext context,Rect rect,ItemStack& stack) {
 
             drawEmpty(context,rect);
+            if(stack.item == nullptr || stack.amount == 0) {
+                return context.mouseInside(rect);
+            }
             context.drawRect(rect,Color::white,stack.item->getIcon());
 
             if(stack.amount) {
@@ -52,10 +57,13 @@ class ItemSlotWidget {
                 }
             }
 
-            if(context.mouseInside(rect)) {
-                return true;
+            
+            auto display = stack.item->getItemDisplay(stack);
+            if(display.bar) {
+                context.drawRect(Rect(rect.position+vec2(0,rect.size.y-barWidth),vec2(rect.size.x*display.barPercent,barWidth)),Color::red,sprite);
             }
-            return false;
+
+            return context.mouseInside(rect);
         }
 
 };

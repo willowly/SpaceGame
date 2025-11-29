@@ -29,9 +29,8 @@ class PlayerWidget : public ActorWidget<Character> {
         if(player.inMenu) {
             if(player.openMenuObject != nullptr) {
                 player.openMenuObject->drawMenu(context,player);
-            } else {
-                inventoryWidget->draw(context,player);
             }
+            inventoryWidget->draw(context,player);
         }
         toolbarWidget->draw(context,player);
     }

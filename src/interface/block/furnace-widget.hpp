@@ -15,7 +15,7 @@ class FurnaceWidget : public BlockWidget<FurnaceBlock> {
     public:
         Sprite solid;
         Font* font;
-        vec2 size = vec2(80,50);
+        vec2 size = vec2(80,20);
         float padding = 3;
         vec2 slotSize = vec2(10,10);
         float spacing = 2;
@@ -24,7 +24,7 @@ class FurnaceWidget : public BlockWidget<FurnaceBlock> {
 
         TextWidget tooltipTextTitle;
 
-        void draw(DrawContext context,Character& user,FurnaceBlock& furnace,GenericStorage& storage,BlockState& state) {
+        void draw(DrawContext context,Character& user,FurnaceBlock& furnace,BlockStorage& storage,BlockState& state) {
 
             Rect screen = context.getScreenSize();
 
@@ -33,21 +33,40 @@ class FurnaceWidget : public BlockWidget<FurnaceBlock> {
             auto slotsHover = Color(0.1,0.1,1);
             //interface.drawRect(vulkan,glm::vec2(0,-3),glm::vec2(101,12),glm::vec2(0.5,1),vec2(0.5,1),Color(0.5,0.5,0.5),solidTexture);
             
-            Rect mainPanel = Rect::anchored(Rect::centered(size),screen,vec2(0.5,0.5));
+            Rect mainPanel = Rect::anchored(Rect::withPivot(vec2(0,-3),size,vec2(0.5,1)),screen,vec2(0.5,0.5));
             context.drawRect(mainPanel,background,solid);
 
 
-            float width = 1.5;
-            float ratio = 1.5;
-            float padding = 0.1f;
-
             
-            auto inputStackOpt = storage.getStack(furnace.INPUTSTACK_VAR);
+            auto inputStack = storage.getStack(furnace.INPUTSTACK_VAR);
+            auto outputStack = storage.getStack(furnace.OUTPUTSTACK_VAR);
+            auto currentRecipe = storage.getPointer<Recipe>(furnace.CURRENTRECIPE_VAR);
+            float timer = storage.getFloat(furnace.TIMER_VAR);
 
-            auto inputRect = Rect::anchored(Rect(vec2(padding),slotSize),mainPanel,vec2(0,0));
-            itemSlot->draw(context,inputRect,inputStackOpt);
+            ItemStack* selectedSlot = nullptr;
 
-            Rect item = Rect::anchored(Rect::withPivot(vec2(padding,-padding),slotSize,vec2(1,0)),mainPanel,vec2(1,0));
+            auto slotRect = Rect::anchored(Rect(vec2(padding),slotSize),mainPanel,vec2(0,0));
+            if(itemSlot->draw(context,slotRect,inputStack)) {
+                selectedSlot = &inputStack;
+            }
+
+            auto barRect = Rect::withPivot(slotRect.topRight()+vec2(15-slotRect.size.x*0.5f,slotRect.size.y*0.5f),vec2(15.0-slotRect.size.x*0.5f,3.0),vec2(0.5f));
+
+            context.drawRect(barRect,slots,solid);
+
+            if(currentRecipe != nullptr) {
+                auto progress = timer/currentRecipe->time;
+                progress = fmin(fmax(progress,0),1);
+                barRect = Rect::anchored(Rect::withPivot(vec2(barRect.size.x*progress,barRect.size.y),vec2(0,0.5)),barRect,vec2(0,0.5));
+                context.drawRect(barRect,Color::red,solid);
+            }
+
+            slotRect.position += vec2(30,0);
+            if(itemSlot->draw(context,slotRect,outputStack)) {
+                selectedSlot = &outputStack;
+            }
+
+            Rect item = Rect::anchored(Rect::withPivot(vec2(-padding,padding),slotSize,vec2(1,0)),mainPanel,vec2(1,0));
 
             Recipe* selectedRecipe = nullptr;
 
@@ -57,23 +76,6 @@ class FurnaceWidget : public BlockWidget<FurnaceBlock> {
                 if(itemSlot->draw(context,item,recipe->result)) {
                     selectedRecipe = recipe;
                 }
-                // context.drawRect(item,slots,solid);
-                // context.drawRect(item,Color::white,recipe->result.item->getIcon());
-                // if(context.mouseInside(item)) {
-                //     selectedRecipe = recipe;
-                // }
-
-                // if(recipe->result.amount > 1) {
-                //     std::string str = "" + std::to_string((int)recipe->result.amount);
-
-                //     vec2 position = vec2(0.0f);
-                //     std::reverse(str.begin(),str.end());
-                //     for(char c : str) {
-                //         context.drawRect(Rect::anchored(Rect::withPivot(position,vec2(width,width*ratio),vec2(1,1)),item,vec2(1,1)),Color::white,font->getSprite(c));
-                //         position.x -= width + padding;
-                        
-                //     }
-                // }
                 
                 item.position.x -= slotSize.x + spacing;
                 
@@ -84,8 +86,21 @@ class FurnaceWidget : public BlockWidget<FurnaceBlock> {
                 if(context.mouseLeftClicked()) {
                     furnace.tryStartCraft(*selectedRecipe,user,storage,state);
                 }
+                return; //need to fix this,see comment below
+                
+            } else {
+                if(selectedSlot != nullptr && selectedSlot->item != nullptr) {
+                    drawTooltip(context,*selectedSlot);
+                    if(context.mouseLeftClicked()) {
+                        user.inventory.give(*selectedSlot); //make this a call to the furnace :)
+                        selectedSlot->clear();
+                    }
+                }
                 
             }
+
+            storage.setStack(furnace.INPUTSTACK_VAR,inputStack);
+            storage.setStack(furnace.OUTPUTSTACK_VAR,outputStack);
             
             
         }

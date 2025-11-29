@@ -22,6 +22,23 @@ struct Rect {
 
     }
 
+    vec2 bottomRight() {
+        return vec2(position+size);
+    }
+    vec2 bottomLeft() {
+        return vec2(position.x,position.y+size.y);
+    }
+    vec2 topRight() {
+        return vec2(position.x+size.x,position.y);
+    }
+    vec2 topLeft() {
+        return position;
+    }
+
+    // static Rect corners(vec2 topLeft,vec2 bottomRight) {
+
+    // }
+
     static Rect withPivot(vec2 position,vec2 size,vec2 pivot) {
         return Rect(position-(size*pivot),size);
     }
@@ -46,7 +63,7 @@ struct Rect {
         return Rect(vec2(0.0f),vec2(size));
     }
 
-    static Rect squareCenteres(vec2 position,float size) {
+    static Rect squareCentered(vec2 position,float size) {
         return Rect(position,vec2(size));
     }
 

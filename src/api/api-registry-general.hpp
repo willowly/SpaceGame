@@ -6,7 +6,7 @@
 #include "engine/debug.hpp"
 #include <graphics/color.hpp>
 
-using std::string,std::variant;
+using std::string,std::variant,glm::vec3;
 
 namespace API {
 
@@ -140,6 +140,26 @@ namespace API {
         Debug::subtractTrace();
         get<Block*>(table,key,pointer,required);
     }
+
+    // honestly fuck this for now
+    // void getVec3(sol::table table,variant<string,int> key,vec3* pointer,bool required = false) {
+    //     Debug::addTrace(keyAsString(key)); 
+    //     sol::table obj = table[key];
+    //     if(obj != sol::lua_nil) {
+    //         sol::object x = obj[1];
+    //         sol::object y = obj[1];
+    //         sol::object z = obj[1];
+    //         if(x.is<)
+    //         sol::table table = solObject;
+    //         string str = obj.as<string>();
+    //         *pointer = registry.getBlock(str);
+    //         Debug::subtractTrace();
+    //         return;
+            
+    //     }
+    //     Debug::subtractTrace();
+    //     get<Block*>(table,key,pointer,required);
+    // }
 
 
 

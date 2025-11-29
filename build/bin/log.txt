@@ -58,3 +58,4 @@
 [INFO] Loaded Place Block "furnace" (items.furnace)
 [INFO] Loaded Place Block "thruster" (items.thruster)
 [INFO] Loaded Place Block "cockpit" (items.cockpit)
+[INFO] Loaded Pickaxe Tool "pickaxe" (items.pickaxe)

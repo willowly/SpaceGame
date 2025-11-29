@@ -1286,8 +1286,9 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/item.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/sprite.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/rect.hpp \
-  /Users/willow/Documents/GitHub/SpaceGame/src/block/block-state.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/generic-storage.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/block/block-state.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/helper/block-storage.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/item/recipe.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/components/inventory.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/interface/actor/actor-widget.hpp \

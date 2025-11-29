@@ -215,9 +215,6 @@ class GameApplication {
 
             
 
-            pickaxe = PickaxeTool(registry.getModel("pickaxe"),registry.getMaterial("pickaxe"),vec3(0.2,-0.4,-0.5),quat(vec3(glm::radians(-5.0f),glm::radians(90.0f),glm::radians(-5.0f))));
-            pickaxe.defaultSprite = registry.getTexture("pickaxe_item");
-
             //world.spawn(Construction::makeInstance(tin,vec3(0)));
 
             VkPipeline terrainPipeline = vulkan->createManagedPipeline<TerrainVertex>(Vulkan::vertCodePath("terrain"),Vulkan::fragCodePath("terrain"));
@@ -237,7 +234,7 @@ class GameApplication {
             makeAluminumPlate.result = ItemStack(registry.getItem("tin_plate"),1);
 
             makeAluminumPlate.ingredients.push_back(ItemStack(tinOre,5));
-            makeAluminumPlate.time = 1;
+            makeAluminumPlate.time = 10;
 
             makeFurnace.result = ItemStack(registry.getItem("furnace"),1);
 
@@ -287,18 +284,6 @@ class GameApplication {
             font.textureSize = vec2(312,12);
             font.characters = "0123456789x.ABCDEFGHIJKLMNOPQRSTUVWXYZ ";
 
-            player->inventory.give(stoneItem,10);
-            player->inventory.give(registry.getItem("tin_ore"),5);
-            player->inventory.give(&pickaxe,1);
-            player->inventory.give(registry.getItem("tin_plate"),100);
-            player->inventory.give(registry.getItem("furnace"),1);
-            player->inventory.give(registry.getItem("thruster"),10);
-            player->inventory.give(registry.getItem("cockpit"),1);
-
-            player->toolbar[0] = &pickaxe;
-            player->toolbar[1] = registry.getItem("furnace");
-            player->toolbar[2] = registry.getItem("tin_plate");
-
             player->recipes.push_back(&makeFurnace);
             
             FurnaceBlock* furnace = static_cast<FurnaceBlock*>(registry.getBlock("furnace"));
@@ -306,6 +291,10 @@ class GameApplication {
             furnace->widget = &furnaceWidget;
 
             player->widget = &playerWidget;
+
+            lua["player"] = player;
+
+            lua.do_file("scripts/start.lua");
             
 
         }

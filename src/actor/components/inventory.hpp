@@ -14,7 +14,7 @@ class Inventory {
             std::vector<ItemStack*> list;
             for (auto& stack : items)
             {
-                if(stack.amount > 0) {
+                if(stack.item != nullptr && stack.amount > 0) {
                     list.push_back(&stack);
                 }
             }

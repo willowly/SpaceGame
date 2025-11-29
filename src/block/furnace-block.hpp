@@ -79,14 +79,20 @@ class FurnaceBlock : public Block {
 
         void craftStep(float& craftTimer,Recipe& recipe,ItemStack& inputStack,ItemStack& outputStack,float dt) {
             if(recipe.ingredients.size() == 1) {
+                auto ingredient = recipe.ingredients[0];
                 std::cout << "furnace crafting " << recipe.result.item->name << " " << craftTimer << std::endl;
+                if(!inputStack.has(ingredient)) {
+                    return;
+                }
                 craftTimer += dt * craftSpeed;
                 if(craftTimer > recipe.time) {
-                    auto ingredient = recipe.ingredients[0];
+                    
                     if(inputStack.has(ingredient)) {
-                        inputStack.amount -= ingredient.amount;
+                        if(outputStack.tryInsert(recipe.result)) {
+                            inputStack.amount -= ingredient.amount;
+                            craftTimer = 0;
+                        }
                     }
-                    craftTimer = 0;
                 }
             } else {
                 Debug::warn("furnace recipe has " + std::to_string(recipe.ingredients.size()) + " ingredients (must be 1)");
@@ -94,7 +100,7 @@ class FurnaceBlock : public Block {
             }
         }
 
-        virtual void tryStartCraft(Recipe& recipe,Character& character,GenericStorage& storage,BlockState& state) {
+        virtual void tryStartCraft(Recipe& recipe,Character& character,BlockStorage& storage,BlockState& state) {
             if(!character.inventory.hasIngredients(recipe)) {
                 return;
             }
@@ -102,10 +108,31 @@ class FurnaceBlock : public Block {
                 Debug::warn("furnace recipe has " + std::to_string(recipe.ingredients.size()) + " ingredients (must be 1)");
                 return;
             }
-            character.inventory.take(recipe.ingredients[0]); //should have them so we dont need to check
-            storage.setStack(INPUTSTACK_VAR,recipe.ingredients[0]);
-            storage.setPointer<Recipe>(CURRENTRECIPE_VAR,&recipe);
-            storage.setFloat(TIMER_VAR,0);
+             //should have them so we dont need to check
+
+            auto currentRecipe = storage.getPointer<Recipe>(CURRENTRECIPE_VAR);
+            if(currentRecipe != &recipe) {
+                storage.setFloat(TIMER_VAR,0);
+                currentRecipe = &recipe;
+            }
+
+            auto inputStack = storage.getStack(INPUTSTACK_VAR);
+            if(inputStack.tryInsert(recipe.ingredients[0])) {
+                character.inventory.take(recipe.ingredients[0]);
+            } else {
+                // try to take the item out
+                if(!inputStack.empty()) {
+                    character.inventory.give(inputStack);
+                    inputStack.clear();
+                    // try again
+                    if(inputStack.tryInsert(recipe.ingredients[0])) {
+                        character.inventory.take(recipe.ingredients[0]);
+                    }
+                }
+            }
+            storage.setStack(INPUTSTACK_VAR,inputStack);
+            storage.setPointer<Recipe>(CURRENTRECIPE_VAR,currentRecipe);
+            
 
         }
 };

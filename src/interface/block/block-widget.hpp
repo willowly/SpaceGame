@@ -12,7 +12,7 @@ class BlockWidget {
         
 
 
-    virtual void draw(DrawContext context,Character& user,BlockType& block,GenericStorage& storage,BlockState& state) = 0;
+    virtual void draw(DrawContext context,Character& user,BlockType& block,BlockStorage& storage,BlockState& state) = 0;
 
     
 };
