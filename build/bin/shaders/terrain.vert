@@ -5,13 +5,13 @@
 
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inNormal;
-layout(location = 2) in int inTextureID;
-layout(location = 3) in float inOreBlend;
+layout(location = 2) in ivec4 inTextureID;
+layout(location = 3) in vec4 inOreBlend;
 
 layout(location = 0) out vec3 outPosition;
 layout(location = 1) out vec3 outNormal;
-layout(location = 2) out int outTextureID;
-layout(location = 3) out float outOreBlend;
+layout(location = 2) out ivec4 outTextureID;
+layout(location = 3) out vec4 outOreBlend;
 
 #include "push_constant.hlsl"
 
@@ -25,5 +25,6 @@ void main() {
     outPosition = inPosition;
     outTextureID = inTextureID;
     outOreBlend = inOreBlend;
+
     
 }

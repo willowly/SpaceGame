@@ -221,24 +221,23 @@ class GameApplication {
             terrainMaterial = vulkan->createMaterial(terrainPipeline,LitMaterialData(registry.getTexture("rock")));
             
             Terrain* terrain = world.spawn(Terrain::makeInstance(terrainMaterial,vec3(0,0,10)));
-            terrain->rockTexture = registry.getTexture("rock");
-            terrain->oreTexture = registry.getTexture("ore");
+            terrain->terrainTypes[0].item = registry.getItem("stone");
+            terrain->terrainTypes[0].texture = registry.getTexture("rock");
+            terrain->terrainTypes[1].item = registry.getItem("tin_ore");
+            terrain->terrainTypes[1].texture = registry.getTexture("tin_ore");
+            terrain->terrainTypes[2].item = registry.getItem("tin_ore");
+            terrain->terrainTypes[2].texture = registry.getTexture("coal_ore");
             terrain->generateMesh(); // needs to generate after the texture is applied. information for this should be passed into the terrain material
 
-            auto stoneItem = registry.getItem("stone");
-            terrain->item1 = stoneItem;
-
-            auto tinOre = registry.getItem("tin_ore");
-            terrain->item2 = tinOre;
 
             makeAluminumPlate.result = ItemStack(registry.getItem("tin_plate"),1);
 
-            makeAluminumPlate.ingredients.push_back(ItemStack(tinOre,5));
+            makeAluminumPlate.ingredients.push_back(ItemStack(registry.getItem("tin_ore"),5));
             makeAluminumPlate.time = 10;
 
             makeFurnace.result = ItemStack(registry.getItem("furnace"),1);
 
-            makeFurnace.ingredients.push_back(ItemStack(stoneItem,10));
+            makeFurnace.ingredients.push_back(ItemStack(registry.getItem("stone"),10));
             makeFurnace.time = 3;
             
 

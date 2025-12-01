@@ -64,11 +64,8 @@ class PickaxeTool : public Tool {
                     auto results = terrain->terraformSphere(worldHit.hit.point,mineRadius,-mineAmount);
                     terrain->generateMesh();
                     
-                    if((results.stone) > 0) {
-                        user.inventory.give(terrain->item1,results.stone);
-                    }
-                    if((results.ore) > 0) {
-                        user.inventory.give(terrain->item2,results.ore);
+                    if(results.item != nullptr) {
+                        user.inventory.give(results.item,1);
                     }
                     damage++;
                 }

@@ -129,7 +129,7 @@ items.pickaxe = {
     icon = "pickaxe_item",
     model = "pickaxe",
     material = "pickaxe",
-    durability = 100,
+    durability = 300,
     offset = vec3(0.2,-0.4,-0.5),
     rotation = quat(-5,90,-5)
 }

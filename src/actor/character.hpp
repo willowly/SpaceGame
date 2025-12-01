@@ -56,6 +56,7 @@ class Character : public Actor {
         vec3 moveInput;
 
         vec3 velocity;
+        float rotationSpeed;
 
         Item* currentToolItem;
         int selectedTool;

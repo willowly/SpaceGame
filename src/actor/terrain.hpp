@@ -8,13 +8,15 @@
 #include "item/item.hpp"
 
 using std::unique_ptr;
+using glm::vec3, glm::ivec4,glm::vec4;
 
 struct TerrainVertex {
     vec3 pos;
     vec3 normal;
-    int textureID;
-    float oreBlend;
-    TerrainVertex(vec3 pos,float oreBlend,int textureID) : pos(pos),textureID(textureID),oreBlend(oreBlend)  {}
+    ivec4 textureID = ivec4(0);
+    vec4 oreBlend = vec4(0.0);
+    TerrainVertex(vec3 pos,ivec4 textureID,vec4 oreBlend) : pos(pos),textureID(textureID),oreBlend(oreBlend)  {}
+    TerrainVertex(vec3 pos) : pos(pos)  {}
 
     static VkVertexInputBindingDescription getBindingDescription() {
         VkVertexInputBindingDescription bindingDescription{};
@@ -39,16 +41,25 @@ struct TerrainVertex {
 
         attributeDescriptions[2].binding = 0;
         attributeDescriptions[2].location = 2;
-        attributeDescriptions[2].format = VK_FORMAT_R32_SINT;
+        attributeDescriptions[2].format = VK_FORMAT_R32G32B32A32_SINT;
         attributeDescriptions[2].offset = offsetof(TerrainVertex, textureID);
 
         attributeDescriptions[3].binding = 0;
         attributeDescriptions[3].location = 3;
-        attributeDescriptions[3].format = VK_FORMAT_R32_SFLOAT;
+        attributeDescriptions[3].format = VK_FORMAT_R32G32B32A32_SFLOAT;
         attributeDescriptions[3].offset = offsetof(TerrainVertex, oreBlend);
 
         return attributeDescriptions;
     }
+};
+
+struct TerrainMaterial {
+    LitMaterialData terrainTypes[8];
+};
+
+struct TerrainType {
+    Item* item;
+    TextureID texture;
 };
 
 class Terrain : public Actor {
@@ -56,7 +67,7 @@ class Terrain : public Actor {
 
     struct VoxelData {
         float amount = 0;
-        float ore = 0;
+        int type;
         int verticesStart = 0;
         int verticesEnd = 0;
     };
@@ -74,36 +85,19 @@ class Terrain : public Actor {
     public:
 
         struct TerraformResults {
-            int stone = 0;
-            int ore = 0;
+            Item* item = nullptr;
         };
 
-        Item* item1;
-        Item* item2;
-        Item* item3;
-        TextureID rockTexture;
-        TextureID oreTexture;
         int meshState = -1;
         MeshBuffer meshBuffer[FRAMES_IN_FLIGHT];
         bool meshOutOfDate;
         Material material = Material::none;
         int size = 30;
         float noiseScale = 100;
-        float oreNoiseScale = 30;
         float surfaceLevel = 0.5;
-        float oreSurfaceLevel = 0.4f;
         float cellSize = 0.5f;
-
-    Item* getItem() {
-        int r = (int)(glfwGetTime()*100);
-        if(r % 5 == 0) {
-            return item2;
-        }
-        if(r % 8 == 0) {
-            return item3;
-        }
-        return item1;
-    }
+        TerrainType terrainTypes[8];
+    
 
     void generateData() {
         terrainData.resize(size*size*size);
@@ -123,15 +117,28 @@ class Terrain : public Actor {
                     float distance = glm::length(vec3(x-radius,y-radius,z-radius));
                     float radiusInfluence = (radius-distance)/radius;
                     terrainData[i].amount = noise * (radiusInfluence+0.5f);
+                    i++;
+                }
+            }
+        }
+        generateOre(1,10,0.3);
+        generateOre(2,10,0.4);
+    }
 
-                    float oreNoise = simplex.fractal(5,x/oreNoiseScale,y/oreNoiseScale,z/oreNoiseScale);
-                    if(oreNoise > oreSurfaceLevel) {
-                        oreNoise = 1;
-                    } else {
-                        oreNoise = 0;
+    void generateOre(int id,float scale,float surfaceLevel) {
+        const SimplexNoise simplex;
+
+        int i = 0;
+        for (int z = 0; z < size; z++)
+        {
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float oreNoise = simplex.fractal(5,x/scale+(size*id/scale),y/scale,z/scale);
+                    if(oreNoise > surfaceLevel) {
+                        terrainData[i].type = id;
                     }
-                    oreNoise = fmin(fmax(oreNoise,0),1);
-                    terrainData[i].ore = oreNoise;
                     i++;
                 }
             }
@@ -202,32 +209,32 @@ class Terrain : public Actor {
         }
 
         // consolodate vertices
-        std::vector<TerrainVertex> newVertices;
-        unordered_map<vec3,std::pair<int,std::vector<vec3>>> vertexMap;
-        for(auto& i : indices) {
-            auto vertex = vertices[i];
-            if(vertexMap.contains(vertex.pos)) {
-                i = vertexMap[vertex.pos].first;
-            } else {
-                newVertices.push_back(vertex);
-                i = newVertices.size() - 1;
-                vertexMap[vertex.pos].first = i;
-            }
-            vertexMap[vertex.pos].second.push_back(vertex.normal);
-        }
-        // smooth normals
-        for (auto p : vertexMap)
-        {
-            auto& data = p.second;
-            vec3 normal = vec3(0);
-            for(auto n : data.second) {
-                normal += n;
-            }
-            normal /= data.second.size();
-            newVertices[data.first].normal = normal;
-        }
+        // std::vector<TerrainVertex> newVertices;
+        // unordered_map<vec3,std::pair<int,std::vector<vec3>>> vertexMap;
+        // for(auto& i : indices) {
+        //     auto vertex = vertices[i];
+        //     if(vertexMap.contains(vertex.pos)) {
+        //         i = vertexMap[vertex.pos].first;
+        //     } else {
+        //         newVertices.push_back(vertex);
+        //         i = newVertices.size() - 1;
+        //         vertexMap[vertex.pos].first = i;
+        //     }
+        //     vertexMap[vertex.pos].second.push_back(vertex.normal);
+        // }
+        // // smooth normals
+        // for (auto p : vertexMap)
+        // {
+        //     auto& data = p.second;
+        //     vec3 normal = vec3(0);
+        //     for(auto n : data.second) {
+        //         normal += n;
+        //     }
+        //     normal /= data.second.size();
+        //     newVertices[data.first].normal = normal;
+        // }
         
-        vertices = std::move(newVertices);
+        // vertices = std::move(newVertices);
         meshOutOfDate = true;
         std::cout << "generate time: " << (float)glfwGetTime() - clock << std::endl;
     }
@@ -247,6 +254,8 @@ class Terrain : public Actor {
         int cellIndex = getPointIndex(cellPos.x,cellPos.y,cellPos.z);
         terrainData[cellIndex].verticesStart = startIndex;
         int face[3];
+        ivec4 textureIDVec = ivec4(0);
+        std::cout << "[";
         while(i < 100) //break out if theres a problem lol
         {
             int edge = tris[i];
@@ -261,19 +270,40 @@ class Terrain : public Actor {
             float t = (surfaceLevel - a)/(b-a);
             t = std::min(std::max(t,0.0f),1.0f);
 
-            float oreBlend = terrainData[cellIndex].ore;
-            vertices.push_back(TerrainVertex((getEdgePos(edge,t) + cellPos)*cellSize,oreBlend,oreTexture));
+            
+            int closestCellIndex;
+            if(a > b) {
+                closestCellIndex = getPointIndex((int)aPos.x,(int)aPos.y,(int)aPos.z);
+            } else {
+                closestCellIndex = getPointIndex((int)bPos.x,(int)bPos.y,(int)bPos.z);
+            }
             int vertIndex = i % 3;
+
+            std::cout << "v" << vertIndex << " ";
+
+            TextureID texture = terrainTypes[terrainData[closestCellIndex].type].texture;
+
+            std::cout << texture << " ";
+            
+            auto vertex = TerrainVertex((getEdgePos(edge,t) + cellPos)*cellSize);
+            textureIDVec[vertIndex] = texture;
+            vertex.oreBlend[vertIndex] = 1;
+            
+            vertices.push_back(vertex);
             face[vertIndex] = vertices.size()-1;
             indices.push_back(vertices.size()-1);
             if(vertIndex == 2) {
                 vec3 normal = MathHelper::normalFromPlanePoints(vertices[face[0]].pos,vertices[face[1]].pos,vertices[face[2]].pos);
                 vertices[face[0]].normal = normal;
+                vertices[face[0]].textureID = textureIDVec;
                 vertices[face[1]].normal = normal;
+                vertices[face[1]].textureID = textureIDVec;
                 vertices[face[2]].normal = normal;
+                vertices[face[2]].textureID = textureIDVec;
             }
             i++;
         }
+        std::cout << "]";
         terrainData[cellIndex].verticesEnd = indices.size();
         
         
@@ -407,12 +437,10 @@ class Terrain : public Actor {
                         float old = terrainData[i].amount;
                         terrainData[i].amount += change * influence;
                         terrainData[i].amount = std::min(std::max(terrainData[i].amount,0.0f),1.0f);
+                        int terrainTypeID = terrainData[i].type;
+                        
                         if(old > surfaceLevel && terrainData[i].amount < surfaceLevel) {
-                            if(terrainData[i].ore > oreSurfaceLevel) {
-                                results.ore++;
-                            } else {
-                                results.stone++;
-                            }
+                            results.item = terrainTypes[terrainTypeID].item;
                         }
                     }
                     i++;
