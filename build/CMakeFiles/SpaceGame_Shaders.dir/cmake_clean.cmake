@@ -4,6 +4,8 @@ file(REMOVE_RECURSE
   "bin/shaders/compiled/debug_vert.spv"
   "bin/shaders/compiled/lit_frag.spv"
   "bin/shaders/compiled/lit_vert.spv"
+  "bin/shaders/compiled/skybox_frag.spv"
+  "bin/shaders/compiled/skybox_vert.spv"
   "bin/shaders/compiled/terrain_frag.spv"
   "bin/shaders/compiled/terrain_vert.spv"
   "bin/shaders/compiled/ui_frag.spv"

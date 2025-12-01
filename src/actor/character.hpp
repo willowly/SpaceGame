@@ -42,21 +42,25 @@ class Character : public Actor {
         float lookPitch = 0;
         float lookSensitivity = 5;
         float height = 0.4f;
-        float radius = 1;
-        float acceleration = 10;
+        float radius = 0.5;
+        float acceleration = 5;
         float jumpForce = 10;
         float craftSpeed = 1;
+        float rotationSpeed = 90;
+        float rotationAcceleration = 5;
 
-
+        // inputs
         bool clickInput = false;
         bool interactInput = false;
+        float rotationInput = 0;
 
         bool thirdPerson = false;
 
         vec3 moveInput;
 
         vec3 velocity;
-        float rotationSpeed;
+        float rotationVelocity;
+        
 
         Item* currentToolItem;
         int selectedTool;
@@ -132,6 +136,8 @@ class Character : public Actor {
                 vec3 targetVelocity = rotation * moveInput * moveSpeed;
                 velocity = MathHelper::lerp(velocity,targetVelocity,acceleration*dt);
                 position += velocity * dt;
+                rotationVelocity = MathHelper::lerp(rotationVelocity,rotationInput * rotationSpeed,acceleration * dt);
+                rotation = glm::angleAxis(glm::radians(rotationVelocity * dt),transformDirection(vec3(0,0,-1))) * rotation;
 
                 if(!inMenu) {
                     if(interactInput) {
@@ -238,6 +244,13 @@ class Character : public Actor {
             }
             if(input.getKey(GLFW_KEY_C)) {
                 moveInput.y -= 1;
+            }
+            rotationInput = 0;
+            if(input.getKey(GLFW_KEY_Q)) {
+                rotationInput -= 1;
+            }
+            if(input.getKey(GLFW_KEY_E)) {
+                rotationInput += 1;
             }
 
             if(input.getKeyPressed(GLFW_KEY_F)) {
@@ -363,10 +376,12 @@ class Character : public Actor {
         }
 
         void moveMouse(vec2 delta) {
-            rotation = glm::angleAxis(glm::radians(delta.x) * lookSensitivity,vec3(0,-1,0)) * rotation;
-            lookPitch += delta.y * lookSensitivity;
-            if(lookPitch > 89.9f) lookPitch = 89.9f;
-            if(lookPitch < -89.9f) lookPitch = -89.9f;
+            rotation = glm::angleAxis(glm::radians(delta.x) * lookSensitivity,transformDirection(vec3(0,-1,0))) * rotation;
+            rotation = glm::angleAxis(glm::radians(delta.y) * lookSensitivity,transformDirection(vec3(-1,0,0))) * rotation;
+            // if under gravitational forces...
+                // lookPitch += delta.y * lookSensitivity;
+                // if(lookPitch > 89.9f) lookPitch = 89.9f;
+                // if(lookPitch < -89.9f) lookPitch = -89.9f;
         }
 
         void setCamera(Camera& camera) {

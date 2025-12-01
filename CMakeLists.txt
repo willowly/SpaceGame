@@ -117,6 +117,7 @@ compile_shader("lit")
 compile_shader("terrain")
 compile_shader("ui")
 compile_shader("debug")
+compile_shader("skybox")
 
 add_custom_target(SpaceGame_Shaders DEPENDS ${SHADER_OUTPUTS})
 add_dependencies(SpaceGame SpaceGame_Shaders)

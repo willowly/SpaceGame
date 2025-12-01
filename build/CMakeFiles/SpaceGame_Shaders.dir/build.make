@@ -74,6 +74,8 @@ CMakeFiles/SpaceGame_Shaders: bin/shaders/compiled/ui_frag.spv
 CMakeFiles/SpaceGame_Shaders: bin/shaders/compiled/ui_vert.spv
 CMakeFiles/SpaceGame_Shaders: bin/shaders/compiled/debug_frag.spv
 CMakeFiles/SpaceGame_Shaders: bin/shaders/compiled/debug_vert.spv
+CMakeFiles/SpaceGame_Shaders: bin/shaders/compiled/skybox_frag.spv
+CMakeFiles/SpaceGame_Shaders: bin/shaders/compiled/skybox_vert.spv
 
 bin/shaders/compiled/debug_frag.spv: bin/shaders/debug.frag
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating bin/shaders/compiled/debug_frag.spv"
@@ -91,20 +93,28 @@ bin/shaders/compiled/lit_vert.spv: bin/shaders/lit.vert
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Generating bin/shaders/compiled/lit_vert.spv"
 	glslc /Users/willow/Documents/GitHub/SpaceGame/build/bin/shaders/lit.vert -o /Users/willow/Documents/GitHub/SpaceGame/build/bin/shaders/compiled/lit_vert.spv
 
+bin/shaders/compiled/skybox_frag.spv: bin/shaders/skybox.frag
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Generating bin/shaders/compiled/skybox_frag.spv"
+	glslc /Users/willow/Documents/GitHub/SpaceGame/build/bin/shaders/skybox.frag -o /Users/willow/Documents/GitHub/SpaceGame/build/bin/shaders/compiled/skybox_frag.spv
+
+bin/shaders/compiled/skybox_vert.spv: bin/shaders/skybox.vert
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Generating bin/shaders/compiled/skybox_vert.spv"
+	glslc /Users/willow/Documents/GitHub/SpaceGame/build/bin/shaders/skybox.vert -o /Users/willow/Documents/GitHub/SpaceGame/build/bin/shaders/compiled/skybox_vert.spv
+
 bin/shaders/compiled/terrain_frag.spv: bin/shaders/terrain.frag
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Generating bin/shaders/compiled/terrain_frag.spv"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Generating bin/shaders/compiled/terrain_frag.spv"
 	glslc /Users/willow/Documents/GitHub/SpaceGame/build/bin/shaders/terrain.frag -o /Users/willow/Documents/GitHub/SpaceGame/build/bin/shaders/compiled/terrain_frag.spv
 
 bin/shaders/compiled/terrain_vert.spv: bin/shaders/terrain.vert
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Generating bin/shaders/compiled/terrain_vert.spv"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Generating bin/shaders/compiled/terrain_vert.spv"
 	glslc /Users/willow/Documents/GitHub/SpaceGame/build/bin/shaders/terrain.vert -o /Users/willow/Documents/GitHub/SpaceGame/build/bin/shaders/compiled/terrain_vert.spv
 
 bin/shaders/compiled/ui_frag.spv: bin/shaders/ui.frag
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Generating bin/shaders/compiled/ui_frag.spv"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Generating bin/shaders/compiled/ui_frag.spv"
 	glslc /Users/willow/Documents/GitHub/SpaceGame/build/bin/shaders/ui.frag -o /Users/willow/Documents/GitHub/SpaceGame/build/bin/shaders/compiled/ui_frag.spv
 
 bin/shaders/compiled/ui_vert.spv: bin/shaders/ui.vert
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Generating bin/shaders/compiled/ui_vert.spv"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Generating bin/shaders/compiled/ui_vert.spv"
 	glslc /Users/willow/Documents/GitHub/SpaceGame/build/bin/shaders/ui.vert -o /Users/willow/Documents/GitHub/SpaceGame/build/bin/shaders/compiled/ui_vert.spv
 
 SpaceGame_Shaders: CMakeFiles/SpaceGame_Shaders
@@ -112,6 +122,8 @@ SpaceGame_Shaders: bin/shaders/compiled/debug_frag.spv
 SpaceGame_Shaders: bin/shaders/compiled/debug_vert.spv
 SpaceGame_Shaders: bin/shaders/compiled/lit_frag.spv
 SpaceGame_Shaders: bin/shaders/compiled/lit_vert.spv
+SpaceGame_Shaders: bin/shaders/compiled/skybox_frag.spv
+SpaceGame_Shaders: bin/shaders/compiled/skybox_vert.spv
 SpaceGame_Shaders: bin/shaders/compiled/terrain_frag.spv
 SpaceGame_Shaders: bin/shaders/compiled/terrain_vert.spv
 SpaceGame_Shaders: bin/shaders/compiled/ui_frag.spv

@@ -4,6 +4,8 @@
 d87dcf6bf170c2f2a78e89574d02e20f bin/shaders/compiled/debug_vert.spv
 1e50b9e483f37e13ddcba9ea8e1a6400 bin/shaders/compiled/lit_frag.spv
 e9ab2d7780739cb251b6229c55b3aecc bin/shaders/compiled/lit_vert.spv
+648361b6acf901be21ff454189460dea bin/shaders/compiled/skybox_frag.spv
+6f790e5c68bd1708e4c9b8d36621fc8f bin/shaders/compiled/skybox_vert.spv
 a5c769143664b8c5478d446cc9e98d3c bin/shaders/compiled/terrain_frag.spv
 e4f3baa68609fe5a2892337ad20caf2a bin/shaders/compiled/terrain_vert.spv
 5fcfa855142f8142c5b6cf74d57e58a9 bin/shaders/compiled/ui_frag.spv

@@ -33,7 +33,7 @@ void main() {
     vec3 lightColor = vec3(3,3,3);
     vec3 ambient = vec3(0.1,0.1,0.13);
 
-    float diff = max((dot(normal, lightDir)/2)+0.5, 0.0);
+    float diff = max(dot(normal, lightDir), 0.0);
 
     // float fresnel = 1.0f-abs(dot(normal, sceneData[push.frameIndex].viewDir));
     // fresnel = pow(fresnel,3);

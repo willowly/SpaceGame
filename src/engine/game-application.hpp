@@ -207,11 +207,8 @@ class GameApplication {
 
             lastTime = (float)glfwGetTime();
 
-            Actor* planePrototype = registry.getActor("plane");
-
             auto playerPrototype = Character::makeDefaultPrototype();
 
-            world.spawn(Actor::makeInstance(planePrototype,vec3(0,-3,0)));
 
             
 

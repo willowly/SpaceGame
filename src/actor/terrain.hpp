@@ -92,7 +92,7 @@ class Terrain : public Actor {
         MeshBuffer meshBuffer[FRAMES_IN_FLIGHT];
         bool meshOutOfDate;
         Material material = Material::none;
-        int size = 30;
+        int size = 50;
         float noiseScale = 100;
         float surfaceLevel = 0.5;
         float cellSize = 0.5f;
@@ -121,8 +121,8 @@ class Terrain : public Actor {
                 }
             }
         }
-        generateOre(1,10,0.3);
-        generateOre(2,10,0.4);
+        generateOre(1,30,0.3);
+        generateOre(2,60,0.4);
     }
 
     void generateOre(int id,float scale,float surfaceLevel) {
@@ -255,7 +255,6 @@ class Terrain : public Actor {
         terrainData[cellIndex].verticesStart = startIndex;
         int face[3];
         ivec4 textureIDVec = ivec4(0);
-        std::cout << "[";
         while(i < 100) //break out if theres a problem lol
         {
             int edge = tris[i];
@@ -279,11 +278,7 @@ class Terrain : public Actor {
             }
             int vertIndex = i % 3;
 
-            std::cout << "v" << vertIndex << " ";
-
             TextureID texture = terrainTypes[terrainData[closestCellIndex].type].texture;
-
-            std::cout << texture << " ";
             
             auto vertex = TerrainVertex((getEdgePos(edge,t) + cellPos)*cellSize);
             textureIDVec[vertIndex] = texture;
@@ -303,7 +298,6 @@ class Terrain : public Actor {
             }
             i++;
         }
-        std::cout << "]";
         terrainData[cellIndex].verticesEnd = indices.size();
         
         
