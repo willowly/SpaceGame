@@ -3918,6 +3918,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
   /Users/willow/Documents/GitHub/SpaceGame/src/graphics/color.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/graphics/mesh-data.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/graphics/mesh.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/graphics/skybox.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/graphics/vulkan.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/anim.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/block-storage.hpp \
@@ -4286,6 +4287,8 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: /Users/willow/Documents/GitHub/SpaceGam
 /usr/local/include/lua/lua.h:
 
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/geometric.hpp:
+
+/Users/willow/Documents/GitHub/SpaceGame/src/graphics/skybox.hpp:
 
 /Users/willow/Documents/GitHub/SpaceGame/include/glm/ext/vector_uint4.hpp:
 

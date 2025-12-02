@@ -12,6 +12,7 @@
 #include "helper/string-helper.hpp"
 #include "helper/random-helper.hpp"
 #include "graphics/camera.hpp"
+#include "graphics/skybox.hpp"
 #include "world.hpp"
 #include "actor/actors-all.hpp"
 #include "engine/registry.hpp"
@@ -111,7 +112,7 @@ class GameApplication {
         Recipe makeAluminumPlate = Recipe(ItemStack(registry.getItem("tin_plate"),1));
         Recipe makeFurnace = Recipe(ItemStack(registry.getItem("furnace_item"),1));
 
-
+        Skybox skybox;
         
 
         float lastTime = 0; //tells how long its been since the last update
@@ -209,7 +210,15 @@ class GameApplication {
 
             auto playerPrototype = Character::makeDefaultPrototype();
 
+            SkyboxMaterialData skyboxMaterial;
+            skyboxMaterial.top = registry.getTexture("space_up");
+            skyboxMaterial.bottom = registry.getTexture("space_dn");
+            skyboxMaterial.left = registry.getTexture("space_lf");
+            skyboxMaterial.right = registry.getTexture("space_rt");
+            skyboxMaterial.front = registry.getTexture("space_ft");
+            skyboxMaterial.back = registry.getTexture("space_bk");
 
+            skybox.loadResources(*vulkan,skyboxMaterial);
             
 
             //world.spawn(Construction::makeInstance(tin,vec3(0)));
@@ -343,6 +352,8 @@ class GameApplication {
             {
                 glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
             }
+
+            skybox.addRenderables(*vulkan,camera);
 
             // auto hitOpt = world.raycast(player->getLookRay(),10);
             // if(hitOpt) {

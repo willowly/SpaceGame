@@ -13,5 +13,7 @@ void main() {
     spriteCoord += push.spriteOffset;
     outColor = texture(texSampler[push.textureID],spriteCoord) * push.color;
 
+    gl_FragDepth = 0.0f;
+
     //outColor = vec4(1,1,1,0.5);
 }

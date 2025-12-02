@@ -79,7 +79,8 @@ class Interface {
             };
             quadMesh = vulkan.createMeshBuffers<UIVertex>(data.vertices,data.indices);
             PipelineOptions options;
-            options.depthTestEnabled = VK_FALSE;
+            options.depthTestEnabled = VK_TRUE;
+            options.depthCompareOp = VK_COMPARE_OP_ALWAYS;
             options.blend = VK_TRUE;
             VkPipeline pipeline = vulkan.createManagedPipeline<UIVertex>(Vulkan::vertCodePath("ui"),Vulkan::fragCodePath("ui"),options);
             UIMaterialData materialData;

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "vulkan.hpp"
-
+#include "engine/debug.hpp"
 
 struct SkyboxVertex {
     vec3 pos;
@@ -38,50 +38,82 @@ struct SkyboxVertex {
     }
 };
 
-struct SkyboxMaterial {
-    TextureID texture;
-    SkyboxMaterial(TextureID texture) : texture(texture) {}
+struct SkyboxMaterialData {
+    TextureID top;
+    TextureID bottom;
+    TextureID left;
+    TextureID right;
+    TextureID front;
+    TextureID back;
+    SkyboxMaterialData() {}
+    SkyboxMaterialData(TextureID top,TextureID bottom,TextureID left,TextureID right,TextureID front,TextureID back) : top(top),bottom(bottom),left(left),right(right),front(front),back(back) {}
 };
 
 class Skybox {
 
     MeshBuffer mesh;
+    bool readyToRender = false;
+    Material material = Material::none;
+
     public:
-        TextureID top;
-        Material material;
-        // TextureID bottom;
-        // TextureID left;
-        // TextureID right;
-        // TextureID front;
-        // TextureID back;
     
 
 
-    bool renderToRender;
 
-    void loadResources(Vulkan& vulkan) {
-        auto pipeline = vulkan.createManagedPipeline<SkyboxVertex>(Vulkan::vertCodePath("skybox"),Vulkan::fragCodePath("skybox"));
-        material = vulkan.createMaterial(pipeline,SkyboxMaterial(top));
+    void loadResources(Vulkan& vulkan,SkyboxMaterialData materialData) {
 
-        std::vector<SkyboxVertex> vertices = {
-            SkyboxVertex(vec3(1,1,1),  vec2(0,0),0),
-            SkyboxVertex(vec3(-1,1,1), vec2(1,0),0),
-            SkyboxVertex(vec3(1,-1,1), vec2(0,1),0),
-            SkyboxVertex(vec3(-1,-1,1),vec2(1,1),0)
-        };
+        PipelineOptions opts;
+        opts.depthCompareOp = VK_COMPARE_OP_EQUAL;
+        auto pipeline = vulkan.createManagedPipeline<SkyboxVertex>(Vulkan::vertCodePath("skybox"),Vulkan::fragCodePath("skybox"),opts);
+        material = vulkan.createMaterial(pipeline,materialData);
 
-        std::vector<uint16_t> indices = {
-            0,1,2,
-            2,3,4
-        };
+        
+
+        std::vector<SkyboxVertex> vertices;
+
+        std::vector<uint16_t> indices;
+
+        addFace(vertices,indices,glm::quat(vec3(0.0f,glm::radians(-90.0f),0.0f)),0);
+        addFace(vertices,indices,glm::quat(vec3(0.0f,0.0f,glm::radians(180.0f))),1);
+
+        
+
+        addFace(vertices,indices,glm::quat(vec3(0.0f,glm::radians(180.0f),glm::radians(-90.0f))),2);
+        addFace(vertices,indices,glm::quat(vec3(0.0f,0.0f,glm::radians(90.0f))),3);
+
+        addFace(vertices,indices,glm::quat(vec3(glm::radians(-90.0f),0.0f,glm::radians(180.0f))),4);
+        addFace(vertices,indices,glm::quat(vec3(glm::radians(90.0f),0.0f,0.0f)),5);
 
         mesh = vulkan.createMeshBuffers(vertices,indices);
+        readyToRender = true;
 
     }
 
+    void addFace(std::vector<SkyboxVertex>& vertices,std::vector<uint16_t>& indices,quat rot,int face) {
+        uint16_t i = vertices.size();
+        vertices.push_back(SkyboxVertex(rot * vec3(1,1,1),  vec2(0,0),face));
+        vertices.push_back(SkyboxVertex(rot * vec3(-1,1,1), vec2(1,0),face));
+        vertices.push_back(SkyboxVertex(rot * vec3(1,1,-1), vec2(0,1),face));
+        vertices.push_back(SkyboxVertex(rot * vec3(-1,1,-1),vec2(1,1),face));
+        
+        std::vector<int> newIndices = {0,1,2,1,2,3};
+        for(auto index : newIndices) {
+            indices.push_back(i+(uint16_t)index);
+        }
+        // 0,1,2,
+        //     1,2,3,
+    }
+
     void addRenderables(Vulkan& vulkan,Camera& camera) {
+
+        if(!readyToRender) {
+            Debug::warn("skybox not ready to render");
+            return;
+        }
+
         auto mat = glm::mat4(1.0f);
         mat = glm::translate(mat,camera.position);
+        mat = glm::scale(mat,vec3(10.0f));
         vulkan.addMesh(mesh,material,mat);
     }
 };

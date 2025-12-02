@@ -127,6 +127,7 @@ struct PipelineOptions {
     VkPolygonMode polygonMode = VK_POLYGON_MODE_FILL;
     VkPrimitiveTopology topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
     VkBool32 depthTestEnabled = VK_TRUE;
+    VkCompareOp depthCompareOp = VK_COMPARE_OP_LESS;
     VkBlendOp blendOp = VK_BLEND_OP_ADD;
     VkBool32 blend = VK_FALSE;
 };
@@ -519,7 +520,7 @@ class Vulkan {
             depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
             depthStencil.depthTestEnable = pipelineOptions.depthTestEnabled;
             depthStencil.depthWriteEnable = VK_TRUE;
-            depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
+            depthStencil.depthCompareOp = pipelineOptions.depthCompareOp;
             depthStencil.depthBoundsTestEnable = VK_FALSE;
             depthStencil.minDepthBounds = 0.0f; // Optional
             depthStencil.maxDepthBounds = 1.0f; // Optional

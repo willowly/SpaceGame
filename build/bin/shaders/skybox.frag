@@ -6,7 +6,7 @@
 
 
 layout(location = 0) flat in int face;
-layout(location = 1) out vec2 texCoord;
+layout(location = 1) in vec2 texCoord;
 
 layout(location = 0) out vec4 outColor;
 
@@ -16,7 +16,7 @@ layout(binding = 1) uniform sampler2D texSampler[];
 
 layout(scalar, buffer_reference, buffer_reference_align = 4) readonly buffer MaterialData
 {
-    uint top; 
+    uint tex[6];  
 };
 
 #include "push_constant.hlsl"
@@ -27,8 +27,7 @@ void main() {
     MaterialData material = push.material;
 
 
-    outColor = texture(texSampler[material.top],texCoord);
-    
-    //outColor = vec4(texCoord,0,0);
+    outColor = texture(texSampler[material.tex[face]],texCoord);
+    gl_FragDepth = 1.0f;
 
 }

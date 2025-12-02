@@ -1271,6 +1271,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/math-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/input.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/random-helper.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/graphics/skybox.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/world.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/actor.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/physics/intersections.hpp \
