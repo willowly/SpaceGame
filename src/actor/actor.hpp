@@ -71,7 +71,7 @@ class Actor {
             
         }
 
-        virtual void collideBasic(Actor* actor,float radius) {
+        virtual void collideBasic(Actor* actor,float height,float radius) {
 
         }
 

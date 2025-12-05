@@ -219,6 +219,12 @@ class GameApplication {
             skyboxMaterial.back = registry.getTexture("space_bk");
 
             skybox.loadResources(*vulkan,skyboxMaterial);
+
+            // auto cubePrototype = Actor::makeDefaultPrototype();
+            // cubePrototype->model = registry.getModel("block");
+            // cubePrototype->material = registry.getMaterial("tin_block");
+
+            // world.spawn(Actor::makeInstance(cubePrototype.get()));
             
 
             //world.spawn(Construction::makeInstance(tin,vec3(0)));
@@ -248,6 +254,8 @@ class GameApplication {
             
 
             player = world.spawn(Character::makeInstance(playerPrototype.get(),vec3(0.0,0.0,0.0)));
+            player->model = registry.getModel("capsule_thin");
+            player->material = registry.getMaterial("player");
 
             glfwPollEvents();
             input.clearInputBuffers(); // reset mouse position;
@@ -326,8 +334,6 @@ class GameApplication {
 
             player->setCamera(camera);
             player->processInput(input);
-
-            world.raycast(player->getLookRay(),10);
             
             world.frame(vulkan,dt);
 
@@ -362,7 +368,12 @@ class GameApplication {
             //     Debug::drawRay(hit.hit.point,hit.hit.normal,Color::green);
             // }
 
-            //Debug::addRenderables(*vulkan);
+            // auto hit = Physics::intersectCapsuleBox(player->position,player->getEyePosition(),player->radius,vec3(0),vec3(0.5f));
+            // if(hit) {
+            //     Physics::resolveBasic(player->position,hit.value());
+            // }
+
+            Debug::addRenderables(*vulkan);
             
             // do all the end of frame code in vulkan
             vulkan->render(camera);

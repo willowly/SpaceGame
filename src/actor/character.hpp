@@ -41,8 +41,8 @@ class Character : public Actor {
         float moveSpeed = 5.0f;
         float lookPitch = 0;
         float lookSensitivity = 5;
-        float height = 0.4f;
-        float radius = 0.5;
+        float height = 1.0f;
+        float radius = 0.4;
         float acceleration = 5;
         float jumpForce = 10;
         float craftSpeed = 1;
@@ -59,11 +59,11 @@ class Character : public Actor {
         vec3 moveInput;
 
         vec3 velocity;
-        float rotationVelocity;
+        vec3 rotationVelocity;
         
 
-        Item* currentToolItem;
-        int selectedTool;
+        Item* currentToolItem = nullptr;
+        int selectedTool = 0;
 
         Item* toolbar[9] = {};
 
@@ -82,7 +82,7 @@ class Character : public Actor {
         ivec3 ridingConstructionPoint;
         quat ridingConstructionRotation;
 
-        vec3 thirdPersonCameraOffset = vec3(0,3,20);
+        vec3 thirdPersonCameraOffset = vec3(1,0.5,10);
         vec3 thirdPersonCameraRot;
 
         Inventory inventory;
@@ -91,7 +91,7 @@ class Character : public Actor {
 
         std::vector<Recipe*> recipes;
 
-        Recipe* currentRecipe;
+        Recipe* currentRecipe = nullptr;
         float recipeTimer; //
 
         Character(const Character& character) {
@@ -136,8 +136,16 @@ class Character : public Actor {
                 vec3 targetVelocity = rotation * moveInput * moveSpeed;
                 velocity = MathHelper::lerp(velocity,targetVelocity,acceleration*dt);
                 position += velocity * dt;
-                rotationVelocity = MathHelper::lerp(rotationVelocity,rotationInput * rotationSpeed,acceleration * dt);
-                rotation = glm::angleAxis(glm::radians(rotationVelocity * dt),transformDirection(vec3(0,0,-1))) * rotation;
+
+                // there might be soe 
+                rotationVelocity.z = MathHelper::lerp(rotationVelocity.z,rotationInput * rotationSpeed,acceleration * dt);
+                rotationVelocity.x = MathHelper::lerp(rotationVelocity.x,fmin(abs(lookPitch),rotationSpeed) * sign(lookPitch),acceleration * dt);
+                //rotationVelocity.x = fmax(abs(rotationVelocity.x),abs(lookPitch))
+                lookPitch -= rotationVelocity.x * dt;
+                vec3 eyePos = getEyePosition();
+                rotation = glm::angleAxis(glm::radians(rotationVelocity.z) * dt,transformDirection(vec3(0,0,-1))) * rotation;
+                rotation = glm::angleAxis(glm::radians(rotationVelocity.x) * dt,transformDirection(vec3(-1,0,0))) * rotation;
+                position = eyePos - transformDirection(vec3(0,height,0)); // to rotate around eye
 
                 if(!inMenu) {
                     if(interactInput) {
@@ -153,7 +161,7 @@ class Character : public Actor {
                 clickInput = false;
                 interactInput = false;
 
-                world->collideBasic(this,radius);
+                world->collideBasic(this,height,radius);
             }
 
             if(currentRecipe != nullptr) {
@@ -164,6 +172,10 @@ class Character : public Actor {
                     }
                 }
             }
+            
+            // if not under gravity...
+
+            
 
             
 
@@ -377,7 +389,9 @@ class Character : public Actor {
 
         void moveMouse(vec2 delta) {
             rotation = glm::angleAxis(glm::radians(delta.x) * lookSensitivity,transformDirection(vec3(0,-1,0))) * rotation;
-            rotation = glm::angleAxis(glm::radians(delta.y) * lookSensitivity,transformDirection(vec3(-1,0,0))) * rotation;
+            lookPitch += delta.y * lookSensitivity;
+            if(lookPitch > 89.9f) lookPitch = 89.9f;
+            if(lookPitch < -89.9f) lookPitch = -89.9f;
             // if under gravitational forces...
                 // lookPitch += delta.y * lookSensitivity;
                 // if(lookPitch > 89.9f) lookPitch = 89.9f;
@@ -409,7 +423,7 @@ class Character : public Actor {
         }
 
         vec3 getEyePosition() {
-            return position + vec3(0,height,0);
+            return transformPoint(vec3(0,height,0));
         }
 
         quat getEyeRotation() {

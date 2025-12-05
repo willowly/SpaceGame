@@ -22,6 +22,8 @@ void main() {
     MaterialData material = push.material;
 
     outColor = vec4(material.color, 1.0);
+
+    gl_FragDepth = 0.0f;
     
     //outColor = vec4(texCoord,0,0);
 

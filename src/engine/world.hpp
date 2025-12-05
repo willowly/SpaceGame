@@ -145,12 +145,12 @@ class World {
             return result;
         }
 
-        void collideBasic(Actor* actor,float radius) {
+        void collideBasic(Actor* actor,float height,float radius) {
             iteratingActors++;
             for (auto& colliderActor : actors)
             {
                 if(actor != colliderActor.get()) {
-                    colliderActor->collideBasic(actor,radius);
+                    colliderActor->collideBasic(actor,height,radius);
                 }
                 
             }

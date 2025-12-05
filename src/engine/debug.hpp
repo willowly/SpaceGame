@@ -92,8 +92,9 @@ class Debug {
 
         bool readyToRender = false;
         Material wireFrameMaterial = Material::none;
-        //VkPipeline solidPipeline;
-        //MeshBuffer quad;
+        Material solidMaterial = Material::none;
+
+        MeshBuffer quad;
         MeshBuffer line;
         //MeshBuffer cube;
 
@@ -109,23 +110,42 @@ class Debug {
 
         static void loadRenderResources(Vulkan& vulkan) {
             Debug& debug = getInstance();
+
             PipelineOptions pOptions;
             pOptions.polygonMode = VK_POLYGON_MODE_LINE;
             pOptions.topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
             auto wireFramePipeline = vulkan.createManagedPipeline<DebugVertex>("shaders/compiled/debug_vert.spv","shaders/compiled/debug_frag.spv",pOptions);
             debug.wireFrameMaterial = vulkan.createMaterial(wireFramePipeline,DebugMaterialData(vec3(0,1,0)));
+
+            pOptions = PipelineOptions();
+            auto solidPipeline = vulkan.createManagedPipeline<DebugVertex>("shaders/compiled/debug_vert.spv","shaders/compiled/debug_frag.spv",pOptions);
+            debug.solidMaterial = vulkan.createMaterial(solidPipeline,DebugMaterialData(vec3(0,1,0)));
             
             //debug.solidPipeline = vulkan.createManagedPipeline<DebugVertex>("shaders/compiled/debug_vert.spv","shaders/compiled/debug_frag.spv");
 
+            // line
             MeshData<DebugVertex> data;
             data.vertices = std::vector<DebugVertex> {
                 DebugVertex(vec3(0,0,0)),
                 DebugVertex(vec3(1,1,1)),
             };
             data.indices = std::vector<uint16_t> {
-                0,1,2
+                0,1
             };
             debug.line = vulkan.createMeshBuffers<DebugVertex>(data.vertices,data.indices);
+
+
+            data.vertices = std::vector<DebugVertex> {
+                DebugVertex(vec3(0,0,0)),
+                DebugVertex(vec3(0,1,0)),
+                DebugVertex(vec3(1,0,0)),
+                DebugVertex(vec3(1,1,0))
+            };
+            data.indices = std::vector<uint16_t> {
+                0,1,2,
+                1,2,3
+            };
+            debug.quad = vulkan.createMeshBuffers<DebugVertex>(data.vertices,data.indices);
 
             debug.readyToRender = true;
         }
@@ -278,6 +298,14 @@ class Debug {
             //     modelMatrix *= glm::inverse(camera.getViewRotationMatrix());
             //     model->render(camera.getViewMatrix(),modelMatrix,camera.getProjectionMatrix(),shader);
             // }
+
+            for (auto& p : instance.pointsToDraw)
+            {
+                auto mat = glm::mat4(1.0f);
+                mat = glm::translate(mat,p.position);
+                mat = glm::scale(mat,vec3(0.1));
+                vulkan.addMesh(instance.quad,instance.solidMaterial,mat);
+            }
     
 
             for (auto& l : instance.linesToDraw)

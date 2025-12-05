@@ -270,21 +270,24 @@ class Construction : public Actor {
             return result;
         }
 
-        virtual void collideBasic(Actor* actor,float radius) {
+        virtual void collideBasic(Actor* actor,float height,float radius) {
             vec3 localActorPosition = inverseTransformPoint(actor->position);
-            for (int z = floor(std::max((float)min.z,localActorPosition.z-radius)); z <= ceil(std::min((float)max.z,localActorPosition.z+radius)); z++)
+            vec3 localActorPositionTop = inverseTransformPoint(actor->transformPoint(vec3(0,height,0)));
+            float bounds = radius + height;
+            for (int z = floor(std::max((float)min.z,localActorPosition.z-bounds)); z <= ceil(std::min((float)max.z,localActorPosition.z+bounds)); z++)
             {
-                for (int y = floor(std::max((float)min.y,localActorPosition.y-radius)); y <= ceil(std::min((float)max.y,localActorPosition.y+radius)); y++)
+                for (int y = floor(std::max((float)min.y,localActorPosition.y-bounds)); y <= ceil(std::min((float)max.y,localActorPosition.y+bounds)); y++)
                 {
-                    for (int x = floor(std::max((float)min.x,localActorPosition.x-radius)); x <= ceil(std::min((float)max.x,localActorPosition.x+radius)); x++)
+                    for (int x = floor(std::max((float)min.x,localActorPosition.x-bounds)); x <= ceil(std::min((float)max.x,localActorPosition.x+bounds)); x++)
                     {
                         int i = getIndex(ivec3(x,y,z));
                         if(blockData[i].block != nullptr) {
-                            auto contact_opt = Physics::intersectSphereBox(localActorPosition,radius,vec3(x,y,z),vec3(0.5f));
+                            auto contact_opt = Physics::intersectCapsuleBox(localActorPosition,localActorPositionTop,radius,vec3(x,y,z),vec3(0.5f));
                             if(contact_opt) {
                                 
                                 auto contact = contact_opt.value();
                                 Physics::resolveBasic(localActorPosition,contact);
+                                Physics::resolveBasic(localActorPositionTop,contact);
                                 
                             }
                         }

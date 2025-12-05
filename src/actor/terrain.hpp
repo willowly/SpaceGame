@@ -109,8 +109,11 @@ class Terrain : public Actor {
         int i = 0;
         for (int z = 0; z < size; z++)
         {
+            int percent = ((float)z/size)*100;
+            std::cout << "generating terrain " << percent << "%" << std::endl;
             for (int y = 0; y < size; y++)
             {
+
                 for (int x = 0; x < size; x++)
                 {
                     float noise = simplex.fractal(5,x/noiseScale,y/noiseScale,z/noiseScale);
@@ -131,6 +134,8 @@ class Terrain : public Actor {
         int i = 0;
         for (int z = 0; z < size; z++)
         {
+            int percent = ((float)z/size)*100;
+            std::cout << "generating ore " << percent << "%" << std::endl;
             for (int y = 0; y < size; y++)
             {
                 for (int x = 0; x < size; x++)
@@ -189,8 +194,11 @@ class Terrain : public Actor {
         int i = 0;
         for (int z = 0; z < size; z++)
         {
+            int percent = ((float)z/size)*100;
+            std::cout << "generating mesh " << percent << "%" << std::endl;
             for (int y = 0; y < size; y++)
             {
+                
                 for (int x = 0; x < size; x++)
                 {
                     int config = 0;
@@ -208,31 +216,31 @@ class Terrain : public Actor {
             }
         }
 
-        // consolodate vertices
-        // std::vector<TerrainVertex> newVertices;
-        // unordered_map<vec3,std::pair<int,std::vector<vec3>>> vertexMap;
-        // for(auto& i : indices) {
-        //     auto vertex = vertices[i];
-        //     if(vertexMap.contains(vertex.pos)) {
-        //         i = vertexMap[vertex.pos].first;
-        //     } else {
-        //         newVertices.push_back(vertex);
-        //         i = newVertices.size() - 1;
-        //         vertexMap[vertex.pos].first = i;
-        //     }
-        //     vertexMap[vertex.pos].second.push_back(vertex.normal);
-        // }
-        // // smooth normals
-        // for (auto p : vertexMap)
-        // {
-        //     auto& data = p.second;
-        //     vec3 normal = vec3(0);
-        //     for(auto n : data.second) {
-        //         normal += n;
-        //     }
-        //     normal /= data.second.size();
-        //     newVertices[data.first].normal = normal;
-        // }
+        //consolodate normals
+        //std::vector<TerrainVertex> newVertices;
+        unordered_map<vec3,std::vector<TerrainVertex*>> vertexMap;
+        for(auto& i : indices) {
+            auto& vertex = vertices[i];
+            if(!vertexMap.contains(vertex.pos)) {
+                vertexMap[vertex.pos] = std::vector<TerrainVertex*>();
+            }
+            vertexMap[vertex.pos].push_back(&vertex); //we can't resize the vector un
+        }
+        // smooth normals
+        for (auto p : vertexMap)
+        {
+            auto& verticesAtPoint = p.second;
+            vec3 normal = vec3(0);
+            //average the normals at that point
+            for(auto v : verticesAtPoint) {
+                normal += v->normal;
+            }
+            normal /= verticesAtPoint.size();
+            // reapply the averaged normal
+            for(auto v : verticesAtPoint) {
+                v->normal = normal;
+            }
+        }
         
         // vertices = std::move(newVertices);
         meshOutOfDate = true;
@@ -371,10 +379,12 @@ class Terrain : public Actor {
         return result;
     }
 
-    virtual void collideBasic(Actor* actor,float radius) {
+    virtual void collideBasic(Actor* actor,float height,float radius) {
         vec3 localActorPosition = inverseTransformPoint(actor->position);
+        vec3 localActorPositionTop = inverseTransformPoint(actor->transformPoint(vec3(0,height,0)));
+        Debug::drawLine(actor->position,actor->transformPoint(vec3(0,height,0)));
         auto posCellSpace = getCellAtWorldPos(actor->position);
-        auto radiusCellSpace = radius/cellSize;
+        auto radiusCellSpace = (radius+height)/cellSize;
         for (int z = std::max(0,(int)floor(posCellSpace.z-radiusCellSpace)); z <= std::min(size-1,(int)ceil(posCellSpace.z+radiusCellSpace)); z++)
         {
             for (int y = std::max(0,(int)floor(posCellSpace.y-radiusCellSpace)); y <= std::min(size-1,(int)ceil(posCellSpace.y+radiusCellSpace)); y++)
@@ -384,15 +394,23 @@ class Terrain : public Actor {
                     auto voxel = terrainData[getPointIndex(x,y,z)];
                     for (int i = voxel.verticesStart;i < voxel.verticesEnd;i += 3)
                     {
+                        
                         vec3 a = vertices[indices[i]].pos;
                         vec3 b = vertices[indices[i+1]].pos;
                         vec3 c = vertices[indices[i+2]].pos;
+                        // Debug::drawLine(transformPoint(a),transformPoint(b),Color::white);
+                        // Debug::drawLine(transformPoint(b),transformPoint(c),Color::white);
+                        // Debug::drawLine(transformPoint(c),transformPoint(a),Color::white);
 
-                        auto contact_opt = Physics::intersectSphereTri(localActorPosition,radius,a,b,c);
+                        // this should probably be wrapped in some collision shape of the actor
+                        auto contact_opt = Physics::intersectCapsuleTri(localActorPosition,localActorPositionTop,radius,a,b,c);
                         if(contact_opt) {
                             
                             auto contact = contact_opt.value();
+
+                            Debug::drawRay(contact.point,contact.normal*contact.penetration);
                             Physics::resolveBasic(localActorPosition,contact);
+                            Physics::resolveBasic(localActorPositionTop,contact); // i mean... somethings gotta be wrong here lol
                             
                         }
                             

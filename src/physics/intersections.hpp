@@ -61,6 +61,21 @@ namespace Physics {
 
     }
 
+    RaycastHit intersectLinePlane(Ray plane,Ray line) {
+
+        // assuming vectors are normalized
+        float denom = glm::dot(plane.direction, line.direction);
+        auto workingPlaneDirection = plane.direction;
+        if(denom > 0) { //make sure the normal is pointing away from the ray?
+            workingPlaneDirection *= -1.0f;
+        }
+
+        vec3 delta = plane.origin - line.origin;
+        float distance = glm::dot(delta,plane.direction) / denom;
+        return RaycastHit(line.origin + line.direction * distance,plane.direction,distance);
+
+    }
+
     std::optional<RaycastHit> intersectRayTriangle(vec3 a,vec3 b,vec3 c,Ray ray) {
 
         vec3 normal = MathHelper::normalFromPlanePoints(a,b,c);
@@ -258,6 +273,155 @@ namespace Physics {
         }
         
 
+    }
+
+    std::optional<Contact> moveContact(std::optional<Contact> contact,vec3 delta) {
+        if(contact) {
+            contact.value().point += delta;
+            return contact;
+        } else {
+            return contact;
+        }
+    }
+
+    std::optional<Contact> intersectCapsuleTri(vec3 bottomCenter,vec3 topCenter,float radius,vec3 a,vec3 b,vec3 c) {
+
+        Ray plane = Ray(a,MathHelper::normalFromPlanePoints(a,b,c));
+
+        //vec3 delta = topCenter - bottomCenter;
+
+        auto hit = intersectLinePlane(plane,Ray(bottomCenter,topCenter - bottomCenter));
+        vec3 tracePoint = hit.point;
+
+        bool insideTri = true;
+        // test if tracePoint is inside triangle
+        if(glm::dot(plane.direction,glm::cross(b-a,tracePoint-a)) < 0) {
+            insideTri = false;
+        }
+        else if(glm::dot(plane.direction,glm::cross(c-b,tracePoint-b)) < 0) {
+            insideTri = false;
+        }
+        else if(glm::dot(plane.direction,glm::cross(a-c,tracePoint-c)) < 0) {
+            insideTri = false;
+        }
+        vec3 closestPointOnTri;
+        if(insideTri) {
+            closestPointOnTri = tracePoint;
+        } else {
+            vec3 ab = glm::closestPointOnLine(tracePoint,a,b);
+            vec3 bc = glm::closestPointOnLine(tracePoint,b,c);
+            vec3 ca = glm::closestPointOnLine(tracePoint,c,a);
+            float deltaAB = glm::length2(ab-tracePoint);
+            float deltaBC = glm::length2(bc-tracePoint);
+            float deltaCA = glm::length2(ca-tracePoint);
+            if(deltaAB < deltaBC) {
+                if(deltaAB < deltaCA) {
+                    closestPointOnTri = ab;
+                } else {
+                    closestPointOnTri = ca;
+                }
+            } else {
+                if(deltaBC < deltaCA) {
+                    closestPointOnTri = bc;
+                } else {
+                    closestPointOnTri = ca;
+                }
+            }
+        }
+
+        vec3 closestPointOnLine = glm::closestPointOnLine(closestPointOnTri,bottomCenter,topCenter);
+
+        // could probably optimize this further by reusing some of work done here
+        return intersectSphereTri(closestPointOnLine,radius,a,b,c);
+    
+        
+
+    }
+
+    std::optional<Contact> intersectCapsuleBox(vec3 bottomCenter,vec3 topCenter,float radius,vec3 position,vec3 halfSize) {
+        auto line = Ray(bottomCenter,topCenter - bottomCenter);
+
+        vec3 signs = vec3(1);
+
+        if(line.origin.x < 0) {
+            signs.x = -1;
+        }
+        if(line.origin.y < 0) {
+            signs.y = -1;
+        }
+        if(line.origin.z < 0) {
+            signs.z = -1;
+        }
+        line.origin -= position;
+        
+        line.origin *= signs;
+        line.direction *= signs;
+
+        auto plane = Ray(vec3(halfSize.x,0,0),vec3(1,0,0));
+
+        // x face
+        auto hit = intersectLinePlane(plane,line);
+        
+        if(abs(hit.point.z) > halfSize.z) {
+            hit.point.z = halfSize.z * sign(hit.point.z);
+        }
+        if(abs(hit.point.y) > halfSize.y) {
+            hit.point.y = halfSize.y * sign(hit.point.y);
+        }
+
+        vec3 faceX = hit.point;
+        vec3 faceXLine = glm::closestPointOnLine(faceX,line.origin,line.origin+line.direction);
+        float faceXdist2 = glm::distance2(faceX,faceXLine);
+
+        plane = Ray(vec3(0,halfSize.y,0),vec3(0,1,0));
+
+        hit = intersectLinePlane(plane,line);
+        
+        if(abs(hit.point.x) > halfSize.x) {
+            hit.point.x = halfSize.x * sign(hit.point.x);
+        }
+        if(abs(hit.point.z) > halfSize.z) {
+            hit.point.z = halfSize.z * sign(hit.point.z);
+        }
+
+        vec3 faceY = hit.point;
+        vec3 faceYLine = glm::closestPointOnLine(faceY,line.origin,line.origin+line.direction);
+        float faceYdist2 = glm::distance2(faceY,faceYLine);
+
+        plane = Ray(vec3(0,0,halfSize.z),vec3(0,0,1));
+
+        hit = intersectLinePlane(plane,line);
+        
+        if(abs(hit.point.x) > halfSize.x) {
+            hit.point.x = halfSize.x * sign(hit.point.x);
+        }
+        if(abs(hit.point.y) > halfSize.y) {
+            hit.point.y = halfSize.y * sign(hit.point.y);
+        }
+
+        vec3 faceZ = hit.point;
+        vec3 faceZLine = glm::closestPointOnLine(faceZ,line.origin,line.origin+line.direction);
+        float faceZdist2 = glm::distance2(faceZ,faceZLine);
+        
+        vec3 closestOnCube;
+        float closestDist2;
+        if(faceXdist2 < faceYdist2) {
+            closestOnCube = faceX;
+            closestDist2 = faceXdist2;
+        } else {
+            closestOnCube = faceY;
+            closestDist2 = faceYdist2;
+        }
+        if(faceZdist2 < closestDist2) {
+            closestOnCube = faceZ;
+        }
+
+        vec3 closestOnCapsuleLine = glm::closestPointOnLine(closestOnCube,line.origin,line.origin + line.direction);
+        closestOnCapsuleLine *= signs;
+
+        closestOnCapsuleLine += position;
+
+        return intersectSphereBox(closestOnCapsuleLine,radius,position,halfSize);
     }
 
 

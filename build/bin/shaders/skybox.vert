@@ -18,7 +18,6 @@ void main() {
     mat4 modelMatrix = push.modelMatrix;
 
     gl_Position = sceneData[frameIndex].proj * sceneData[frameIndex].view * modelMatrix * vec4(inPosition, 1.0);
-    gl_Position.z = gl_Position.w;
     outFace = inFace;
     outTexCoord = inTexCoord;
     
