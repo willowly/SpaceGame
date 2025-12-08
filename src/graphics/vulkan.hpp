@@ -227,7 +227,9 @@ class Vulkan {
         }
 
         void addMesh(MeshBuffer& mesh,Material material, glm::mat4 matrix = glm::mat4(1.0f)) {
-
+            // if(mesh.buffer == VK_NULL_HANDLE) {
+            //     throw std::runtime_error("guh");
+            // }
             renderObjects.push_back(RenderObject(mesh,matrix,material.pipeline,material.data));
 
         }
@@ -326,6 +328,7 @@ class Vulkan {
                     VkDeviceSize offsets[] = {0};
                     vkCmdBindVertexBuffers(commandBuffer,0,1,vertexBuffers,offsets);
                     vkCmdBindIndexBuffer(commandBuffer, meshBuffer.buffer, meshBuffer.indexOffset, VK_INDEX_TYPE_UINT16);
+                    currentMeshBuffer = meshBuffer.buffer;
                 }
 
                 if(renderObject.pipeline != currentPipeline) {
@@ -340,6 +343,9 @@ class Vulkan {
                 //std::cout << sizeof(MeshPushConstant) << std::endl;
                 vkCmdPushConstants(commandBuffer,pipelineLayout,VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,0,sizeof(MeshPushConstant),&pushConstant);
                 
+                if(currentMeshBuffer == VK_NULL_HANDLE) {
+                    std::cout << "drawing null mesh" << std::endl;
+                }
                 
                 vkCmdDrawIndexed(commandBuffer, meshBuffer.indexCount, 1, 0, 0, 0);
 

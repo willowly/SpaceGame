@@ -90,6 +90,7 @@ class GameApplication {
         std::vector<float> frameTimes;
 
         Character* player;
+        Terrain* terrain;
 
         Interface interface;
 
@@ -232,14 +233,20 @@ class GameApplication {
             VkPipeline terrainPipeline = vulkan->createManagedPipeline<TerrainVertex>(Vulkan::vertCodePath("terrain"),Vulkan::fragCodePath("terrain"));
             terrainMaterial = vulkan->createMaterial(terrainPipeline,LitMaterialData(registry.getTexture("rock")));
             
-            Terrain* terrain = world.spawn(Terrain::makeInstance(terrainMaterial,vec3(0,0,10)));
-            terrain->terrainTypes[0].item = registry.getItem("stone");
-            terrain->terrainTypes[0].texture = registry.getTexture("rock");
-            terrain->terrainTypes[1].item = registry.getItem("tin_ore");
-            terrain->terrainTypes[1].texture = registry.getTexture("tin_ore");
-            terrain->terrainTypes[2].item = registry.getItem("tin_ore");
-            terrain->terrainTypes[2].texture = registry.getTexture("coal_ore");
-            terrain->generateMesh(); // needs to generate after the texture is applied. information for this should be passed into the terrain material
+            GenerationSettings settings;
+            settings.noiseScale = 100;
+            settings.stoneType.item = registry.getItem("stone");
+            settings.stoneType.texture = registry.getTexture("rock");
+            settings.meshBuffer = registry.getModel("block")->meshBuffer;
+
+            terrain = world.spawn(Terrain::makeInstance(terrainMaterial,settings,vec3(0,0,10)));
+            // terrain->terrainTypes[0].item = registry.getItem("stone");
+            // terrain->terrainTypes[0].texture = registry.getTexture("rock");
+            // terrain->terrainTypes[1].item = registry.getItem("tin_ore");
+            // terrain->terrainTypes[1].texture = registry.getTexture("tin_ore");
+            // terrain->terrainTypes[2].item = registry.getItem("tin_ore");
+            // terrain->terrainTypes[2].texture = registry.getTexture("coal_ore");
+            terrain->addChunk(ivec3(0,0,0)); // needs to generate after the texture is applied. information for this should be passed into the terrain material
 
 
             makeAluminumPlate.result = ItemStack(registry.getItem("tin_plate"),1);
@@ -334,32 +341,36 @@ class GameApplication {
 
             player->setCamera(camera);
             player->processInput(input);
+
+            std::cout << "starting world frame" << std::endl;
             
             world.frame(vulkan,dt);
 
-            DrawContext drawContext(interface,*vulkan,input);
+            std::cout << "ending world frame" << std::endl;
 
-            Rect screenRect = Rect(drawContext.getScreenSize());
+            // DrawContext drawContext(interface,*vulkan,input);
 
-            Sprite solidSprite = registry.getSprite("solid");
+            // Rect screenRect = Rect(drawContext.getScreenSize());
+
+            // Sprite solidSprite = registry.getSprite("solid");
             // cursor
-            interface.drawRect(*vulkan,Rect::anchored(Rect::centered(vec2(4,0.5)),screenRect,vec2(0.5,0.5)),Color::white,solidSprite);
-            interface.drawRect(*vulkan,Rect::anchored(Rect::centered(vec2(0.5,4)),screenRect,vec2(0.5,0.5)),Color::white,solidSprite);
+            //interface.drawRect(*vulkan,Rect::anchored(Rect::centered(vec2(4,0.5)),screenRect,vec2(0.5,0.5)),Color::white,solidSprite);
+            //interface.drawRect(*vulkan,Rect::anchored(Rect::centered(vec2(0.5,4)),screenRect,vec2(0.5,0.5)),Color::white,solidSprite);
 
-            if(player->widget != nullptr) {
-                player->widget->draw(drawContext,*player);
-            }
+            // if(player->widget != nullptr) {
+            //     player->widget->draw(drawContext,*player);
+            // }
             
-            if(player->inMenu) 
-            {
-                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-            } 
-            else 
-            {
-                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-            }
+            // if(player->inMenu) 
+            // {
+            //     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            // } 
+            // else 
+            // {
+            //     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            // }
 
-            skybox.addRenderables(*vulkan,camera);
+            //skybox.addRenderables(*vulkan,camera);
 
             // auto hitOpt = world.raycast(player->getLookRay(),10);
             // if(hitOpt) {
@@ -373,7 +384,9 @@ class GameApplication {
             //     Physics::resolveBasic(player->position,hit.value());
             // }
 
-            Debug::addRenderables(*vulkan);
+            //terrain->loadChunks(player->position,1);
+
+            //Debug::addRenderables(*vulkan);
             
             // do all the end of frame code in vulkan
             vulkan->render(camera);

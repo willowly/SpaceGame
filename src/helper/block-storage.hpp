@@ -52,7 +52,7 @@ class BlockStorage : public GenericStorage {
         }
 
         void clear() {
-            BlockStorage::clear();
+            GenericStorage::clear();
             stacks.clear();
             pointers.clear();
         }

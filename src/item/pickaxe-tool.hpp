@@ -58,15 +58,15 @@ class PickaxeTool : public Tool {
                     }
                     construction->setBlock(placePointLocalInt,nullptr,BlockFacing::FORWARD);
                     damage++;
-                }
+            }
                 Terrain* terrain = dynamic_cast<Terrain*>(worldHit.actor);
                 if(terrain != nullptr) {
-                    auto results = terrain->terraformSphere(worldHit.hit.point,mineRadius,-mineAmount);
-                    terrain->generateMesh();
+                    // auto results = terrain->terraformSphere(worldHit.hit.point,mineRadius,-mineAmount);
+                    // terrain->generateMesh();
                     
-                    if(results.item != nullptr) {
-                        user.inventory.give(results.item,1);
-                    }
+                    // if(results.item != nullptr) {
+                    //     user.inventory.give(results.item,1);
+                    // }
                     damage++;
                 }
             }

@@ -6,75 +6,16 @@
 #include "engine/debug.hpp"
 #include "SimplexNoise.h"
 #include "item/item.hpp"
+#include "helper/location-key.hpp"
+#include "terrain-chunk.hpp"
+#include "terrain-structs.hpp"
+#include <math.h>
 
 using std::unique_ptr;
 using glm::vec3, glm::ivec4,glm::vec4;
 
-struct TerrainVertex {
-    vec3 pos;
-    vec3 normal;
-    ivec4 textureID = ivec4(0);
-    vec4 oreBlend = vec4(0.0);
-    TerrainVertex(vec3 pos,ivec4 textureID,vec4 oreBlend) : pos(pos),textureID(textureID),oreBlend(oreBlend)  {}
-    TerrainVertex(vec3 pos) : pos(pos)  {}
-
-    static VkVertexInputBindingDescription getBindingDescription() {
-        VkVertexInputBindingDescription bindingDescription{};
-        bindingDescription.binding = 0;
-        bindingDescription.stride = sizeof(TerrainVertex);
-        bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
-        return bindingDescription;
-    }
-
-    static std::array<VkVertexInputAttributeDescription, 4> getAttributeDescriptions() {
-        std::array<VkVertexInputAttributeDescription, 4> attributeDescriptions{};
-        attributeDescriptions[0].binding = 0;
-        attributeDescriptions[0].location = 0;
-        attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-        attributeDescriptions[0].offset = offsetof(TerrainVertex, pos);
-
-        attributeDescriptions[1].binding = 0;
-        attributeDescriptions[1].location = 1;
-        attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-        attributeDescriptions[1].offset = offsetof(TerrainVertex, normal);
-
-        attributeDescriptions[2].binding = 0;
-        attributeDescriptions[2].location = 2;
-        attributeDescriptions[2].format = VK_FORMAT_R32G32B32A32_SINT;
-        attributeDescriptions[2].offset = offsetof(TerrainVertex, textureID);
-
-        attributeDescriptions[3].binding = 0;
-        attributeDescriptions[3].location = 3;
-        attributeDescriptions[3].format = VK_FORMAT_R32G32B32A32_SFLOAT;
-        attributeDescriptions[3].offset = offsetof(TerrainVertex, oreBlend);
-
-        return attributeDescriptions;
-    }
-};
-
-struct TerrainMaterial {
-    LitMaterialData terrainTypes[8];
-};
-
-struct TerrainType {
-    Item* item;
-    TextureID texture;
-};
 
 class Terrain : public Actor {
-
-
-    struct VoxelData {
-        float amount = 0;
-        int type;
-        int verticesStart = 0;
-        int verticesEnd = 0;
-    };
-
-    std::vector<VoxelData> terrainData;
-    std::vector<TerrainVertex> vertices;
-    std::vector<uint16_t> indices;
 
     
 
@@ -82,449 +23,221 @@ class Terrain : public Actor {
 
     }
 
+    GenerationSettings settings;
+    std::map<LocationKey,TerrainChunk> chunks;
+    Material material = Material::none;
+
+    int chunkSize = 30; //without LOD, all chunks are the same size
+    float cellSize = 0.5f;
+
     public:
 
-        struct TerraformResults {
-            Item* item = nullptr;
-        };
+        
 
-        int meshState = -1;
-        MeshBuffer meshBuffer[FRAMES_IN_FLIGHT];
-        bool meshOutOfDate;
-        Material material = Material::none;
-        int size = 50;
-        float noiseScale = 100;
-        float surfaceLevel = 0.5;
-        float cellSize = 0.5f;
-        TerrainType terrainTypes[8];
+
+    void addChunk(ivec3 pos) {
+        LocationKey key(pos);
+        chunks.emplace(key,TerrainChunk(pos,chunkSize,cellSize));
+        auto& chunk = chunks.at(key);
+        chunk.generateData(settings);
+        chunk.generateMesh();
+    }
+
+    void loadChunks(vec3 position,int distance) {
+        ivec3 pos = glm::floor(position/((float)chunkSize*cellSize));
+        pos.y = 0;
+        for (int z = -distance; z <= distance; z++)
+        {
+            for (int x = -distance; x <= distance; x++)
+            {
+                LocationKey key(pos + ivec3(x,0,z));
+                if(!chunks.contains(key)) {
+                    std::cout << key.x << "," << key.y << "," << key.z << std::endl;
+                    addChunk(pos + ivec3(x,0,z));
+                }
+            }
+        }
+        
+    }
     
 
-    void generateData() {
-        terrainData.resize(size*size*size);
 
-        const SimplexNoise simplex;
+    // void generateOre(int id,float scale,float surfaceLevel,vec3 offset,Chunk& chunk) {
+    //     const SimplexNoise simplex;
 
-        float radius = size*0.5f;
+    //     auto& terrainData = chunk.terrainData;
 
-        int i = 0;
-        for (int z = 0; z < size; z++)
-        {
-            int percent = ((float)z/size)*100;
-            std::cout << "generating terrain " << percent << "%" << std::endl;
-            for (int y = 0; y < size; y++)
-            {
-
-                for (int x = 0; x < size; x++)
-                {
-                    float noise = simplex.fractal(5,x/noiseScale,y/noiseScale,z/noiseScale);
-                    float distance = glm::length(vec3(x-radius,y-radius,z-radius));
-                    float radiusInfluence = (radius-distance)/radius;
-                    terrainData[i].amount = noise * (radiusInfluence+0.5f);
-                    i++;
-                }
-            }
-        }
-        generateOre(1,30,0.3);
-        generateOre(2,60,0.4);
-    }
-
-    void generateOre(int id,float scale,float surfaceLevel) {
-        const SimplexNoise simplex;
-
-        int i = 0;
-        for (int z = 0; z < size; z++)
-        {
-            int percent = ((float)z/size)*100;
-            std::cout << "generating ore " << percent << "%" << std::endl;
-            for (int y = 0; y < size; y++)
-            {
-                for (int x = 0; x < size; x++)
-                {
-                    float oreNoise = simplex.fractal(5,x/scale+(size*id/scale),y/scale,z/scale);
-                    if(oreNoise > surfaceLevel) {
-                        terrainData[i].type = id;
-                    }
-                    i++;
-                }
-            }
-        }
-    }
+    //     int i = 0;
+    //     for (int z = 0; z < chunkSize; z++)
+    //     {
+    //         int percent = ((float)z/chunkSize)*100;
+    //         //std::cout << "generating ore " << percent << "%" << std::endl;
+    //         for (int y = 0; y < chunkSize; y++)
+    //         {
+    //             for (int x = 0; x < chunkSize; x++)
+    //             {
+    //                 vec3 samplePos = vec3(x,y,z);
+    //                 samplePos += offset;
+    //                 samplePos /= scale;
+    //                 samplePos += vec3(chunkSize*id);
+    //                 float oreNoise = simplex.fractal(5,samplePos.x,samplePos.y,samplePos.z);
+    //                 if(oreNoise > surfaceLevel) {
+    //                     terrainData[i].type = id;
+    //                 }
+    //                 i++;
+    //             }
+    //         }
+    //     }
+    // }
 
     virtual void addRenderables(Vulkan* vulkan,float dt) {
-        if(vertices.size() == 0 || indices.size() == 0) return;
-        if(meshState == -1) {
-            meshBuffer[0] = vulkan->createMeshBuffers(vertices,indices);
-            meshBuffer[1] = vulkan->createMeshBuffers(vertices,indices);
-            meshOutOfDate = false;
-            meshState = 0;
-        } else {
-            if(meshOutOfDate) {
-                meshState++;
-                if(meshState >= FRAMES_IN_FLIGHT) meshState = 0;
-                vulkan->updateMeshBuffer(meshBuffer[meshState],vertices,indices);
-                meshOutOfDate = false;
-            }
+        
+        for(auto& pair : chunks) {
+            auto chunk = pair.second;
+            chunk.addRenderables(vulkan,dt,position,material);
         }
-        vulkan->addMesh(meshBuffer[meshState],material,glm::translate(glm::mat4(1.0f),position));
         //std::cout << "render time: " << (float)glfwGetTime() - clock << std::endl;
     }
 
-    int getPointIndex(int x,int y,int z) {
-        return x + y * size + z * size * size;
-    }
-
-    float getPoint(int x,int y,int z) {
-        if(x < 0 || x >= size) return 0;
-        if(y < 0 || y >= size) return 0;
-        if(z < 0 || z >= size) return 0;
-        return terrainData[x + y * size + z * size * size].amount;
-    }
-
-    bool getPointInside(int x,int y,int z) {
-        
-        return getPoint(x,y,z) > surfaceLevel;
-    }
-
-
-    void generateMesh() {
-        float clock = (float)glfwGetTime();
-        vertices.clear();
-        indices.clear();
-
-        int i = 0;
-        for (int z = 0; z < size; z++)
-        {
-            int percent = ((float)z/size)*100;
-            std::cout << "generating mesh " << percent << "%" << std::endl;
-            for (int y = 0; y < size; y++)
-            {
-                
-                for (int x = 0; x < size; x++)
-                {
-                    int config = 0;
-                    if(getPointInside(x,y,z)) config |= 1;
-                    if(getPointInside(x+1,y,z)) config |= 2;
-                    if(getPointInside(x+1,y,z+1)) config |= 4;
-                    if(getPointInside(x,y,z+1)) config |= 8;
-                    if(getPointInside(x,y+1,z)) config |= 16;
-                    if(getPointInside(x+1,y+1,z)) config |= 32;
-                    if(getPointInside(x+1,y+1,z+1)) config |= 64;
-                    if(getPointInside(x,y+1,z+1)) config |= 128;
-                    addCell(config,vec3(x,y,z));
-                    i++;
-                }
-            }
-        }
-
-        //consolodate normals
-        //std::vector<TerrainVertex> newVertices;
-        unordered_map<vec3,std::vector<TerrainVertex*>> vertexMap;
-        for(auto& i : indices) {
-            auto& vertex = vertices[i];
-            if(!vertexMap.contains(vertex.pos)) {
-                vertexMap[vertex.pos] = std::vector<TerrainVertex*>();
-            }
-            vertexMap[vertex.pos].push_back(&vertex); //we can't resize the vector un
-        }
-        // smooth normals
-        for (auto p : vertexMap)
-        {
-            auto& verticesAtPoint = p.second;
-            vec3 normal = vec3(0);
-            //average the normals at that point
-            for(auto v : verticesAtPoint) {
-                normal += v->normal;
-            }
-            normal /= verticesAtPoint.size();
-            // reapply the averaged normal
-            for(auto v : verticesAtPoint) {
-                v->normal = normal;
-            }
-        }
-        
-        // vertices = std::move(newVertices);
-        meshOutOfDate = true;
-        std::cout << "generate time: " << (float)glfwGetTime() - clock << std::endl;
-    }
-
-    void addCell(int config,vec3 cellPos) {
-        if(config < 0) {
-            std::cout << "out of range " << config << std::endl;
-            return;
-        }
-        if(config > 255) {
-            std::cout << "out of range " << config << std::endl;
-            return;
-        }
-        const int* tris = TerrainHelper::triTable[config];
-        int i = 0;
-        int startIndex = indices.size();
-        int cellIndex = getPointIndex(cellPos.x,cellPos.y,cellPos.z);
-        terrainData[cellIndex].verticesStart = startIndex;
-        int face[3];
-        ivec4 textureIDVec = ivec4(0);
-        while(i < 100) //break out if theres a problem lol
-        {
-            int edge = tris[i];
-            if(edge == -1) break;
-            vec3 aPos = getEdgePos(edge,0)+cellPos;
-            vec3 bPos = getEdgePos(edge,1)+cellPos;
-            float a = getPoint((int)aPos.x,(int)aPos.y,(int)aPos.z);
-            float b = getPoint((int)bPos.x,(int)bPos.y,(int)bPos.z);
-            
-            
-            
-            float t = (surfaceLevel - a)/(b-a);
-            t = std::min(std::max(t,0.0f),1.0f);
-
-            
-            int closestCellIndex;
-            if(a > b) {
-                closestCellIndex = getPointIndex((int)aPos.x,(int)aPos.y,(int)aPos.z);
-            } else {
-                closestCellIndex = getPointIndex((int)bPos.x,(int)bPos.y,(int)bPos.z);
-            }
-            int vertIndex = i % 3;
-
-            TextureID texture = terrainTypes[terrainData[closestCellIndex].type].texture;
-            
-            auto vertex = TerrainVertex((getEdgePos(edge,t) + cellPos)*cellSize);
-            textureIDVec[vertIndex] = texture;
-            vertex.oreBlend[vertIndex] = 1;
-            
-            vertices.push_back(vertex);
-            face[vertIndex] = vertices.size()-1;
-            indices.push_back(vertices.size()-1);
-            if(vertIndex == 2) {
-                vec3 normal = MathHelper::normalFromPlanePoints(vertices[face[0]].pos,vertices[face[1]].pos,vertices[face[2]].pos);
-                vertices[face[0]].normal = normal;
-                vertices[face[0]].textureID = textureIDVec;
-                vertices[face[1]].normal = normal;
-                vertices[face[1]].textureID = textureIDVec;
-                vertices[face[2]].normal = normal;
-                vertices[face[2]].textureID = textureIDVec;
-            }
-            i++;
-        }
-        terrainData[cellIndex].verticesEnd = indices.size();
-        
-        
-    }
-
-    vec3 getEdgePos(int index,float t) {
-        switch(index) {
-            case 0:
-                return vec3(t,0,0);
-            case 1:
-                return vec3(1,0,t);
-            case 2:
-                return vec3(t,0,1);
-            case 3:
-                return vec3(0,0,t);
-            case 4:
-                return vec3(t,1,0);
-            case 5:
-                return vec3(1,1,t);
-            case 6:
-                return vec3(t,1,1);
-            case 7:
-                return vec3(0,1,t);
-            case 8:
-                return vec3(0,t,0);
-            case 9:
-                return vec3(1,t,0);
-            case 10:
-                return vec3(1,t,1);
-            case 11:
-                return vec3(0,t,1);
-
-        }
-        return vec3(0,0,0);
-    }
-
-    ivec3 getCellAtWorldPos(vec3 pos) {
-        return glm::floor(inverseTransformPoint(pos)/cellSize);
-    }
-
-    vec3 getCellWorldPos(ivec3 cell) {
-        vec3 cellPos = (vec3)cell + vec3(0.5);
-        cellPos = transformPoint(cellPos*cellSize);
-        return cellPos;
-    }
+    // ivec3 getCellAtWorldPos(vec3 pos) {
+    //     return glm::floor(inverseTransformPoint(pos)/cellSize);
+    // }
 
     virtual std::optional<RaycastHit> raycast(Ray ray, float dist) {
 
-        std::optional<RaycastHit> result = std::nullopt;
-        Ray localRay = Ray(inverseTransformPoint(ray.origin),inverseTransformDirection(ray.direction));
-        for(size_t i = 0;i+2 < indices.size();i += 3)
-        {
-            vec3 a = vertices[indices[i]].pos;
-            vec3 b = vertices[indices[i+1]].pos;
-            vec3 c = vertices[indices[i+2]].pos;
+        return std::nullopt;
 
-            auto hitopt = Physics::intersectRayTriangle(a,b,c,localRay);
-            if(hitopt) {
+        // std::optional<RaycastHit> result = std::nullopt;
+        // Ray localRay = Ray(inverseTransformPoint(ray.origin),inverseTransformDirection(ray.direction));
+        // for(size_t i = 0;i+2 < indices.size();i += 3)
+        // {
+        //     vec3 a = vertices[indices[i]].pos;
+        //     vec3 b = vertices[indices[i+1]].pos;
+        //     vec3 c = vertices[indices[i+2]].pos;
+
+        //     auto hitopt = Physics::intersectRayTriangle(a,b,c,localRay);
+        //     if(hitopt) {
                 
-                auto hit = hitopt.value();
-                if(hit.distance <= dist) {
-                    hit.point = transformPoint(hit.point);
-                    hit.normal = transformDirection(hit.normal);
-                    result = hit;
-                    dist = hit.distance; //distance stays the same when transformed
-                }
-            }
+        //         auto hit = hitopt.value();
+        //         if(hit.distance <= dist) {
+        //             hit.point = transformPoint(hit.point);
+        //             hit.normal = transformDirection(hit.normal);
+        //             result = hit;
+        //             dist = hit.distance; //distance stays the same when transformed
+        //         }
+        //     }
                 
-        }
-        //std::cout << "raycast time: " << (float)glfwGetTime() - clock << std::endl;
-        return result;
+        // }
+        // //std::cout << "raycast time: " << (float)glfwGetTime() - clock << std::endl;
+        // return result;
     }
 
     virtual void collideBasic(Actor* actor,float height,float radius) {
-        vec3 localActorPosition = inverseTransformPoint(actor->position);
-        vec3 localActorPositionTop = inverseTransformPoint(actor->transformPoint(vec3(0,height,0)));
-        Debug::drawLine(actor->position,actor->transformPoint(vec3(0,height,0)));
-        auto posCellSpace = getCellAtWorldPos(actor->position);
-        auto radiusCellSpace = (radius+height)/cellSize;
-        for (int z = std::max(0,(int)floor(posCellSpace.z-radiusCellSpace)); z <= std::min(size-1,(int)ceil(posCellSpace.z+radiusCellSpace)); z++)
-        {
-            for (int y = std::max(0,(int)floor(posCellSpace.y-radiusCellSpace)); y <= std::min(size-1,(int)ceil(posCellSpace.y+radiusCellSpace)); y++)
-            {
-                for (int x = std::max(0,(int)floor(posCellSpace.x-radiusCellSpace)); x <= std::min(size-1,(int)ceil(posCellSpace.x+radiusCellSpace)); x++)
-                {
-                    auto voxel = terrainData[getPointIndex(x,y,z)];
-                    for (int i = voxel.verticesStart;i < voxel.verticesEnd;i += 3)
-                    {
+        return;
+        // vec3 localActorPosition = inverseTransformPoint(actor->position);
+        // vec3 localActorPositionTop = inverseTransformPoint(actor->transformPoint(vec3(0,height,0)));
+        // Debug::drawLine(actor->position,actor->transformPoint(vec3(0,height,0)));
+        // auto posCellSpace = getCellAtWorldPos(actor->position);
+        // auto radiusCellSpace = (radius+height)/cellSize;
+        // for (int z = std::max(0,(int)floor(posCellSpace.z-radiusCellSpace)); z <= std::min(size-1,(int)ceil(posCellSpace.z+radiusCellSpace)); z++)
+        // {
+        //     for (int y = std::max(0,(int)floor(posCellSpace.y-radiusCellSpace)); y <= std::min(size-1,(int)ceil(posCellSpace.y+radiusCellSpace)); y++)
+        //     {
+        //         for (int x = std::max(0,(int)floor(posCellSpace.x-radiusCellSpace)); x <= std::min(size-1,(int)ceil(posCellSpace.x+radiusCellSpace)); x++)
+        //         {
+        //             auto voxel = terrainData[getPointIndex(x,y,z)];
+        //             for (int i = voxel.verticesStart;i < voxel.verticesEnd;i += 3)
+        //             {
                         
-                        vec3 a = vertices[indices[i]].pos;
-                        vec3 b = vertices[indices[i+1]].pos;
-                        vec3 c = vertices[indices[i+2]].pos;
-                        // Debug::drawLine(transformPoint(a),transformPoint(b),Color::white);
-                        // Debug::drawLine(transformPoint(b),transformPoint(c),Color::white);
-                        // Debug::drawLine(transformPoint(c),transformPoint(a),Color::white);
+        //                 vec3 a = vertices[indices[i]].pos;
+        //                 vec3 b = vertices[indices[i+1]].pos;
+        //                 vec3 c = vertices[indices[i+2]].pos;
+        //                 // Debug::drawLine(transformPoint(a),transformPoint(b),Color::white);
+        //                 // Debug::drawLine(transformPoint(b),transformPoint(c),Color::white);
+        //                 // Debug::drawLine(transformPoint(c),transformPoint(a),Color::white);
 
-                        // this should probably be wrapped in some collision shape of the actor
-                        auto contact_opt = Physics::intersectCapsuleTri(localActorPosition,localActorPositionTop,radius,a,b,c);
-                        if(contact_opt) {
+        //                 // this should probably be wrapped in some collision shape of the actor
+        //                 auto contact_opt = Physics::intersectCapsuleTri(localActorPosition,localActorPositionTop,radius,a,b,c);
+        //                 if(contact_opt) {
                             
-                            auto contact = contact_opt.value();
+        //                     auto contact = contact_opt.value();
 
-                            Debug::drawRay(contact.point,contact.normal*contact.penetration);
-                            Physics::resolveBasic(localActorPosition,contact);
-                            Physics::resolveBasic(localActorPositionTop,contact); // i mean... somethings gotta be wrong here lol
+        //                     Debug::drawRay(contact.point,contact.normal*contact.penetration);
+        //                     Physics::resolveBasic(localActorPosition,contact);
+        //                     Physics::resolveBasic(localActorPositionTop,contact); // i mean... somethings gotta be wrong here lol
                             
-                        }
+        //                 }
                             
-                    } 
-                }
-            }
-        }
-        actor->position = transformPoint(localActorPosition);
+        //             } 
+        //         }
+        //     }
+        // }
+        // actor->position = transformPoint(localActorPosition);
     }
     
     //need to manually regenerate the mesh (in case things want to do multiple)
-    TerraformResults terraformSphere(vec3 pos,float radius,float change) {
 
-
-        TerraformResults results;
-
-        float clock = (float)glfwGetTime();
-        auto posCellSpace = getCellAtWorldPos(pos);
-        auto radiusCellSpace = radius/cellSize;
-        std::cout << radiusCellSpace << std::endl;
-        std::cout << posCellSpace.z-radiusCellSpace << std::endl;
-        std::cout << posCellSpace.z+radiusCellSpace << std::endl;
-        for (int z = floor(std::max(0.0f,posCellSpace.z-radiusCellSpace)); z <= ceil(std::min((float)size,posCellSpace.z+radiusCellSpace)); z++)
-        {
-            for (int y = floor(std::max(0.0f,posCellSpace.y-radiusCellSpace)); y <= ceil(std::min((float)size,posCellSpace.y+radiusCellSpace)); y++)
-            {
-                for (int x = floor(std::max(0.0f,posCellSpace.x-radiusCellSpace)); x <= ceil(std::min((float)size,posCellSpace.x+radiusCellSpace)); x++)
-                {
-                    int i = getPointIndex(x,y,z);
-                    
-                    vec3 cellPos = getCellWorldPos(vec3(x,y,z));
-                    float dist = glm::distance(cellPos,pos);
-                    float influence = (radius-dist)/radius;
-                    
-                    if(influence > 0) {
-                        float old = terrainData[i].amount;
-                        terrainData[i].amount += change * influence;
-                        terrainData[i].amount = std::min(std::max(terrainData[i].amount,0.0f),1.0f);
-                        int terrainTypeID = terrainData[i].type;
-                        
-                        if(old > surfaceLevel && terrainData[i].amount < surfaceLevel) {
-                            results.item = terrainTypes[terrainTypeID].item;
-                        }
-                    }
-                    i++;
-                }
-            }
-        }
-        return results;
-        std::cout << "terraform time: " << (float)glfwGetTime() - clock << std::endl;
-    }
-
-    static std::unique_ptr<Terrain> makeInstance(Material material,vec3 position = vec3(0)) {
+    static std::unique_ptr<Terrain> makeInstance(Material material,GenerationSettings settings,vec3 position = vec3(0)) {
         auto ptr = new Terrain();
         ptr->material = material;
-        ptr->generateData();
-        ptr->generateMesh();
+        ptr->settings = settings;
         return std::unique_ptr<Terrain>(ptr);
     }
 
 
-    void drawCellsOnRay(Ray ray,float dist) {
+    // void drawCellsOnRay(Ray ray,float dist) {
 
         
-        //assert(abs(glm::length(ray.direction) - 1) > 0.001);
+    //     //assert(abs(glm::length(ray.direction) - 1) > 0.001);
         
-        Debug::drawRay(ray.origin,ray.direction*10.0f,Color::white);
-        Ray cellSpaceRay = Ray(transformPoint(ray.origin),transformDirection(ray.direction));
-        cellSpaceRay.origin = cellSpaceRay.origin/cellSize;
-        float cellDist = dist/cellSize;
-        float yxSlope = cellSpaceRay.direction.y/abs(cellSpaceRay.direction.x);
-        float zxSlope = cellSpaceRay.direction.z/abs(cellSpaceRay.direction.x);
-        std::cout << cellDist*cellSpaceRay.direction.x << std::endl;
-        int xDir = ray.direction.x > 0 ? 1 : -1;
-        float xOffset = MathHelper::fromFloor(cellSpaceRay.origin.x*xDir);
-        for(int i = 1;((i-1)*cellSize) <= (abs(cellSpaceRay.direction.x)*dist+xOffset);i++) {
+    //     Debug::drawRay(ray.origin,ray.direction*10.0f,Color::white);
+    //     Ray cellSpaceRay = Ray(transformPoint(ray.origin),transformDirection(ray.direction));
+    //     cellSpaceRay.origin = cellSpaceRay.origin/cellSize;
+    //     float cellDist = dist/cellSize;
+    //     float yxSlope = cellSpaceRay.direction.y/abs(cellSpaceRay.direction.x);
+    //     float zxSlope = cellSpaceRay.direction.z/abs(cellSpaceRay.direction.x);
+    //     std::cout << cellDist*cellSpaceRay.direction.x << std::endl;
+    //     int xDir = ray.direction.x > 0 ? 1 : -1;
+    //     float xOffset = MathHelper::fromFloor(cellSpaceRay.origin.x*xDir);
+    //     for(int i = 1;((i-1)*cellSize) <= (abs(cellSpaceRay.direction.x)*dist+xOffset);i++) {
 
             
             
-            ivec3 cellPos = ivec3(
-                    xDir*floor(i+cellSpaceRay.origin.x)-1,
-                    MathHelper::integerBelow(((i-xOffset)*yxSlope)+cellSpaceRay.origin.y),
-                    MathHelper::integerBelow(((i-xOffset)*zxSlope)+cellSpaceRay.origin.z)
-            );
-            Debug::drawCube(getCellWorldPos(cellPos),vec3(cellSize),Color::green);
-        }
+    //         ivec3 cellPos = ivec3(
+    //                 xDir*floor(i+cellSpaceRay.origin.x)-1,
+    //                 MathHelper::integerBelow(((i-xOffset)*yxSlope)+cellSpaceRay.origin.y),
+    //                 MathHelper::integerBelow(((i-xOffset)*zxSlope)+cellSpaceRay.origin.z)
+    //         );
+    //         Debug::drawCube(getCellWorldPos(cellPos),vec3(cellSize),Color::green);
+    //     }
 
-        float xySlope = cellSpaceRay.direction.x/cellSpaceRay.direction.y;
-        float zySlope = cellSpaceRay.direction.z/cellSpaceRay.direction.y;
-        for(int i = 1;i <= ceil(cellDist*cellSpaceRay.direction.y)+1;i++) {
+    //     float xySlope = cellSpaceRay.direction.x/cellSpaceRay.direction.y;
+    //     float zySlope = cellSpaceRay.direction.z/cellSpaceRay.direction.y;
+    //     for(int i = 1;i <= ceil(cellDist*cellSpaceRay.direction.y)+1;i++) {
 
-            float offset = MathHelper::fromFloor(cellSpaceRay.origin.y);
+    //         float offset = MathHelper::fromFloor(cellSpaceRay.origin.y);
 
-            ivec3 cellPos = ivec3(
-                    MathHelper::integerBelow(((i-offset)*xySlope)+cellSpaceRay.origin.x),
-                    floor(i+cellSpaceRay.origin.y)-1,
-                    MathHelper::integerBelow(((i-offset)*zySlope)+cellSpaceRay.origin.z)
-            );
-            Debug::drawCube(getCellWorldPos(cellPos),vec3(cellSize),Color::magenta);
-        }
+    //         ivec3 cellPos = ivec3(
+    //                 MathHelper::integerBelow(((i-offset)*xySlope)+cellSpaceRay.origin.x),
+    //                 floor(i+cellSpaceRay.origin.y)-1,
+    //                 MathHelper::integerBelow(((i-offset)*zySlope)+cellSpaceRay.origin.z)
+    //         );
+    //         Debug::drawCube(getCellWorldPos(cellPos),vec3(cellSize),Color::magenta);
+    //     }
 
-        float xzSlope = cellSpaceRay.direction.x/cellSpaceRay.direction.z;
-        float yzSlope = cellSpaceRay.direction.y/cellSpaceRay.direction.z;
-        for(int i = 1;i <= ceil(cellDist*cellSpaceRay.direction.z)+1;i++) {
+    //     float xzSlope = cellSpaceRay.direction.x/cellSpaceRay.direction.z;
+    //     float yzSlope = cellSpaceRay.direction.y/cellSpaceRay.direction.z;
+    //     for(int i = 1;i <= ceil(cellDist*cellSpaceRay.direction.z)+1;i++) {
 
-            float offset = MathHelper::fromFloor(cellSpaceRay.origin.z);
+    //         float offset = MathHelper::fromFloor(cellSpaceRay.origin.z);
 
-            ivec3 cellPos = ivec3(
-                    MathHelper::integerBelow(((i-offset)*xzSlope)+cellSpaceRay.origin.x),
-                    MathHelper::integerBelow(((i-offset)*yzSlope)+cellSpaceRay.origin.y),
-                    floor(i+cellSpaceRay.origin.z)-1
-            );
-            Debug::drawCube(getCellWorldPos(cellPos),vec3(cellSize),Color::red);
-        }
-    }
+    //         ivec3 cellPos = ivec3(
+    //                 MathHelper::integerBelow(((i-offset)*xzSlope)+cellSpaceRay.origin.x),
+    //                 MathHelper::integerBelow(((i-offset)*yzSlope)+cellSpaceRay.origin.y),
+    //                 floor(i+cellSpaceRay.origin.z)-1
+    //         );
+    //         Debug::drawCube(getCellWorldPos(cellPos),vec3(cellSize),Color::red);
+    //     }
+    // }
 
 };

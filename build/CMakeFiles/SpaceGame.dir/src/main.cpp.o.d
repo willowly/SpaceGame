@@ -1,4 +1,5 @@
 CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
+  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/share/asan_ignorelist.txt \
   /Users/willow/Documents/GitHub/SpaceGame/src/main.cpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/game-application.hpp \
   /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/iostream \
@@ -1298,6 +1299,9 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Users/willow/Documents/GitHub/SpaceGame/src/actor/terrain.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/terrain-helper.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/include/SimplexNoise.h \
+  /Users/willow/Documents/GitHub/SpaceGame/src/helper/location-key.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/actor/terrain-chunk.hpp \
+  /Users/willow/Documents/GitHub/SpaceGame/src/actor/terrain-structs.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/registry.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/interface/widget.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/engine/loader.hpp \

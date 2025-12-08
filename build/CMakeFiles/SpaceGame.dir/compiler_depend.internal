@@ -846,6 +846,7 @@ CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_glfw.cpp.o
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/stddef.h
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/stdint.h
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/xmmintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/share/asan_ignorelist.txt
  /Users/willow/Documents/GitHub/SpaceGame/include/imgui/backends/imgui_impl_glfw.h
  /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imconfig.h
  /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui.h
@@ -947,6 +948,7 @@ CMakeFiles/SpaceGame.dir/include/imgui/backends/imgui_impl_vulkan.cpp.o
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/stdarg.h
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/stddef.h
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/stdint.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/share/asan_ignorelist.txt
  /Users/willow/Documents/GitHub/SpaceGame/include/imgui/backends/imgui_impl_vulkan.h
  /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imconfig.h
  /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui.h
@@ -1309,6 +1311,7 @@ CMakeFiles/SpaceGame.dir/include/imgui/imgui.cpp.o
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/xsaveoptintrin.h
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/xsavesintrin.h
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/xtestintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/share/asan_ignorelist.txt
  /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imconfig.h
  /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui.h
  /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui_internal.h
@@ -1562,6 +1565,7 @@ CMakeFiles/SpaceGame.dir/include/imgui/imgui_demo.cpp.o
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/stdarg.h
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/stddef.h
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/stdint.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/share/asan_ignorelist.txt
  /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imconfig.h
  /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui.h
 
@@ -1888,6 +1892,7 @@ CMakeFiles/SpaceGame.dir/include/imgui/imgui_draw.cpp.o
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/xsaveoptintrin.h
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/xsavesintrin.h
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/xtestintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/share/asan_ignorelist.txt
  /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imconfig.h
  /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui.h
  /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui_internal.h
@@ -2217,6 +2222,7 @@ CMakeFiles/SpaceGame.dir/include/imgui/imgui_tables.cpp.o
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/xsaveoptintrin.h
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/xsavesintrin.h
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/xtestintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/share/asan_ignorelist.txt
  /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imconfig.h
  /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui.h
  /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui_internal.h
@@ -2544,6 +2550,7 @@ CMakeFiles/SpaceGame.dir/include/imgui/imgui_widgets.cpp.o
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/xsaveoptintrin.h
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/xsavesintrin.h
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/xtestintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/share/asan_ignorelist.txt
  /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imconfig.h
  /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui.h
  /Users/willow/Documents/GitHub/SpaceGame/include/imgui/imgui_internal.h
@@ -3597,6 +3604,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/stdbool.h
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/stddef.h
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/stdint.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/share/asan_ignorelist.txt
  /Users/willow/Documents/GitHub/SpaceGame/include/SimplexNoise.h
  /Users/willow/Documents/GitHub/SpaceGame/include/glm/common.hpp
  /Users/willow/Documents/GitHub/SpaceGame/include/glm/detail/qualifier.hpp
@@ -3895,6 +3903,8 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o
  /Users/willow/Documents/GitHub/SpaceGame/src/actor/character.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/actor/components/inventory.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/actor/construction.hpp
+ /Users/willow/Documents/GitHub/SpaceGame/src/actor/terrain-chunk.hpp
+ /Users/willow/Documents/GitHub/SpaceGame/src/actor/terrain-structs.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/actor/terrain.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/api/api-actor.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/api/api-all.hpp
@@ -3934,6 +3944,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o
  /Users/willow/Documents/GitHub/SpaceGame/src/helper/clock.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/helper/file-helper.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/helper/generic-storage.hpp
+ /Users/willow/Documents/GitHub/SpaceGame/src/helper/location-key.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/helper/math-helper.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/helper/random-helper.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/helper/rect.hpp
