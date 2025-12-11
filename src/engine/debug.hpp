@@ -96,7 +96,7 @@ class Debug {
 
         MeshBuffer quad;
         MeshBuffer line;
-        //MeshBuffer cube;
+        MeshBuffer cube;
 
         
 
@@ -145,7 +145,27 @@ class Debug {
                 0,1,2,
                 1,2,3
             };
+            
             debug.quad = vulkan.createMeshBuffers<DebugVertex>(data.vertices,data.indices);
+
+            data.vertices = std::vector<DebugVertex> {
+                DebugVertex(vec3(0,0,0)),
+                DebugVertex(vec3(0,1,0)),
+                DebugVertex(vec3(1,1,0)),
+                DebugVertex(vec3(1,0,0)),
+                DebugVertex(vec3(0,0,1)),
+                DebugVertex(vec3(0,1,1)),
+                DebugVertex(vec3(1,1,1)),
+                DebugVertex(vec3(1,0,1))
+            };
+            data.indices = std::vector<uint16_t> {
+                0,1,1,2,2,3,3,0,
+                4,5,5,6,6,7,7,4,
+                0,4,1,5,2,6,3,7
+                
+            };
+            
+            debug.cube = vulkan.createMeshBuffers<DebugVertex>(data.vertices,data.indices);
 
             debug.readyToRender = true;
         }
@@ -286,18 +306,6 @@ class Debug {
                 return;
             }
 
-            // for (auto& p : instance->pointsToDraw)
-            // {
-            //     Model* model = instance->getQuadModel();
-            //     Shader& shader = *instance->getShader();
-            //     shader.use();
-            //     shader.setColor("color",p.color);
-            //     glm::mat4 modelMatrix = glm::mat4(1.0f);
-            //     modelMatrix = glm::translate(modelMatrix,p.position);
-            //     modelMatrix = glm::scale(modelMatrix,vec3(0.1,0.1,0.1));
-            //     modelMatrix *= glm::inverse(camera.getViewRotationMatrix());
-            //     model->render(camera.getViewMatrix(),modelMatrix,camera.getProjectionMatrix(),shader);
-            // }
 
             for (auto& p : instance.pointsToDraw)
             {

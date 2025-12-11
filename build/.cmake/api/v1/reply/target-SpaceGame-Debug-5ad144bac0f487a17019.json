@@ -200,15 +200,15 @@
 	[
 		{
 			"backtrace" : 3,
+			"id" : "STB::@6890427a1f51a3e7e1df"
+		},
+		{
+			"backtrace" : 3,
 			"id" : "SIMPLEXNOISE::@6890427a1f51a3e7e1df"
 		},
 		{
 			"backtrace" : 4,
 			"id" : "SpaceGame_Shaders::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 3,
-			"id" : "STB::@6890427a1f51a3e7e1df"
 		}
 	],
 	"id" : "SpaceGame::@6890427a1f51a3e7e1df",

@@ -94,6 +94,8 @@ class Character : public Actor {
         Recipe* currentRecipe = nullptr;
         float recipeTimer; //
 
+        bool underGravity = true;
+
         Character(const Character& character) {
             moveSpeed = character.moveSpeed;
             lookPitch = character.lookPitch;
@@ -137,15 +139,19 @@ class Character : public Actor {
                 velocity = MathHelper::lerp(velocity,targetVelocity,acceleration*dt);
                 position += velocity * dt;
 
-                // there might be soe 
-                rotationVelocity.z = MathHelper::lerp(rotationVelocity.z,rotationInput * rotationSpeed,acceleration * dt);
-                rotationVelocity.x = MathHelper::lerp(rotationVelocity.x,fmin(abs(lookPitch),rotationSpeed) * sign(lookPitch),acceleration * dt);
-                //rotationVelocity.x = fmax(abs(rotationVelocity.x),abs(lookPitch))
-                lookPitch -= rotationVelocity.x * dt;
-                vec3 eyePos = getEyePosition();
-                rotation = glm::angleAxis(glm::radians(rotationVelocity.z) * dt,transformDirection(vec3(0,0,-1))) * rotation;
-                rotation = glm::angleAxis(glm::radians(rotationVelocity.x) * dt,transformDirection(vec3(-1,0,0))) * rotation;
-                position = eyePos - transformDirection(vec3(0,height,0)); // to rotate around eye
+                //velocity += world->getGravityVector(position) * dt;
+                
+                if(!underGravity) {
+                    // there might be soe 
+                    rotationVelocity.z = MathHelper::lerp(rotationVelocity.z,rotationInput * rotationSpeed,acceleration * dt);
+                    rotationVelocity.x = MathHelper::lerp(rotationVelocity.x,fmin(abs(lookPitch),rotationSpeed) * sign(lookPitch),acceleration * dt);
+                    //rotationVelocity.x = fmax(abs(rotationVelocity.x),abs(lookPitch))
+                    lookPitch -= rotationVelocity.x * dt;
+                    vec3 eyePos = getEyePosition();
+                    rotation = glm::angleAxis(glm::radians(rotationVelocity.z) * dt,transformDirection(vec3(0,0,-1))) * rotation;
+                    rotation = glm::angleAxis(glm::radians(rotationVelocity.x) * dt,transformDirection(vec3(-1,0,0))) * rotation;
+                    position = eyePos - transformDirection(vec3(0,height,0)); // to rotate around eye
+                }
 
                 if(!inMenu) {
                     if(interactInput) {
@@ -172,8 +178,6 @@ class Character : public Actor {
                     }
                 }
             }
-            
-            // if not under gravity...
 
             
 

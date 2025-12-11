@@ -27,21 +27,31 @@ class Terrain : public Actor {
     std::map<LocationKey,TerrainChunk> chunks;
     Material material = Material::none;
 
+    std::mutex chunksMtx;
+
     int chunkSize = 30; //without LOD, all chunks are the same size
     float cellSize = 0.5f;
 
     public:
 
-        
+    
 
 
     void addChunk(ivec3 pos) {
+        chunksMtx.lock();
         LocationKey key(pos);
-        chunks.emplace(key,TerrainChunk(pos,chunkSize,cellSize));
+        ivec3 offset = pos*chunkSize;
+        chunks.emplace(std::piecewise_construct,std::make_tuple(key),std::make_tuple(offset,chunkSize,cellSize));
         auto& chunk = chunks.at(key);
         chunk.generateData(settings);
         chunk.generateMesh();
+        connect(chunk,pos);
+        chunksMtx.unlock();
+
+        
     }
+
+    
 
     void loadChunks(vec3 position,int distance) {
         ivec3 pos = glm::floor(position/((float)chunkSize*cellSize));
@@ -59,8 +69,39 @@ class Terrain : public Actor {
         }
         
     }
-    
 
+    // only call when already locked
+    void connect(TerrainChunk& chunk,ivec3 pos) {
+
+        LocationKey keyPosX(pos+ivec3(1,0,0));
+        if(chunks.contains(keyPosX)) {
+            chunk.connectPosX(&chunks.at(keyPosX));
+        }
+        LocationKey keyNegX(pos+ivec3(-1,0,0));
+        if(chunks.contains(keyNegX)) {
+            chunks.at(keyNegX).connectPosX(&chunk);
+        }
+
+        LocationKey keyPosZ(pos+ivec3(0,0,1));
+        if(chunks.contains(keyPosZ)) {
+            chunk.connectPosZ(&chunks.at(keyPosZ));
+        }
+        LocationKey keyNegZ(pos+ivec3(0,0,-1));
+        if(chunks.contains(keyNegZ)) {
+            chunks.at(keyNegZ).connectPosZ(&chunk);
+        }
+    }
+
+    
+    virtual void collideBasic(Actor* actor,float height,float radius) {
+        vec3 localActorPosition = inverseTransformPoint(actor->position);
+        vec3 offset = actor->transformDirection(vec3(0,height,0));
+        for(auto& pair : chunks) {
+            auto& chunk = pair.second;
+            chunk.collideBasic(localActorPosition,offset,radius);
+        }
+        actor->position = transformPoint(localActorPosition);
+    }
 
     // void generateOre(int id,float scale,float surfaceLevel,vec3 offset,Chunk& chunk) {
     //     const SimplexNoise simplex;
@@ -91,9 +132,8 @@ class Terrain : public Actor {
     // }
 
     virtual void addRenderables(Vulkan* vulkan,float dt) {
-        
         for(auto& pair : chunks) {
-            auto chunk = pair.second;
+            auto& chunk = pair.second;
             chunk.addRenderables(vulkan,dt,position,material);
         }
         //std::cout << "render time: " << (float)glfwGetTime() - clock << std::endl;
@@ -132,48 +172,7 @@ class Terrain : public Actor {
         // return result;
     }
 
-    virtual void collideBasic(Actor* actor,float height,float radius) {
-        return;
-        // vec3 localActorPosition = inverseTransformPoint(actor->position);
-        // vec3 localActorPositionTop = inverseTransformPoint(actor->transformPoint(vec3(0,height,0)));
-        // Debug::drawLine(actor->position,actor->transformPoint(vec3(0,height,0)));
-        // auto posCellSpace = getCellAtWorldPos(actor->position);
-        // auto radiusCellSpace = (radius+height)/cellSize;
-        // for (int z = std::max(0,(int)floor(posCellSpace.z-radiusCellSpace)); z <= std::min(size-1,(int)ceil(posCellSpace.z+radiusCellSpace)); z++)
-        // {
-        //     for (int y = std::max(0,(int)floor(posCellSpace.y-radiusCellSpace)); y <= std::min(size-1,(int)ceil(posCellSpace.y+radiusCellSpace)); y++)
-        //     {
-        //         for (int x = std::max(0,(int)floor(posCellSpace.x-radiusCellSpace)); x <= std::min(size-1,(int)ceil(posCellSpace.x+radiusCellSpace)); x++)
-        //         {
-        //             auto voxel = terrainData[getPointIndex(x,y,z)];
-        //             for (int i = voxel.verticesStart;i < voxel.verticesEnd;i += 3)
-        //             {
-                        
-        //                 vec3 a = vertices[indices[i]].pos;
-        //                 vec3 b = vertices[indices[i+1]].pos;
-        //                 vec3 c = vertices[indices[i+2]].pos;
-        //                 // Debug::drawLine(transformPoint(a),transformPoint(b),Color::white);
-        //                 // Debug::drawLine(transformPoint(b),transformPoint(c),Color::white);
-        //                 // Debug::drawLine(transformPoint(c),transformPoint(a),Color::white);
-
-        //                 // this should probably be wrapped in some collision shape of the actor
-        //                 auto contact_opt = Physics::intersectCapsuleTri(localActorPosition,localActorPositionTop,radius,a,b,c);
-        //                 if(contact_opt) {
-                            
-        //                     auto contact = contact_opt.value();
-
-        //                     Debug::drawRay(contact.point,contact.normal*contact.penetration);
-        //                     Physics::resolveBasic(localActorPosition,contact);
-        //                     Physics::resolveBasic(localActorPositionTop,contact); // i mean... somethings gotta be wrong here lol
-                            
-        //                 }
-                            
-        //             } 
-        //         }
-        //     }
-        // }
-        // actor->position = transformPoint(localActorPosition);
-    }
+    
     
     //need to manually regenerate the mesh (in case things want to do multiple)
 

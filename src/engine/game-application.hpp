@@ -20,6 +20,8 @@
 #include "sol/sol.hpp"
 #include "interface/interface.hpp"
 #include "helper/clock.hpp"
+#include <thread>
+#include <chrono>
 
 
 #include "interface/actor/player-widget.hpp"
@@ -57,6 +59,8 @@ class GameApplication {
         void run() {
 
             setup();
+
+            std::thread thread(&GameApplication::chunkTask,this);
 
             while (!glfwWindowShouldClose(window)) {
                 loop();
@@ -239,15 +243,13 @@ class GameApplication {
             settings.stoneType.texture = registry.getTexture("rock");
             settings.meshBuffer = registry.getModel("block")->meshBuffer;
 
-            terrain = world.spawn(Terrain::makeInstance(terrainMaterial,settings,vec3(0,0,10)));
+            terrain = world.spawn(Terrain::makeInstance(terrainMaterial,settings,vec3(0,0,0)));
             // terrain->terrainTypes[0].item = registry.getItem("stone");
             // terrain->terrainTypes[0].texture = registry.getTexture("rock");
             // terrain->terrainTypes[1].item = registry.getItem("tin_ore");
             // terrain->terrainTypes[1].texture = registry.getTexture("tin_ore");
             // terrain->terrainTypes[2].item = registry.getItem("tin_ore");
             // terrain->terrainTypes[2].texture = registry.getTexture("coal_ore");
-            terrain->addChunk(ivec3(0,0,0)); // needs to generate after the texture is applied. information for this should be passed into the terrain material
-
 
             makeAluminumPlate.result = ItemStack(registry.getItem("tin_plate"),1);
 
@@ -260,7 +262,7 @@ class GameApplication {
             makeFurnace.time = 3;
             
 
-            player = world.spawn(Character::makeInstance(playerPrototype.get(),vec3(0.0,0.0,0.0)));
+            player = world.spawn(Character::makeInstance(playerPrototype.get(),vec3(15.0,30.0,15.0)));
             player->model = registry.getModel("capsule_thin");
             player->material = registry.getMaterial("player");
 
@@ -315,6 +317,8 @@ class GameApplication {
             lua["player"] = player;
 
             lua.do_file("scripts/start.lua");
+
+            
             
 
         }
@@ -342,13 +346,13 @@ class GameApplication {
             player->setCamera(camera);
             player->processInput(input);
 
-            std::cout << "starting world frame" << std::endl;
+            //std::cout << "starting world frame" << std::endl;
             
             world.frame(vulkan,dt);
 
-            std::cout << "ending world frame" << std::endl;
+            //std::cout << "ending world frame" << std::endl;
 
-            // DrawContext drawContext(interface,*vulkan,input);
+            DrawContext drawContext(interface,*vulkan,input);
 
             // Rect screenRect = Rect(drawContext.getScreenSize());
 
@@ -360,17 +364,18 @@ class GameApplication {
             // if(player->widget != nullptr) {
             //     player->widget->draw(drawContext,*player);
             // }
-            
-            // if(player->inMenu) 
-            // {
-            //     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-            // } 
-            // else 
-            // {
-            //     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-            // }
 
-            //skybox.addRenderables(*vulkan,camera);
+            
+            if(player->inMenu) 
+            {
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            } 
+            else 
+            {
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            }
+
+            skybox.addRenderables(*vulkan,camera);
 
             // auto hitOpt = world.raycast(player->getLookRay(),10);
             // if(hitOpt) {
@@ -384,7 +389,7 @@ class GameApplication {
             //     Physics::resolveBasic(player->position,hit.value());
             // }
 
-            //terrain->loadChunks(player->position,1);
+            
 
             //Debug::addRenderables(*vulkan);
             
@@ -401,6 +406,12 @@ class GameApplication {
             
             
 
+        }
+
+        void chunkTask() {
+            while(true) {
+                terrain->loadChunks(player->position,2);
+            }
         }
 
         

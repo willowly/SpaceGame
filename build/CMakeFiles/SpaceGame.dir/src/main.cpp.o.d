@@ -1339,6 +1339,10 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o: \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-block.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/api/api-item.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/helper/clock.hpp \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/thread \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__thread/formatter.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__thread/this_thread.h \
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__thread/thread.h \
   /Users/willow/Documents/GitHub/SpaceGame/src/interface/actor/player-widget.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/interface/actor/inventory-widget.hpp \
   /Users/willow/Documents/GitHub/SpaceGame/src/interface/font.hpp \
