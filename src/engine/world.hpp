@@ -4,6 +4,7 @@
 
 #include "actor/actor.hpp"
 #include <memory>
+#include <tracy/Tracy.hpp>
 
 using glm::vec3, glm::quat,std::unique_ptr;
 
@@ -78,6 +79,8 @@ class World {
         // do rendering, step and everything else
         void frame(Vulkan* vulkan,float dt) {
             
+            ZoneScoped;
+            
             float clock = glfwGetTime();
             addRenderables(vulkan,dt);
             renderProcessMs = ((float)glfwGetTime() - clock) * 1000;
@@ -98,6 +101,7 @@ class World {
         }
 
         void addRenderables(Vulkan* vulkan,float dt) {
+            ZoneScoped;
             for (auto& actor : actors)
             {
                 actor->addRenderables(vulkan,dt);
@@ -106,6 +110,7 @@ class World {
         }
 
         void step(float dt) {
+            ZoneScoped;
             iteratingActors++;
             for (auto& actor : actors)
             {
@@ -123,6 +128,7 @@ class World {
         }
 
         std::optional<WorldRaycastHit> raycast(Ray ray,float dist) {
+            ZoneScoped;
             std::optional<WorldRaycastHit> result = std::nullopt;
             iteratingActors++;
             for (auto& actor : actors)
@@ -146,6 +152,7 @@ class World {
         }
 
         void collideBasic(Actor* actor,float height,float radius) {
+            ZoneScoped;
             iteratingActors++;
             for (auto& colliderActor : actors)
             {

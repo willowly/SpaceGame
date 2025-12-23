@@ -50,7 +50,7 @@ unset(_cmake_expected_targets)
 add_library(Tracy::TracyClient STATIC IMPORTED)
 
 set_target_properties(Tracy::TracyClient PROPERTIES
-  INTERFACE_COMPILE_DEFINITIONS "TRACY_ENABLE"
+  INTERFACE_COMPILE_DEFINITIONS "TRACY_ENABLE;TRACY_ON_DEMAND"
   INTERFACE_COMPILE_FEATURES "cxx_std_11"
   INTERFACE_INCLUDE_DIRECTORIES "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/tracy-src/public"
   INTERFACE_LINK_LIBRARIES "Threads::Threads"

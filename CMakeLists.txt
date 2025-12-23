@@ -7,10 +7,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -Wall -Wextra -Werror=return-type -pedantic -Wno-unused-parameter")
 
-if(WIN32)
-    add_library(GLF3 "lib/win/glfw-win.lib")
-endif(WIN32)
-
 if(APPLE)
     link_directories(${CMAKE_SOURCE_DIR}/lib/macos)
 endif(APPLE)
@@ -27,10 +23,26 @@ set(VK_LAYER_PATH,     "/Users/willow/VulkanSDK/1.4.321.0/macOS/share/vulkan/exp
 set(VK_LOADER_DEBUG,   all)
 
 find_package(Vulkan REQUIRED)
-find_package(GLFW3 REQUIRED)
-include_directories(${GLFW3_INCLUDE_DIR})
 
-message(${GLFW3_LIBRARY})
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(GLFW_VULKAN_STATIC OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
+set(GLFW_INCLUDE_NONE ON CACHE BOOL "" FORCE)
+
+include(FetchContent)
+
+FetchContent_Declare(
+    glfw
+    GIT_REPOSITORY https://github.com/glfw/glfw
+    GIT_TAG        3.4
+    GIT_SHALLOW    TRUE
+    GIT_PROGRESS   TRUE
+)
+message("Fetching glfw")
+FetchContent_MakeAvailable(glfw)
 
 find_package(ReactPhysics3D REQUIRED)
 
@@ -46,7 +58,6 @@ include_directories(${FREETYPE_INCLUDE_DIR})
 add_library(STB "include/stb_image.cpp")
 add_library(SIMPLEXNOISE "include/SimplexNoise.cpp")
 
-include(FetchContent)
 
 option(TRACY_ENABLE "" ON)
 option(TRACY_ON_DEMAND "" ON)
@@ -90,24 +101,13 @@ include_directories(include)
 
 # include(tracy/public/tracy/tracy.hpp)
 
-include_directories(include/imgui)
-
 add_executable(SpaceGame 
 src/main.cpp
 include/volk.c
-include/imgui/imgui.cpp
-
-include/imgui/imgui_demo.cpp
-include/imgui/imgui_draw.cpp
-include/imgui/imgui_widgets.cpp
-include/imgui/imgui_tables.cpp
-
-include/imgui/backends/imgui_impl_vulkan.cpp
-include/imgui/backends/imgui_impl_glfw.cpp
 )
 
 target_compile_features(SpaceGame PRIVATE cxx_std_20 )
-target_link_libraries(SpaceGame PRIVATE ${LUA_LIBRARIES} ${GLFW3_LIBRARY} STB ${COCOA_LIBRARY} ${IOKIT_LIBRARY} SIMPLEXNOISE TracyClient)
+target_link_libraries(SpaceGame PRIVATE ${LUA_LIBRARIES} glfw STB ${COCOA_LIBRARY} ${IOKIT_LIBRARY} SIMPLEXNOISE TracyClient Vulkan::Headers)
 
 
 add_custom_target(SHADERS)

@@ -1,11 +1,6 @@
 #pragma once
 
-
-#define IMGUI_IMPL_VULKAN_USE_VOLK
-#include "imgui.h"
-#include "backends/imgui_impl_glfw.h"
-#include "backends/imgui_impl_vulkan.h"
-
+#include "volk.h"
 
 #include <GLFW/glfw3.h>
 
@@ -28,6 +23,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
+
+#include <tracy/Tracy.hpp>
+#include <tracy/TracyVulkan.hpp>
 
 #include <chrono>
 
@@ -143,6 +141,8 @@ struct PipelineOptions {
 
 // };
 
+
+
 class Vulkan {
     public:
         bool enableValidationLayers = false;
@@ -174,6 +174,8 @@ class Vulkan {
             createUniformBuffers();
             createDescriptorPool();
             createDescriptorSets(); // also includes the texture
+
+            tracyCtx = TracyVkContext(physicalDevice, device, graphicsQueue, commandBuffers[0]);
 
             //initImGui();
             
@@ -233,6 +235,8 @@ class Vulkan {
             if (enableValidationLayers) {
                 vkDestroyDebugUtilsMessengerEXT(vkInstance, debugMessenger, nullptr);
             }
+
+            TracyVkDestroy(tracyCtx);
             
             
             vkDestroyPipelineLayout(device,pipelineLayout,nullptr);
@@ -275,6 +279,9 @@ class Vulkan {
 
         void render(const Camera& camera) {
 
+            ZoneScoped;
+
+
             std::cout << frameIndex;
             Clock clock;
             //wait for previous frame to be finished drawing
@@ -283,7 +290,7 @@ class Vulkan {
                 std::cout << "Frame render timed out" << std::endl;
             } else {
                 if(result != VK_SUCCESS) {
-                    throw std::runtime_error("fence wait error " + result);
+                    throw std::runtime_error("fence wait error " + std::to_string(result));
                 }
             }
 
@@ -320,6 +327,9 @@ class Vulkan {
             if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS) {
                 throw std::runtime_error("failed to begin recording command buffer!");
             }
+
+            {
+            TracyVkZone(tracyCtx,commandBuffers[frameIndex],"DrawFrame");
 
             VkRenderPassBeginInfo renderPassInfo{};
             renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -391,6 +401,9 @@ class Vulkan {
             }
 
             vkCmdEndRenderPass(commandBuffer);
+
+            TracyVkCollect(tracyCtx,commandBuffer);
+            }
 
             vkEndCommandBuffer(commandBuffer);
 
@@ -512,6 +525,8 @@ class Vulkan {
 
         template<typename Vertex>
         MeshBuffer createMeshBuffers(std::vector<Vertex>& vertices,std::vector<uint16_t>& indices) {
+
+            ZoneScoped;
             
             VkDeviceSize vertexBufferSize = sizeof(vertices[0]) * vertices.size();
             VkDeviceSize indexBufferSize = sizeof(indices[0]) * indices.size();
@@ -845,6 +860,8 @@ class Vulkan {
         size_t nextTransferIndex = 0;
 
         VkDebugUtilsMessengerEXT debugMessenger;
+
+        TracyVkCtx tracyCtx;
 
         void createVkInstance(string name) {
 
@@ -1667,11 +1684,17 @@ class Vulkan {
 
             beginCommands(transfer.commandBuffer);
 
+            {
+            TracyVkZone(tracyCtx,transfer.commandBuffer,"Copy Buffer");
+
             VkBufferCopy copyRegion{};
             copyRegion.srcOffset = 0; // Optional
             copyRegion.dstOffset = 0; // Optional
             copyRegion.size = size;
             vkCmdCopyBuffer(transfer.commandBuffer, transfer.stagingBuffer.buffer, dstBuffer.buffer, 1, &copyRegion);
+
+            TracyVkCollect(tracyCtx,transfer.commandBuffer);
+            }
             
             submitCommands(transfer.commandBuffer,transfer.fence);
         }
@@ -2129,7 +2152,9 @@ class Vulkan {
             beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
             beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
-            vkBeginCommandBuffer(commandBuffer, &beginInfo);
+            if(vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS) {
+                throw std::runtime_error("command buffer begin failed");
+            }
 
             return commandBuffer;
         }
@@ -2137,7 +2162,9 @@ class Vulkan {
         void beginCommands(VkCommandBuffer commandBuffer) {
             VkCommandBufferBeginInfo beginInfo{};
             beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-            vkBeginCommandBuffer(commandBuffer, &beginInfo);
+            if(vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS) {
+                throw std::runtime_error("command buffer begin failed");
+            }
         }
 
         void submitCommandsWaitAndFree(VkCommandBuffer commandBuffer) {
@@ -2150,13 +2177,13 @@ class Vulkan {
 
         void submitCommands(VkCommandBuffer commandBuffer,VkFence fence = VK_NULL_HANDLE) {
             vkEndCommandBuffer(commandBuffer);
-
+            
             VkSubmitInfo submitInfo{};
             submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
             submitInfo.commandBufferCount = 1;
             submitInfo.pCommandBuffers = &commandBuffer;
 
-            vkQueueSubmit(transferQueue, 1, &submitInfo, fence);
+            vkQueueSubmit(graphicsQueue, 1, &submitInfo, fence);
         }
 
         // from vulkan-tutorial
@@ -2169,62 +2196,6 @@ class Vulkan {
             std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
 
             return VK_FALSE;
-        }
-
-        void initImGui() {
-            VkDescriptorPoolSize pool_sizes[] =
-            {
-                { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
-                { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
-                { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
-                { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
-                { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
-                { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
-                { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
-                { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
-                { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
-                { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
-                { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
-            };
-
-            VkDescriptorPoolCreateInfo pool_info = {};
-            pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-            pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-            pool_info.maxSets = 1000;
-            pool_info.poolSizeCount = std::size(pool_sizes);
-            pool_info.pPoolSizes = pool_sizes;
-
-            VkDescriptorPool imguiPool;
-            if(vkCreateDescriptorPool(device, &pool_info, nullptr, &imguiPool) != VK_SUCCESS) {
-                throw new std::runtime_error("Could not create imgui descriptor pool");
-            }
-
-            //this initializes the core structures of imgui
-            ImGui::CreateContext();
-
-            //this initializes imgui for SDL
-            ImGui_ImplGlfw_InitForVulkan(window,true);
-
-            //this initializes imgui for Vulkan
-            ImGui_ImplVulkan_InitInfo init_info = {};
-            init_info.Instance = vkInstance;
-            init_info.PhysicalDevice = physicalDevice;
-            init_info.Device = device;
-            init_info.Queue = graphicsQueue;
-            init_info.DescriptorPool = imguiPool;
-            init_info.MinImageCount = 3;
-            init_info.ImageCount = 3;
-            init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
-            init_info.Allocator = nullptr;
-            init_info.RenderPass = renderPass;
-
-            
-            VkPhysicalDeviceProperties properties;
-            vkGetPhysicalDeviceProperties(init_info.PhysicalDevice, &properties);
-
-            ImGui_ImplVulkan_Init(&init_info);
-
-
         }
 
         

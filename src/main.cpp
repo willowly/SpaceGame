@@ -1,5 +1,5 @@
-#define TRACY_ENABLE
-// #include "tracy/public/tracy/tracy.hpp"
+#define TRACY_ENABLE 1
+#include <tracy/Tracy.hpp>
 #include "engine/game-application.hpp"
 
 #include "shaderc/shaderc.h"

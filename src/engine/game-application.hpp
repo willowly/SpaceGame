@@ -22,8 +22,9 @@
 #include "helper/clock.hpp"
 #include <thread>
 #include <chrono>
-// #include <tracy/public/tracy/tracy.hpp>
 
+#include <tracy/Tracy.hpp>
+#include <tracy/TracyVulkan.hpp>
 
 #include "interface/actor/player-widget.hpp"
 #include "interface/block/furnace-widget.hpp"
@@ -343,6 +344,8 @@ class GameApplication {
         void loop() 
         {
 
+            ZoneScoped;
+
             // Get inputs, window resize, and more
             glfwPollEvents();
 
@@ -425,14 +428,14 @@ class GameApplication {
 
             input.clearInputBuffers();
 
-            
+            FrameMark;
             
 
         }
 
         void chunkTask() {
             while(!closing) {
-                terrain->loadChunks(player->position,3,vulkan);
+                terrain->loadChunks(player->position,1,vulkan);
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
