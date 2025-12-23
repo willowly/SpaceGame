@@ -407,6 +407,10 @@ FETCHCONTENT_SOURCE_DIR_OGG:PATH=
 FETCHCONTENT_SOURCE_DIR_SFML:PATH=
 
 //When not empty, overrides where to find pre-populated content
+// for tracy
+FETCHCONTENT_SOURCE_DIR_TRACY:PATH=
+
+//When not empty, overrides where to find pre-populated content
 // for vorbis
 FETCHCONTENT_SOURCE_DIR_VORBIS:PATH=
 
@@ -424,6 +428,9 @@ FETCHCONTENT_UPDATES_DISCONNECTED_OGG:BOOL=OFF
 
 //Enables UPDATE_DISCONNECTED behavior just for population of SFML
 FETCHCONTENT_UPDATES_DISCONNECTED_SFML:BOOL=OFF
+
+//Enables UPDATE_DISCONNECTED behavior just for population of tracy
+FETCHCONTENT_UPDATES_DISCONNECTED_TRACY:BOOL=OFF
 
 //Enables UPDATE_DISCONNECTED behavior just for population of vorbis
 FETCHCONTENT_UPDATES_DISCONNECTED_VORBIS:BOOL=OFF
@@ -560,6 +567,121 @@ SpaceGame_IS_TOP_LEVEL:STATIC=ON
 //Value Computed by CMake
 SpaceGame_SOURCE_DIR:STATIC=/Users/willow/Documents/GitHub/SpaceGame
 
+//Enforce callstack collection for tracy regions
+TRACY_CALLSTACK:BOOL=OFF
+
+//Whether to build Tracy python client library
+TRACY_CLIENT_PYTHON:BOOL=OFF
+
+//Enable debuginfod support
+TRACY_DEBUGINFOD:BOOL=OFF
+
+//Enable delayed initialization of the library (init on first call)
+TRACY_DELAYED_INIT:BOOL=OFF
+
+//[advanced] Don't use default demangling function - You'll need
+// to provide your own
+TRACY_DEMANGLE:BOOL=OFF
+
+//Enable profiling
+TRACY_ENABLE:BOOL=ON
+
+//Enable fibers support
+TRACY_FIBERS:BOOL=OFF
+
+//Build Fortran bindings
+TRACY_Fortran:BOOL=OFF
+
+//Ignore instrumentation errors from memory free events that do
+// not have a matching allocation
+TRACY_IGNORE_MEMORY_FAULTS:BOOL=OFF
+
+//Enable libbacktrace to support dynamically loaded elfs in symbol
+// resolution resolution after the first symbol resolve operation
+TRACY_LIBBACKTRACE_ELF_DYNLOAD_SUPPORT:BOOL=OFF
+
+//Use libunwind backtracing where supported
+TRACY_LIBUNWIND_BACKTRACE:BOOL=OFF
+
+//Enable Link-Time optimization
+TRACY_LTO:BOOL=OFF
+
+//Enable the manual lifetime management of the profile
+TRACY_MANUAL_LIFETIME:BOOL=OFF
+
+//Disable client discovery by broadcast to local network
+TRACY_NO_BROADCAST:BOOL=OFF
+
+//Disable all callstack related functionality
+TRACY_NO_CALLSTACK:BOOL=OFF
+
+//Disables the inline functions in callstacks
+TRACY_NO_CALLSTACK_INLINES:BOOL=OFF
+
+//Disable collection of source code
+TRACY_NO_CODE_TRANSFER:BOOL=OFF
+
+//Disable capture of context switches
+TRACY_NO_CONTEXT_SWITCH:BOOL=OFF
+
+//Disable crash handling
+TRACY_NO_CRASH_HANDLER:BOOL=OFF
+
+//Client executable does not exit until all profile data is sent
+// to server
+TRACY_NO_EXIT:BOOL=OFF
+
+//Disable the frame image support and its thread
+TRACY_NO_FRAME_IMAGE:BOOL=OFF
+
+//Disable call stack sampling
+TRACY_NO_SAMPLING:BOOL=OFF
+
+//Disable systrace sampling
+TRACY_NO_SYSTEM_TRACING:BOOL=OFF
+
+//Disable zone validation for C API
+TRACY_NO_VERIFY:BOOL=OFF
+
+//Disable capture of hardware Vsync events
+TRACY_NO_VSYNC_CAPTURE:BOOL=OFF
+
+//Tracy will only accept connections on IPv4 addresses (disable
+// IPv6)
+TRACY_ONLY_IPV4:BOOL=OFF
+
+//Only listen on the localhost interface
+TRACY_ONLY_LOCALHOST:BOOL=OFF
+
+//On-demand profiling
+TRACY_ON_DEMAND:BOOL=OFF
+
+//Enable nopsleds for efficient patching by system-level tools
+// (e.g. rr)
+TRACY_PATCHABLE_NOPSLEDS:BOOL=OFF
+
+//Whether to build Tracy as a static library
+TRACY_STATIC:BOOL=ON
+
+//Instead of full runtime symbol resolution, only resolve the image
+// path and offset to enable offline symbol resolution
+TRACY_SYMBOL_OFFLINE_RESOLVE:BOOL=OFF
+
+//Use lower resolution timers
+TRACY_TIMER_FALLBACK:BOOL=OFF
+
+//[advanced] Verbose output from the profiler
+TRACY_VERBOSE:BOOL=OFF
+
+//Value Computed by CMake
+Tracy_BINARY_DIR:STATIC=/Users/willow/Documents/GitHub/SpaceGame/build/_deps/tracy-build
+
+//Value Computed by CMake
+Tracy_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+Tracy_SOURCE_DIR:STATIC=/Users/willow/Documents/GitHub/SpaceGame/build/_deps/tracy-src
+
 //Path to a program.
 Vulkan_GLSLANG_VALIDATOR_EXECUTABLE:FILEPATH=/usr/local/bin/glslangValidator
 
@@ -595,6 +717,9 @@ libogg_IS_TOP_LEVEL:STATIC=OFF
 
 //Value Computed by CMake
 libogg_SOURCE_DIR:STATIC=/Users/willow/Documents/GitHub/SpaceGame/build/_deps/ogg-src
+
+//The directory containing a CMake configuration file for rocprofiler-sdk.
+rocprofiler-sdk_DIR:PATH=rocprofiler-sdk_DIR-NOTFOUND
 
 //Value Computed by CMake
 vorbis_BINARY_DIR:STATIC=/Users/willow/Documents/GitHub/SpaceGame/build/_deps/vorbis-build
@@ -745,7 +870,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=1
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=2
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJCXX_COMPILER
@@ -988,6 +1113,10 @@ PKG_CONFIG_ARGN-ADVANCED:INTERNAL=1
 PKG_CONFIG_EXECUTABLE-ADVANCED:INTERNAL=1
 //CHECK_TYPE_SIZE: sizeof(short)
 SHORT_SIZE:INTERNAL=2
+//ADVANCED property for variable: TRACY_DEMANGLE
+TRACY_DEMANGLE-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: TRACY_VERBOSE
+TRACY_VERBOSE-ADVANCED:INTERNAL=1
 //CHECK_TYPE_SIZE: sizeof(uint16_t)
 UINT16_SIZE:INTERNAL=2
 //CHECK_TYPE_SIZE: sizeof(uint32_t)

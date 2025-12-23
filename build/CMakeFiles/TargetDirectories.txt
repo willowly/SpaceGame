@@ -7,3 +7,16 @@
 /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles/package_source.dir
 /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles/edit_cache.dir
 /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles/rebuild_cache.dir
+/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles/list_install_components.dir
+/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles/install.dir
+/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles/install/local.dir
+/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles/install/strip.dir
+/Users/willow/Documents/GitHub/SpaceGame/build/_deps/tracy-build/CMakeFiles/TracyClient.dir
+/Users/willow/Documents/GitHub/SpaceGame/build/_deps/tracy-build/CMakeFiles/package.dir
+/Users/willow/Documents/GitHub/SpaceGame/build/_deps/tracy-build/CMakeFiles/package_source.dir
+/Users/willow/Documents/GitHub/SpaceGame/build/_deps/tracy-build/CMakeFiles/edit_cache.dir
+/Users/willow/Documents/GitHub/SpaceGame/build/_deps/tracy-build/CMakeFiles/rebuild_cache.dir
+/Users/willow/Documents/GitHub/SpaceGame/build/_deps/tracy-build/CMakeFiles/list_install_components.dir
+/Users/willow/Documents/GitHub/SpaceGame/build/_deps/tracy-build/CMakeFiles/install.dir
+/Users/willow/Documents/GitHub/SpaceGame/build/_deps/tracy-build/CMakeFiles/install/local.dir
+/Users/willow/Documents/GitHub/SpaceGame/build/_deps/tracy-build/CMakeFiles/install/strip.dir

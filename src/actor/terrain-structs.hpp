@@ -61,6 +61,7 @@ struct TerrainType {
 
 struct GenerationSettings {
     float noiseScale = 100;
+    float radius = 70;
     TerrainType stoneType;
     MeshBuffer meshBuffer;
 };

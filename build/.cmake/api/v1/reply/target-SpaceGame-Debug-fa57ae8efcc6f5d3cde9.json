@@ -29,7 +29,7 @@
 			{
 				"command" : 0,
 				"file" : 0,
-				"line" : 80,
+				"line" : 95,
 				"parent" : 0
 			},
 			{
@@ -41,13 +41,13 @@
 			{
 				"command" : 2,
 				"file" : 0,
-				"line" : 95,
+				"line" : 110,
 				"parent" : 0
 			},
 			{
 				"command" : 3,
 				"file" : 0,
-				"line" : 123,
+				"line" : 138,
 				"parent" : 0
 			},
 			{
@@ -65,25 +65,25 @@
 			{
 				"command" : 4,
 				"file" : 0,
-				"line" : 74,
+				"line" : 87,
 				"parent" : 0
 			},
 			{
 				"command" : 4,
 				"file" : 0,
-				"line" : 76,
+				"line" : 89,
 				"parent" : 0
 			},
 			{
 				"command" : 4,
 				"file" : 0,
-				"line" : 78,
+				"line" : 93,
 				"parent" : 0
 			},
 			{
 				"command" : 5,
 				"file" : 0,
-				"line" : 94,
+				"line" : 109,
 				"parent" : 0
 			}
 		]
@@ -94,7 +94,14 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : " -fpermissive -fsanitize=address -Wall -Wextra -Werror=return-type -pedantic -Wno-unused-parameter -g -std=gnu++20 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mmacosx-version-min=14.3"
+					"fragment" : " -fpermissive -Wall -Wextra -Werror=return-type -pedantic -Wno-unused-parameter -g -std=gnu++20 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mmacosx-version-min=14.3"
+				}
+			],
+			"defines" : 
+			[
+				{
+					"backtrace" : 3,
+					"define" : "TRACY_ENABLE"
 				}
 			],
 			"frameworks" : 
@@ -127,6 +134,11 @@
 				{
 					"backtrace" : 9,
 					"path" : "/Users/willow/Documents/GitHub/SpaceGame/include/imgui"
+				},
+				{
+					"backtrace" : 3,
+					"isSystem" : true,
+					"path" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/tracy-src/public"
 				}
 			],
 			"language" : "CXX",
@@ -134,7 +146,8 @@
 			{
 				"backtraces" : 
 				[
-					10
+					10,
+					3
 				],
 				"standard" : "20"
 			},
@@ -157,6 +170,13 @@
 					"fragment" : "-g -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mmacosx-version-min=14.3"
 				}
 			],
+			"defines" : 
+			[
+				{
+					"backtrace" : 3,
+					"define" : "TRACY_ENABLE"
+				}
+			],
 			"frameworks" : 
 			[
 				{
@@ -187,6 +207,11 @@
 				{
 					"backtrace" : 9,
 					"path" : "/Users/willow/Documents/GitHub/SpaceGame/include/imgui"
+				},
+				{
+					"backtrace" : 3,
+					"isSystem" : true,
+					"path" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/tracy-src/public"
 				}
 			],
 			"language" : "C",
@@ -209,6 +234,10 @@
 		{
 			"backtrace" : 4,
 			"id" : "SpaceGame_Shaders::@6890427a1f51a3e7e1df"
+		},
+		{
+			"backtrace" : 3,
+			"id" : "TracyClient::@5312c6e87bd9d431bdc8"
 		}
 	],
 	"id" : "SpaceGame::@6890427a1f51a3e7e1df",
@@ -217,7 +246,7 @@
 		"commandFragments" : 
 		[
 			{
-				"fragment" : "-fpermissive -fsanitize=address -Wall -Wextra -Werror=return-type -pedantic -Wno-unused-parameter -g",
+				"fragment" : "-fpermissive -Wall -Wextra -Werror=return-type -pedantic -Wno-unused-parameter -g",
 				"role" : "flags"
 			},
 			{
@@ -259,6 +288,11 @@
 			{
 				"backtrace" : 3,
 				"fragment" : "libSIMPLEXNOISE.a",
+				"role" : "libraries"
+			},
+			{
+				"backtrace" : 3,
+				"fragment" : "_deps/tracy-build/libTracyClient.a",
 				"role" : "libraries"
 			}
 		],

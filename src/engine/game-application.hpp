@@ -22,6 +22,7 @@
 #include "helper/clock.hpp"
 #include <thread>
 #include <chrono>
+// #include <tracy/public/tracy/tracy.hpp>
 
 
 #include "interface/actor/player-widget.hpp"
@@ -58,14 +59,21 @@ class GameApplication {
         uint32_t windowHeight = 600;
         void run() {
 
+            std::cout << "main thread id:" << std::this_thread::get_id() << std::endl;
+
             setup();
 
             std::thread thread(&GameApplication::chunkTask,this);
+            
 
             while (!glfwWindowShouldClose(window)) {
                 loop();
             }
 
+            
+            
+            closing = true;
+            thread.join();
             vulkan->waitIdle();
 
         }
@@ -103,6 +111,7 @@ class GameApplication {
         InventoryWidget inventoryWidget;
         ItemSlotWidget itemSlotWidget;
         ItemSlotWidget clearItemSlotWidget;
+        TextWidget fpsText;
 
         FurnaceWidget furnaceWidget;
 
@@ -118,6 +127,8 @@ class GameApplication {
         Recipe makeFurnace = Recipe(ItemStack(registry.getItem("furnace_item"),1));
 
         Skybox skybox;
+
+        std::atomic<bool> closing = false;
         
 
         float lastTime = 0; //tells how long its been since the last update
@@ -211,6 +222,8 @@ class GameApplication {
             loader.loadAll(registry,lua,vulkan);
 
 
+
+
             lastTime = (float)glfwGetTime();
 
             auto playerPrototype = Character::makeDefaultPrototype();
@@ -244,6 +257,8 @@ class GameApplication {
             settings.meshBuffer = registry.getModel("block")->meshBuffer;
 
             terrain = world.spawn(Terrain::makeInstance(terrainMaterial,settings,vec3(0,0,0)));
+
+
             // terrain->terrainTypes[0].item = registry.getItem("stone");
             // terrain->terrainTypes[0].texture = registry.getTexture("rock");
             // terrain->terrainTypes[1].item = registry.getItem("tin_ore");
@@ -262,7 +277,7 @@ class GameApplication {
             makeFurnace.time = 3;
             
 
-            player = world.spawn(Character::makeInstance(playerPrototype.get(),vec3(15.0,30.0,15.0)));
+            player = world.spawn(Character::makeInstance(playerPrototype.get(),vec3(0.0,30.0,0.0)));
             player->model = registry.getModel("capsule_thin");
             player->material = registry.getMaterial("player");
 
@@ -305,6 +320,8 @@ class GameApplication {
             font.charSize = vec2(8,12);
             font.textureSize = vec2(312,12);
             font.characters = "0123456789x.ABCDEFGHIJKLMNOPQRSTUVWXYZ ";
+
+            fpsText.font = &font;
 
             player->recipes.push_back(&makeFurnace);
             
@@ -353,17 +370,18 @@ class GameApplication {
             //std::cout << "ending world frame" << std::endl;
 
             DrawContext drawContext(interface,*vulkan,input);
+            Rect screenRect = Rect(drawContext.getScreenSize());
 
-            // Rect screenRect = Rect(drawContext.getScreenSize());
-
-            // Sprite solidSprite = registry.getSprite("solid");
             // cursor
-            //interface.drawRect(*vulkan,Rect::anchored(Rect::centered(vec2(4,0.5)),screenRect,vec2(0.5,0.5)),Color::white,solidSprite);
-            //interface.drawRect(*vulkan,Rect::anchored(Rect::centered(vec2(0.5,4)),screenRect,vec2(0.5,0.5)),Color::white,solidSprite);
+            Sprite solidSprite = registry.getSprite("solid");
+            interface.drawRect(*vulkan,Rect::anchored(Rect::centered(vec2(4,0.5)),screenRect,vec2(0.5,0.5)),Color::white,solidSprite);
+            interface.drawRect(*vulkan,Rect::anchored(Rect::centered(vec2(0.5,4)),screenRect,vec2(0.5,0.5)),Color::white,solidSprite);
 
-            // if(player->widget != nullptr) {
-            //     player->widget->draw(drawContext,*player);
-            // }
+            if(player->widget != nullptr) {
+                player->widget->draw(drawContext,*player);
+            }
+
+            fpsText.draw(drawContext,vec2(0),std::to_string(1.0f/dt));
 
             
             if(player->inMenu) 
@@ -376,6 +394,10 @@ class GameApplication {
             }
 
             skybox.addRenderables(*vulkan,camera);
+
+            if(input.getKeyPressed(GLFW_KEY_R)) {
+                terrain->loadChunks(player->position,3,vulkan);
+            }
 
             // auto hitOpt = world.raycast(player->getLookRay(),10);
             // if(hitOpt) {
@@ -409,9 +431,10 @@ class GameApplication {
         }
 
         void chunkTask() {
-            while(true) {
-                terrain->loadChunks(player->position,2);
+            while(!closing) {
+                terrain->loadChunks(player->position,3,vulkan);
             }
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
 
         

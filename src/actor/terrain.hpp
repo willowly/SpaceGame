@@ -10,6 +10,8 @@
 #include "terrain-chunk.hpp"
 #include "terrain-structs.hpp"
 #include <math.h>
+#include <thread>
+#include <chrono>
 
 using std::unique_ptr;
 using glm::vec3, glm::ivec4,glm::vec4;
@@ -32,46 +34,85 @@ class Terrain : public Actor {
     int chunkSize = 30; //without LOD, all chunks are the same size
     float cellSize = 0.5f;
 
+    int size = 5;
+
     public:
 
     
 
 
-    void addChunk(ivec3 pos) {
-        chunksMtx.lock();
+    void addChunk(ivec3 pos,Vulkan* vulkan) {
+        
         LocationKey key(pos);
         ivec3 offset = pos*chunkSize;
+        chunksMtx.lock();
         chunks.emplace(std::piecewise_construct,std::make_tuple(key),std::make_tuple(offset,chunkSize,cellSize));
+        chunksMtx.unlock();
         auto& chunk = chunks.at(key);
         chunk.generateData(settings);
-        chunk.generateMesh();
-        connect(chunk,pos);
-        chunksMtx.unlock();
+        chunks.at(key).generateMesh();
+        // connect(chunk,pos,vulkan);
+        // no necesarily "loaded" yet
 
         
     }
 
     
 
-    void loadChunks(vec3 position,int distance) {
+    void loadChunks(vec3 position,int distance,Vulkan* vulkan) {
         ivec3 pos = glm::floor(position/((float)chunkSize*cellSize));
-        pos.y = 0;
+        // generate one extra
         for (int z = -distance; z <= distance; z++)
         {
-            for (int x = -distance; x <= distance; x++)
+            for (int y = -distance; y <= distance; y++)
             {
-                LocationKey key(pos + ivec3(x,0,z));
-                if(!chunks.contains(key)) {
-                    std::cout << key.x << "," << key.y << "," << key.z << std::endl;
-                    addChunk(pos + ivec3(x,0,z));
+                for (int x = -distance; x <= distance; x++)
+                {
+                    ivec3 chunkPos = pos + ivec3(x,y,z);
+                    LocationKey key(chunkPos);
+                    if(chunkPos.x < -size || chunkPos.x > size) {
+                        continue;
+                    }
+                    if(chunkPos.z < -size || chunkPos.z > size) {
+                        continue;
+                    }
+                    if(chunkPos.y < -size || chunkPos.y > size) {
+                        continue;
+                    }
+                    if(!chunks.contains(key)) {
+                        addChunk(chunkPos,vulkan);
+                    }
+                   
                 }
             }
         }
-        
+        // for (int z = -distance; z <= distance; z++)
+        // {
+        //     for (int y = -distance; y <= distance; y++)
+        //     {
+        //         for (int x = -distance; x <= distance; x++)
+        //         {
+        //             ivec3 chunkPos = pos + ivec3(x,y,z);
+        //             LocationKey key(chunkPos);
+        //             if(chunkPos.x < -size || chunkPos.x > size) {
+        //                 continue;
+        //             }
+        //             if(chunkPos.z < -size || chunkPos.z > size) {
+        //                 continue;
+        //             }
+        //             if(chunkPos.y < -size || chunkPos.y > size) {
+        //                 continue;
+        //             }
+        //             if(chunks.contains(key)) {
+        //                 chunks.at(key).updateMeshBuffers(vulkan);
+        //             }
+        //         }
+        //     }
+        // }
     }
 
-    // only call when already locked
-    void connect(TerrainChunk& chunk,ivec3 pos) {
+    
+    void connect(TerrainChunk& chunk,ivec3 pos,Vulkan* vulkan) {
 
         LocationKey keyPosX(pos+ivec3(1,0,0));
         if(chunks.contains(keyPosX)) {
@@ -90,6 +131,21 @@ class Terrain : public Actor {
         if(chunks.contains(keyNegZ)) {
             chunks.at(keyNegZ).connectPosZ(&chunk);
         }
+        for (int z = 0; z <= 1; z++)
+        {
+            for (int y = 0; y <= 1; y++)
+            {
+                for (int x = 0; x <= 1; x++)
+                {
+                    ivec3 chunkPos = pos + ivec3(x,y,z);
+                    LocationKey key(chunkPos);
+                    if(chunks.contains(key)) {
+                        chunks.at(key).generateMesh();
+                    }
+                }
+            }
+        }
+        
     }
 
     
@@ -132,6 +188,7 @@ class Terrain : public Actor {
     // }
 
     virtual void addRenderables(Vulkan* vulkan,float dt) {
+        
         for(auto& pair : chunks) {
             auto& chunk = pair.second;
             chunk.addRenderables(vulkan,dt,position,material);

@@ -6,6 +6,11 @@
 			[
 				{
 					"build" : ".",
+					"childIndexes" : 
+					[
+						1
+					],
+					"hasInstallRule" : true,
 					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
 					"minimumCMakeVersion" : 
 					{
@@ -21,12 +26,32 @@
 						3,
 						4
 					]
+				},
+				{
+					"build" : "_deps/tracy-build",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-_deps.tracy-build-Debug-cd08bce698b2f354397d.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.10"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 1,
+					"source" : "build/_deps/tracy-src",
+					"targetIndexes" : 
+					[
+						5
+					]
 				}
 			],
 			"name" : "Debug",
 			"projects" : 
 			[
 				{
+					"childIndexes" : 
+					[
+						1
+					],
 					"directoryIndexes" : 
 					[
 						0
@@ -40,6 +65,18 @@
 						3,
 						4
 					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						1
+					],
+					"name" : "Tracy",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						5
+					]
 				}
 			],
 			"targets" : 
@@ -47,37 +84,44 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "SHADERS::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-SHADERS-Debug-1130bf984a8717cf0967.json",
+					"jsonFile" : "target-SHADERS-Debug-0710a3a7f3132eb334ed.json",
 					"name" : "SHADERS",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 0,
 					"id" : "SIMPLEXNOISE::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-SIMPLEXNOISE-Debug-c8e691f84934d5f3cdb8.json",
+					"jsonFile" : "target-SIMPLEXNOISE-Debug-02912e43dc1307725d57.json",
 					"name" : "SIMPLEXNOISE",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 0,
 					"id" : "STB::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-STB-Debug-1b2de0a5a54ef312b9ae.json",
+					"jsonFile" : "target-STB-Debug-701bc72275a25aada123.json",
 					"name" : "STB",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 0,
 					"id" : "SpaceGame::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-SpaceGame-Debug-5ad144bac0f487a17019.json",
+					"jsonFile" : "target-SpaceGame-Debug-fa57ae8efcc6f5d3cde9.json",
 					"name" : "SpaceGame",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 0,
 					"id" : "SpaceGame_Shaders::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-SpaceGame_Shaders-Debug-7a85f88ceba5198581cf.json",
+					"jsonFile" : "target-SpaceGame_Shaders-Debug-9a8008af62102126097f.json",
 					"name" : "SpaceGame_Shaders",
 					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "TracyClient::@5312c6e87bd9d431bdc8",
+					"jsonFile" : "target-TracyClient-Debug-e426450608112594c1e4.json",
+					"name" : "TracyClient",
+					"projectIndex" : 1
 				}
 			]
 		}

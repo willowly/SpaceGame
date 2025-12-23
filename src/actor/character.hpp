@@ -167,7 +167,7 @@ class Character : public Actor {
                 clickInput = false;
                 interactInput = false;
 
-                world->collideBasic(this,height,radius);
+                //world->collideBasic(this,height,radius);
             }
 
             if(currentRecipe != nullptr) {

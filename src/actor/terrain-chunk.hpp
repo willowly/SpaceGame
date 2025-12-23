@@ -6,6 +6,7 @@
 #include "SimplexNoise.h"
 #include "terrain-structs.hpp"
 #include <mutex>
+#include "helper/clock.hpp"
 
 #include <map>
 
@@ -35,7 +36,7 @@ class TerrainChunk {
     float cellSize = 0.5f;
 
     std::mutex mtx;
-    std::atomic<bool> loaded = false;
+    std::atomic<bool> readyToRender = false;
 
     // TerrainChunk(const TerrainChunk& chunk) = delete;
     // TerrainChunk& operator=(const TerrainChunk& chunk) = delete;
@@ -95,7 +96,7 @@ class TerrainChunk {
 
         void generateData(GenerationSettings settings) {
 
-            mtx.lock();
+            std::scoped_lock lock(mtx);
             terrainTypes[0] = settings.stoneType;
             terrainData.resize(size*size*size);
 
@@ -103,7 +104,6 @@ class TerrainChunk {
 
             const SimplexNoise simplex;
 
-            float radius = size*0.5f;
 
             int i = 0;
             for (int z = 0; z < size; z++)
@@ -117,24 +117,19 @@ class TerrainChunk {
                     {
                         vec3 samplePos = vec3(x,y,z);
                         samplePos += offset;
-                        samplePos /= settings.noiseScale;
-                        float noise = simplex.fractal(5,samplePos.x,0,samplePos.z);
+                        vec3 noiseSamplePos = samplePos / settings.noiseScale;
+                        float noise = simplex.fractal(5,noiseSamplePos.x,noiseSamplePos.y,noiseSamplePos.z);
                         noise *= 0.5f;
                         noise += 0.5f;
-                        noise *= size;
-                        noise += 5;
-                        
-                        terrainData[i].amount = std::clamp(noise - y,0.0f,1.0f);
-                        terrainData[i].type = 0;
-                        //float distance = glm::length(vec3(x-radius,y-radius,z-radius));
-                        //float radiusInfluence = (radius-distance)/radius;
-                        //terrainData[i].amount = noise;// * (radiusInfluence+0.5f);
+
+
+                        float distance = glm::length(samplePos);
+                        float radiusInfluence = (settings.radius-distance)/settings.radius;
+                        terrainData[i].amount = noise * (radiusInfluence+0.5f);
                         i++;
                     }
                 }
             }
-            mtx.unlock();
-            std::cout << std::endl;
             // generateOre(1,30,0.3,offset,chunk);
             // generateOre(2,60,0.4,offset,chunk);
         }
@@ -185,31 +180,53 @@ class TerrainChunk {
         
 
         void addRenderables(Vulkan* vulkan,float dt,vec3 position,Material material) {
-            if(!loaded) return;
-            if(vertices.size() == 0 || indices.size() == 0) return;
-            if(mtx.try_lock()) {
-                
+            if(!readyToRender) return;
+            std::unique_lock lock(mtx,std::defer_lock);
+            
+            if(lock.try_lock()) {
                 if(meshState == -1) {
+                    if(vertices.size() == 0 || indices.size() == 0) return;
                     meshBuffer[0] = vulkan->createMeshBuffers(vertices,indices);
-                    meshBuffer[1] = vulkan->createMeshBuffers(vertices,indices);
+                    //meshBuffer[1] = vulkan->createMeshBuffers(vertices,indices);
                     meshOutOfDate = false;
                     meshState = 0;
                 } else {
-                    if(meshOutOfDate) {
-                        meshState++;
-                        if(meshState >= FRAMES_IN_FLIGHT) meshState = 0;
-                        vulkan->updateMeshBuffer(meshBuffer[meshState],vertices,indices);
-                        meshOutOfDate = false;
-                    }
+                    // if(meshOutOfDate) {
+                    //     meshState++;
+                    //     if(meshState >= FRAMES_IN_FLIGHT) meshState = 0;
+                    //     vulkan->updateMeshBuffer(meshBuffer[meshState],vertices,indices);
+                    //     meshOutOfDate = false;
+                    // }
                 }
-                mtx.unlock();
+                lock.unlock();
             }
             if(meshState != -1) {
                 vulkan->addMesh(meshBuffer[meshState],material,glm::translate(glm::mat4(1.0f),position+((vec3)offset*cellSize)));
             }
         }
+
+        
+        // void updateMeshBuffers(Vulkan* vulkan) {
+        //     std::scoped_lock lock(mtx);
+        //     if(meshState == 0) {
+        //         if(vertices.size() == 0 || indices.size() == 0) return;
+        //         meshBuffer[0] = vulkan->createMeshBuffers(vertices,indices);
+        //         meshBuffer[1] = vulkan->createMeshBuffers(vertices,indices);
+        //         meshOutOfDate = false;
+        //         meshState = 0;
+        //     } else {
+        //         if(meshOutOfDate) {
+        //             meshState++;
+        //             if(meshState >= FRAMES_IN_FLIGHT) meshState = 0;
+        //             vulkan->updateMeshBuffer(meshBuffer[meshState],vertices,indices);
+        //             meshOutOfDate = false;
+        //         }
+        //     }
+        // }
+
         void generateMesh() {
-            mtx.lock();
+            
+            std::scoped_lock lock(mtx);
             float clock = (float)glfwGetTime();
             vertices.clear();
             indices.clear();
@@ -268,11 +285,8 @@ class TerrainChunk {
                 }
             }
             
-            // // vertices = std::move(newVertices);
+            readyToRender = true;
             meshOutOfDate = true;
-            mtx.unlock();
-            loaded = true;
-            // std::cout << "generate time: " << (float)glfwGetTime() - clock << std::endl;
         }
 
         void addCell(int config,vec3 cellPos) {
@@ -346,7 +360,11 @@ class TerrainChunk {
 
         // need shape
         virtual void collideBasic(vec3& localActorPosition,vec3 topOffset,float radius) {
-            if(!loaded) return;
+            if(!readyToRender) return;
+
+            if(!mtx.try_lock()) {
+                return;
+            }
 
             auto posCellSpace = (localActorPosition/cellSize)-(vec3)offset;
             auto radiusCellSpace = (radius+glm::length(topOffset))/cellSize;
@@ -384,19 +402,20 @@ class TerrainChunk {
                     }
                 }
             }
+            mtx.unlock();
         }
 
         void connectPosX(TerrainChunk* chunk) {
             if(posX != chunk) {
                 posX = chunk;
-                generateMesh();
+                //generateMesh();
             }
         }
 
         void connectPosZ(TerrainChunk* chunk) {
             if(posZ != chunk) {
                 posZ = chunk;
-                generateMesh();
+                //generateMesh();
             }
         }
 

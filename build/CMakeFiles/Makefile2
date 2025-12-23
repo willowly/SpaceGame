@@ -66,10 +66,11 @@ CMAKE_BINARY_DIR = /Users/willow/Documents/GitHub/SpaceGame/build
 all: CMakeFiles/STB.dir/all
 all: CMakeFiles/SIMPLEXNOISE.dir/all
 all: CMakeFiles/SpaceGame.dir/all
+all: _deps/tracy-build/all
 .PHONY : all
 
 # The main recursive "preinstall" target.
-preinstall:
+preinstall: _deps/tracy-build/preinstall
 .PHONY : preinstall
 
 # The main recursive "clean" target.
@@ -78,7 +79,23 @@ clean: CMakeFiles/SIMPLEXNOISE.dir/clean
 clean: CMakeFiles/SpaceGame.dir/clean
 clean: CMakeFiles/SHADERS.dir/clean
 clean: CMakeFiles/SpaceGame_Shaders.dir/clean
+clean: _deps/tracy-build/clean
 .PHONY : clean
+
+#=============================================================================
+# Directory level rules for directory _deps/tracy-build
+
+# Recursive "all" directory target.
+_deps/tracy-build/all: _deps/tracy-build/CMakeFiles/TracyClient.dir/all
+.PHONY : _deps/tracy-build/all
+
+# Recursive "preinstall" directory target.
+_deps/tracy-build/preinstall:
+.PHONY : _deps/tracy-build/preinstall
+
+# Recursive "clean" directory target.
+_deps/tracy-build/clean: _deps/tracy-build/CMakeFiles/TracyClient.dir/clean
+.PHONY : _deps/tracy-build/clean
 
 #=============================================================================
 # Target rules for target CMakeFiles/STB.dir
@@ -139,6 +156,7 @@ CMakeFiles/SIMPLEXNOISE.dir/clean:
 CMakeFiles/SpaceGame.dir/all: CMakeFiles/STB.dir/all
 CMakeFiles/SpaceGame.dir/all: CMakeFiles/SIMPLEXNOISE.dir/all
 CMakeFiles/SpaceGame.dir/all: CMakeFiles/SpaceGame_Shaders.dir/all
+CMakeFiles/SpaceGame.dir/all: _deps/tracy-build/CMakeFiles/TracyClient.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=5,6,7,8,9,10,11,12,13,14 "Built target SpaceGame"
@@ -146,7 +164,7 @@ CMakeFiles/SpaceGame.dir/all: CMakeFiles/SpaceGame_Shaders.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/SpaceGame.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles 24
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles 26
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/SpaceGame.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles 0
 .PHONY : CMakeFiles/SpaceGame.dir/rule
@@ -211,6 +229,32 @@ SpaceGame_Shaders: CMakeFiles/SpaceGame_Shaders.dir/rule
 CMakeFiles/SpaceGame_Shaders.dir/clean:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame_Shaders.dir/build.make CMakeFiles/SpaceGame_Shaders.dir/clean
 .PHONY : CMakeFiles/SpaceGame_Shaders.dir/clean
+
+#=============================================================================
+# Target rules for target _deps/tracy-build/CMakeFiles/TracyClient.dir
+
+# All Build rule for target.
+_deps/tracy-build/CMakeFiles/TracyClient.dir/all:
+	$(MAKE) $(MAKESILENT) -f _deps/tracy-build/CMakeFiles/TracyClient.dir/build.make _deps/tracy-build/CMakeFiles/TracyClient.dir/depend
+	$(MAKE) $(MAKESILENT) -f _deps/tracy-build/CMakeFiles/TracyClient.dir/build.make _deps/tracy-build/CMakeFiles/TracyClient.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=25,26 "Built target TracyClient"
+.PHONY : _deps/tracy-build/CMakeFiles/TracyClient.dir/all
+
+# Build rule for subdir invocation for target.
+_deps/tracy-build/CMakeFiles/TracyClient.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 _deps/tracy-build/CMakeFiles/TracyClient.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles 0
+.PHONY : _deps/tracy-build/CMakeFiles/TracyClient.dir/rule
+
+# Convenience name for target.
+TracyClient: _deps/tracy-build/CMakeFiles/TracyClient.dir/rule
+.PHONY : TracyClient
+
+# clean rule for target.
+_deps/tracy-build/CMakeFiles/TracyClient.dir/clean:
+	$(MAKE) $(MAKESILENT) -f _deps/tracy-build/CMakeFiles/TracyClient.dir/build.make _deps/tracy-build/CMakeFiles/TracyClient.dir/clean
+.PHONY : _deps/tracy-build/CMakeFiles/TracyClient.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.
