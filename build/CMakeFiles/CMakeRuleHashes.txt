@@ -1,6 +1,8 @@
 # Hashes of file build rules.
 3ed835bf0b586db14d23d048ad4b15c7 CMakeFiles/SpaceGame_Shaders
 161b66001ad82d78acb0d400a4e7ae41 _deps/glfw-build/src/CMakeFiles/update_mappings
+aa923e4bea18c0ec1045b8845db55913 bin/shaders/compiled/construction_frag.spv
+474bfb3e3d29a32990497faa4dde7546 bin/shaders/compiled/construction_vert.spv
 8627f655e5ad5aeee883bf346abdd45a bin/shaders/compiled/debug_frag.spv
 d87dcf6bf170c2f2a78e89574d02e20f bin/shaders/compiled/debug_vert.spv
 1e50b9e483f37e13ddcba9ea8e1a6400 bin/shaders/compiled/lit_frag.spv

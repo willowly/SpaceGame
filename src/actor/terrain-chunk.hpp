@@ -29,8 +29,9 @@ class TerrainChunk {
     std::vector<uint16_t> indices;
     int meshState = -1;
     MeshBuffer meshBuffer[FRAMES_IN_FLIGHT];
-    bool meshOutOfDate = false;
+    bool gpuMeshOutOfDate = false;
     TerrainType terrainTypes[8];
+    bool meshOutOfDate;
 
     int size = 30;
     float cellSize = 0.5f;
@@ -49,6 +50,7 @@ class TerrainChunk {
     }
 
     float getPoint(int x,int y,int z) {
+
         if(x < 0) {
             x = 0;
         }
@@ -59,7 +61,18 @@ class TerrainChunk {
                 x = size-1;
             }
         }
-        y = std::clamp(y,0,size-1);
+
+        if(y < 0) {
+            y = 0;
+        }
+        if(y >= size) {
+            if(posY != nullptr) {
+                return posY->getPoint(x,y - size,z);
+            } else {
+                y = size-1;
+            }
+        }
+
         if(z < 0) {
             z = 0;
         }
@@ -87,23 +100,39 @@ class TerrainChunk {
         return cellPos;
     }
 
+    ivec3 localToCellPos(vec3 local) {
+        local /= cellSize;
+        local -= offset;
+        return (ivec3)glm::floor(local);
+    }
+
+    vec3 getTerrainLocalOffset() {
+        return ((vec3)offset)*cellSize;
+    }
+
     TerrainChunk* posX = nullptr;
     TerrainChunk* posZ = nullptr;
+    TerrainChunk* posY = nullptr;
 
     public:
 
-        TerrainChunk(ivec3 offset,int chunkSize,float cellSize) : offset(offset), size(chunkSize), cellSize(cellSize) {}
+        TerrainChunk(ivec3 offset,int chunkSize,float cellSize) : offset(offset), size(chunkSize), cellSize(cellSize) {
+
+            for (auto& buffer : meshBuffer)
+            {
+                buffer.buffer = VK_NULL_HANDLE;
+            }
+            
+        }
 
         void generateData(GenerationSettings settings) {
 
             std::scoped_lock lock(mtx);
             terrainTypes[0] = settings.stoneType;
+            terrainTypes[1] = settings.oreType;
             terrainData.resize(size*size*size);
 
-            meshBuffer[0] = settings.meshBuffer;
-
             const SimplexNoise simplex;
-
 
             int i = 0;
             for (int z = 0; z < size; z++)
@@ -130,52 +159,80 @@ class TerrainChunk {
                     }
                 }
             }
-            // generateOre(1,30,0.3,offset,chunk);
+
+            generateOre(1,30,0.5,offset);
+            meshOutOfDate = true;
             // generateOre(2,60,0.4,offset,chunk);
         }
 
-        //position is in chunk space
-        TerraformResults terraformSphere(vec3 pos,float radius,float change) {
+        void generateOre(int id,float scale,float surfaceLevel,vec3 offset) {
+            const SimplexNoise simplex;
 
 
-            TerraformResults results;
-            return results;
-
-            // float clock = (float)glfwGetTime();
-            // auto posCellSpace = getCellAtWorldPos(pos);
-            // auto radiusCellSpace = radius/cellSize;
-            // std::cout << radiusCellSpace << std::endl;
-            // std::cout << posCellSpace.z-radiusCellSpace << std::endl;
-            // std::cout << posCellSpace.z+radiusCellSpace << std::endl;
-            // for (int z = floor(std::max(0.0f,posCellSpace.z-radiusCellSpace)); z <= ceil(std::min((float)chunkSize,posCellSpace.z+radiusCellSpace)); z++)
-            // {
-            //     for (int y = floor(std::max(0.0f,posCellSpace.y-radiusCellSpace)); y <= ceil(std::min((float)chunkSize,posCellSpace.y+radiusCellSpace)); y++)
-            //     {
-            //         for (int x = floor(std::max(0.0f,posCellSpace.x-radiusCellSpace)); x <= ceil(std::min((float)chunkSize,posCellSpace.x+radiusCellSpace)); x++)
-            //         {
-            //             int i = getPointIndex(x,y,z);
-                        
-            //             vec3 cellPos = getCellWorldPos(vec3(x,y,z));
-            //             float dist = glm::distance(cellPos,pos);
-            //             float influence = (radius-dist)/radius;
-                        
-            //             if(influence > 0) {
-            //                 float old = terrainData[i].amount;
-            //                 terrainData[i].amount += change * influence;
-            //                 terrainData[i].amount = std::min(std::max(terrainData[i].amount,0.0f),1.0f);
-            //                 int terrainTypeID = terrainData[i].type;
-                            
-            //                 if(old > SURFACE_LVL && terrainData[i].amount < SURFACE_LVL) {
-            //                     results.item = terrainTypes[terrainTypeID].item;
-            //                 }
-            //             }
-            //             i++;
-            //         }
-            //     }
-            // }
-            // return results;
-            // std::cout << "terraform time: " << (float)glfwGetTime() - clock << std::endl;
+            int i = 0;
+            for (int z = 0; z < size; z++)
+            {
+                int percent = ((float)z/size)*100;
+                //std::cout << "generating ore " << percent << "%" << std::endl;
+                for (int y = 0; y < size; y++)
+                {
+                    for (int x = 0; x < size; x++)
+                    {
+                        vec3 samplePos = vec3(x,y,z);
+                        samplePos += offset;
+                        samplePos /= scale;
+                        samplePos += vec3(size*id);
+                        float oreNoise = simplex.fractal(5,samplePos.x,samplePos.y,samplePos.z);
+                        if(oreNoise > surfaceLevel) {
+                            std::cout << "ore" << std::endl;
+                            terrainData[i].type = id;
+                        }
+                        i++;
+                    }
+                }
+            }
         }
+
+        //position is in terrain space
+        void terraformSphere(vec3 pos,float radius,float change,TerraformResults& results) {
+
+
+
+            
+            auto posCellSpace = localToCellPos(pos);
+            auto radiusCellSpace = radius/cellSize;
+            std::cout << radiusCellSpace << std::endl;
+            std::cout << posCellSpace.z-radiusCellSpace << std::endl;
+            std::cout << posCellSpace.z+radiusCellSpace << std::endl;
+            for (int z = floor(std::max(0.0f,posCellSpace.z-radiusCellSpace)); z <= ceil(std::min((float)size,posCellSpace.z+radiusCellSpace)); z++)
+            {
+                for (int y = floor(std::max(0.0f,posCellSpace.y-radiusCellSpace)); y <= ceil(std::min((float)size,posCellSpace.y+radiusCellSpace)); y++)
+                {
+                    for (int x = floor(std::max(0.0f,posCellSpace.x-radiusCellSpace)); x <= ceil(std::min((float)size,posCellSpace.x+radiusCellSpace)); x++)
+                    {
+                        int i = getPointIndex(x,y,z);
+                        
+                        vec3 cellPos = getCellLocalPos(vec3(x,y,z));
+                        float dist = glm::distance(cellPos,pos);
+                        float influence = (radius-dist)/radius;
+                        
+                        if(influence > 0) {
+                            float old = terrainData[i].amount;
+                            terrainData[i].amount += change * influence;
+                            terrainData[i].amount = std::min(std::max(terrainData[i].amount,0.0f),1.0f);
+                            int terrainTypeID = terrainData[i].type;
+                            
+                            if(old > SURFACE_LVL && terrainData[i].amount < SURFACE_LVL) {
+                                results.addItem(ItemStack(terrainTypes[terrainTypeID].item,1));
+                            }
+                            meshOutOfDate = true;
+                        }
+                        i++;
+                    }
+                }
+            }
+        }
+
 
         
 
@@ -188,15 +245,15 @@ class TerrainChunk {
                     if(vertices.size() == 0 || indices.size() == 0) return;
                     meshBuffer[0] = vulkan->createMeshBuffers(vertices,indices);
                     //meshBuffer[1] = vulkan->createMeshBuffers(vertices,indices);
-                    meshOutOfDate = false;
+                    gpuMeshOutOfDate = false;
                     meshState = 0;
                 } else {
-                    // if(meshOutOfDate) {
-                    //     meshState++;
-                    //     if(meshState >= FRAMES_IN_FLIGHT) meshState = 0;
-                    //     vulkan->updateMeshBuffer(meshBuffer[meshState],vertices,indices);
-                    //     meshOutOfDate = false;
-                    // }
+                    if(gpuMeshOutOfDate) {
+                        meshState++;
+                        if(meshState >= FRAMES_IN_FLIGHT) meshState = 0;
+                        vulkan->updateMeshBuffer(meshBuffer[meshState],vertices,indices);
+                        gpuMeshOutOfDate = false;
+                    }
                 }
                 lock.unlock();
             }
@@ -205,26 +262,12 @@ class TerrainChunk {
             }
         }
 
-        
-        // void updateMeshBuffers(Vulkan* vulkan) {
-        //     std::scoped_lock lock(mtx);
-        //     if(meshState == 0) {
-        //         if(vertices.size() == 0 || indices.size() == 0) return;
-        //         meshBuffer[0] = vulkan->createMeshBuffers(vertices,indices);
-        //         meshBuffer[1] = vulkan->createMeshBuffers(vertices,indices);
-        //         meshOutOfDate = false;
-        //         meshState = 0;
-        //     } else {
-        //         if(meshOutOfDate) {
-        //             meshState++;
-        //             if(meshState >= FRAMES_IN_FLIGHT) meshState = 0;
-        //             vulkan->updateMeshBuffer(meshBuffer[meshState],vertices,indices);
-        //             meshOutOfDate = false;
-        //         }
-        //     }
-        // }
-
+        // force
         void generateMesh() {
+
+            if(!meshOutOfDate) {
+                return;
+            }
             
             std::scoped_lock lock(mtx);
             float clock = (float)glfwGetTime();
@@ -286,7 +329,8 @@ class TerrainChunk {
             }
             
             readyToRender = true;
-            meshOutOfDate = true;
+            gpuMeshOutOfDate = true;
+            meshOutOfDate = false;
         }
 
         void addCell(int config,vec3 cellPos) {
@@ -329,7 +373,7 @@ class TerrainChunk {
                 }
                 int vertIndex = i % 3;
 
-                TextureID texture = terrainTypes[0].texture;
+                TextureID texture = terrainTypes[terrainData[closestCellIndex].type].texture;
 
                 // std::cout << vertIndex << std::endl;
                 
@@ -405,9 +449,42 @@ class TerrainChunk {
             mtx.unlock();
         }
 
+        virtual std::optional<RaycastHit> raycast(Ray ray, float dist) {
+
+            if(!mtx.try_lock()) { //if a chunk isn't ready to load we can just assume its being loaded far away :)
+                return std::nullopt;
+            }
+            std::optional<RaycastHit> result = std::nullopt;
+            Ray localRay = Ray(ray.origin-getTerrainLocalOffset(),ray.direction);
+
+
+            for(size_t i = 0;i+2 < indices.size();i += 3)
+            {
+                vec3 a = vertices[indices[i]].pos;
+                vec3 b = vertices[indices[i+1]].pos;
+                vec3 c = vertices[indices[i+2]].pos;
+
+                auto hitopt = Physics::intersectRayTriangle(a,b,c,localRay);
+                if(hitopt) {
+                    
+                    auto hit = hitopt.value();
+                    if(hit.distance <= dist) {
+                        hit.point = (hit.point) + getTerrainLocalOffset();
+                        result = hit;
+                        dist = hit.distance; //distance stays the same when transformed
+                    }
+                }
+                    
+            }
+            mtx.unlock();
+
+            return result;
+        }
+
         void connectPosX(TerrainChunk* chunk) {
             if(posX != chunk) {
                 posX = chunk;
+                meshOutOfDate = true;
                 //generateMesh();
             }
         }
@@ -415,6 +492,15 @@ class TerrainChunk {
         void connectPosZ(TerrainChunk* chunk) {
             if(posZ != chunk) {
                 posZ = chunk;
+                meshOutOfDate = true;
+                //generateMesh();
+            }
+        }
+
+        void connectPosY(TerrainChunk* chunk) {
+            if(posY != chunk) {
+                posY = chunk;
+                meshOutOfDate = true;
                 //generateMesh();
             }
         }

@@ -281,8 +281,9 @@ class Vulkan {
 
             ZoneScoped;
 
+            
+           
 
-            std::cout << frameIndex;
             Clock clock;
             //wait for previous frame to be finished drawing
             auto result = vkWaitForFences(device, 1, &inFlightFences[frameIndex], VK_TRUE, UINT64_MAX);
@@ -299,6 +300,8 @@ class Vulkan {
             if(time > 0.1) {
                 std::cout << "frame hang: " << (int)(time*1000) << "ms" << std::endl;
             }
+
+            
             
             // scene data buffer
             updateUniformBuffer(frameIndex,camera);
@@ -555,7 +558,7 @@ class Vulkan {
             // copy the data over
             copyBuffer(transfer, buffer, bufferSize);
 
-            std::cout << "mesh upload: " << bufferSize << " bytes" << std::endl;
+            // std::cout << "mesh upload: " << bufferSize << " bytes" << std::endl;
 
             MeshBuffer meshBuffer(buffer);
             meshBuffer.indexOffset = sizeof(vertices[0]) * vertices.size();
@@ -567,7 +570,9 @@ class Vulkan {
         template<typename Vertex>
         void updateMeshBuffer(MeshBuffer& meshBuffer,std::vector<Vertex>& vertices,std::vector<uint16_t>& indices) {
 
-            destroyBuffer(meshBuffer);
+            if(meshBuffer.buffer != VK_NULL_HANDLE) {
+                destroyBuffer(meshBuffer);
+            }
             meshBuffer = createMeshBuffers(vertices,indices);
 
         }
@@ -970,6 +975,7 @@ class Vulkan {
             vkEnumeratePhysicalDevices(vkInstance, &deviceCount, devices.data());
             
             for (const auto& device : devices) {
+
                 if (isDeviceSuitable(device)) {
                     physicalDevice = device;
                     break;
@@ -1686,6 +1692,8 @@ class Vulkan {
 
             {
             TracyVkZone(tracyCtx,transfer.commandBuffer,"Copy Buffer");
+            TracyPlotConfig("Buffer Size",tracy::PlotFormatType::Memory,true,true,0);
+            TracyPlot("Buffer Size", (int64_t)size);
 
             VkBufferCopy copyRegion{};
             copyRegion.srcOffset = 0; // Optional

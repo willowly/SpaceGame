@@ -13,10 +13,6 @@ class PlaceBlockTool: public Tool {
             
         }
 
-        PlaceBlockTool(Block* block) : Tool(block->model,block->material), block(block) {
-
-        }
-
         BlockFacing placeDirection = BlockFacing::FORWARD;
 
         quat placeAnimationRotation = glm::quat(vec3(glm::radians(-50.0f),0,0));
@@ -40,10 +36,10 @@ class PlaceBlockTool: public Tool {
                 }
                 Terrain* terrain = dynamic_cast<Terrain*>(worldHit.actor);
                 if(terrain != nullptr) {
-                    world->spawn(Construction::makeInstance(block,worldHit.hit.point+glm::vec3(0,0.4,0),user.rotation));
+                    world->spawn(Construction::makeInstance(world->constructionMaterial,block,worldHit.hit.point+glm::vec3(0,0.4,0),user.rotation));
                 }
             } else {
-                world->spawn(Construction::makeInstance(block,ray.origin + ray.direction*10.0f,glm::quatLookAt(ray.direction,vec3(0,1,0))));
+                world->spawn(Construction::makeInstance(world->constructionMaterial,block,ray.origin + ray.direction*10.0f,glm::quatLookAt(ray.direction,vec3(0,1,0))));
             }
             placeAnimationTimer = placeAnimationTime;
         }

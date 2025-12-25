@@ -19,11 +19,11 @@ namespace API {
             case ObjLoadType::ARRAY:
                 // type is in slot 1 (hopefully)
                 getModel(table,2,&block->model,registry,false);
-                getMaterial(table,3,&block->material,registry,false);
+                getTexture(table,3,&block->texture,registry,false);
                 break;
             case ObjLoadType::TABLE:
                 getModel(table,"model",&block->model,registry,false);
-                getMaterial(table,"material",&block->material,registry,false);
+                getTexture(table,"texture",&block->texture,registry,false);
                 break;
             case ObjLoadType::INVALID:
                 //registry.materials.erase(name);

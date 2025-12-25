@@ -54,26 +54,26 @@ print("Loading Blocks")
 blocks.tin = {
     type="block",
     model="block",
-    material="tin_block"
+    texture="tin_block"
 }
 
 blocks.cockpit = {
     type = "cockpit",
     model = "cockpit",
-    material = "cockpit"
+    texture = "cockpit"
 }
 
 blocks.thruster = {
     type = "thruster",
     model = "thruster",
-    material = "thruster",
+    texture = "solid",
     force = 20
 }
 
 blocks.furnace = {
     type = "furnace",
     model = "furnace",
-    material = "furnace"
+    texture = "furnace"
 }
 
 print("Loading Items")

@@ -19,6 +19,59 @@
 using glm::ivec3,glm::vec3;
 using std::unordered_map;
 
+struct ConstructionVertex {
+    glm::vec3 pos;
+    glm::vec3 normal;
+    glm::vec2 texCoord;
+    int textureID;
+
+    ConstructionVertex() {}
+
+    static VkVertexInputBindingDescription getBindingDescription() {
+        VkVertexInputBindingDescription bindingDescription{};
+        bindingDescription.binding = 0;
+        bindingDescription.stride = sizeof(ConstructionVertex);
+        bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+        return bindingDescription;
+    }
+
+    static std::array<VkVertexInputAttributeDescription, 4> getAttributeDescriptions() {
+        std::array<VkVertexInputAttributeDescription, 4> attributeDescriptions{};
+        attributeDescriptions[0].binding = 0;
+        attributeDescriptions[0].location = 0;
+        attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
+        attributeDescriptions[0].offset = offsetof(ConstructionVertex, pos);
+
+        attributeDescriptions[1].binding = 0;
+        attributeDescriptions[1].location = 1;
+        attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+        attributeDescriptions[1].offset = offsetof(ConstructionVertex, normal);
+
+        attributeDescriptions[2].binding = 0;
+        attributeDescriptions[2].location = 2;
+        attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
+        attributeDescriptions[2].offset = offsetof(ConstructionVertex, texCoord);
+
+        attributeDescriptions[3].binding = 0;
+        attributeDescriptions[3].location = 3;
+        attributeDescriptions[3].format = VK_FORMAT_R32_SINT;
+        attributeDescriptions[3].offset = offsetof(ConstructionVertex, textureID);
+
+        return attributeDescriptions;
+    }
+
+    ConstructionVertex(Vertex vertex,TextureID texture) {
+        pos = vertex.pos;
+        normal = vertex.normal;
+        texCoord = vertex.texCoord;
+        textureID = texture;
+
+    }
+
+
+};
+
 #define CONSTRUCTION
 class Construction : public Actor {
 
@@ -33,7 +86,15 @@ class Construction : public Actor {
     ivec3 min = ivec3(0,0,0);
     ivec3 max = ivec3(0,0,0);
     std::vector<BlockData> blockData;
+    std::vector<ConstructionVertex> vertices;
+    std::vector<uint16_t> indices;
 
+    Material material = Material::none;
+
+    int meshState = -1;
+    MeshBuffer meshBuffer[FRAMES_IN_FLIGHT];
+    bool gpuMeshOutOfDate = false;
+    //bool meshOutOfDate;
 
     std::vector<int> blockCountX;
 
@@ -176,7 +237,13 @@ class Construction : public Actor {
             velocity += transformDirection(force);
         }
 
-        void addRenderables(Vulkan* vulkan,float dt) {
+        void generateMesh() {
+
+            //if(!meshOutOfDate) return;
+
+            vertices.clear();
+            indices.clear();
+
             size_t i = 0;
             for (int z = min.z; z <= max.z; z++)
             {
@@ -187,18 +254,46 @@ class Construction : public Actor {
                         
                         if(blockData.size() > i && blockData[i].block != nullptr) {
                             quat rotation = getRotationFromFacing(blockData[i].state.facing);
-                            glm::mat4 blockMatrix = glm::translate(getTransform(),vec3(x,y,z)) * glm::mat4(rotation);
-                            blockData[i].block->model->addToRender(vulkan,blockData[i].block->material,blockMatrix);
-                        } else {
-                            // model->renderMode = Model::RenderMode::Wireframe;
-                            // model->render(transformPoint(vec3(x,y,z)),camera,*Debug::getShader());
-                            // model->renderMode = Model::RenderMode::Solid;
+                            //glm::mat4 blockMatrix = glm::translate(getTransform(),vec3(x,y,z)) * glm::mat4(rotation);
+                            int indexOffset = vertices.size();
+                            auto block = blockData[i].block;
+                            for(auto vertex : blockData[i].block->model->meshData.vertices) {
+                                vertex.pos += vec3(x,y,z);
+                                vertices.push_back(ConstructionVertex(vertex,block->texture)); 
+                            }
+                            for(auto index : blockData[i].block->model->meshData.indices) {
+                                indices.push_back(index + indexOffset); 
+                            }
                         }
                         i++;
                     }
                 }
             }
 
+            gpuMeshOutOfDate = true;
+
+
+        }
+
+        void addRenderables(Vulkan* vulkan,float dt) {
+            if(vertices.size() == 0 || indices.size() == 0) return;
+            if(meshState == -1) {
+                
+                meshBuffer[0] = vulkan->createMeshBuffers(vertices,indices);
+                //meshBuffer[1] = vulkan->createMeshBuffers(vertices,indices);
+                gpuMeshOutOfDate = false;
+                meshState = 0;
+            } else {
+                if(gpuMeshOutOfDate) {
+                    meshState++;
+                    if(meshState >= FRAMES_IN_FLIGHT) meshState = 0;
+                    vulkan->updateMeshBuffer(meshBuffer[meshState],vertices,indices);
+                    gpuMeshOutOfDate = false;
+                }
+            }
+            if(meshState != -1) {
+                vulkan->addMesh(meshBuffer[meshState],material,getTransform());
+            }
         }
 
         void setBounds(ivec3 newMin,ivec3 newMax) {
@@ -333,12 +428,7 @@ class Construction : public Actor {
                 blockData[index] = BlockData();
             }
 
-            for (size_t i = 0; i < blockCountX.size(); i++)
-            {
-                std::cout << blockCountX[i] << ", ";
-            }
-            
-            std::cout << std::endl;
+            generateMesh();
             
             if(blockCount <= 0) {
                 destroy();
@@ -425,16 +515,17 @@ class Construction : public Actor {
             }
         }
 
-        static std::unique_ptr<Construction> makeInstance(vec3 position,quat rotation = glm::identity<quat>()) {
+        static std::unique_ptr<Construction> makeInstance(Material material,vec3 position,quat rotation = glm::identity<quat>()) {
             auto ptr = new Construction();
             ptr->position = position;
             ptr->rotation = rotation;
             ptr->targetRotation = rotation;
+            ptr->material = material;
             return std::unique_ptr<Construction>(ptr);
         }
 
-        static std::unique_ptr<Construction> makeInstance(Block* block,vec3 position,quat rotation = glm::identity<quat>()) {
-            auto ptr = makeInstance(position,rotation);
+        static std::unique_ptr<Construction> makeInstance(Material material,Block* block,vec3 position,quat rotation = glm::identity<quat>()) {
+            auto ptr = makeInstance(material,position,rotation);
             ptr->setBlock(ivec3(0),block,BlockFacing::FORWARD);
             return ptr;
         }

@@ -250,12 +250,16 @@ class GameApplication {
 
             VkPipeline terrainPipeline = vulkan->createManagedPipeline<TerrainVertex>(Vulkan::vertCodePath("terrain"),Vulkan::fragCodePath("terrain"));
             terrainMaterial = vulkan->createMaterial(terrainPipeline,LitMaterialData(registry.getTexture("rock")));
+
+            VkPipeline constructionPipeline = vulkan->createManagedPipeline<ConstructionVertex>(Vulkan::vertCodePath("construction"),Vulkan::fragCodePath("construction"));
+            world.constructionMaterial = vulkan->createMaterial(constructionPipeline,LitMaterialData(registry.getTexture("rock")));
             
             GenerationSettings settings;
             settings.noiseScale = 100;
             settings.stoneType.item = registry.getItem("stone");
             settings.stoneType.texture = registry.getTexture("rock");
-            settings.meshBuffer = registry.getModel("block")->meshBuffer;
+            settings.oreType.item = registry.getItem("stone");
+            settings.oreType.texture = registry.getTexture("tin_ore");
 
             terrain = world.spawn(Terrain::makeInstance(terrainMaterial,settings,vec3(0,0,0)));
 
@@ -402,12 +406,12 @@ class GameApplication {
                 terrain->loadChunks(player->position,3,vulkan);
             }
 
-            // auto hitOpt = world.raycast(player->getLookRay(),10);
-            // if(hitOpt) {
-            //     auto hit = hitOpt.value();
+            auto hitOpt = world.raycast(player->getLookRay(),10);
+            if(hitOpt) {
+                auto hit = hitOpt.value();
                 
-            //     Debug::drawRay(hit.hit.point,hit.hit.normal,Color::green);
-            // }
+                Debug::drawRay(hit.hit.point,hit.hit.normal,Color::green);
+            }
 
             // auto hit = Physics::intersectCapsuleBox(player->position,player->getEyePosition(),player->radius,vec3(0),vec3(0.5f));
             // if(hit) {

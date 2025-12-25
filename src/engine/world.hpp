@@ -46,6 +46,9 @@ class World {
 
     public:
 
+        // not sure how to solve this one :)
+        Material constructionMaterial = Material::none;
+
         float stepDt = 0.02;
 
         float stepProcessMs;

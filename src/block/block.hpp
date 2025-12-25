@@ -15,15 +15,15 @@ class Block {
 
     public:
         Mesh<Vertex>* model;
-        Material material;
+        TextureID texture;
         bool canRide;
         Item* drop;
 
         
-        Block(Mesh<Vertex>* model,Material material) : model(model), material(material) {
+        Block(Mesh<Vertex>* model,TextureID texture) : model(model), texture(texture) {
             
         }
-        Block() : Block(nullptr,Material::none) {}
+        Block() : Block(nullptr,0) {}
         
         virtual ~Block() = default;
 

@@ -31,10 +31,8 @@ class FurnaceBlock : public Block {
         BlockWidget<FurnaceBlock>* widget;
         std::vector<Recipe*> recipes;
     
-        FurnaceBlock(Mesh<Vertex>* model,Material material) : Block(model,material) {
-            
+        FurnaceBlock() : Block() {
         }
-        FurnaceBlock() : FurnaceBlock(nullptr,Material::none) {}
 
         virtual void onPlace(Construction* construction,ivec3 position,BlockState& state) {
             auto storage = construction->addStorage(position);

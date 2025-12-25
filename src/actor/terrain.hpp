@@ -51,10 +51,16 @@ class Terrain : public Actor {
         auto& chunk = chunks.at(key);
         chunk.generateData(settings);
         chunks.at(key).generateMesh();
-        // connect(chunk,pos,vulkan);
-        // no necesarily "loaded" yet
+        connect(chunk,pos,vulkan);
 
         
+    }
+
+    ivec3 worldToChunkPos(vec3 position) {
+        return glm::floor(position/((float)chunkSize*cellSize));
+    }
+    ivec3 worldToChunkPosRounded(vec3 position) {
+        return glm::round(position/((float)chunkSize*cellSize));
     }
 
     
@@ -123,6 +129,15 @@ class Terrain : public Actor {
             chunks.at(keyNegX).connectPosX(&chunk);
         }
 
+        LocationKey keyPosY(pos+ivec3(0,1,0));
+        if(chunks.contains(keyPosY)) {
+            chunk.connectPosY(&chunks.at(keyPosY));
+        }
+        LocationKey keyNegY(pos+ivec3(0,-1,0));
+        if(chunks.contains(keyNegY)) {
+            chunks.at(keyNegY).connectPosY(&chunk);
+        }
+
         LocationKey keyPosZ(pos+ivec3(0,0,1));
         if(chunks.contains(keyPosZ)) {
             chunk.connectPosZ(&chunks.at(keyPosZ));
@@ -131,13 +146,16 @@ class Terrain : public Actor {
         if(chunks.contains(keyNegZ)) {
             chunks.at(keyNegZ).connectPosZ(&chunk);
         }
+
+        
+
         for (int z = 0; z <= 1; z++)
         {
             for (int y = 0; y <= 1; y++)
             {
                 for (int x = 0; x <= 1; x++)
                 {
-                    ivec3 chunkPos = pos + ivec3(x,y,z);
+                    ivec3 chunkPos = pos - ivec3(x,y,z);
                     LocationKey key(chunkPos);
                     if(chunks.contains(key)) {
                         chunks.at(key).generateMesh();
@@ -157,6 +175,24 @@ class Terrain : public Actor {
             chunk.collideBasic(localActorPosition,offset,radius);
         }
         actor->position = transformPoint(localActorPosition);
+    }
+
+    TerraformResults terraformSphere(vec3 pos,float radius,float change) {
+
+        TerraformResults results;
+        vec3 localPosition = inverseTransformPoint(pos);
+
+        for(auto& pair : chunks) {
+            auto& chunk = pair.second;
+            chunk.terraformSphere(localPosition,radius,change,results);
+        }
+        for(auto& pair : chunks) {
+            auto& chunk = pair.second;
+            chunk.generateMesh(); //only generates if it needs an update
+        }
+
+        return results;
+
     }
 
     // void generateOre(int id,float scale,float surfaceLevel,vec3 offset,Chunk& chunk) {
@@ -202,31 +238,40 @@ class Terrain : public Actor {
 
     virtual std::optional<RaycastHit> raycast(Ray ray, float dist) {
 
-        return std::nullopt;
+        ZoneScopedN("terrain raycast");
+        Ray localRay = Ray(inverseTransformPoint(ray.origin),inverseTransformDirection(ray.direction));
 
-        // std::optional<RaycastHit> result = std::nullopt;
-        // Ray localRay = Ray(inverseTransformPoint(ray.origin),inverseTransformDirection(ray.direction));
-        // for(size_t i = 0;i+2 < indices.size();i += 3)
-        // {
-        //     vec3 a = vertices[indices[i]].pos;
-        //     vec3 b = vertices[indices[i+1]].pos;
-        //     vec3 c = vertices[indices[i+2]].pos;
+        std::optional<RaycastHit> result = std::nullopt;
 
-        //     auto hitopt = Physics::intersectRayTriangle(a,b,c,localRay);
-        //     if(hitopt) {
-                
-        //         auto hit = hitopt.value();
-        //         if(hit.distance <= dist) {
-        //             hit.point = transformPoint(hit.point);
-        //             hit.normal = transformDirection(hit.normal);
-        //             result = hit;
-        //             dist = hit.distance; //distance stays the same when transformed
-        //         }
-        //     }
-                
-        // }
-        // //std::cout << "raycast time: " << (float)glfwGetTime() - clock << std::endl;
-        // return result;
+        ivec3 pos = worldToChunkPosRounded(ray.origin);
+
+        for (int z = 0; z <= 1; z++)
+        {
+            for (int y = 0; y <= 1; y++)
+            {
+                for (int x = 0; x <= 1; x++)
+                {
+                    ivec3 chunkPos = pos - ivec3(x,y,z);
+                    LocationKey key(chunkPos);
+                    if(chunks.contains(key)) {
+                        auto hitOpt = chunks.at(key).raycast(localRay,dist);
+                        if(hitOpt) {
+                    
+                            auto hit = hitOpt.value();
+                            if(hit.distance <= dist) {
+                                hit.point = transformPoint(hit.point);
+                                hit.normal = transformDirection(hit.normal);
+                                result = hit;
+                                dist = hit.distance; //distance stays the same when transformed
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        
+        return result;
     }
 
     
@@ -236,7 +281,7 @@ class Terrain : public Actor {
     static std::unique_ptr<Terrain> makeInstance(Material material,GenerationSettings settings,vec3 position = vec3(0)) {
         auto ptr = new Terrain();
         ptr->material = material;
-        ptr->settings = settings;
+        ptr->settings = settings; 
         return std::unique_ptr<Terrain>(ptr);
     }
 

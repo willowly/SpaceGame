@@ -61,12 +61,12 @@ class PickaxeTool : public Tool {
             }
                 Terrain* terrain = dynamic_cast<Terrain*>(worldHit.actor);
                 if(terrain != nullptr) {
-                    // auto results = terrain->terraformSphere(worldHit.hit.point,mineRadius,-mineAmount);
-                    // terrain->generateMesh();
+                    auto results = terrain->terraformSphere(worldHit.hit.point,mineRadius,-mineAmount);
+                    //terrain->regenerate();
                     
-                    // if(results.item != nullptr) {
-                    //     user.inventory.give(results.item,1);
-                    // }
+                    for(auto& stack : results.items) {
+                        user.inventory.give(stack);
+                    }
                     damage++;
                 }
             }
@@ -85,6 +85,7 @@ class PickaxeTool : public Tool {
             float damage = stack.storage.getInt(DAMAGE_VAR,0);
             return ItemDisplayData(1-(damage/durability));
         }
+
 
         
 

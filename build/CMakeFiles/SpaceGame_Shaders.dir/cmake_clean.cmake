@@ -1,5 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/SpaceGame_Shaders"
+  "bin/shaders/compiled/construction_frag.spv"
+  "bin/shaders/compiled/construction_vert.spv"
   "bin/shaders/compiled/debug_frag.spv"
   "bin/shaders/compiled/debug_vert.spv"
   "bin/shaders/compiled/lit_frag.spv"

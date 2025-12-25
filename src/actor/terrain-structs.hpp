@@ -63,9 +63,21 @@ struct GenerationSettings {
     float noiseScale = 100;
     float radius = 70;
     TerrainType stoneType;
-    MeshBuffer meshBuffer;
+    TerrainType oreType;
 };
 
 struct TerraformResults {
-    Item* item = nullptr;
+
+    std::vector<ItemStack> items;
+
+    void addItem(ItemStack giveStack) {
+        for (auto&& stack : items)
+        {
+            if(stack.item == giveStack.item) {
+                stack.amount = giveStack.amount;
+                return;
+            }
+        }
+        items.push_back(giveStack);
+    }
 };

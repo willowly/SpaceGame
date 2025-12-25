@@ -15,6 +15,7 @@
 [INFO] Loaded Model "asteroid" (models)
 [INFO] Loaded Model "block" (models)
 [INFO] Loaded Model "chair" (models)
+[INFO] Loaded Texture "block-sheet" (textures)
 [INFO] Loaded Texture "furnace" (textures)
 [INFO] Loaded Texture "tin_block" (textures)
 [INFO] Loaded Texture "cobalt_block" (textures)
