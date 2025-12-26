@@ -184,7 +184,6 @@ class TerrainChunk {
                         samplePos += vec3(size*id);
                         float oreNoise = simplex.fractal(5,samplePos.x,samplePos.y,samplePos.z);
                         if(oreNoise > surfaceLevel) {
-                            std::cout << "ore" << std::endl;
                             terrainData[i].type = id;
                         }
                         i++;

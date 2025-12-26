@@ -16,6 +16,10 @@
 
 #include "helper/block-storage.hpp"
 
+#include "helper/rect.hpp"
+
+#include <bitset> //for shenanigans, remove if unused
+
 using glm::ivec3,glm::vec3;
 using std::unordered_map;
 
@@ -264,7 +268,7 @@ class Construction : public Actor {
                                     addSingleBlock(vec3(x,y,z),rotation,block);
                                     break;
                                 case Block::ModelType::ConnectedBlock:
-                                    addSingleBlock(vec3(x,y,z),rotation,block);
+                                    addConnectedBlock(vec3(x,y,z),rotation,block);
                                     break;
                             }
                             
@@ -279,13 +283,94 @@ class Construction : public Actor {
 
         }
 
-        void addBlockFace(vec3 position,quat rotation,TextureID textureID) {
+        // move a bunch of these to helper
+
+        void addConnectedBlockFace(vec3 position,quat rotation,TextureID textureID) {
+            ivec2 gridSize(8,8);
+
+            
+
+            char connectivity = 0;
+            connectivity |= solidInDirection(position,glm::round(rotation * vec3(0,1,0))) << 0;
+            connectivity |= solidInDirection(position,glm::round(rotation * vec3(1,0,0))) << 1;
+            connectivity |= solidInDirection(position,glm::round(rotation * vec3(0,-1,0))) << 2;
+            connectivity |= solidInDirection(position,glm::round(rotation * vec3(-1,0,0))) << 3;
+
+
+            int id = 0;
+
+            const int TOP_BIT = 0b0001;
+            const int BOTTOM_BIT = 0b0100;
+            const int RIGHT_BIT = 0b0010;
+            const int LEFT_BIT = 0b1000;
+            // vertical 1x3
+            if(connectivity == TOP_BIT) {
+                id = 8;
+            }
+            if(connectivity == (TOP_BIT | BOTTOM_BIT)) {  //equals goes first??
+                id = 16;
+            }
+            if(connectivity == BOTTOM_BIT) {
+                id = 24;
+            }
+            // horizontal 1x3
+            if(connectivity == RIGHT_BIT) {
+                id = 1;
+            }
+            if(connectivity == (RIGHT_BIT | LEFT_BIT)) { 
+                id = 2;
+            }
+            if(connectivity == LEFT_BIT) {
+                id = 3;
+            }
+            // corners
+            if(connectivity == (TOP_BIT | RIGHT_BIT)) {
+                id = 9;
+            }
+            if(connectivity == (TOP_BIT | LEFT_BIT)) {
+                id = 11;
+            }
+            if(connectivity == (BOTTOM_BIT | RIGHT_BIT)) {
+                id = 25;
+            }
+            if(connectivity == (BOTTOM_BIT | LEFT_BIT)) {
+                id = 27;
+            }
+
+            //edges
+            if(connectivity == (TOP_BIT | RIGHT_BIT | LEFT_BIT)) {
+                id = 10;
+            }
+            if(connectivity == (TOP_BIT | BOTTOM_BIT | RIGHT_BIT)) {
+                id = 17;
+            }
+            if(connectivity == (TOP_BIT | BOTTOM_BIT | LEFT_BIT)) {
+                id = 19;
+            }
+            if(connectivity == (BOTTOM_BIT | RIGHT_BIT | LEFT_BIT)) {
+                id = 26;
+            }
+            //middle
+            if(connectivity == (TOP_BIT | BOTTOM_BIT | RIGHT_BIT | LEFT_BIT)) {
+                id = 18;
+            }
+
+            ivec2 gridPos = ivec2((id % gridSize.x),id/gridSize.y); //see below comment about backwardsness
+
+            Rect rect((vec2)gridPos/(vec2)gridSize,1.0f/(vec2)gridSize); 
+
+            addBlockFace(position,rotation,textureID,rect);
+        }
+
+        void addBlockFace(vec3 position,quat rotation,TextureID textureID,Rect texRect = Rect::unitSquare) {
             int indexOffset = vertices.size();
             auto faceVerts = vector<ConstructionVertex> {
-                ConstructionVertex(Vertex(vec3(0.5,0.5,0.5),vec3(0.0,0.0,1.0),vec2(0,0)),textureID),
-                ConstructionVertex(Vertex(vec3(0.5,-0.5,0.5),vec3(0.0,0.0,1.0),vec2(0,1)),textureID),
-                ConstructionVertex(Vertex(vec3(-0.5,0.5,0.5),vec3(0.0,0.0,1.0),vec2(1,0)),textureID),
-                ConstructionVertex(Vertex(vec3(-0.5,-0.5,0.5),vec3(0.0,0.0,1.0),vec2(1,1)),textureID)
+
+                // the texcoords aren't how you'd expect but if you think about it makes sense (I hope) idk theres weirdness about texture sampling
+                ConstructionVertex(Vertex(vec3(0.5,0.5,0.5),vec3(0.0,0.0,1.0),texRect.bottomRight()),textureID),
+                ConstructionVertex(Vertex(vec3(0.5,-0.5,0.5),vec3(0.0,0.0,1.0),texRect.topRight()),textureID),
+                ConstructionVertex(Vertex(vec3(-0.5,0.5,0.5),vec3(0.0,0.0,1.0),texRect.bottomLeft()),textureID),
+                ConstructionVertex(Vertex(vec3(-0.5,-0.5,0.5),vec3(0.0,0.0,1.0),texRect.topLeft()),textureID)
             };
             for(auto vertex : faceVerts) {
                 vertex.pos = rotation * vertex.pos;
@@ -300,6 +385,7 @@ class Construction : public Actor {
                 indices.push_back(index + indexOffset); 
             }
         }
+        
 
 
         bool solidInDirection(ivec3 position,ivec3 direction) {
@@ -319,8 +405,18 @@ class Construction : public Actor {
             if(!solidInDirection(position,ivec3(0,0,-1))) addBlockFace(position,rotation * quat(glm::radians(vec3(0,180,0))),block->texture);
             if(!solidInDirection(position,ivec3(1,0,0))) addBlockFace(position,rotation * quat(glm::radians(vec3(0, 90,0))) ,block->texture);
             if(!solidInDirection(position,ivec3(-1,0,0))) addBlockFace(position,rotation * quat(glm::radians(vec3(0,-90,0))) ,block->texture);
-            if(!solidInDirection(position,ivec3(0,1,0))) addBlockFace(position,rotation * quat(glm::radians(vec3(-90,0,0))) ,block->texture); //idk why this is flipped from how you'd expect
+            if(!solidInDirection(position,ivec3(0,1,0))) addBlockFace(position,rotation * quat(glm::radians(vec3(-90,0,0))) ,block->texture); //this is flipped from how id expect :shrug: 
             if(!solidInDirection(position,ivec3(0,-1,0))) addBlockFace(position,rotation * quat(glm::radians(vec3( 90,0,0))) ,block->texture);
+        }
+
+        void addConnectedBlock(ivec3 position,quat rotation,Block* block) {
+            
+            if(!solidInDirection(position,ivec3(0,0,1))) addConnectedBlockFace(position,rotation,block->texture);
+            if(!solidInDirection(position,ivec3(0,0,-1))) addConnectedBlockFace(position,rotation * quat(glm::radians(vec3(0,180,0))),block->texture);
+            if(!solidInDirection(position,ivec3(1,0,0))) addConnectedBlockFace(position,rotation * quat(glm::radians(vec3(0, 90,0))) ,block->texture);
+            if(!solidInDirection(position,ivec3(-1,0,0))) addConnectedBlockFace(position,rotation * quat(glm::radians(vec3(0,-90,0))) ,block->texture);
+            if(!solidInDirection(position,ivec3(0,1,0))) addConnectedBlockFace(position,rotation * quat(glm::radians(vec3(-90,0,0))) ,block->texture); //this is flipped from how id expect :shrug: 
+            if(!solidInDirection(position,ivec3(0,-1,0))) addConnectedBlockFace(position,rotation * quat(glm::radians(vec3( 90,0,0))) ,block->texture);
         }
 
         void addMeshBlock(vec3 position,quat rotation,Block* block) {
@@ -333,6 +429,8 @@ class Construction : public Actor {
                 indices.push_back(index + indexOffset); 
             }
         }
+
+        // end move a bunch of these to helper
 
         void addRenderables(Vulkan* vulkan,float dt) {
             if(vertices.size() == 0 || indices.size() == 0) return;

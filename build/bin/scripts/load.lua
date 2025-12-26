@@ -53,8 +53,8 @@ print("Loading Blocks")
 -- blocks.cobalt = {"block","block","cobalt_block"}
 blocks.tin = {
     type="block",
-    model="block",
-    texture="tin_block"
+    model="connected",
+    texture="block_sheet_clean"
 }
 
 blocks.cockpit = {
