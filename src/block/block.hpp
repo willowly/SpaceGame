@@ -11,16 +11,30 @@ struct BlockState;
 class Character;
 
 
+
+
 class Block {
 
+    
+
     public:
-        Mesh<Vertex>* model;
+
+        enum class ModelType { //scoped enum to avoid name conflicts
+            SingleBlock,
+            ConnectedBlock,
+            Mesh
+        };
+
+        ModelType modelType = ModelType::Mesh;
+        Mesh<Vertex>* mesh;
         TextureID texture;
         bool canRide;
         Item* drop;
 
         
-        Block(Mesh<Vertex>* model,TextureID texture) : model(model), texture(texture) {
+
+        
+        Block(Mesh<Vertex>* mesh,TextureID texture) : mesh(mesh), texture(texture) {
             
         }
         Block() : Block(nullptr,0) {}

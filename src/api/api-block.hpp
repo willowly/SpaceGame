@@ -12,7 +12,7 @@ namespace API {
         
         block["drop"] = &Block::drop;
         block["texture"] = &Block::texture;
-        block["model"] = &Block::model;
+        block["model"] = &Block::mesh;
 
     }
 }

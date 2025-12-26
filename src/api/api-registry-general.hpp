@@ -98,7 +98,7 @@ namespace API {
         get<Sprite>(table,key,pointer,required);
     }
 
-    void getModel(sol::table table,std::variant<string,int> key,Mesh<Vertex>** pointer,Registry& registry,bool required = false) {
+    void getMesh(sol::table table,std::variant<string,int> key,Mesh<Vertex>** pointer,Registry& registry,bool required = false) {
         Debug::addTrace(keyAsString(key));
         sol::object obj = table[key];
         if(obj.is<string>()) {

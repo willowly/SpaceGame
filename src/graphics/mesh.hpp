@@ -25,6 +25,9 @@ struct Vertex {
 
     Vertex(glm::vec3 pos) : pos(pos) {}
 
+
+    Vertex(glm::vec3 pos,vec3 normal,vec2 texCoord) : pos(pos), normal(normal), texCoord(texCoord) {}
+
     static VkVertexInputBindingDescription getBindingDescription() {
         VkVertexInputBindingDescription bindingDescription{};
         bindingDescription.binding = 0;

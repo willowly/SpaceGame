@@ -20,7 +20,7 @@ namespace API {
     void loadItemToolType(ObjLoadType loadType,sol::table table,Tool* item,Registry& registry) {
         loadItemBaseType(loadType,table,item,registry);
         get<float>(table,"lookLerp",&item->lookLerp,false);
-        getModel(table,"model",&item->heldModel,registry,false);
+        getMesh(table,"model",&item->heldModel,registry,false);
         getMaterial(table,"material",&item->heldModelMaterial,registry,false);
         get<vec3>(table,"offset",&item->modelOffset,false);
         get<quat>(table,"rotation",&item->modelRotation,false);

@@ -253,17 +253,21 @@ class Construction : public Actor {
                     {
                         
                         if(blockData.size() > i && blockData[i].block != nullptr) {
-                            quat rotation = getRotationFromFacing(blockData[i].state.facing);
-                            //glm::mat4 blockMatrix = glm::translate(getTransform(),vec3(x,y,z)) * glm::mat4(rotation);
-                            int indexOffset = vertices.size();
+                            quat rotation = quat(vec3(0.0));//getRotationFromFacing(BlockFacing::FORWARD);
+                            
                             auto block = blockData[i].block;
-                            for(auto vertex : blockData[i].block->model->meshData.vertices) {
-                                vertex.pos += vec3(x,y,z);
-                                vertices.push_back(ConstructionVertex(vertex,block->texture)); 
+                            switch(block->modelType) {
+                                case Block::ModelType::Mesh:
+                                    addMeshBlock(vec3(x,y,z),rotation,block);
+                                    break;
+                                case Block::ModelType::SingleBlock:
+                                    addSingleBlock(vec3(x,y,z),rotation,block);
+                                    break;
+                                case Block::ModelType::ConnectedBlock:
+                                    addSingleBlock(vec3(x,y,z),rotation,block);
+                                    break;
                             }
-                            for(auto index : blockData[i].block->model->meshData.indices) {
-                                indices.push_back(index + indexOffset); 
-                            }
+                            
                         }
                         i++;
                     }
@@ -273,6 +277,61 @@ class Construction : public Actor {
             gpuMeshOutOfDate = true;
 
 
+        }
+
+        void addBlockFace(vec3 position,quat rotation,TextureID textureID) {
+            int indexOffset = vertices.size();
+            auto faceVerts = vector<ConstructionVertex> {
+                ConstructionVertex(Vertex(vec3(0.5,0.5,0.5),vec3(0.0,0.0,1.0),vec2(0,0)),textureID),
+                ConstructionVertex(Vertex(vec3(0.5,-0.5,0.5),vec3(0.0,0.0,1.0),vec2(0,1)),textureID),
+                ConstructionVertex(Vertex(vec3(-0.5,0.5,0.5),vec3(0.0,0.0,1.0),vec2(1,0)),textureID),
+                ConstructionVertex(Vertex(vec3(-0.5,-0.5,0.5),vec3(0.0,0.0,1.0),vec2(1,1)),textureID)
+            };
+            for(auto vertex : faceVerts) {
+                vertex.pos = rotation * vertex.pos;
+                vertex.pos += position;
+                vertex.normal = rotation * vertex.normal;
+                vertices.push_back(vertex); 
+            }
+            auto faceIndices = vector<uint16_t> {
+                0,1,2,1,2,3
+            };
+            for(auto index : faceIndices) {
+                indices.push_back(index + indexOffset); 
+            }
+        }
+
+
+        bool solidInDirection(ivec3 position,ivec3 direction) {
+            Block* block = getBlock(position+direction).first;
+            if(block == nullptr) {
+                return false;
+            }
+            if(block->modelType == Block::ModelType::Mesh) {
+                return false;
+            }
+            return true;
+        }
+
+        void addSingleBlock(ivec3 position,quat rotation,Block* block) {
+            
+            if(!solidInDirection(position,ivec3(0,0,1))) addBlockFace(position,rotation,block->texture);
+            if(!solidInDirection(position,ivec3(0,0,-1))) addBlockFace(position,rotation * quat(glm::radians(vec3(0,180,0))),block->texture);
+            if(!solidInDirection(position,ivec3(1,0,0))) addBlockFace(position,rotation * quat(glm::radians(vec3(0, 90,0))) ,block->texture);
+            if(!solidInDirection(position,ivec3(-1,0,0))) addBlockFace(position,rotation * quat(glm::radians(vec3(0,-90,0))) ,block->texture);
+            if(!solidInDirection(position,ivec3(0,1,0))) addBlockFace(position,rotation * quat(glm::radians(vec3(-90,0,0))) ,block->texture); //idk why this is flipped from how you'd expect
+            if(!solidInDirection(position,ivec3(0,-1,0))) addBlockFace(position,rotation * quat(glm::radians(vec3( 90,0,0))) ,block->texture);
+        }
+
+        void addMeshBlock(vec3 position,quat rotation,Block* block) {
+            int indexOffset = vertices.size();
+            for(auto vertex : block->mesh->meshData.vertices) {
+                vertex.pos += position;
+                vertices.push_back(ConstructionVertex(vertex,block->texture)); 
+            }
+            for(auto index : block->mesh->meshData.indices) {
+                indices.push_back(index + indexOffset); 
+            }
         }
 
         void addRenderables(Vulkan* vulkan,float dt) {

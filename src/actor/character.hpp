@@ -56,6 +56,8 @@ class Character : public Actor {
 
         bool thirdPerson = false;
 
+        bool noClip = false;
+
         vec3 moveInput;
 
         vec3 velocity;
@@ -167,7 +169,9 @@ class Character : public Actor {
                 clickInput = false;
                 interactInput = false;
 
-                world->collideBasic(this,height,radius);
+                if(!noClip) {
+                    world->collideBasic(this,height,radius);
+                }
             }
 
             if(currentRecipe != nullptr) {
@@ -302,6 +306,11 @@ class Character : public Actor {
             }
             if(input.getKeyPressed(GLFW_KEY_Z)) {
                 thirdPerson = !thirdPerson;
+            }
+
+            //check for cheats access
+            if(input.getKeyPressed(GLFW_KEY_F1)) {
+                noClip = !noClip;
             }
 
             ItemStack* currentTool = inventory.getStack(currentToolItem);

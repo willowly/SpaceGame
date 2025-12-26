@@ -187,11 +187,11 @@ CMakeFiles/SIMPLEXNOISE.dir/clean:
 # Target rules for target CMakeFiles/SpaceGame.dir
 
 # All Build rule for target.
-CMakeFiles/SpaceGame.dir/all: _deps/glfw-build/src/CMakeFiles/glfw.dir/all
-CMakeFiles/SpaceGame.dir/all: _deps/tracy-build/CMakeFiles/TracyClient.dir/all
 CMakeFiles/SpaceGame.dir/all: CMakeFiles/STB.dir/all
 CMakeFiles/SpaceGame.dir/all: CMakeFiles/SIMPLEXNOISE.dir/all
 CMakeFiles/SpaceGame.dir/all: CMakeFiles/SpaceGame_Shaders.dir/all
+CMakeFiles/SpaceGame.dir/all: _deps/glfw-build/src/CMakeFiles/glfw.dir/all
+CMakeFiles/SpaceGame.dir/all: _deps/tracy-build/CMakeFiles/TracyClient.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/SpaceGame.dir/build.make CMakeFiles/SpaceGame.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=5,6,7 "Built target SpaceGame"

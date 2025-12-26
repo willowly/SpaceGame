@@ -14,15 +14,42 @@ using std::string,std::variant;
 
 namespace API {
 
+    void getBlockModel(sol::table table,std::variant<string,int> key,Block* block,Registry& registry) {
+        sol::object obj = table[key];
+        if(obj.is<string>()) {
+            string str = obj.as<string>();
+            block->modelType = Block::ModelType::Mesh;
+            if(str == "block") {
+                block->modelType = Block::ModelType::SingleBlock;
+            }
+            if(str == "single_block") {
+                block->modelType = Block::ModelType::SingleBlock;
+            }
+            if(str == "connected") {
+                block->modelType = Block::ModelType::ConnectedBlock;
+            }
+            if(str == "connected_block") {
+                block->modelType = Block::ModelType::ConnectedBlock;
+            }
+            if(block->modelType == Block::ModelType::Mesh) {
+                getMesh(table,key,&block->mesh,registry,true);
+            }
+            Debug::subtractTrace();
+            return;
+            
+        }
+        getMesh(table,key,&block->mesh,registry,true);
+    }
+
     void loadBlockBaseType(ObjLoadType loadType,sol::table table,Block* block,Registry& registry) {
         switch (loadType) {
             case ObjLoadType::ARRAY:
                 // type is in slot 1 (hopefully)
-                getModel(table,2,&block->model,registry,false);
+                getBlockModel(table,2,block,registry);
                 getTexture(table,3,&block->texture,registry,false);
                 break;
             case ObjLoadType::TABLE:
-                getModel(table,"model",&block->model,registry,false);
+                getBlockModel(table,"model",block,registry);
                 getTexture(table,"texture",&block->texture,registry,false);
                 break;
             case ObjLoadType::INVALID:
