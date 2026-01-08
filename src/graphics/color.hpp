@@ -20,6 +20,18 @@ class Color {
             this->b = b;
             this->a = 1;
         }
+        Color(vec3 vec){
+            this->r = vec.x;
+            this->g = vec.y;
+            this->b = vec.z;
+            this->a = 1;
+        }
+        Color(vec4 vec){
+            this->r = vec.x;
+            this->g = vec.y;
+            this->b = vec.z;
+            this->a = vec.w;
+        }
         Color(){
         }
         float r;

@@ -12,56 +12,114 @@
 #include "engine/input.hpp"
 #include "engine/world.hpp"
 #include "construction.hpp"
-#include "item/tool-user.hpp"
 
-#include <item/pickaxe-tool.hpp>
-#include <item/place-block-tool.hpp>
+#include "item/item-stack.hpp"
+#include "item/recipe.hpp"
+#include "components/inventory.hpp"
 
 #include <GLFW/glfw3.h>
 
 
-class Character : public Actor, public ToolUser {
+#include "interface/actor/actor-widget.hpp"
+#include "interface/menu-object.hpp"
+
+
+class Character : public Actor {
 
 
     public: 
 
         // Prototype constructors
         
+        // enum Action {
+        //     Neutral,
+        //     InMenu
+        // } action = Action::Neutral;
 
 
-
+        // prototype
         float moveSpeed = 5.0f;
         float lookPitch = 0;
         float lookSensitivity = 5;
-        float height = 0.0f;
-        float radius = 0.5;
-        float acceleration = 10;
+        float height = 1.0f;
+        float radius = 0.4;
+        float acceleration = 5;
         float jumpForce = 10;
+        float craftSpeed = 1;
+        float rotationSpeed = 90;
+        float rotationAcceleration = 5;
+
+        // inputs
         bool clickInput = false;
         bool interactInput = false;
+        float rotationInput = 0;
 
-        bool thirdPerson = true;
+        bool thirdPerson = false;
+
+        bool noClip = false;
 
         vec3 moveInput;
 
         vec3 velocity;
+        vec3 rotationVelocity;
+        
 
-        Tool* currentTool = nullptr;
-        int selectedTool;
+        Item* currentToolItem = nullptr;
+        int selectedTool = 0;
 
-        Tool* toolbar[9] = {};
+        Item* toolbar[9] = {};
+
+        struct HeldItemData {
+            float actionTimer;
+            float animationTimer;
+            int action;
+            void setAction(int newAction) {
+                action = newAction;
+                actionTimer = 0;
+                animationTimer = 0;
+            }
+        } heldItemData;
 
         Construction* ridingConstruction = nullptr;
         ivec3 ridingConstructionPoint;
         quat ridingConstructionRotation;
 
-        vec3 thirdPersonCameraOffset = vec3(0,3,20);
+        vec3 thirdPersonCameraOffset = vec3(1,0.5,10);
         vec3 thirdPersonCameraRot;
+
+        Inventory inventory;
+
+        std::unique_ptr<MenuObject> openMenuObject;
+
+        std::vector<Recipe*> recipes;
+
+        Recipe* currentRecipe = nullptr;
+        float recipeTimer; //
+
+        bool underGravity = true;
+
+        Character(const Character& character) {
+            moveSpeed = character.moveSpeed;
+            lookPitch = character.lookPitch;
+            lookSensitivity = character.lookSensitivity;
+            height = character.height;
+            radius = character.radius;
+            acceleration = character.acceleration;
+            jumpForce = character.jumpForce;
+        }
+
+    
+
+        bool inMenu;
+
+        ActorWidget<Character>* widget;
 
 
         void addRenderables(Vulkan* vulkan,float dt) {
+            ItemStack* currentTool = inventory.getStack(currentToolItem);
             if(currentTool != nullptr && ridingConstruction == nullptr) {
-                currentTool->addRenderables(vulkan,this,dt);
+                heldItemData.animationTimer += dt;
+                currentTool->item->addRenderables(vulkan,*this,dt);
             }
             if(thirdPerson) {
                 Actor::addRenderables(vulkan,dt);
@@ -70,34 +128,64 @@ class Character : public Actor, public ToolUser {
 
         void step(World* world,float dt) {
 
-            float moveSpeed = 5.0f;
-            
-            
+            if(ridingConstruction != nullptr) {
+                
+                ridingConstruction->setMoveControl(ridingConstructionRotation * moveInput);
+                ridingConstruction->setTargetRotation(getEyeRotation() * glm::inverse(ridingConstructionRotation) * glm::angleAxis(glm::radians(180.0f),vec3(0,1,0)));
+                position = ridingConstruction->transformPoint(ridingConstructionPoint);
+                if(interactInput) {
+                    dismount();
+                }
+            } else {
+                vec3 targetVelocity = rotation * moveInput * moveSpeed;
+                velocity = MathHelper::lerp(velocity,targetVelocity,acceleration*dt);
+                position += velocity * dt;
 
-            if(interactInput) {
-                interact(world);
+                //velocity += world->getGravityVector(position) * dt;
+                
+                if(!underGravity) {
+                    // there might be soe 
+                    rotationVelocity.z = MathHelper::lerp(rotationVelocity.z,rotationInput * rotationSpeed,acceleration * dt);
+                    rotationVelocity.x = MathHelper::lerp(rotationVelocity.x,fmin(abs(lookPitch),rotationSpeed) * sign(lookPitch),acceleration * dt);
+                    //rotationVelocity.x = fmax(abs(rotationVelocity.x),abs(lookPitch))
+                    lookPitch -= rotationVelocity.x * dt;
+                    vec3 eyePos = getEyePosition();
+                    rotation = glm::angleAxis(glm::radians(rotationVelocity.z) * dt,transformDirection(vec3(0,0,-1))) * rotation;
+                    rotation = glm::angleAxis(glm::radians(rotationVelocity.x) * dt,transformDirection(vec3(-1,0,0))) * rotation;
+                    position = eyePos - transformDirection(vec3(0,height,0)); // to rotate around eye
+                }
+
+                if(!inMenu) {
+                    if(interactInput) {
+                        interact(world);
+                    }
+                    ItemStack* currentTool = inventory.getStack(currentToolItem);
+                    if(currentTool != nullptr) {
+                        currentTool->item->step(world,*this,*currentTool,dt);
+                        heldItemData.actionTimer += dt;
+                    }
+                }
+
+                clickInput = false;
+                interactInput = false;
+
+                if(!noClip) {
+                    world->collideBasic(this,height,radius);
+                }
             }
 
-            if(currentTool != nullptr) {
-                currentTool->step(world,this,dt);
+            if(currentRecipe != nullptr) {
+                recipeTimer += dt * craftSpeed;
+                if(recipeTimer > currentRecipe->time) {
+                    if(inventory.tryCraft(*currentRecipe)) {
+                        cancelCraft();
+                    }
+                }
             }
 
-            // if(ridingConstruction != nullptr) {
-            //     ridingConstruction->setMoveControl(ridingConstructionRotation * moveInput);
-            //     ridingConstruction->setTargetRotation(getEyeRotation() * glm::inverse(ridingConstructionRotation) * glm::angleAxis(glm::radians(180.0f),vec3(0,1,0)));
-            //     position = ridingConstruction->transformPoint(ridingConstructionPoint);
-            // } else {
-            vec3 targetVelocity = rotation * moveInput * moveSpeed;
-            velocity = MathHelper::lerp(velocity,targetVelocity,acceleration*dt);
-            position += velocity * dt;
+            
 
-            clickInput = false;
-            interactInput = false;
-
-            // if(ridingConstruction == nullptr) { //dont collide with anything if we are riding
-            //     world->collideBasic(this,radius);
-            // }
-            world->collideBasic(this,radius);
+            
 
         }
 
@@ -105,6 +193,7 @@ class Character : public Actor, public ToolUser {
             if(ridingConstruction != nullptr) {
                 dismount();
             }
+            thirdPerson = true;
             ridingConstruction = construction;
             ridingConstructionPoint = point;
             ridingConstructionRotation = rotation;
@@ -115,6 +204,7 @@ class Character : public Actor, public ToolUser {
             position += ridingConstruction->transformDirection(vec3(0,1,0));
             ridingConstruction->resetTargets();
             ridingConstruction = nullptr;
+            thirdPerson = false;
             //body->getCollider(0)->setIsSimulationCollider(true);
         }
 
@@ -146,6 +236,16 @@ class Character : public Actor, public ToolUser {
         void processInput(Input& input) {
 
             // eventually we want an enum for keys instead of using the defines
+            
+
+            if(inMenu) {
+                processInputInventory(input);
+            } else {
+                processInputNormal(input);
+            }
+        }
+
+        void processInputNormal(Input& input) {
             moveInput = vec3(0,0,0);
             if(input.getKey(GLFW_KEY_W)) {
                 moveInput.z -= 1; //im not sure why this exists :shrug:
@@ -165,8 +265,15 @@ class Character : public Actor, public ToolUser {
             if(input.getKey(GLFW_KEY_C)) {
                 moveInput.y -= 1;
             }
+            rotationInput = 0;
+            if(input.getKey(GLFW_KEY_Q)) {
+                rotationInput -= 1;
+            }
+            if(input.getKey(GLFW_KEY_E)) {
+                rotationInput += 1;
+            }
 
-            if(input.getKeyPressed(GLFW_KEY_E)) {
+            if(input.getKeyPressed(GLFW_KEY_F)) {
                 interactInput = true;
             }
 
@@ -197,44 +304,121 @@ class Character : public Actor, public ToolUser {
             if(input.getKeyPressed(GLFW_KEY_9)) {
                 setCurrentTool(8);
             }
-
             if(input.getKeyPressed(GLFW_KEY_Z)) {
                 thirdPerson = !thirdPerson;
             }
 
-            if(currentTool != nullptr) {
-                currentTool->processInput(input);
+            //check for cheats access
+            if(input.getKeyPressed(GLFW_KEY_F1)) {
+                noClip = !noClip;
             }
 
+            ItemStack* currentTool = inventory.getStack(currentToolItem);
+            if(currentTool != nullptr) {
+                currentTool->item->processInput(input);
+            }
+
+            if(input.getKeyPressed(GLFW_KEY_TAB)) {
+                openMenu();
+            }
             moveMouse(input.getMouseDelta() * 0.01f);
         }
 
+        void processInputInventory(Input& input) {
+            moveInput = vec3(0,0,0);
+            if(input.getKeyPressed(GLFW_KEY_TAB)) {
+                closeMenu();
+            }
+            if(input.getKeyPressed(GLFW_KEY_F)) {
+                closeMenu();
+            }
+            input.getMouseDelta();
+        }
+
         void setCurrentTool(int index) {
+
+            auto newTool = inventory.getStack(toolbar[index]);
+            auto currentTool = inventory.getStack(currentToolItem);
+            if(newTool == currentTool) return; //dont do anything if its the same tool
+
             if(currentTool != nullptr) {
-                currentTool->unequip(this);
+                currentTool->item->unequip(*this);
             }
             selectedTool = index;
-            currentTool = toolbar[index];
-            if(currentTool != nullptr) {
-                currentTool->equip(this);
+            if(newTool != nullptr) {
+                newTool->item->equip(*this);
+                heldItemData.setAction(0); // reset actions
+                currentToolItem = newTool->item;
+            } else {
+                currentToolItem = nullptr;
             }
+            
+            
+        }
+
+        void setToolbar(int index,Item* item) {
+            for(auto&& itemInBar : toolbar) {
+                if(itemInBar == item) {
+                    itemInBar = nullptr;
+                }
+            }
+            toolbar[index] = item;
+        }
+
+        // for tools to do when they reduce count etc
+        void refreshTool() {
+            setCurrentTool(selectedTool);
+        }
+
+        void closeMenu() {
+            inMenu = false;
+            openMenuObject = nullptr;
+        }
+
+        void openMenu() {
+            openMenu(nullptr);
+        }
+
+        void openMenu(std::unique_ptr<MenuObject> menuObject) {
+            heldItemData.setAction(0);
+            inMenu = true;
+            openMenuObject = std::move(menuObject);
+            
+        }
+
+        void startCraft(Recipe& recipe) {
+            if(!inventory.hasIngredients(recipe)) {
+                // dont even start it
+                return;
+            }
+            currentRecipe = &recipe;
+            recipeTimer = 0;
+        }
+
+        void cancelCraft() {
+            currentRecipe = nullptr;
+            recipeTimer = 0;
         }
 
         void moveMouse(vec2 delta) {
-            rotation = glm::angleAxis(glm::radians(delta.x) * lookSensitivity,vec3(0,-1,0)) * rotation;
+            rotation = glm::angleAxis(glm::radians(delta.x) * lookSensitivity,transformDirection(vec3(0,-1,0))) * rotation;
             lookPitch += delta.y * lookSensitivity;
             if(lookPitch > 89.9f) lookPitch = 89.9f;
             if(lookPitch < -89.9f) lookPitch = -89.9f;
+            // if under gravitational forces...
+                // lookPitch += delta.y * lookSensitivity;
+                // if(lookPitch > 89.9f) lookPitch = 89.9f;
+                // if(lookPitch < -89.9f) lookPitch = -89.9f;
         }
 
         void setCamera(Camera& camera) {
-            // if(ridingConstruction == nullptr && !thirdPerson) {
-                 camera.position = getEyePosition();
-                 camera.rotation = getEyeRotation();
-            // } else {
-                // camera.position = position + getEyeRotation() * thirdPersonCameraOffset;
-                // camera.rotation = getEyeRotation();
-            //}
+            if(ridingConstruction == nullptr && !thirdPerson) {
+                camera.position = getEyePosition();
+                camera.rotation = getEyeRotation();
+            } else {
+                camera.position = position + getEyeRotation() * thirdPersonCameraOffset;
+                camera.rotation = getEyeRotation();
+            }
             
         }
 
@@ -252,7 +436,7 @@ class Character : public Actor, public ToolUser {
         }
 
         vec3 getEyePosition() {
-            return position + vec3(0,height,0);
+            return transformPoint(vec3(0,height,0));
         }
 
         quat getEyeRotation() {

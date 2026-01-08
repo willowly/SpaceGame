@@ -4,6 +4,7 @@
 
 #include "actor/actor.hpp"
 #include <memory>
+#include <tracy/Tracy.hpp>
 
 using glm::vec3, glm::quat,std::unique_ptr;
 
@@ -45,20 +46,24 @@ class World {
 
     public:
 
+        // not sure how to solve this one :)
+        Material constructionMaterial = Material::none;
+
         float stepDt = 0.02;
 
         float stepProcessMs;
         float renderProcessMs;
 
-        bool iteratingActors = false; //so we dont resize the actor vector when iterating over it
+        int iteratingActors = 0; //so we dont resize the actor vector when iterating over it. int so that we can have nested iterations
 
         World() {
+
         }
 
         template<typename T>
         T* spawn(unique_ptr<T> spawned) {
             T* rawSpawned = spawned.get();
-            if(iteratingActors) {
+            if(iteratingActors > 0) {
                 spawnedActors.push_back(std::move(spawned));
             } else {
                 actors.push_back(std::move(spawned));
@@ -76,6 +81,8 @@ class World {
         
         // do rendering, step and everything else
         void frame(Vulkan* vulkan,float dt) {
+            
+            ZoneScoped;
             
             float clock = glfwGetTime();
             addRenderables(vulkan,dt);
@@ -97,6 +104,7 @@ class World {
         }
 
         void addRenderables(Vulkan* vulkan,float dt) {
+            ZoneScoped;
             for (auto& actor : actors)
             {
                 actor->addRenderables(vulkan,dt);
@@ -105,12 +113,13 @@ class World {
         }
 
         void step(float dt) {
-            iteratingActors = true;
+            ZoneScoped;
+            iteratingActors++;
             for (auto& actor : actors)
             {
                 actor->step(this,dt);
             }
-            iteratingActors = false;
+            iteratingActors--;
             for(auto& actor : spawnedActors) {
                 actors.push_back(std::move(actor));
             }
@@ -122,7 +131,9 @@ class World {
         }
 
         std::optional<WorldRaycastHit> raycast(Ray ray,float dist) {
+            ZoneScoped;
             std::optional<WorldRaycastHit> result = std::nullopt;
+            iteratingActors++;
             for (auto& actor : actors)
             {
                 auto hitopt = actor->raycast(ray,dist);
@@ -139,19 +150,21 @@ class World {
                     }
                 }
             }
+            iteratingActors--;
             return result;
         }
 
-        void collideBasic(Actor* actor,float radius) {
-            iteratingActors = true;
+        void collideBasic(Actor* actor,float height,float radius) {
+            ZoneScoped;
+            iteratingActors++;
             for (auto& colliderActor : actors)
             {
                 if(actor != colliderActor.get()) {
-                    colliderActor->collideBasic(actor,radius);
+                    colliderActor->collideBasic(actor,height,radius);
                 }
                 
             }
-            iteratingActors = false;
+            iteratingActors--;
         }
 
         Camera& getCamera() {

@@ -6,5 +6,5 @@
 layout(scalar, buffer_reference, buffer_reference_align = 4) readonly buffer MaterialData
 {
     uint textureID; 
-    vec3 color;
+    vec4 color;
 };

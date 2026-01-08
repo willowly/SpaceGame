@@ -1,6 +1,6 @@
 #pragma once
 #include "registry.hpp"
-#include "graphics/model.hpp"
+#include "graphics/mesh.hpp"
 #include "graphics/vulkan.hpp"
 #include <filesystem>
 
@@ -46,7 +46,7 @@ class Loader {
                 
                 string name = p.stem().string();
                 registry.addModel(name);
-                Mesh* model = registry.getModel(name);
+                Mesh<Vertex>* model = registry.getModel(name);
                 model->loadFromFile(entry.path().string());
                 model->createBuffers(vulkan);
                 Debug::info("Loaded Model \"" + name + "\"",InfoPriority::MEDIUM);
@@ -107,6 +107,7 @@ class Loader {
             lua["materials"] = API::MaterialRegistry(registry,vulkan);
             lua["actors"] = API::ActorRegistry(registry);
             lua["blocks"] = API::BlockRegistry(registry);
+            lua["items"] = API::ItemRegistry(registry);
             lua.do_file("scripts/load.lua");
         }
 

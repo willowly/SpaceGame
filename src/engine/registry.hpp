@@ -1,9 +1,11 @@
 #pragma once
-#include "graphics/model.hpp"
+#include "graphics/mesh.hpp"
 #include "graphics/vulkan.hpp"
 #include "actor/actor.hpp"
 #include "block/block.hpp"
-#include "item/tool.hpp"
+#include "item/item.hpp"
+#include "helper/sprite.hpp"
+#include "interface/widget.hpp"
 #include <map>
 #include <memory>
 
@@ -14,13 +16,17 @@ using std::map,std::unique_ptr;
 
 class Registry {
 
-    map<string,Mesh> models;
+    map<string,Mesh<Vertex>> models;
     map<string,TextureID> textures;
+    map<string,Sprite> sprites;
     map<string,Material> materials;
+
+    map<string,unique_ptr<Item>> item;
     
     map<string,unique_ptr<Actor>> actors;
     map<string,unique_ptr<Block>> blocks;
-    map<string,unique_ptr<Tool>> tools;
+    map<string,unique_ptr<Item>> items;
+    map<string,unique_ptr<Widget>> widgets;
     
     TextureID errorTexture = 0; 
 
@@ -32,6 +38,10 @@ class Registry {
 
         bool hasTexture(string name) {
             return textures.contains(name);
+        }
+
+        bool hasSprite(string name) {
+            return sprites.contains(name);
         }
 
         bool hasMaterial(string name) {
@@ -46,11 +56,15 @@ class Registry {
             return blocks.contains(name);
         }
 
-        bool hasTool(string name) {
-            return tools.contains(name);
+        bool hasItem(string name) {
+            return items.contains(name);
         }
 
-        Mesh* getModel(string name) {
+        bool hasWidget(string name) {
+            return widgets.contains(name);
+        }
+
+        Mesh<Vertex>* getModel(string name) {
             if(models.contains(name)) {
                 return &models.at(name);
             } else {
@@ -65,6 +79,17 @@ class Registry {
                 Debug::warn("no texture called " + name + "\"");
             }
             return errorTexture;
+        }
+        Sprite getSprite(string name) {
+            if(sprites.contains(name)) {
+                return sprites.at(name);
+            } else {
+                if(textures.contains(name)) {
+                    return Sprite(textures.at(name));
+                }
+                Debug::warn("no sprite called " + name + "\"");
+            }
+            return Sprite(errorTexture);
         }
         Material getMaterial(string name) {
             if(materials.contains(name)) {
@@ -92,22 +117,34 @@ class Registry {
             return nullptr;
         }
 
-        Tool* getTool(string name) {
-            if(tools.contains(name)) {
-                return tools.at(name).get();
+        Item* getItem(string name) {
+            if(items.contains(name)) {
+                return items.at(name).get();
             } else {
-                Debug::warn("no tool prototype called \"" + name + "\"");
+                Debug::warn("no item prototype called \"" + name + "\"");
             }
             return nullptr;
         }
 
-        Mesh* addModel(string name) {
-            models.emplace(name,Mesh());
+        Widget* getWidget(string name) {
+            if(widgets.contains(name)) {
+                return widgets.at(name).get();
+            } else {
+                Debug::warn("no widget called \"" + name + "\"");
+            }
+            return nullptr;
+        }
+
+        Mesh<Vertex>* addModel(string name) {
+            models.emplace(name,Mesh<Vertex>());
             return &models.at(name);
         }
 
         void addTexture(string name,TextureID texture) {
             textures.emplace(name,texture);
+        }
+        void addSprite(string name,Sprite sprite) {
+            sprites.emplace(name,sprite);
         }
         void addMaterial(string name,Material material) {
             materials.emplace(name,material);
@@ -126,9 +163,15 @@ class Registry {
         }
 
         template <typename T>
-        Tool* addTool(string name) {
-            tools.emplace(name,std::make_unique<T>());
-            return dynamic_cast<T*>(tools.at(name).get());
+        T* addItem(string name) {
+            items.emplace(name,std::make_unique<T>());
+            return dynamic_cast<T*>(items.at(name).get());
+        }
+
+        template <typename T>
+        T* addWidget(string name) {
+            widgets.emplace(name,std::make_unique<T>());
+            return dynamic_cast<T*>(items.at(name).get());
         }
 
         VkPipeline litShader;

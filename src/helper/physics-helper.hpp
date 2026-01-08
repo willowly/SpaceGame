@@ -5,7 +5,7 @@
 #include <glm/gtx/quaternion.hpp>
 
 #include <reactphysics3d/reactphysics3d.h>
-#include <graphics/model.hpp>
+#include <graphics/mesh.hpp>
 
 
 namespace PhysicsHelper {

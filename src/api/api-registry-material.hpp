@@ -11,20 +11,6 @@ using std::string,std::variant;
 
 namespace API {
 
-    
-    void getMaterial(sol::table table,std::variant<string,int> key,Material* pointer,Registry& registry,bool required = false) {
-        Debug::addTrace(keyAsString(key)); 
-        sol::object obj = table[key];
-        if(obj.is<string>()) {
-            string str = obj.as<string>();
-            *pointer = registry.getMaterial(str);
-            Debug::subtractTrace();
-            return;
-            
-        }
-        Debug::subtractTrace();
-        get<Material>(table,key,pointer,required);
-    }
 
     struct MaterialRegistry {
         MaterialRegistry(Registry& registry,Vulkan* vulkan) : registry(registry), vulkan(vulkan) {}
@@ -48,12 +34,12 @@ namespace API {
                 
                 case ObjLoadType::ARRAY:
                     getTexture(table,2,&materialData.texture,registry,true);
-                    getColorAsVec3(table,3,&materialData.color,false);
+                    getColorAsVec4(table,3,&materialData.color,false);
                     registry.addMaterial(name,vulkan->createMaterial(pipeline,materialData));
                     break;
                 case ObjLoadType::TABLE:
                     getTexture(table,"texture",&materialData.texture,registry,true);
-                    getColorAsVec3(table,"color",&materialData.color,false);
+                    getColorAsVec4(table,"color",&materialData.color,false);
                     registry.addMaterial(name,vulkan->createMaterial(pipeline,materialData));
                     break;
                 case ObjLoadType::INVALID:

@@ -15,11 +15,11 @@ namespace API {
         switch (loadType) {
             case ObjLoadType::ARRAY:
                 // type is in slot 1 (hopefully)
-                getModel(table,2,&actor->model,registry,false);
+                getMesh(table,2,&actor->model,registry,false);
                 getMaterial(table,3,&actor->material,registry,false);
                 break;
             case ObjLoadType::TABLE:
-                getModel(table,"model",&actor->model,registry,false);
+                getMesh(table,"model",&actor->model,registry,false);
                 getMaterial(table,"material",&actor->material,registry,false);
                 break;
             case ObjLoadType::INVALID:

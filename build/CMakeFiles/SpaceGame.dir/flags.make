@@ -3,15 +3,15 @@
 
 # compile C with /usr/bin/clang
 # compile CXX with /usr/bin/clang++
-C_DEFINES = 
+C_DEFINES = -DTRACY_ENABLE -DTRACY_ON_DEMAND
 
-C_INCLUDES = -I/usr/local/include -I/usr/local/include/lua -I/Users/willow/Documents/GitHub/SpaceGame/src -I/Users/willow/Documents/GitHub/SpaceGame/include -I/Users/willow/Documents/GitHub/SpaceGame/include/imgui -F/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks
+C_INCLUDES = -I/usr/local/include/lua -I/Users/willow/Documents/GitHub/SpaceGame/src -I/Users/willow/Documents/GitHub/SpaceGame/include -I/Users/willow/Documents/GitHub/SpaceGame/build/_deps/glfw-src/include -F/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks -isystem /Users/willow/Documents/GitHub/SpaceGame/build/_deps/tracy-src/public -isystem /Users/willow/VulkanSDK/1.4.321.0/macOS/include
 
-C_FLAGS = -g -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mmacosx-version-min=14.3
+C_FLAGS = -g -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk
 
-CXX_DEFINES = 
+CXX_DEFINES = -DTRACY_ENABLE -DTRACY_ON_DEMAND
 
-CXX_INCLUDES = -I/usr/local/include -I/usr/local/include/lua -I/Users/willow/Documents/GitHub/SpaceGame/src -I/Users/willow/Documents/GitHub/SpaceGame/include -I/Users/willow/Documents/GitHub/SpaceGame/include/imgui -F/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks
+CXX_INCLUDES = -I/usr/local/include/lua -I/Users/willow/Documents/GitHub/SpaceGame/src -I/Users/willow/Documents/GitHub/SpaceGame/include -I/Users/willow/Documents/GitHub/SpaceGame/build/_deps/glfw-src/include -F/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks -isystem /Users/willow/Documents/GitHub/SpaceGame/build/_deps/tracy-src/public -isystem /Users/willow/VulkanSDK/1.4.321.0/macOS/include
 
-CXX_FLAGS =  -fpermissive -Wall -Wextra -pedantic -Wno-unused-parameter -g -std=gnu++20 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mmacosx-version-min=14.3
+CXX_FLAGS =  -fpermissive -Wall -Wextra -Werror=return-type -pedantic -Wno-unused-parameter -g -std=gnu++20 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk
 

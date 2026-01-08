@@ -14,8 +14,67 @@
 #include <block/block.hpp>
 #include <block/block-state.hpp>
 
+#include "helper/block-storage.hpp"
+
+#include "helper/rect.hpp"
+
+#include <bitset> //for shenanigans, remove if unused
+
 using glm::ivec3,glm::vec3;
 using std::unordered_map;
+
+struct ConstructionVertex {
+    glm::vec3 pos;
+    glm::vec3 normal;
+    glm::vec2 texCoord;
+    int textureID;
+
+    ConstructionVertex() {}
+
+    static VkVertexInputBindingDescription getBindingDescription() {
+        VkVertexInputBindingDescription bindingDescription{};
+        bindingDescription.binding = 0;
+        bindingDescription.stride = sizeof(ConstructionVertex);
+        bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+        return bindingDescription;
+    }
+
+    static std::array<VkVertexInputAttributeDescription, 4> getAttributeDescriptions() {
+        std::array<VkVertexInputAttributeDescription, 4> attributeDescriptions{};
+        attributeDescriptions[0].binding = 0;
+        attributeDescriptions[0].location = 0;
+        attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
+        attributeDescriptions[0].offset = offsetof(ConstructionVertex, pos);
+
+        attributeDescriptions[1].binding = 0;
+        attributeDescriptions[1].location = 1;
+        attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+        attributeDescriptions[1].offset = offsetof(ConstructionVertex, normal);
+
+        attributeDescriptions[2].binding = 0;
+        attributeDescriptions[2].location = 2;
+        attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
+        attributeDescriptions[2].offset = offsetof(ConstructionVertex, texCoord);
+
+        attributeDescriptions[3].binding = 0;
+        attributeDescriptions[3].location = 3;
+        attributeDescriptions[3].format = VK_FORMAT_R32_SINT;
+        attributeDescriptions[3].offset = offsetof(ConstructionVertex, textureID);
+
+        return attributeDescriptions;
+    }
+
+    ConstructionVertex(Vertex vertex,TextureID texture) {
+        pos = vertex.pos;
+        normal = vertex.normal;
+        texCoord = vertex.texCoord;
+        textureID = texture;
+
+    }
+
+
+};
 
 #define CONSTRUCTION
 class Construction : public Actor {
@@ -31,13 +90,22 @@ class Construction : public Actor {
     ivec3 min = ivec3(0,0,0);
     ivec3 max = ivec3(0,0,0);
     std::vector<BlockData> blockData;
+    std::vector<ConstructionVertex> vertices;
+    std::vector<uint16_t> indices;
 
+    Material material = Material::none;
+
+    int meshState = -1;
+    MeshBuffer meshBuffer[FRAMES_IN_FLIGHT];
+    bool gpuMeshOutOfDate = false;
+    //bool meshOutOfDate;
 
     std::vector<int> blockCountX;
 
     vec3 moveControl;
     quat targetRotation = glm::identity<quat>();
     float turnForce = 1.5;
+    vec3 velocity;
 
     int blockCount; //block count
 
@@ -115,40 +183,71 @@ class Construction : public Actor {
             Location(ivec3 i) : x(i.x), y(i.y), z(i.z) {
                 
             }
+            ivec3 asVec3() const {
+                return ivec3(x,y,z);
+            }
 
             constexpr auto operator<=>(const Location&) const = default;
 
         };
 
+        std::map<Location,BlockStorage> blockStorage;
+        std::map<Location,bool> stepCallbacks;
+
         void step(World* world,float dt) {
             
-            
+            for(auto& pair : stepCallbacks) {
 
-            // i have no idea why z and x are inverted :shrug:
-            // if(moveControl.z > 0) {
-            //     applyForce(vec3(0,0,-1) * thrustForces[BlockFacing::FORWARD] * moveControl.z);
-            // }
-            // if(moveControl.z < 0) {
-            //     applyForce(vec3(0,0,-1) * thrustForces[BlockFacing::BACKWARD] * moveControl.z);
-            // }
-            // if(moveControl.x < 0) {
-            //     applyForce(vec3(-1,0,0) * thrustForces[BlockFacing::LEFT] * moveControl.x);
-            // }
-            // if(moveControl.x > 0) {
-            //     applyForce(vec3(-1,0,0) * thrustForces[BlockFacing::RIGHT] * moveControl.x);
-            // }
-            // if(moveControl.y < 0) {
-            //     applyForce(vec3(0,1,0) * thrustForces[BlockFacing::UP] * moveControl.y);
-            // }
-            // if(moveControl.y > 0) {
-            //     applyForce(vec3(0,1,0) * thrustForces[BlockFacing::DOWN] * moveControl.y);
-            // }
-            // //velocity = MathHelper::moveTowards(velocity,rotation * targetVelocity,thrustForce * dt);
-            // rotation = glm::slerp(rotation,targetRotation,turnForce * dt);
+                ivec3 location = pair.first.asVec3();
+                bool enabled = pair.second;
+                if(enabled) {
+
+                    Block* block;
+                    BlockState blockState;
+                    std::tie(block,blockState) = getBlock(location);
+
+                    if(block != nullptr) {
+                        block->onStep(world,this,location,blockState,dt);
+                    }
+                }
+            }
+
+            //i have no idea why z and x are inverted :shrug:
+            if(moveControl.z > 0) {
+                applyForce(vec3(0,0,-1) * thrustForces[BlockFacing::FORWARD] * moveControl.z * dt);
+            }
+            if(moveControl.z < 0) {
+                applyForce(vec3(0,0,-1) * thrustForces[BlockFacing::BACKWARD] * moveControl.z * dt);
+            }
+            if(moveControl.x < 0) {
+                applyForce(vec3(-1,0,0) * thrustForces[BlockFacing::LEFT] * moveControl.x * dt);
+            }
+            if(moveControl.x > 0) {
+                applyForce(vec3(-1,0,0) * thrustForces[BlockFacing::RIGHT] * moveControl.x * dt);
+            }
+            if(moveControl.y < 0) {
+                applyForce(vec3(0,1,0) * thrustForces[BlockFacing::UP] * moveControl.y * dt);
+            }
+            if(moveControl.y > 0) {
+                applyForce(vec3(0,1,0) * thrustForces[BlockFacing::DOWN] * moveControl.y * dt);
+            }
+            //velocity = MathHelper::moveTowards(velocity,rotation * targetVelocity,thrustForce * dt);
+            rotation = glm::slerp(rotation,targetRotation,turnForce * dt);
+            position += velocity * dt;
             
         }
 
-        void addRenderables(Vulkan* vulkan,float dt) {
+        void applyForce(vec3 force) {
+            velocity += transformDirection(force);
+        }
+
+        void generateMesh() {
+
+            //if(!meshOutOfDate) return;
+
+            vertices.clear();
+            indices.clear();
+
             size_t i = 0;
             for (int z = min.z; z <= max.z; z++)
             {
@@ -158,19 +257,200 @@ class Construction : public Actor {
                     {
                         
                         if(blockData.size() > i && blockData[i].block != nullptr) {
-                            quat rotation = getRotationFromFacing(blockData[i].state.facing);
-                            glm::mat4 blockMatrix = glm::translate(getTransform(),vec3(x,y,z)) * glm::mat4(rotation);
-                            blockData[i].block->model->addToRender(vulkan,blockData[i].block->material,blockMatrix);
-                        } else {
-                            // model->renderMode = Model::RenderMode::Wireframe;
-                            // model->render(transformPoint(vec3(x,y,z)),camera,*Debug::getShader());
-                            // model->renderMode = Model::RenderMode::Solid;
+                            quat rotation = quat(vec3(0.0));//getRotationFromFacing(BlockFacing::FORWARD);
+                            
+                            auto block = blockData[i].block;
+                            switch(block->modelType) {
+                                case Block::ModelType::Mesh:
+                                    addMeshBlock(vec3(x,y,z),rotation,block);
+                                    break;
+                                case Block::ModelType::SingleBlock:
+                                    addSingleBlock(vec3(x,y,z),rotation,block);
+                                    break;
+                                case Block::ModelType::ConnectedBlock:
+                                    addConnectedBlock(vec3(x,y,z),rotation,block);
+                                    break;
+                            }
+                            
                         }
                         i++;
                     }
                 }
             }
 
+            gpuMeshOutOfDate = true;
+
+
+        }
+
+        // move a bunch of these to helper
+
+        void addConnectedBlockFace(vec3 position,quat rotation,TextureID textureID) {
+            ivec2 gridSize(8,8);
+
+            
+
+            char connectivity = 0;
+            connectivity |= solidInDirection(position,glm::round(rotation * vec3(0,1,0))) << 0;
+            connectivity |= solidInDirection(position,glm::round(rotation * vec3(1,0,0))) << 1;
+            connectivity |= solidInDirection(position,glm::round(rotation * vec3(0,-1,0))) << 2;
+            connectivity |= solidInDirection(position,glm::round(rotation * vec3(-1,0,0))) << 3;
+
+
+            int id = 0;
+
+            const int TOP_BIT = 0b0001;
+            const int BOTTOM_BIT = 0b0100;
+            const int RIGHT_BIT = 0b0010;
+            const int LEFT_BIT = 0b1000;
+            // vertical 1x3
+            if(connectivity == TOP_BIT) {
+                id = 8;
+            }
+            if(connectivity == (TOP_BIT | BOTTOM_BIT)) {  //equals goes first??
+                id = 16;
+            }
+            if(connectivity == BOTTOM_BIT) {
+                id = 24;
+            }
+            // horizontal 1x3
+            if(connectivity == RIGHT_BIT) {
+                id = 1;
+            }
+            if(connectivity == (RIGHT_BIT | LEFT_BIT)) { 
+                id = 2;
+            }
+            if(connectivity == LEFT_BIT) {
+                id = 3;
+            }
+            // corners
+            if(connectivity == (TOP_BIT | RIGHT_BIT)) {
+                id = 9;
+            }
+            if(connectivity == (TOP_BIT | LEFT_BIT)) {
+                id = 11;
+            }
+            if(connectivity == (BOTTOM_BIT | RIGHT_BIT)) {
+                id = 25;
+            }
+            if(connectivity == (BOTTOM_BIT | LEFT_BIT)) {
+                id = 27;
+            }
+
+            //edges
+            if(connectivity == (TOP_BIT | RIGHT_BIT | LEFT_BIT)) {
+                id = 10;
+            }
+            if(connectivity == (TOP_BIT | BOTTOM_BIT | RIGHT_BIT)) {
+                id = 17;
+            }
+            if(connectivity == (TOP_BIT | BOTTOM_BIT | LEFT_BIT)) {
+                id = 19;
+            }
+            if(connectivity == (BOTTOM_BIT | RIGHT_BIT | LEFT_BIT)) {
+                id = 26;
+            }
+            //middle
+            if(connectivity == (TOP_BIT | BOTTOM_BIT | RIGHT_BIT | LEFT_BIT)) {
+                id = 18;
+            }
+
+            ivec2 gridPos = ivec2((id % gridSize.x),id/gridSize.y); //see below comment about backwardsness
+
+            Rect rect((vec2)gridPos/(vec2)gridSize,1.0f/(vec2)gridSize); 
+
+            addBlockFace(position,rotation,textureID,rect);
+        }
+
+        void addBlockFace(vec3 position,quat rotation,TextureID textureID,Rect texRect = Rect::unitSquare) {
+            int indexOffset = vertices.size();
+            auto faceVerts = vector<ConstructionVertex> {
+
+                // the texcoords aren't how you'd expect but if you think about it makes sense (I hope) idk theres weirdness about texture sampling
+                ConstructionVertex(Vertex(vec3(0.5,0.5,0.5),vec3(0.0,0.0,1.0),texRect.bottomRight()),textureID),
+                ConstructionVertex(Vertex(vec3(0.5,-0.5,0.5),vec3(0.0,0.0,1.0),texRect.topRight()),textureID),
+                ConstructionVertex(Vertex(vec3(-0.5,0.5,0.5),vec3(0.0,0.0,1.0),texRect.bottomLeft()),textureID),
+                ConstructionVertex(Vertex(vec3(-0.5,-0.5,0.5),vec3(0.0,0.0,1.0),texRect.topLeft()),textureID)
+            };
+            for(auto vertex : faceVerts) {
+                vertex.pos = rotation * vertex.pos;
+                vertex.pos += position;
+                vertex.normal = rotation * vertex.normal;
+                vertices.push_back(vertex); 
+            }
+            auto faceIndices = vector<uint16_t> {
+                0,1,2,1,2,3
+            };
+            for(auto index : faceIndices) {
+                indices.push_back(index + indexOffset); 
+            }
+        }
+        
+
+
+        bool solidInDirection(ivec3 position,ivec3 direction) {
+            Block* block = getBlock(position+direction).first;
+            if(block == nullptr) {
+                return false;
+            }
+            if(block->modelType == Block::ModelType::Mesh) {
+                return false;
+            }
+            return true;
+        }
+
+        void addSingleBlock(ivec3 position,quat rotation,Block* block) {
+            
+            if(!solidInDirection(position,ivec3(0,0,1))) addBlockFace(position,rotation,block->texture);
+            if(!solidInDirection(position,ivec3(0,0,-1))) addBlockFace(position,rotation * quat(glm::radians(vec3(0,180,0))),block->texture);
+            if(!solidInDirection(position,ivec3(1,0,0))) addBlockFace(position,rotation * quat(glm::radians(vec3(0, 90,0))) ,block->texture);
+            if(!solidInDirection(position,ivec3(-1,0,0))) addBlockFace(position,rotation * quat(glm::radians(vec3(0,-90,0))) ,block->texture);
+            if(!solidInDirection(position,ivec3(0,1,0))) addBlockFace(position,rotation * quat(glm::radians(vec3(-90,0,0))) ,block->texture); //this is flipped from how id expect :shrug: 
+            if(!solidInDirection(position,ivec3(0,-1,0))) addBlockFace(position,rotation * quat(glm::radians(vec3( 90,0,0))) ,block->texture);
+        }
+
+        void addConnectedBlock(ivec3 position,quat rotation,Block* block) {
+            
+            if(!solidInDirection(position,ivec3(0,0,1))) addConnectedBlockFace(position,rotation,block->texture);
+            if(!solidInDirection(position,ivec3(0,0,-1))) addConnectedBlockFace(position,rotation * quat(glm::radians(vec3(0,180,0))),block->texture);
+            if(!solidInDirection(position,ivec3(1,0,0))) addConnectedBlockFace(position,rotation * quat(glm::radians(vec3(0, 90,0))) ,block->texture);
+            if(!solidInDirection(position,ivec3(-1,0,0))) addConnectedBlockFace(position,rotation * quat(glm::radians(vec3(0,-90,0))) ,block->texture);
+            if(!solidInDirection(position,ivec3(0,1,0))) addConnectedBlockFace(position,rotation * quat(glm::radians(vec3(-90,0,0))) ,block->texture); //this is flipped from how id expect :shrug: 
+            if(!solidInDirection(position,ivec3(0,-1,0))) addConnectedBlockFace(position,rotation * quat(glm::radians(vec3( 90,0,0))) ,block->texture);
+        }
+
+        void addMeshBlock(vec3 position,quat rotation,Block* block) {
+            int indexOffset = vertices.size();
+            for(auto vertex : block->mesh->meshData.vertices) {
+                vertex.pos += position;
+                vertices.push_back(ConstructionVertex(vertex,block->texture)); 
+            }
+            for(auto index : block->mesh->meshData.indices) {
+                indices.push_back(index + indexOffset); 
+            }
+        }
+
+        // end move a bunch of these to helper
+
+        void addRenderables(Vulkan* vulkan,float dt) {
+            if(vertices.size() == 0 || indices.size() == 0) return;
+            if(meshState == -1) {
+                
+                meshBuffer[0] = vulkan->createMeshBuffers(vertices,indices);
+                //meshBuffer[1] = vulkan->createMeshBuffers(vertices,indices);
+                gpuMeshOutOfDate = false;
+                meshState = 0;
+            } else {
+                if(gpuMeshOutOfDate) {
+                    meshState++;
+                    if(meshState >= FRAMES_IN_FLIGHT) meshState = 0;
+                    vulkan->updateMeshBuffer(meshBuffer[meshState],vertices,indices);
+                    gpuMeshOutOfDate = false;
+                }
+            }
+            if(meshState != -1) {
+                vulkan->addMesh(meshBuffer[meshState],material,getTransform());
+            }
         }
 
         void setBounds(ivec3 newMin,ivec3 newMax) {
@@ -242,21 +522,24 @@ class Construction : public Actor {
             return result;
         }
 
-        virtual void collideBasic(Actor* actor,float radius) {
+        virtual void collideBasic(Actor* actor,float height,float radius) {
             vec3 localActorPosition = inverseTransformPoint(actor->position);
-            for (int z = floor(std::max((float)min.z,localActorPosition.z-radius)); z <= ceil(std::min((float)max.z,localActorPosition.z+radius)); z++)
+            vec3 localActorPositionTop = inverseTransformPoint(actor->transformPoint(vec3(0,height,0)));
+            float bounds = radius + height;
+            for (int z = floor(std::max((float)min.z,localActorPosition.z-bounds)); z <= ceil(std::min((float)max.z,localActorPosition.z+bounds)); z++)
             {
-                for (int y = floor(std::max((float)min.y,localActorPosition.y-radius)); y <= ceil(std::min((float)max.y,localActorPosition.y+radius)); y++)
+                for (int y = floor(std::max((float)min.y,localActorPosition.y-bounds)); y <= ceil(std::min((float)max.y,localActorPosition.y+bounds)); y++)
                 {
-                    for (int x = floor(std::max((float)min.x,localActorPosition.x-radius)); x <= ceil(std::min((float)max.x,localActorPosition.x+radius)); x++)
+                    for (int x = floor(std::max((float)min.x,localActorPosition.x-bounds)); x <= ceil(std::min((float)max.x,localActorPosition.x+bounds)); x++)
                     {
                         int i = getIndex(ivec3(x,y,z));
                         if(blockData[i].block != nullptr) {
-                            auto contact_opt = Physics::intersectSphereBox(localActorPosition,radius,vec3(x,y,z),vec3(0.5f));
+                            auto contact_opt = Physics::intersectCapsuleBox(localActorPosition,localActorPositionTop,radius,vec3(x,y,z),vec3(0.5f));
                             if(contact_opt) {
                                 
                                 auto contact = contact_opt.value();
                                 Physics::resolveBasic(localActorPosition,contact);
+                                Physics::resolveBasic(localActorPositionTop,contact);
                                 
                             }
                         }
@@ -278,6 +561,13 @@ class Construction : public Actor {
                 blockData[index].block->onBreak(this,location,blockData[index].state);
                 blockCount--;
                 blockCountX[location.x - min.x]--;
+
+                if(blockStorage.contains(Location(location))) {
+                    blockStorage.erase(Location(location));
+                }
+                if(stepCallbacks.contains(Location(location))) {
+                    stepCallbacks[Location(location)] = false;
+                }
             }
             //Debug::info("index: " + std::to_string(index) + " " + StringHelper::toString(location),InfoPriority::LOW);
             if(block != nullptr) {
@@ -295,12 +585,7 @@ class Construction : public Actor {
                 blockData[index] = BlockData();
             }
 
-            for (size_t i = 0; i < blockCountX.size(); i++)
-            {
-                std::cout << blockCountX[i] << ", ";
-            }
-            
-            std::cout << std::endl;
+            generateMesh();
             
             if(blockCount <= 0) {
                 destroy();
@@ -353,6 +638,23 @@ class Construction : public Actor {
             return true;
         }
 
+        
+        BlockStorage* addStorage(ivec3 location) {
+            blockStorage[Location(location)] = BlockStorage();
+            return &blockStorage[Location(location)];
+        }
+
+        void addStepCallback(ivec3 location) {
+            stepCallbacks[Location(location)] = true;
+        }
+
+        BlockStorage* getStorage(ivec3 location) {
+            if(blockStorage.contains(Location(location))) {
+                return &blockStorage[Location(location)];
+            }
+            return nullptr;
+        }
+
         void createBlockMap(map<Location,BlockData>& blockMap) {
             int i = 0;
             for (int z = min.z; z <= max.z; z++)
@@ -370,15 +672,17 @@ class Construction : public Actor {
             }
         }
 
-        static std::unique_ptr<Construction> makeInstance(vec3 position,quat rotation = glm::identity<quat>()) {
+        static std::unique_ptr<Construction> makeInstance(Material material,vec3 position,quat rotation = glm::identity<quat>()) {
             auto ptr = new Construction();
             ptr->position = position;
             ptr->rotation = rotation;
+            ptr->targetRotation = rotation;
+            ptr->material = material;
             return std::unique_ptr<Construction>(ptr);
         }
 
-        static std::unique_ptr<Construction> makeInstance(Block* block,vec3 position,quat rotation = glm::identity<quat>()) {
-            auto ptr = makeInstance(position,rotation);
+        static std::unique_ptr<Construction> makeInstance(Material material,Block* block,vec3 position,quat rotation = glm::identity<quat>()) {
+            auto ptr = makeInstance(material,position,rotation);
             ptr->setBlock(ivec3(0),block,BlockFacing::FORWARD);
             return ptr;
         }

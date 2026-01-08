@@ -1,20 +1,21 @@
 #version 450
 
-vec2 positions[4] = vec2[](
-    vec2(-1,  1),
-    vec2( 1,  1),
-    vec2(-1, -1),
-    vec2( 1, -1)
-);
+layout(location = 0) in vec2 position;
+layout(location = 1) in vec2 uv;
+
+layout(location = 0) out vec2 outTexCoord;
 
 
 #include "scene_data.hlsl"
 
-#include "push_constant.hlsl"
+#include "ui_push_constant.hlsl"
 
 
 void main() {
     uint frameIndex = push.frameIndex;
 
-    gl_Position = sceneData[frameIndex].screen * vec4(positions[gl_VertexIndex], 0.0, 1.0);
+    gl_Position = sceneData[frameIndex].screen * push.modelMatrix * vec4(position, 0.0, 1.0);
+    gl_Position.z = 0.0;
+
+    outTexCoord = uv;
 }

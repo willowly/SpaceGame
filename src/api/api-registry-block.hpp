@@ -8,21 +8,49 @@
 #include "api/api-registry.hpp"
 #include <block/cockpit-block.hpp>
 #include <block/thruster-block.hpp>
+#include <block/furnace-block.hpp>
 
 using std::string,std::variant;
 
 namespace API {
 
+    void getBlockModel(sol::table table,std::variant<string,int> key,Block* block,Registry& registry) {
+        sol::object obj = table[key];
+        if(obj.is<string>()) {
+            string str = obj.as<string>();
+            block->modelType = Block::ModelType::Mesh;
+            if(str == "block") {
+                block->modelType = Block::ModelType::SingleBlock;
+            }
+            if(str == "single_block") {
+                block->modelType = Block::ModelType::SingleBlock;
+            }
+            if(str == "connected") {
+                block->modelType = Block::ModelType::ConnectedBlock;
+            }
+            if(str == "connected_block") {
+                block->modelType = Block::ModelType::ConnectedBlock;
+            }
+            if(block->modelType == Block::ModelType::Mesh) {
+                getMesh(table,key,&block->mesh,registry,true);
+            }
+            Debug::subtractTrace();
+            return;
+            
+        }
+        getMesh(table,key,&block->mesh,registry,true);
+    }
+
     void loadBlockBaseType(ObjLoadType loadType,sol::table table,Block* block,Registry& registry) {
         switch (loadType) {
             case ObjLoadType::ARRAY:
                 // type is in slot 1 (hopefully)
-                getModel(table,2,&block->model,registry,false);
-                getMaterial(table,3,&block->material,registry,false);
+                getBlockModel(table,2,block,registry);
+                getTexture(table,3,&block->texture,registry,false);
                 break;
             case ObjLoadType::TABLE:
-                getModel(table,"model",&block->model,registry,false);
-                getMaterial(table,"material",&block->material,registry,false);
+                getBlockModel(table,"model",block,registry);
+                getTexture(table,"texture",&block->texture,registry,false);
                 break;
             case ObjLoadType::INVALID:
                 //registry.materials.erase(name);
@@ -46,7 +74,11 @@ namespace API {
                 break;
         }
     }
+    
     void loadBlockCockpit(ObjLoadType loadType,sol::table table,CockpitBlock* block,Registry& registry) {
+        loadBlockBaseType(loadType,table,block,registry);
+    }
+    void loadBlockFurnace(ObjLoadType loadType,sol::table table,FurnaceBlock* block,Registry& registry) {
         loadBlockBaseType(loadType,table,block,registry);
     }
 
@@ -63,11 +95,18 @@ namespace API {
             Debug::info("Loaded Thruster Block \"" + name + "\"",InfoPriority::MEDIUM);
             return;
         }
+        if(type == "furnace") {
+            FurnaceBlock* block = registry.addBlock<FurnaceBlock>(name);
+            loadBlockFurnace(loadType,table,block,registry);
+            Debug::info("Loaded Furnace Block \"" + name + "\"",InfoPriority::MEDIUM);
+            return;
+        }
         Block* block = registry.addBlock<Block>(name);
         loadBlockBaseType(loadType,table,block,registry);
         Debug::info("Loaded Block \"" + name + "\"",InfoPriority::MEDIUM);
         
     }
+    
 
 
     struct BlockRegistry {

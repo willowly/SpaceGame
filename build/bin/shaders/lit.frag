@@ -13,6 +13,8 @@ layout(binding = 1) uniform sampler2D texSampler[];
 
 #include "push_constant.hlsl"
 
+#include "color_helper.hlsl"
+
 void main() {
     MaterialData material = push.material;
 
@@ -23,7 +25,7 @@ void main() {
     float diff = max(dot(normal, lightDir), 0.0);
 
     vec3 diffuse = diff * lightColor;
-    vec3 objectColor = texture(texSampler[material.textureID],texCoord).rgb * material.color;
+    vec3 objectColor = texture(texSampler[material.textureID],texCoord).rgb * toLinear(material.color.rgb);
     vec3 result = (ambient + diffuse) * objectColor;
     outColor = vec4(result, 1.0);
     

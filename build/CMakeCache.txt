@@ -14,8 +14,8 @@
 # EXTERNAL cache entries
 ########################
 
-//Build Framework bundle for OSX
-BUILD_FRAMEWORK:BOOL=OFF
+//Build shared libraries
+BUILD_SHARED_LIBS:BOOL=OFF
 
 //Path to a program.
 CMAKE_ADDR2LINE:FILEPATH=CMAKE_ADDR2LINE-NOTFOUND
@@ -175,53 +175,15 @@ CMAKE_NM:FILEPATH=/usr/bin/nm
 //Path to a program.
 CMAKE_OBJCOPY:FILEPATH=CMAKE_OBJCOPY-NOTFOUND
 
-//OBJCXX compiler
-CMAKE_OBJCXX_COMPILER:FILEPATH=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++
-
-//Flags used by the Objective-C++ compiler during all build types.
-CMAKE_OBJCXX_FLAGS:STRING=
-
-//Flags used by the Objective-C++ compiler during DEBUG builds.
-CMAKE_OBJCXX_FLAGS_DEBUG:STRING=-g
-
-//Flags used by the Objective-C++ compiler during MINSIZEREL builds.
-CMAKE_OBJCXX_FLAGS_MINSIZEREL:STRING=-Os -DNDEBUG
-
-//Flags used by the Objective-C++ compiler during RELEASE builds.
-CMAKE_OBJCXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
-
-//Flags used by the Objective-C++ compiler during RELWITHDEBINFO
-// builds.
-CMAKE_OBJCXX_FLAGS_RELWITHDEBINFO:STRING=-O2 -g -DNDEBUG
-
-//OBJC compiler
-CMAKE_OBJC_COMPILER:FILEPATH=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang
-
-//Flags used by the Objective-C compiler during all build types.
-CMAKE_OBJC_FLAGS:STRING=
-
-//Flags used by the Objective-C compiler during DEBUG builds.
-CMAKE_OBJC_FLAGS_DEBUG:STRING=-g
-
-//Flags used by the Objective-C compiler during MINSIZEREL builds.
-CMAKE_OBJC_FLAGS_MINSIZEREL:STRING=-Os -DNDEBUG
-
-//Flags used by the Objective-C compiler during RELEASE builds.
-CMAKE_OBJC_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
-
-//Flags used by the Objective-C compiler during RELWITHDEBINFO
-// builds.
-CMAKE_OBJC_FLAGS_RELWITHDEBINFO:STRING=-O2 -g -DNDEBUG
-
 //Path to a program.
 CMAKE_OBJDUMP:FILEPATH=/usr/bin/objdump
 
 //Build architectures for OSX
 CMAKE_OSX_ARCHITECTURES:STRING=
 
-//The minimal iOS version that will be able to run the built binaries.
-// Cannot be lower than 13.0
-CMAKE_OSX_DEPLOYMENT_TARGET:STRING=14.3
+//Minimum OS X version to target for deployment (at runtime); newer
+// APIs weak linked. Set to empty string for default value.
+CMAKE_OSX_DEPLOYMENT_TARGET:STRING=
 
 //The product will be built against the headers and libraries located
 // inside the indicated SDK.
@@ -237,13 +199,13 @@ CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 CMAKE_PROJECT_NAME:STATIC=SpaceGame
 
 //Value Computed by CMake
-CMAKE_PROJECT_VERSION:STATIC=3.0.1
+CMAKE_PROJECT_VERSION:STATIC=0.13.1
 
 //Value Computed by CMake
-CMAKE_PROJECT_VERSION_MAJOR:STATIC=3
+CMAKE_PROJECT_VERSION_MAJOR:STATIC=0
 
 //Value Computed by CMake
-CMAKE_PROJECT_VERSION_MINOR:STATIC=0
+CMAKE_PROJECT_VERSION_MINOR:STATIC=13
 
 //Value Computed by CMake
 CMAKE_PROJECT_VERSION_PATCH:STATIC=1
@@ -319,67 +281,6 @@ CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 //Path to a library.
 COCOA_LIBRARY:FILEPATH=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/Cocoa.framework
 
-//Enable to build OSX bundles
-CPACK_BINARY_BUNDLE:BOOL=OFF
-
-//Enable to build Debian packages
-CPACK_BINARY_DEB:BOOL=OFF
-
-//Enable to build OSX Drag And Drop package
-CPACK_BINARY_DRAGNDROP:BOOL=OFF
-
-//Enable to build FreeBSD packages
-CPACK_BINARY_FREEBSD:BOOL=OFF
-
-//Enable to build IFW packages
-CPACK_BINARY_IFW:BOOL=OFF
-
-//Enable to build NSIS packages
-CPACK_BINARY_NSIS:BOOL=OFF
-
-//Enable to build productbuild packages
-CPACK_BINARY_PRODUCTBUILD:BOOL=OFF
-
-//Enable to build RPM packages
-CPACK_BINARY_RPM:BOOL=OFF
-
-//Enable to build STGZ packages
-CPACK_BINARY_STGZ:BOOL=ON
-
-//Enable to build TBZ2 packages
-CPACK_BINARY_TBZ2:BOOL=OFF
-
-//Enable to build TGZ packages
-CPACK_BINARY_TGZ:BOOL=ON
-
-//Enable to build TXZ packages
-CPACK_BINARY_TXZ:BOOL=OFF
-
-//Enable to build RPM source packages
-CPACK_SOURCE_RPM:BOOL=OFF
-
-//Enable to build TBZ2 source packages
-CPACK_SOURCE_TBZ2:BOOL=ON
-
-//Enable to build TGZ source packages
-CPACK_SOURCE_TGZ:BOOL=ON
-
-//Enable to build TXZ source packages
-CPACK_SOURCE_TXZ:BOOL=ON
-
-//Enable to build TZ source packages
-CPACK_SOURCE_TZ:BOOL=ON
-
-//Enable to build ZIP source packages
-CPACK_SOURCE_ZIP:BOOL=OFF
-
-//Set FLAC__BYTES_PER_WORD to 8, for 64-bit machines. For 32-bit
-// machines, turning this off might give a tiny speed improvement
-ENABLE_64_BIT_WORDS:BOOL=ON
-
-//Enable -Werror in all Makefiles
-ENABLE_WERROR:BOOL=OFF
-
 //Directory under which to collect all populated content
 FETCHCONTENT_BASE_DIR:PATH=/Users/willow/Documents/GitHub/SpaceGame/build/_deps
 
@@ -391,54 +292,21 @@ FETCHCONTENT_FULLY_DISCONNECTED:BOOL=OFF
 FETCHCONTENT_QUIET:BOOL=ON
 
 //When not empty, overrides where to find pre-populated content
-// for flac
-FETCHCONTENT_SOURCE_DIR_FLAC:PATH=
+// for glfw
+FETCHCONTENT_SOURCE_DIR_GLFW:PATH=
 
 //When not empty, overrides where to find pre-populated content
-// for Freetype
-FETCHCONTENT_SOURCE_DIR_FREETYPE:PATH=
-
-//When not empty, overrides where to find pre-populated content
-// for ogg
-FETCHCONTENT_SOURCE_DIR_OGG:PATH=
-
-//When not empty, overrides where to find pre-populated content
-// for SFML
-FETCHCONTENT_SOURCE_DIR_SFML:PATH=
-
-//When not empty, overrides where to find pre-populated content
-// for vorbis
-FETCHCONTENT_SOURCE_DIR_VORBIS:PATH=
+// for tracy
+FETCHCONTENT_SOURCE_DIR_TRACY:PATH=
 
 //Enables UPDATE_DISCONNECTED behavior for all content population
 FETCHCONTENT_UPDATES_DISCONNECTED:BOOL=OFF
 
-//Enables UPDATE_DISCONNECTED behavior just for population of flac
-FETCHCONTENT_UPDATES_DISCONNECTED_FLAC:BOOL=OFF
+//Enables UPDATE_DISCONNECTED behavior just for population of glfw
+FETCHCONTENT_UPDATES_DISCONNECTED_GLFW:BOOL=OFF
 
-//Enables UPDATE_DISCONNECTED behavior just for population of Freetype
-FETCHCONTENT_UPDATES_DISCONNECTED_FREETYPE:BOOL=OFF
-
-//Enables UPDATE_DISCONNECTED behavior just for population of ogg
-FETCHCONTENT_UPDATES_DISCONNECTED_OGG:BOOL=OFF
-
-//Enables UPDATE_DISCONNECTED behavior just for population of SFML
-FETCHCONTENT_UPDATES_DISCONNECTED_SFML:BOOL=OFF
-
-//Enables UPDATE_DISCONNECTED behavior just for population of vorbis
-FETCHCONTENT_UPDATES_DISCONNECTED_VORBIS:BOOL=OFF
-
-//Value Computed by CMake
-FLAC_BINARY_DIR:STATIC=/Users/willow/Documents/GitHub/SpaceGame/build/_deps/flac-build
-
-//Value Computed by CMake
-FLAC_IS_TOP_LEVEL:STATIC=OFF
-
-//Dependencies for the target
-FLAC_LIB_DEPENDS:STATIC=general;Ogg::ogg;
-
-//Value Computed by CMake
-FLAC_SOURCE_DIR:STATIC=/Users/willow/Documents/GitHub/SpaceGame/build/_deps/flac-src
+//Enables UPDATE_DISCONNECTED behavior just for population of tracy
+FETCHCONTENT_UPDATES_DISCONNECTED_TRACY:BOOL=OFF
 
 //Git command line client
 GIT_EXECUTABLE:FILEPATH=/usr/bin/git
@@ -449,23 +317,40 @@ GLFW3_INCLUDE_DIR:PATH=/usr/local/include
 //Path to a library.
 GLFW3_LIBRARY:FILEPATH=/usr/local/lib/libglfw3.a
 
-//Path to a program.
-HAVE_GIT:FILEPATH=/usr/bin/git
+//Value Computed by CMake
+GLFW_BINARY_DIR:STATIC=/Users/willow/Documents/GitHub/SpaceGame/build/_deps/glfw-build
 
-//Install CMake package-config module
-INSTALL_CMAKE_CONFIG_MODULE:BOOL=ON
+//Build support for Cocoa
+GLFW_BUILD_COCOA:BOOL=ON
 
-//Install CMake package configiguration module
-INSTALL_CMAKE_PACKAGE_MODULE:BOOL=ON
+//Build the GLFW documentation
+GLFW_BUILD_DOCS:BOOL=OFF
+
+//Build the GLFW example programs
+GLFW_BUILD_EXAMPLES:BOOL=OFF
+
+//Build the GLFW test programs
+GLFW_BUILD_TESTS:BOOL=OFF
+
+GLFW_INCLUDE_NONE:BOOL=ON
+
+//Generate installation target
+GLFW_INSTALL:BOOL=OFF
+
+//Value Computed by CMake
+GLFW_IS_TOP_LEVEL:STATIC=OFF
+
+//Library type override for GLFW (SHARED, STATIC, OBJECT, or empty
+// to follow BUILD_SHARED_LIBS)
+GLFW_LIBRARY_TYPE:STRING=
+
+//Value Computed by CMake
+GLFW_SOURCE_DIR:STATIC=/Users/willow/Documents/GitHub/SpaceGame/build/_deps/glfw-src
+
+GLFW_VULKAN_STATIC:BOOL=OFF
 
 //Path to a library.
 IOKIT_LIBRARY:FILEPATH=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/IOKit.framework
-
-//iconv include directory
-Iconv_INCLUDE_DIR:PATH=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include
-
-//iconv library (if not in the C library)
-Iconv_LIBRARY:FILEPATH=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/lib/libiconv.tbd
 
 //Path to a file.
 LUA_INCLUDE_DIR:PATH=/usr/local/include/lua
@@ -485,71 +370,8 @@ OPENGL_gl_LIBRARY:FILEPATH=/Applications/Xcode.app/Contents/Developer/Platforms/
 //OpenGL GLU library
 OPENGL_glu_LIBRARY:FILEPATH=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/OpenGL.framework
 
-//Arguments to supply to pkg-config
-PKG_CONFIG_ARGN:STRING=
-
-//pkg-config executable
-PKG_CONFIG_EXECUTABLE:FILEPATH=/usr/local/bin/pkg-config
-
 //The directory containing a CMake configuration file for ReactPhysics3D.
 ReactPhysics3D_DIR:PATH=/usr/local/lib/cmake/ReactPhysics3D
-
-//Value Computed by CMake
-SFML_BINARY_DIR:STATIC=/Users/willow/Documents/GitHub/SpaceGame/build/_deps/sfml-build
-
-//ON to build SFML's Audio module.
-SFML_BUILD_AUDIO:BOOL=ON
-
-//ON to build SFML as frameworks libraries (release only), OFF
-// to build according to BUILD_SHARED_LIBS
-SFML_BUILD_FRAMEWORKS:BOOL=OFF
-
-//ON to build SFML's Graphics module.
-SFML_BUILD_GRAPHICS:BOOL=ON
-
-//ON to build SFML's Network module.
-SFML_BUILD_NETWORK:BOOL=ON
-
-//ON to build SFML's Window module. This setting is ignored, if
-// the graphics module is built.
-SFML_BUILD_WINDOW:BOOL=ON
-
-//ON to configure extras, OFF to ignore them
-SFML_CONFIGURE_EXTRAS:BOOL=OFF
-
-//ON to enable precompiled headers for SFML builds -- only supported
-// on Windows/Linux and for static library builds
-SFML_ENABLE_PCH:BOOL=OFF
-
-//Enable sanitizers
-SFML_ENABLE_SANITIZERS:BOOL=OFF
-
-//Enable standard library assertions
-SFML_ENABLE_STDLIB_ASSERTIONS:BOOL=OFF
-
-//ON to automatically install pkg-config files so other projects
-// can find SFML
-SFML_INSTALL_PKGCONFIG_FILES:BOOL=OFF
-
-//ON to automatically install the Xcode templates, OFF to do nothing
-// about it. The templates are compatible with Xcode 4 and 5.
-SFML_INSTALL_XCODE_TEMPLATES:BOOL=OFF
-
-//Value Computed by CMake
-SFML_IS_TOP_LEVEL:STATIC=OFF
-
-//ON to use an OpenGL ES implementation, OFF to use a desktop OpenGL
-// implementation
-SFML_OPENGL_ES:BOOL=0
-
-//Value Computed by CMake
-SFML_SOURCE_DIR:STATIC=/Users/willow/Documents/GitHub/SpaceGame/build/_deps/sfml-src
-
-//ON to use system dependencies, OFF to use the bundled ones.
-SFML_USE_SYSTEM_DEPS:BOOL=OFF
-
-//Treat compiler warnings as errors
-SFML_WARNINGS_AS_ERRORS:BOOL=OFF
 
 //Value Computed by CMake
 SpaceGame_BINARY_DIR:STATIC=/Users/willow/Documents/GitHub/SpaceGame/build
@@ -560,59 +382,129 @@ SpaceGame_IS_TOP_LEVEL:STATIC=ON
 //Value Computed by CMake
 SpaceGame_SOURCE_DIR:STATIC=/Users/willow/Documents/GitHub/SpaceGame
 
+//Enforce callstack collection for tracy regions
+TRACY_CALLSTACK:BOOL=OFF
+
+//Whether to build Tracy python client library
+TRACY_CLIENT_PYTHON:BOOL=OFF
+
+//Enable debuginfod support
+TRACY_DEBUGINFOD:BOOL=OFF
+
+//Enable delayed initialization of the library (init on first call)
+TRACY_DELAYED_INIT:BOOL=OFF
+
+//[advanced] Don't use default demangling function - You'll need
+// to provide your own
+TRACY_DEMANGLE:BOOL=OFF
+
+//Enable profiling
+TRACY_ENABLE:BOOL=ON
+
+//Enable fibers support
+TRACY_FIBERS:BOOL=OFF
+
+//Build Fortran bindings
+TRACY_Fortran:BOOL=OFF
+
+//Ignore instrumentation errors from memory free events that do
+// not have a matching allocation
+TRACY_IGNORE_MEMORY_FAULTS:BOOL=OFF
+
+//Enable libbacktrace to support dynamically loaded elfs in symbol
+// resolution resolution after the first symbol resolve operation
+TRACY_LIBBACKTRACE_ELF_DYNLOAD_SUPPORT:BOOL=OFF
+
+//Use libunwind backtracing where supported
+TRACY_LIBUNWIND_BACKTRACE:BOOL=OFF
+
+//Enable Link-Time optimization
+TRACY_LTO:BOOL=OFF
+
+//Enable the manual lifetime management of the profile
+TRACY_MANUAL_LIFETIME:BOOL=OFF
+
+//Disable client discovery by broadcast to local network
+TRACY_NO_BROADCAST:BOOL=OFF
+
+//Disable all callstack related functionality
+TRACY_NO_CALLSTACK:BOOL=OFF
+
+//Disables the inline functions in callstacks
+TRACY_NO_CALLSTACK_INLINES:BOOL=OFF
+
+//Disable collection of source code
+TRACY_NO_CODE_TRANSFER:BOOL=OFF
+
+//Disable capture of context switches
+TRACY_NO_CONTEXT_SWITCH:BOOL=OFF
+
+//Disable crash handling
+TRACY_NO_CRASH_HANDLER:BOOL=OFF
+
+//Client executable does not exit until all profile data is sent
+// to server
+TRACY_NO_EXIT:BOOL=OFF
+
+//Disable the frame image support and its thread
+TRACY_NO_FRAME_IMAGE:BOOL=OFF
+
+//Disable call stack sampling
+TRACY_NO_SAMPLING:BOOL=OFF
+
+//Disable systrace sampling
+TRACY_NO_SYSTEM_TRACING:BOOL=OFF
+
+//Disable zone validation for C API
+TRACY_NO_VERIFY:BOOL=OFF
+
+//Disable capture of hardware Vsync events
+TRACY_NO_VSYNC_CAPTURE:BOOL=OFF
+
+//Tracy will only accept connections on IPv4 addresses (disable
+// IPv6)
+TRACY_ONLY_IPV4:BOOL=OFF
+
+//Only listen on the localhost interface
+TRACY_ONLY_LOCALHOST:BOOL=OFF
+
+//On-demand profiling
+TRACY_ON_DEMAND:BOOL=ON
+
+//Enable nopsleds for efficient patching by system-level tools
+// (e.g. rr)
+TRACY_PATCHABLE_NOPSLEDS:BOOL=OFF
+
+//Whether to build Tracy as a static library
+TRACY_STATIC:BOOL=ON
+
+//Instead of full runtime symbol resolution, only resolve the image
+// path and offset to enable offline symbol resolution
+TRACY_SYMBOL_OFFLINE_RESOLVE:BOOL=OFF
+
+//Use lower resolution timers
+TRACY_TIMER_FALLBACK:BOOL=OFF
+
+//[advanced] Verbose output from the profiler
+TRACY_VERBOSE:BOOL=OFF
+
+//Value Computed by CMake
+Tracy_BINARY_DIR:STATIC=/Users/willow/Documents/GitHub/SpaceGame/build/_deps/tracy-build
+
+//Value Computed by CMake
+Tracy_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+Tracy_SOURCE_DIR:STATIC=/Users/willow/Documents/GitHub/SpaceGame/build/_deps/tracy-src
+
 //Path to a program.
 Vulkan_GLSLANG_VALIDATOR_EXECUTABLE:FILEPATH=/usr/local/bin/glslangValidator
 
 //Path to a program.
 Vulkan_GLSLC_EXECUTABLE:FILEPATH=/usr/local/bin/glslc
 
-//Path to a file.
-Vulkan_INCLUDE_DIR:PATH=Vulkan_INCLUDE_DIR-NOTFOUND
-
-//Path to a library.
-Vulkan_LIBRARY:FILEPATH=Vulkan_LIBRARY-NOTFOUND
-
-//Use any assembly optimization routines
-WITH_ASM:BOOL=ON
-
-//ogg support (default: test for libogg)
-WITH_OGG:BOOL=ON
-
-//Value Computed by CMake
-freetype_BINARY_DIR:STATIC=/Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-build
-
-//Value Computed by CMake
-freetype_IS_TOP_LEVEL:STATIC=OFF
-
-//Value Computed by CMake
-freetype_SOURCE_DIR:STATIC=/Users/willow/Documents/GitHub/SpaceGame/build/_deps/freetype-src
-
-//Value Computed by CMake
-libogg_BINARY_DIR:STATIC=/Users/willow/Documents/GitHub/SpaceGame/build/_deps/ogg-build
-
-//Value Computed by CMake
-libogg_IS_TOP_LEVEL:STATIC=OFF
-
-//Value Computed by CMake
-libogg_SOURCE_DIR:STATIC=/Users/willow/Documents/GitHub/SpaceGame/build/_deps/ogg-src
-
-//Value Computed by CMake
-vorbis_BINARY_DIR:STATIC=/Users/willow/Documents/GitHub/SpaceGame/build/_deps/vorbis-build
-
-//Value Computed by CMake
-vorbis_IS_TOP_LEVEL:STATIC=OFF
-
-//Dependencies for the target
-vorbis_LIB_DEPENDS:STATIC=general;Ogg::ogg;
-
-//Value Computed by CMake
-vorbis_SOURCE_DIR:STATIC=/Users/willow/Documents/GitHub/SpaceGame/build/_deps/vorbis-src
-
-//Dependencies for the target
-vorbisenc_LIB_DEPENDS:STATIC=general;vorbis;
-
-//Dependencies for the target
-vorbisfile_LIB_DEPENDS:STATIC=general;vorbis;
+//The directory containing a CMake configuration file for rocprofiler-sdk.
+rocprofiler-sdk_DIR:PATH=rocprofiler-sdk_DIR-NOTFOUND
 
 
 ########################
@@ -745,33 +637,9 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=1
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=4
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CMAKE_OBJCXX_COMPILER
-CMAKE_OBJCXX_COMPILER-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CMAKE_OBJCXX_FLAGS
-CMAKE_OBJCXX_FLAGS-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CMAKE_OBJCXX_FLAGS_DEBUG
-CMAKE_OBJCXX_FLAGS_DEBUG-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CMAKE_OBJCXX_FLAGS_MINSIZEREL
-CMAKE_OBJCXX_FLAGS_MINSIZEREL-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CMAKE_OBJCXX_FLAGS_RELEASE
-CMAKE_OBJCXX_FLAGS_RELEASE-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CMAKE_OBJCXX_FLAGS_RELWITHDEBINFO
-CMAKE_OBJCXX_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CMAKE_OBJC_COMPILER
-CMAKE_OBJC_COMPILER-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CMAKE_OBJC_FLAGS
-CMAKE_OBJC_FLAGS-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CMAKE_OBJC_FLAGS_DEBUG
-CMAKE_OBJC_FLAGS_DEBUG-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CMAKE_OBJC_FLAGS_MINSIZEREL
-CMAKE_OBJC_FLAGS_MINSIZEREL-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CMAKE_OBJC_FLAGS_RELEASE
-CMAKE_OBJC_FLAGS_RELEASE-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CMAKE_OBJC_FLAGS_RELWITHDEBINFO
-CMAKE_OBJC_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP
 CMAKE_OBJDUMP-ADVANCED:INTERNAL=1
 //Platform information initialized
@@ -814,166 +682,26 @@ CMAKE_TAPI-ADVANCED:INTERNAL=1
 CMAKE_UNAME:INTERNAL=/usr/bin/uname
 //ADVANCED property for variable: CMAKE_VERBOSE_MAKEFILE
 CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CPACK_BINARY_BUNDLE
-CPACK_BINARY_BUNDLE-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CPACK_BINARY_DEB
-CPACK_BINARY_DEB-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CPACK_BINARY_DRAGNDROP
-CPACK_BINARY_DRAGNDROP-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CPACK_BINARY_FREEBSD
-CPACK_BINARY_FREEBSD-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CPACK_BINARY_IFW
-CPACK_BINARY_IFW-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CPACK_BINARY_NSIS
-CPACK_BINARY_NSIS-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CPACK_BINARY_PRODUCTBUILD
-CPACK_BINARY_PRODUCTBUILD-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CPACK_BINARY_RPM
-CPACK_BINARY_RPM-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CPACK_BINARY_STGZ
-CPACK_BINARY_STGZ-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CPACK_BINARY_TBZ2
-CPACK_BINARY_TBZ2-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CPACK_BINARY_TGZ
-CPACK_BINARY_TGZ-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CPACK_BINARY_TXZ
-CPACK_BINARY_TXZ-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CPACK_SOURCE_RPM
-CPACK_SOURCE_RPM-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CPACK_SOURCE_TBZ2
-CPACK_SOURCE_TBZ2-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CPACK_SOURCE_TGZ
-CPACK_SOURCE_TGZ-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CPACK_SOURCE_TXZ
-CPACK_SOURCE_TXZ-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CPACK_SOURCE_TZ
-CPACK_SOURCE_TZ-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: CPACK_SOURCE_ZIP
-CPACK_SOURCE_ZIP-ADVANCED:INTERNAL=1
-//Test DODEFINE_EXTENSIONS
-DODEFINE_EXTENSIONS:INTERNAL=1
 //Details about finding GLFW3
 FIND_PACKAGE_MESSAGE_DETAILS_GLFW3:INTERNAL=[/usr/local/lib/libglfw3.a][/usr/local/include][v()]
-//Details about finding Iconv
-FIND_PACKAGE_MESSAGE_DETAILS_Iconv:INTERNAL=[/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/lib/libiconv.tbd][/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include][v()]
 //Details about finding Lua
 FIND_PACKAGE_MESSAGE_DETAILS_Lua:INTERNAL=[/usr/local/lib/liblua5.4.dylib][/usr/local/include/lua][v5.4.6()]
 //Details about finding OpenGL
 FIND_PACKAGE_MESSAGE_DETAILS_OpenGL:INTERNAL=[/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/OpenGL.framework][/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/OpenGL.framework][c ][v()]
-//Details about finding PkgConfig
-FIND_PACKAGE_MESSAGE_DETAILS_PkgConfig:INTERNAL=[/usr/local/bin/pkg-config][v2.5.0()]
 //Details about finding Threads
 FIND_PACKAGE_MESSAGE_DETAILS_Threads:INTERNAL=[TRUE][v()]
 //Details about finding Vulkan
 FIND_PACKAGE_MESSAGE_DETAILS_Vulkan:INTERNAL=[/Users/willow/VulkanSDK/1.4.321.0/macOS/lib/libVulkan.dylib][/Users/willow/VulkanSDK/1.4.321.0/macOS/include][cfound components: glslc glslangValidator ][v1.4.321()]
-//Result of CHECK_CPU_ARCH
-FLAC__CPU_X86_64:INTERNAL=1
-//Have include arm_neon.h
-FLAC__HAS_NEONINTRIN:INTERNAL=
-//Have include x86intrin.h
-FLAC__HAS_X86INTRIN:INTERNAL=1
 //ADVANCED property for variable: GIT_EXECUTABLE
 GIT_EXECUTABLE-ADVANCED:INTERNAL=1
-//Test HAVE_ASSOC_MATH
-HAVE_ASSOC_MATH:INTERNAL=1
-//Test HAVE_BSWAP16
-HAVE_BSWAP16:INTERNAL=1
-//Test HAVE_BSWAP32
-HAVE_BSWAP32:INTERNAL=1
-//Have include byteswap.h
-HAVE_BYTESWAP_H:INTERNAL=
-//Have function clock_gettime
-HAVE_CLOCK_GETTIME:INTERNAL=
-//Have include cpuid.h
-HAVE_CPUID_H:INTERNAL=1
-//Test HAVE_DECL_AFTER_STMT_FLAG
-HAVE_DECL_AFTER_STMT_FLAG:INTERNAL=1
-//Have include fcntl.h
-HAVE_FCNTL_H:INTERNAL=1
-//Result of TRY_COMPILE
-HAVE_FLAC__CPU_X86_64:INTERNAL=TRUE
-//Have function fseeko
-HAVE_FSEEKO:INTERNAL=1
-//Result of TRY_COMPILE
-HAVE_INT16_SIZE:INTERNAL=TRUE
-//Result of TRY_COMPILE
-HAVE_INT32_SIZE:INTERNAL=TRUE
-//Result of TRY_COMPILE
-HAVE_INT64_SIZE:INTERNAL=TRUE
-//Have include inttypes.h
-HAVE_INTTYPES_H:INTERNAL=1
-//Result of TRY_COMPILE
-HAVE_INT_SIZE:INTERNAL=TRUE
-//Test HAVE_LANGINFO_CODESET
-HAVE_LANGINFO_CODESET:INTERNAL=1
-//Have library m
-HAVE_LIBM:INTERNAL=1
-//Result of TRY_COMPILE
-HAVE_LONG_LONG_SIZE:INTERNAL=TRUE
-//Result of TRY_COMPILE
-HAVE_LONG_SIZE:INTERNAL=TRUE
-//Have function lround
-HAVE_LROUND:INTERNAL=1
-//Test HAVE_MBSTATE
-HAVE_MBSTATE:INTERNAL=1
-//Result of TRY_COMPILE
-HAVE_SHORT_SIZE:INTERNAL=TRUE
-//Test HAVE_STACKREALIGN_FLAG
-HAVE_STACKREALIGN_FLAG:INTERNAL=1
-//Have include stdbool.h
-HAVE_STDBOOL_H:INTERNAL=1
-//Have include stddef.h
-HAVE_STDDEF_H:INTERNAL=1
-//Have include stdint.h
-HAVE_STDINT_H:INTERNAL=1
-//Have include sys/param.h
-HAVE_SYS_PARAM_H:INTERNAL=1
-//Have include sys/types.h
-HAVE_SYS_TYPES_H:INTERNAL=1
-//Result of TRY_COMPILE
-HAVE_UINT16_SIZE:INTERNAL=TRUE
-//Result of TRY_COMPILE
-HAVE_UINT32_SIZE:INTERNAL=TRUE
-//Have include unistd.h
-HAVE_UNISTD_H:INTERNAL=1
-//Result of TRY_COMPILE
-HAVE_U_INT16_SIZE:INTERNAL=TRUE
-//Result of TRY_COMPILE
-HAVE_U_INT32_SIZE:INTERNAL=TRUE
-//Test HAVE_WEFFCXX_FLAG
-HAVE_WEFFCXX_FLAG:INTERNAL=1
-//Test HAVE_WERROR_FLAG
-HAVE_WERROR_FLAG:INTERNAL=1
-//Have include inttypes.h
-INCLUDE_INTTYPES_H:INTERNAL=1
-//Have include stdint.h
-INCLUDE_STDINT_H:INTERNAL=1
-//Have include sys/types.h
-INCLUDE_SYS_TYPES_H:INTERNAL=1
-//CHECK_TYPE_SIZE: sizeof(int16_t)
-INT16_SIZE:INTERNAL=2
-//CHECK_TYPE_SIZE: sizeof(int32_t)
-INT32_SIZE:INTERNAL=4
-//CHECK_TYPE_SIZE: sizeof(int64_t)
-INT64_SIZE:INTERNAL=8
-//CHECK_TYPE_SIZE: sizeof(int)
-INT_SIZE:INTERNAL=4
-//ADVANCED property for variable: Iconv_INCLUDE_DIR
-Iconv_INCLUDE_DIR-ADVANCED:INTERNAL=1
-//Test Iconv_IS_BUILT_IN
-Iconv_IS_BUILT_IN:INTERNAL=
-//ADVANCED property for variable: Iconv_LIBRARY
-Iconv_LIBRARY-ADVANCED:INTERNAL=1
-//CHECK_TYPE_SIZE: sizeof(long long)
-LONG_LONG_SIZE:INTERNAL=8
-//CHECK_TYPE_SIZE: sizeof(long)
-LONG_SIZE:INTERNAL=8
+//GLFW pkg-config Libs.private
+GLFW_PKG_CONFIG_LIBS_PRIVATE:INTERNAL= -framework Cocoa -framework IOKit -framework CoreFoundation
+//GLFW pkg-config Requires.private
+GLFW_PKG_CONFIG_REQUIRES_PRIVATE:INTERNAL=
 //ADVANCED property for variable: LUA_INCLUDE_DIR
 LUA_INCLUDE_DIR-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: LUA_LIBRARY
 LUA_LIBRARY-ADVANCED:INTERNAL=1
-//ogg has already been built
-OGG_FOUND:INTERNAL=1
 //ADVANCED property for variable: OPENGL_GLU_INCLUDE_DIR
 OPENGL_GLU_INCLUDE_DIR-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: OPENGL_INCLUDE_DIR
@@ -982,28 +710,14 @@ OPENGL_INCLUDE_DIR-ADVANCED:INTERNAL=1
 OPENGL_gl_LIBRARY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: OPENGL_glu_LIBRARY
 OPENGL_glu_LIBRARY-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: PKG_CONFIG_ARGN
-PKG_CONFIG_ARGN-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: PKG_CONFIG_EXECUTABLE
-PKG_CONFIG_EXECUTABLE-ADVANCED:INTERNAL=1
-//CHECK_TYPE_SIZE: sizeof(short)
-SHORT_SIZE:INTERNAL=2
-//CHECK_TYPE_SIZE: sizeof(uint16_t)
-UINT16_SIZE:INTERNAL=2
-//CHECK_TYPE_SIZE: sizeof(uint32_t)
-UINT32_SIZE:INTERNAL=4
-//CHECK_TYPE_SIZE: sizeof(u_int16_t)
-U_INT16_SIZE:INTERNAL=2
-//CHECK_TYPE_SIZE: sizeof(u_int32_t)
-U_INT32_SIZE:INTERNAL=4
+//ADVANCED property for variable: TRACY_DEMANGLE
+TRACY_DEMANGLE-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: TRACY_VERBOSE
+TRACY_VERBOSE-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: Vulkan_GLSLANG_VALIDATOR_EXECUTABLE
 Vulkan_GLSLANG_VALIDATOR_EXECUTABLE-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: Vulkan_GLSLC_EXECUTABLE
 Vulkan_GLSLC_EXECUTABLE-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: Vulkan_INCLUDE_DIR
-Vulkan_INCLUDE_DIR-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: Vulkan_LIBRARY
-Vulkan_LIBRARY-ADVANCED:INTERNAL=1
 //CMAKE_INSTALL_PREFIX during last run
 _GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX:INTERNAL=/usr/local
 
