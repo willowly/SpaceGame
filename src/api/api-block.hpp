@@ -11,8 +11,8 @@ namespace API {
         sol::usertype<Block> block = lua.new_usertype<Block>("block",sol::no_constructor);
         
         block["drop"] = &Block::drop;
-        block["texture"] = &Block::texture;
-        block["model"] = &Block::mesh;
+        // block["texture"] = &Block::texture;
+        // block["model"] = &Block::mesh;
 
     }
 }

@@ -5,8 +5,9 @@
 #include "actor/actor.hpp"
 #include <memory>
 #include <tracy/Tracy.hpp>
+#include "physics/physics-body.hpp"
 
-using glm::vec3, glm::quat,std::unique_ptr;
+using glm::vec3, glm::quat, std::unique_ptr;
 
 #define WORLD
 class World {
@@ -54,11 +55,21 @@ class World {
         float stepProcessMs;
         float renderProcessMs;
 
+        std::vector<PhysicsBody*> physicsBodies;
+        bool pausePhysics;
+        bool stepPhysics; //trigger
+
         int iteratingActors = 0; //so we dont resize the actor vector when iterating over it. int so that we can have nested iterations
+
+
 
         World() {
 
         }
+
+        vec3 testPointA;
+        vec3 testPointB;
+        vec3 testPointC;
 
         template<typename T>
         T* spawn(unique_ptr<T> spawned) {
@@ -68,11 +79,10 @@ class World {
             } else {
                 actors.push_back(std::move(spawned));
             }
+
+            rawSpawned->spawn(this); // do actor specific spawning code
+
             return rawSpawned;
-        }
-
-        void destroy(Actor* actor) {
-
         }
 
         vec3 getGravityVector(vec3 position) {
@@ -114,16 +124,44 @@ class World {
 
         void step(float dt) {
             ZoneScoped;
+            
             iteratingActors++;
             for (auto& actor : actors)
             {
                 actor->step(this,dt);
             }
+            // remove the ones marked as destroyed
+            for (int i = actors.size() - 1; i >= 0; i--)
+            {
+                auto& actor = actors[i];
+                if(actor->destroyed) {
+                    actors.erase(actors.begin()+i);
+                }
+            }
             iteratingActors--;
+
+            if(!pausePhysics || stepPhysics) {
+                physics(dt);
+                stepPhysics = false;
+            }
+
             for(auto& actor : spawnedActors) {
                 actors.push_back(std::move(actor));
             }
             spawnedActors.clear();
+        }
+
+        void physics(float dt) {
+
+            for(auto& physicsBody : physicsBodies) {
+                vec3 gravity = getGravityVector(physicsBody->getPosition());
+                physicsBody->setVelocity(physicsBody->getVelocity() + gravity * dt);
+                physicsBody->integrate(dt);
+                physicsBody->collideWithTriangle(testPointA,testPointB,testPointC);
+            }
+            
+            
+
         }
 
         void applyGravityIfEnabled(Actor* actor,float dt) {
@@ -165,6 +203,14 @@ class World {
                 
             }
             iteratingActors--;
+        }
+
+        void addPhysicsBody(PhysicsBody* body) {
+            physicsBodies.push_back(body);
+        }
+
+        void removePhysicsBody(PhysicsBody* body) {
+            std::erase(physicsBodies,body);
         }
 
         Camera& getCamera() {

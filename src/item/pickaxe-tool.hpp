@@ -41,6 +41,8 @@ class PickaxeTool : public Tool {
             
             int damage = stack.storage.getInt(DAMAGE_VAR,0);
             auto worldHitOpt = world->raycast(ray,reach);
+            TerraformResults results; //terrain
+            std::optional<ItemStack> resultStack; //constructions :shrug:
             if(worldHitOpt) {
                 auto worldHit = worldHitOpt.value();
                 Construction* construction = dynamic_cast<Construction*>(worldHit.actor);
@@ -50,30 +52,35 @@ class PickaxeTool : public Tool {
                     ivec3 placePointLocalInt = glm::round(placePointLocal);
                     auto blockPair = construction->getBlock(placePointLocalInt);
                     if(blockPair.first != nullptr) {
-                        auto stackOpt = blockPair.first->getDrop(blockPair.second);
-                        if(stackOpt) {
-                            auto stack = stackOpt.value();
-                            user.inventory.give(stack);
-                        }
+                        resultStack = blockPair.first->getDrop(blockPair.second);
+                        // give at the end to avoid errors
                     }
-                    construction->setBlock(placePointLocalInt,nullptr,BlockFacing::FORWARD);
+                    construction->breakBlock(world,placePointLocalInt);
                     damage++;
             }
                 Terrain* terrain = dynamic_cast<Terrain*>(worldHit.actor);
                 if(terrain != nullptr) {
-                    auto results = terrain->terraformSphere(worldHit.hit.point,mineRadius,-mineAmount);
-                    //terrain->regenerate();
+                    results = terrain->terraformSphere(worldHit.hit.point,mineRadius,-mineAmount);
+                    // give at the end to avoid errors
                     
-                    for(auto& stack : results.items) {
-                        user.inventory.give(stack);
-                    }
+    
                     damage++;
                 }
             }
-            std::cout << "damage: " << damage << std::endl;
+            //std::cout << "damage: " << damage << std::endl;
             stack.storage.setInt(DAMAGE_VAR,damage);
             if(damage >= durability) {
                 stack.clear();
+            }
+            
+            // good enough for now
+            if(resultStack) {
+                auto stack = resultStack.value();
+                user.inventory.give(stack);
+            }
+
+            for(auto& stack : results.items) {
+                user.inventory.give(stack);
             }
         }
 

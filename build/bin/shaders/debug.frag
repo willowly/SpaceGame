@@ -14,17 +14,15 @@ layout(scalar, buffer_reference, buffer_reference_align = 4) readonly buffer Mat
     vec3 color;
 };
 
-#include "push_constant.hlsl"
+#include "debug_push_constant.hlsl"
 
 #include "color_helper.hlsl"
 
 void main() {
-    MaterialData material = push.material;
+    
 
-    outColor = vec4(material.color, 1.0);
+    outColor = push.color;
 
     gl_FragDepth = 0.0f;
-    
-    //outColor = vec4(texCoord,0,0);
 
 }

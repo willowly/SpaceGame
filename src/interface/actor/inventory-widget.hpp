@@ -13,7 +13,7 @@ class InventoryWidget {
     public:
         Sprite solid;
         Font* font;
-        vec2 size = vec2(80,30);
+        vec2 size = vec2(150,40);
         float padding = 3;
         vec2 slotSize = vec2(10,10);
         float spacing = 2;

@@ -66,6 +66,8 @@ class Terrain : public Actor {
     
 
     void loadChunks(vec3 position,int distance,Vulkan* vulkan) {
+
+        position = inverseTransformPoint(position);
         ivec3 pos = glm::floor(position/((float)chunkSize*cellSize));
         // generate one extra
         for (int z = -distance; z <= distance; z++)
@@ -168,13 +170,13 @@ class Terrain : public Actor {
 
     
     virtual void collideBasic(Actor* actor,float height,float radius) {
-        vec3 localActorPosition = inverseTransformPoint(actor->position);
+        vec3 localActorPosition = inverseTransformPoint(actor->getPosition());
         vec3 offset = actor->transformDirection(vec3(0,height,0));
         for(auto& pair : chunks) {
             auto& chunk = pair.second;
             chunk.collideBasic(localActorPosition,offset,radius);
         }
-        actor->position = transformPoint(localActorPosition);
+        actor->setPosition(transformPoint(localActorPosition));
     }
 
     TerraformResults terraformSphere(vec3 pos,float radius,float change) {
@@ -282,6 +284,7 @@ class Terrain : public Actor {
         auto ptr = new Terrain();
         ptr->material = material;
         ptr->settings = settings; 
+        ptr->position = position;
         return std::unique_ptr<Terrain>(ptr);
     }
 

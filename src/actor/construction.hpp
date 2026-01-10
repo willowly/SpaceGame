@@ -23,6 +23,7 @@
 using glm::ivec3,glm::vec3;
 using std::unordered_map;
 
+
 struct ConstructionVertex {
     glm::vec3 pos;
     glm::vec3 normal;
@@ -79,19 +80,19 @@ struct ConstructionVertex {
 #define CONSTRUCTION
 class Construction : public Actor {
 
+    static const Color debugGroupColors[];
 
     struct BlockData {
         Block* block = nullptr; //eventually this will be a list of blocks in the construction
-        BlockState state;
+        BlockState state = BlockState::none;
         BlockData(Block* block,BlockState state) : block(block), state(state) {}
         BlockData() {}
     };
 
-    ivec3 min = ivec3(0,0,0);
-    ivec3 max = ivec3(0,0,0);
+    ivec3 min = {};
+    ivec3 max = {};
     std::vector<BlockData> blockData;
-    std::vector<ConstructionVertex> vertices;
-    std::vector<uint16_t> indices;
+    MeshData<ConstructionVertex> meshData;
 
     Material material = Material::none;
 
@@ -101,17 +102,25 @@ class Construction : public Actor {
     //bool meshOutOfDate;
 
     std::vector<int> blockCountX;
+    std::vector<int> blockCountY;
+    std::vector<int> blockCountZ;
 
-    vec3 moveControl;
+    vec3 moveControl = {};
     quat targetRotation = glm::identity<quat>();
     float turnForce = 1.5;
-    vec3 velocity;
+    vec3 velocity = {};
 
-    int blockCount; //block count
+    float inverseMass = 1; //make should be part of some rigidbody component :shrug:
+
+    int blockCount = 0; //block count
+
+    float timer = 0;
 
     Construction() : Actor() {
         blockData.push_back(BlockData()); //starting block
         blockCountX.push_back(0);
+        blockCountY.push_back(0);
+        blockCountZ.push_back(0);
     }
 
     
@@ -124,53 +133,6 @@ class Construction : public Actor {
         // 4 - LEFT
         // 5 - RIGHT
         float thrustForces[6];
-
-
-        static BlockFacing getFacingFromVector(vec3 v) {
-            v = glm::normalize(v);
-            if(v.z == 1) {
-                return BlockFacing::FORWARD;
-            }
-            if(v.z == -1) {
-                return BlockFacing::BACKWARD;
-            }
-            if(v.y == 1) {
-                return BlockFacing::UP;
-            }
-            if(v.y == -1) {
-                return BlockFacing::DOWN;
-            }
-            if(v.x == 1) {
-                return BlockFacing::RIGHT;
-            }
-            if(v.x == -1) {
-                return BlockFacing::LEFT;
-            }
-            return BlockFacing::FORWARD;
-        }
-
-        static quat getRotationFromFacing(BlockFacing blockFacing) {
-            switch(blockFacing) {
-                case BlockFacing::FORWARD:
-                    return glm::angleAxis(glm::radians(0.0f),vec3(0,1.0f,0));
-                    break;
-                case BlockFacing::BACKWARD:
-                    return glm::angleAxis(glm::radians(180.0f),vec3(0,1.0f,0));
-                    break;
-                case BlockFacing::UP:
-                    return glm::angleAxis(glm::radians(-90.0f),vec3(1.0f,0,0));
-                    break;
-                case BlockFacing::DOWN:
-                    return glm::angleAxis(glm::radians(90.0f),vec3(1.0f,0,0));
-                    break;
-                case BlockFacing::RIGHT:
-                    return glm::angleAxis(glm::radians(90.0f),vec3(0,1.0f,0));
-                    break;
-                case BlockFacing::LEFT:
-                    return glm::angleAxis(glm::radians(-90.0f),vec3(0,1.0f,0));
-                    break;
-            }
-        }
 
         // idk
         struct Location {
@@ -203,7 +165,7 @@ class Construction : public Actor {
                 if(enabled) {
 
                     Block* block;
-                    BlockState blockState;
+                    BlockState blockState = BlockState::none;
                     std::tie(block,blockState) = getBlock(location);
 
                     if(block != nullptr) {
@@ -212,18 +174,21 @@ class Construction : public Actor {
                 }
             }
 
+            timer += dt;
+
+            
             //i have no idea why z and x are inverted :shrug:
             if(moveControl.z > 0) {
-                applyForce(vec3(0,0,-1) * thrustForces[BlockFacing::FORWARD] * moveControl.z * dt);
+                applyForce(vec3(0,0,1) * thrustForces[BlockFacing::BACKWARD] * moveControl.z * dt); //too move forward we must thrust backwards
             }
             if(moveControl.z < 0) {
-                applyForce(vec3(0,0,-1) * thrustForces[BlockFacing::BACKWARD] * moveControl.z * dt);
+                applyForce(vec3(0,0,1) * thrustForces[BlockFacing::FORWARD] * moveControl.z * dt);
             }
             if(moveControl.x < 0) {
-                applyForce(vec3(-1,0,0) * thrustForces[BlockFacing::LEFT] * moveControl.x * dt);
+                applyForce(vec3(1,0,0) * thrustForces[BlockFacing::RIGHT] * moveControl.x * dt);
             }
             if(moveControl.x > 0) {
-                applyForce(vec3(-1,0,0) * thrustForces[BlockFacing::RIGHT] * moveControl.x * dt);
+                applyForce(vec3(1,0,0) * thrustForces[BlockFacing::LEFT] * moveControl.x * dt);
             }
             if(moveControl.y < 0) {
                 applyForce(vec3(0,1,0) * thrustForces[BlockFacing::UP] * moveControl.y * dt);
@@ -234,19 +199,19 @@ class Construction : public Actor {
             //velocity = MathHelper::moveTowards(velocity,rotation * targetVelocity,thrustForce * dt);
             rotation = glm::slerp(rotation,targetRotation,turnForce * dt);
             position += velocity * dt;
+            //std::cout << "velocity: " << StringHelper::toString(velocity) << "moveControl:" << StringHelper::toString(moveControl) << std::endl;
             
         }
 
         void applyForce(vec3 force) {
-            velocity += transformDirection(force);
+            velocity += transformDirection(force) * inverseMass;
         }
 
         void generateMesh() {
 
             //if(!meshOutOfDate) return;
 
-            vertices.clear();
-            indices.clear();
+            meshData.clear();
 
             size_t i = 0;
             for (int z = min.z; z <= max.z; z++)
@@ -257,20 +222,10 @@ class Construction : public Actor {
                     {
                         
                         if(blockData.size() > i && blockData[i].block != nullptr) {
-                            quat rotation = quat(vec3(0.0));//getRotationFromFacing(BlockFacing::FORWARD);
                             
                             auto block = blockData[i].block;
-                            switch(block->modelType) {
-                                case Block::ModelType::Mesh:
-                                    addMeshBlock(vec3(x,y,z),rotation,block);
-                                    break;
-                                case Block::ModelType::SingleBlock:
-                                    addSingleBlock(vec3(x,y,z),rotation,block);
-                                    break;
-                                case Block::ModelType::ConnectedBlock:
-                                    addConnectedBlock(vec3(x,y,z),rotation,block);
-                                    break;
-                            }
+                            auto state = blockData[i].state;
+                            block->addToMesh(this,meshData,ivec3(x,y,z),state);
                             
                         }
                         i++;
@@ -283,160 +238,26 @@ class Construction : public Actor {
 
         }
 
-        // move a bunch of these to helper
-
-        void addConnectedBlockFace(vec3 position,quat rotation,TextureID textureID) {
-            ivec2 gridSize(8,8);
-
-            
-
-            char connectivity = 0;
-            connectivity |= solidInDirection(position,glm::round(rotation * vec3(0,1,0))) << 0;
-            connectivity |= solidInDirection(position,glm::round(rotation * vec3(1,0,0))) << 1;
-            connectivity |= solidInDirection(position,glm::round(rotation * vec3(0,-1,0))) << 2;
-            connectivity |= solidInDirection(position,glm::round(rotation * vec3(-1,0,0))) << 3;
-
-
-            int id = 0;
-
-            const int TOP_BIT = 0b0001;
-            const int BOTTOM_BIT = 0b0100;
-            const int RIGHT_BIT = 0b0010;
-            const int LEFT_BIT = 0b1000;
-            // vertical 1x3
-            if(connectivity == TOP_BIT) {
-                id = 8;
-            }
-            if(connectivity == (TOP_BIT | BOTTOM_BIT)) {  //equals goes first??
-                id = 16;
-            }
-            if(connectivity == BOTTOM_BIT) {
-                id = 24;
-            }
-            // horizontal 1x3
-            if(connectivity == RIGHT_BIT) {
-                id = 1;
-            }
-            if(connectivity == (RIGHT_BIT | LEFT_BIT)) { 
-                id = 2;
-            }
-            if(connectivity == LEFT_BIT) {
-                id = 3;
-            }
-            // corners
-            if(connectivity == (TOP_BIT | RIGHT_BIT)) {
-                id = 9;
-            }
-            if(connectivity == (TOP_BIT | LEFT_BIT)) {
-                id = 11;
-            }
-            if(connectivity == (BOTTOM_BIT | RIGHT_BIT)) {
-                id = 25;
-            }
-            if(connectivity == (BOTTOM_BIT | LEFT_BIT)) {
-                id = 27;
-            }
-
-            //edges
-            if(connectivity == (TOP_BIT | RIGHT_BIT | LEFT_BIT)) {
-                id = 10;
-            }
-            if(connectivity == (TOP_BIT | BOTTOM_BIT | RIGHT_BIT)) {
-                id = 17;
-            }
-            if(connectivity == (TOP_BIT | BOTTOM_BIT | LEFT_BIT)) {
-                id = 19;
-            }
-            if(connectivity == (BOTTOM_BIT | RIGHT_BIT | LEFT_BIT)) {
-                id = 26;
-            }
-            //middle
-            if(connectivity == (TOP_BIT | BOTTOM_BIT | RIGHT_BIT | LEFT_BIT)) {
-                id = 18;
-            }
-
-            ivec2 gridPos = ivec2((id % gridSize.x),id/gridSize.y); //see below comment about backwardsness
-
-            Rect rect((vec2)gridPos/(vec2)gridSize,1.0f/(vec2)gridSize); 
-
-            addBlockFace(position,rotation,textureID,rect);
-        }
-
-        void addBlockFace(vec3 position,quat rotation,TextureID textureID,Rect texRect = Rect::unitSquare) {
-            int indexOffset = vertices.size();
-            auto faceVerts = vector<ConstructionVertex> {
-
-                // the texcoords aren't how you'd expect but if you think about it makes sense (I hope) idk theres weirdness about texture sampling
-                ConstructionVertex(Vertex(vec3(0.5,0.5,0.5),vec3(0.0,0.0,1.0),texRect.bottomRight()),textureID),
-                ConstructionVertex(Vertex(vec3(0.5,-0.5,0.5),vec3(0.0,0.0,1.0),texRect.topRight()),textureID),
-                ConstructionVertex(Vertex(vec3(-0.5,0.5,0.5),vec3(0.0,0.0,1.0),texRect.bottomLeft()),textureID),
-                ConstructionVertex(Vertex(vec3(-0.5,-0.5,0.5),vec3(0.0,0.0,1.0),texRect.topLeft()),textureID)
-            };
-            for(auto vertex : faceVerts) {
-                vertex.pos = rotation * vertex.pos;
-                vertex.pos += position;
-                vertex.normal = rotation * vertex.normal;
-                vertices.push_back(vertex); 
-            }
-            auto faceIndices = vector<uint16_t> {
-                0,1,2,1,2,3
-            };
-            for(auto index : faceIndices) {
-                indices.push_back(index + indexOffset); 
-            }
-        }
-        
-
-
         bool solidInDirection(ivec3 position,ivec3 direction) {
             Block* block = getBlock(position+direction).first;
             if(block == nullptr) {
                 return false;
             }
-            if(block->modelType == Block::ModelType::Mesh) {
+            // check if block is "solid"
+            if(!block->solid) {
                 return false;
             }
+            
             return true;
-        }
-
-        void addSingleBlock(ivec3 position,quat rotation,Block* block) {
-            
-            if(!solidInDirection(position,ivec3(0,0,1))) addBlockFace(position,rotation,block->texture);
-            if(!solidInDirection(position,ivec3(0,0,-1))) addBlockFace(position,rotation * quat(glm::radians(vec3(0,180,0))),block->texture);
-            if(!solidInDirection(position,ivec3(1,0,0))) addBlockFace(position,rotation * quat(glm::radians(vec3(0, 90,0))) ,block->texture);
-            if(!solidInDirection(position,ivec3(-1,0,0))) addBlockFace(position,rotation * quat(glm::radians(vec3(0,-90,0))) ,block->texture);
-            if(!solidInDirection(position,ivec3(0,1,0))) addBlockFace(position,rotation * quat(glm::radians(vec3(-90,0,0))) ,block->texture); //this is flipped from how id expect :shrug: 
-            if(!solidInDirection(position,ivec3(0,-1,0))) addBlockFace(position,rotation * quat(glm::radians(vec3( 90,0,0))) ,block->texture);
-        }
-
-        void addConnectedBlock(ivec3 position,quat rotation,Block* block) {
-            
-            if(!solidInDirection(position,ivec3(0,0,1))) addConnectedBlockFace(position,rotation,block->texture);
-            if(!solidInDirection(position,ivec3(0,0,-1))) addConnectedBlockFace(position,rotation * quat(glm::radians(vec3(0,180,0))),block->texture);
-            if(!solidInDirection(position,ivec3(1,0,0))) addConnectedBlockFace(position,rotation * quat(glm::radians(vec3(0, 90,0))) ,block->texture);
-            if(!solidInDirection(position,ivec3(-1,0,0))) addConnectedBlockFace(position,rotation * quat(glm::radians(vec3(0,-90,0))) ,block->texture);
-            if(!solidInDirection(position,ivec3(0,1,0))) addConnectedBlockFace(position,rotation * quat(glm::radians(vec3(-90,0,0))) ,block->texture); //this is flipped from how id expect :shrug: 
-            if(!solidInDirection(position,ivec3(0,-1,0))) addConnectedBlockFace(position,rotation * quat(glm::radians(vec3( 90,0,0))) ,block->texture);
-        }
-
-        void addMeshBlock(vec3 position,quat rotation,Block* block) {
-            int indexOffset = vertices.size();
-            for(auto vertex : block->mesh->meshData.vertices) {
-                vertex.pos += position;
-                vertices.push_back(ConstructionVertex(vertex,block->texture)); 
-            }
-            for(auto index : block->mesh->meshData.indices) {
-                indices.push_back(index + indexOffset); 
-            }
         }
 
         // end move a bunch of these to helper
 
         void addRenderables(Vulkan* vulkan,float dt) {
-            if(vertices.size() == 0 || indices.size() == 0) return;
+            if(meshData.vertices.size() == 0 || meshData.indices.size() == 0) return;
             if(meshState == -1) {
                 
-                meshBuffer[0] = vulkan->createMeshBuffers(vertices,indices);
+                meshBuffer[0] = vulkan->createMeshBuffers(meshData.vertices,meshData.indices);
                 //meshBuffer[1] = vulkan->createMeshBuffers(vertices,indices);
                 gpuMeshOutOfDate = false;
                 meshState = 0;
@@ -444,13 +265,31 @@ class Construction : public Actor {
                 if(gpuMeshOutOfDate) {
                     meshState++;
                     if(meshState >= FRAMES_IN_FLIGHT) meshState = 0;
-                    vulkan->updateMeshBuffer(meshBuffer[meshState],vertices,indices);
+                    vulkan->updateMeshBuffer(meshBuffer[meshState],meshData.vertices,meshData.indices);
                     gpuMeshOutOfDate = false;
                 }
             }
             if(meshState != -1) {
                 vulkan->addMesh(meshBuffer[meshState],material,getTransform());
             }
+            // center of mass
+            // Debug::drawPoint(position,Color::green);
+
+            // thrust forces
+            Debug::drawRay(position,transformDirection(thrustForces[BlockFacing::FORWARD]* vec3(0,0,0.1)), Color::blue);
+            Debug::drawRay(position,transformDirection(thrustForces[BlockFacing::BACKWARD]*vec3(0,0,-0.1)),Color::blue);
+            Debug::drawRay(position,transformDirection(thrustForces[BlockFacing::UP]*      vec3(0,0.1,0)),Color::yellow);
+            Debug::drawRay(position,transformDirection(thrustForces[BlockFacing::DOWN]*    vec3(0,-0.1,0)), Color::yellow);
+            Debug::drawRay(position,transformDirection(thrustForces[BlockFacing::RIGHT]*   vec3(0.1,0,0)), Color::red);
+            Debug::drawRay(position,transformDirection(thrustForces[BlockFacing::LEFT]*    vec3(-0.1,0,0)),Color::red);
+
+            // bounds
+            // Debug::drawCube(transformPoint((vec3)(max+min)/2.0f),(vec3)(max-min) + vec3(1),rotation,Color::red);
+        }
+
+        void moveBounds(ivec3 amount) {
+            min += amount;
+            max += amount;
         }
 
         void setBounds(ivec3 newMin,ivec3 newMax) {
@@ -458,7 +297,6 @@ class Construction : public Actor {
                 Debug::warn("construction bounds min bigger than max, cancelling operation");
                 return;
             }
-            
             
             //construct a map of existing blocks
             map<Location,BlockData> blockMap;
@@ -468,8 +306,12 @@ class Construction : public Actor {
 
             //int i = 0;
             blockData.clear();
-            blockCountX.clear();
+            blockCountX.clear(); // this kinda repeated code could probably be written in a more elegant way but Idk how so :shrug:
             blockCountX.resize((newMax.x - newMin.x) + 1);
+            blockCountY.clear();
+            blockCountY.resize((newMax.y - newMin.y) + 1);
+            blockCountZ.clear();
+            blockCountZ.resize((newMax.z - newMin.z) + 1);
             for (int z = newMin.z; z <= newMax.z; z++)
             {
                 for (int y = newMin.y; y <= newMax.y; y++)
@@ -482,6 +324,8 @@ class Construction : public Actor {
                             //std::cout << "<" << x << "," << y << "," << z <<  ">:" << blockMap.at(Location(x,y,z)) << std::endl;
                             blockData.push_back(it->second);
                             blockCountX[x - newMin.x]++;
+                            blockCountY[y - newMin.y]++;
+                            blockCountZ[z - newMin.z]++;
                         } else {
                             //std::cout << "e,";
                             blockData.push_back(BlockData());
@@ -490,6 +334,32 @@ class Construction : public Actor {
                     }
                 }
             }
+
+            //printBlockCounts();
+
+            
+        }
+
+        void printBlockCounts() {
+
+            std::cout << "block x: ";
+            for (size_t i = 0; i < blockCountX.size(); i++)
+            {
+                std::cout << blockCountX[i] << ",";
+            }
+            std::cout << std::endl;
+            std::cout << "block y: ";
+            for (size_t i = 0; i < blockCountY.size(); i++)
+            {
+                std::cout << blockCountY[i] << ",";
+            }
+            std::cout << std::endl;
+            std::cout << "block z: ";
+            for (size_t i = 0; i < blockCountZ.size(); i++)
+            {
+                std::cout << blockCountZ[i] << ",";
+            }
+            std::cout << std::endl;
         }
 
         virtual std::optional<RaycastHit> raycast(Ray ray, float dist) {
@@ -523,7 +393,7 @@ class Construction : public Actor {
         }
 
         virtual void collideBasic(Actor* actor,float height,float radius) {
-            vec3 localActorPosition = inverseTransformPoint(actor->position);
+            vec3 localActorPosition = inverseTransformPoint(actor->getPosition());
             vec3 localActorPositionTop = inverseTransformPoint(actor->transformPoint(vec3(0,height,0)));
             float bounds = radius + height;
             for (int z = floor(std::max((float)min.z,localActorPosition.z-bounds)); z <= ceil(std::min((float)max.z,localActorPosition.z+bounds)); z++)
@@ -543,24 +413,81 @@ class Construction : public Actor {
                                 
                             }
                         }
-                        Debug::drawCube(transformPoint(vec3(x,y,z)),vec3(1),Color::green);
                     }
                 }
             }
-            actor->position = transformPoint(localActorPosition);
+            actor->setPosition(transformPoint(localActorPosition));
         }
 
-        void setBlock(ivec3 location,Block* block,BlockFacing facing) {
-            if(!isInsideBounds(location)) {
-                setBounds(glm::min(min,location),glm::max(max,location));
-            }
+        void setPivot(ivec3 location) {
+
+
+            position += transformDirection(location); //average is in local space, position is in world space :shrug:
+
+            moveBounds(-location); // this moves all the blocks
+        }
+
+        void recalculatePivot() {
+            setPivot((min+max)/2);
+        }
+        
+        // RIGIDBODY COMPONENT
+
+        float getMass() {
+            if(inverseMass == 0) return std::numeric_limits<float>::infinity();
+            return 1/inverseMass;
+        }
+        void setMass(float mass) {
+            if(mass == 0) mass = 0.0001;
+            inverseMass = 1/mass;
+        }
+
+        void changeMass(float change) {
+            float mass = getMass();
+            mass += change;
+            setMass(mass);
+        }
+
+        vec3 getVelocity() {
+            return velocity;
+        }
+
+        // END RIGIDBODY COMPONENT
+
+        // used when wanting to break a place, not replace
+        void breakBlock(World* world,ivec3 location) {
+
             int index = getIndex(location);
 
-             
+            removeBlockNoUpdate(location); //does the main removal, tracking, and storage/callback cleanup 
+
+            checkBlockAxisAll(location); //reduce bounds or break up construction. makes index invalid
+
+            recalculatePivot();
+            generateMesh();
+
+            calculateBreakup(world,location);
+
+            if(blockCount <= 0) {
+                destroy(world);
+            }
+        }
+
+
+        // used by placing and breaking. Handles removal, tracking, and storage/callback cleanup
+        void removeBlockNoUpdate(ivec3 location) {
+
+            int index = getIndex(location);
+
             if(blockData[index].block != nullptr) {
                 blockData[index].block->onBreak(this,location,blockData[index].state);
                 blockCount--;
                 blockCountX[location.x - min.x]--;
+                blockCountY[location.y - min.y]--;
+                blockCountZ[location.z - min.z]--;
+                blockData[index] = BlockData();
+
+                changeMass(-1); //just 1 for now
 
                 if(blockStorage.contains(Location(location))) {
                     blockStorage.erase(Location(location));
@@ -569,26 +496,175 @@ class Construction : public Actor {
                     stepCallbacks[Location(location)] = false;
                 }
             }
-            //Debug::info("index: " + std::to_string(index) + " " + StringHelper::toString(location),InfoPriority::LOW);
-            if(block != nullptr) {
-                //auto collider = body->addCollider(common->createBoxShape(rp3d::Vector3(0.5f,0.5f,0.5f)),rp3d::Transform(PhysicsHelper::toRp3dVector(location),rp3d::Quaternion::identity()));
-                //collider->getMaterial().setBounciness(0.0);
-                //collider->getMaterial().setMassDensity(1);
-                //body->updateMassPropertiesFromColliders(); //center of mass + inertia tensor included
-                blockData[index] = BlockData(block,BlockState(facing));
-                if(blockData[index].block != nullptr) {
-                    blockData[index].block->onPlace(this,location,blockData[index].state);
-                    blockCount++;
-                    blockCountX[location.x - min.x]++;
-                }
-            } else {
-                blockData[index] = BlockData();
+        }
+
+        //assumes its not replacing a block. handles tracking, mass and bounds
+        void addBlockNoUpdate(ivec3 location,Block& block,BlockFacing facing) {
+            blockCount++;
+            blockCountX[location.x - min.x]++;
+            blockCountY[location.y - min.y]++;
+            blockCountZ[location.z - min.z]++;
+            int index = getIndex(location);
+            auto state = block.onPlace(this,location,facing);
+            blockData[index] = BlockData(&block,state);
+            changeMass(1); //just 1 for now
+        }
+
+        // make the bounds
+        void boundsEncapsulate(ivec3 location) {
+            if(!isInsideBounds(location)) {
+                vec3 newMin = glm::min(min,location);
+                vec3 newMax = glm::max(max,location);
+                setBounds(newMin,newMax);
+            }
+        }
+
+        // places a block, must be valid. can't be used for destruction. replaces existing block. Handles updating mesh and stuff
+        void placeBlock(ivec3 location,Block* block,BlockFacing facing) {
+            if(block == nullptr) {
+                Debug::warn("tried to place null block");
+                return;
             }
 
-            generateMesh();
+            boundsEncapsulate(location);
             
-            if(blockCount <= 0) {
-                destroy();
+            removeBlockNoUpdate(location);
+            
+            
+            addBlockNoUpdate(location,*block,facing);
+
+            recalculatePivot();
+            generateMesh();
+        }
+
+        void calculateBreakup(World* world,ivec3 location) {
+            std::vector<int> blockGroups(blockData.size(),0);
+            std::vector<ivec3> locations;
+            std::cout << "STARTING BREAKUP CALCULATION" << std::endl;
+            tryAddToGroup(1,location+ivec3(1,0,0),blockGroups,locations);
+            tryAddToGroup(2,location+ivec3(-1,0,0),blockGroups,locations);
+            tryAddToGroup(3,location+ivec3(0,1,0),blockGroups,locations);
+            tryAddToGroup(4,location+ivec3(0,-1,0),blockGroups,locations);
+            tryAddToGroup(5,location+ivec3(0,0,1),blockGroups,locations);
+            tryAddToGroup(6,location+ivec3(0,0,-1),blockGroups,locations);
+
+            const ivec3 directions[] = {
+                ivec3(1,0,0),
+                ivec3(-1,0,0),
+                ivec3(0,1,0),
+                ivec3(0,-1,0),
+                ivec3(0,0,1),
+                ivec3(0,0,-1)
+            };
+
+            std::vector<Construction*> constructions(6,nullptr);
+
+            int originalConstructionGroup = 0;
+            int i = -1; //increments at the start
+            for (int z = min.z; z <= max.z; z++)
+            {
+                for (int y = min.y; y <= max.y; y++)
+                {
+                    for (int x = min.x; x <= max.x; x++)
+                    {
+                        i++; // so continues work
+                        int blockGroup = blockGroups[i];
+                        if(blockGroup != 0) {
+
+                            if(blockGroup == originalConstructionGroup) continue;
+
+                            vec3 worldLocation = transformPoint(vec3(x,y,z));
+                            if(constructions[blockGroup-1] == nullptr) {
+                                if(originalConstructionGroup == 0) {
+                                    originalConstructionGroup = blockGroup;
+                                    constructions[blockGroup-1] = this;
+                                    continue;
+                                } else {
+                                    constructions[blockGroup-1] = world->spawn(Construction::makeInstance(material,worldLocation,rotation));
+                                    constructions[blockGroup-1]->velocity = velocity; //match velocities
+                                }
+                            }
+                            auto& newConstruction = *constructions[blockGroup-1];
+                            ivec3 newLocalLocation = glm::round(newConstruction.inverseTransformPoint(worldLocation));
+                            int newIndex = newConstruction.getIndex(newLocalLocation);
+                            if(blockGroup != originalConstructionGroup) {
+                                newConstruction.boundsEncapsulate(newLocalLocation);
+                                newConstruction.addBlockNoUpdate(newLocalLocation,*blockData[i].block,BlockFacing::FORWARD); //a block location should not have a group unless its a real block
+                                newConstruction.blockData[newIndex].state = blockData[i].state; // copy state
+                                // TODO: transfer storage
+                                removeBlockNoUpdate(vec3(x,y,z));
+                            }
+
+                        }
+                    }
+                }
+            }
+
+            for (size_t i = 0; i < 6; i++)
+            {
+                if(constructions[i] != nullptr) { //regenerate all at the end
+                    constructions[i]->generateMesh();
+                    constructions[i]->recalculatePivot();
+                }
+            }
+            
+
+        }
+
+        void tryAddToGroup(int group,ivec3 location,std::vector<int>& blockGroups,std::vector<ivec3>& locations) {
+            if(getBlock(location).first == nullptr) {
+                //std::cout << "block is null" << std::endl;
+                return;
+            }
+            int index = getIndex(location);
+            if(blockGroups[index] >= group) {
+                //std::cout << "group is " << group << std::endl;
+                return;
+            }
+            Debug::drawCube(transformPoint(location),vec3(1),rotation,debugGroupColors[group-1],1);
+            blockGroups[index] = group;
+            //locations.push_back(location);
+            tryAddToGroup(group,location+ivec3(1,0,0),blockGroups,locations);
+            tryAddToGroup(group,location+ivec3(-1,0,0),blockGroups,locations);
+            tryAddToGroup(group,location+ivec3(0,1,0),blockGroups,locations);
+            tryAddToGroup(group,location+ivec3(0,-1,0),blockGroups,locations);
+            tryAddToGroup(group,location+ivec3(0,0,1),blockGroups,locations);
+            tryAddToGroup(group,location+ivec3(0,0,-1),blockGroups,locations);
+        }
+
+        // reduces bounds or (in future) breaks up construction. call when block broken
+        void checkBlockAxisAll(ivec3 location) {
+
+            // TODO should probably accumulate bounds change but its probably literally not an issue at all. It would have to be detached anyway
+            ivec3 newMin = min;
+            ivec3 newMax = max;
+            ivec3 indices = location - min;
+            if(blockCountX[indices.x] == 0) {
+                if(indices.x == 0) {
+                    newMin.x += 1;
+                }
+                else if(indices.x == blockCountX.size()-1) {
+                    newMax.x -= 1;
+                }
+            }
+            if(blockCountY[indices.y] == 0) {
+                if(indices.y == 0) {
+                    newMin.y += 1;
+                }
+                else if(indices.y == blockCountY.size()-1) {
+                    newMax.y -= 1;
+                }
+            }
+            if(blockCountZ[indices.z] == 0) {
+                if(indices.z == 0) {
+                    newMin.z += 1;
+                }
+                else if(indices.z == blockCountZ.size()-1) {
+                    newMax.z -= 1;
+                }
+            }
+            if(newMin != min || newMax != max) {
+                setBounds(newMin,newMax);
             }
         }
 
@@ -617,7 +693,7 @@ class Construction : public Actor {
 
         std::pair<Block*,BlockState> getBlock(ivec3 location) {
             if(!isInsideBounds(location)) {
-                return std::pair(nullptr,BlockState());
+                return std::pair(nullptr,BlockState::none);
             }
             auto data = blockData[getIndex(location)];
             return std::pair(data.block,data.state);
@@ -683,7 +759,7 @@ class Construction : public Actor {
 
         static std::unique_ptr<Construction> makeInstance(Material material,Block* block,vec3 position,quat rotation = glm::identity<quat>()) {
             auto ptr = makeInstance(material,position,rotation);
-            ptr->setBlock(ivec3(0),block,BlockFacing::FORWARD);
+            ptr->placeBlock(ivec3(0),block,BlockFacing::FORWARD);
             return ptr;
         }
 };
@@ -697,3 +773,12 @@ bool operator< (const Construction::Location& a,const Construction::Location& b)
     }
     return a.x < b.x;
 }
+
+const Color Construction::debugGroupColors[] = {
+    Color::green,
+    Color::blue,
+    Color::red,
+    Color::magenta,
+    Color::cyan,
+    Color::yellow
+};

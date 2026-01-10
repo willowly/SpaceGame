@@ -200,9 +200,9 @@ class TerrainChunk {
             
             auto posCellSpace = localToCellPos(pos);
             auto radiusCellSpace = radius/cellSize;
-            std::cout << radiusCellSpace << std::endl;
-            std::cout << posCellSpace.z-radiusCellSpace << std::endl;
-            std::cout << posCellSpace.z+radiusCellSpace << std::endl;
+            // std::cout << radiusCellSpace << std::endl;
+            // std::cout << posCellSpace.z-radiusCellSpace << std::endl;
+            // std::cout << posCellSpace.z+radiusCellSpace << std::endl;
             for (int z = floor(std::max(0.0f,posCellSpace.z-radiusCellSpace)); z <= ceil(std::min((float)size,posCellSpace.z+radiusCellSpace)); z++)
             {
                 for (int y = floor(std::max(0.0f,posCellSpace.y-radiusCellSpace)); y <= ceil(std::min((float)size,posCellSpace.y+radiusCellSpace)); y++)

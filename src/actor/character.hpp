@@ -53,6 +53,7 @@ class Character : public Actor {
         bool clickInput = false;
         bool interactInput = false;
         float rotationInput = 0;
+        bool brakeInput = false;
 
         bool thirdPerson = false;
 
@@ -116,8 +117,9 @@ class Character : public Actor {
 
 
         void addRenderables(Vulkan* vulkan,float dt) {
+            if(ridingConstruction != nullptr) return;
             ItemStack* currentTool = inventory.getStack(currentToolItem);
-            if(currentTool != nullptr && ridingConstruction == nullptr) {
+            if(currentTool != nullptr) {
                 heldItemData.animationTimer += dt;
                 currentTool->item->addRenderables(vulkan,*this,dt);
             }
@@ -130,7 +132,13 @@ class Character : public Actor {
 
             if(ridingConstruction != nullptr) {
                 
-                ridingConstruction->setMoveControl(ridingConstructionRotation * moveInput);
+                
+                if(brakeInput) {
+                    ridingConstruction->setMoveControl(ridingConstruction->inverseTransformDirection(MathHelper::clampLength(-ridingConstruction->getVelocity(),1)));
+                } else {
+                    ridingConstruction->setMoveControl(ridingConstructionRotation  * glm::angleAxis(glm::radians(180.0f),vec3(0,1,0)) * moveInput); //we have to turn around bc we are facing negative Z
+                }
+                rotationVelocity.z = MathHelper::lerp(rotationVelocity.z,rotationInput * rotationSpeed,acceleration * dt); //maybe later we will feed this right into the construction
                 ridingConstruction->setTargetRotation(getEyeRotation() * glm::inverse(ridingConstructionRotation) * glm::angleAxis(glm::radians(180.0f),vec3(0,1,0)));
                 position = ridingConstruction->transformPoint(ridingConstructionPoint);
                 if(interactInput) {
@@ -138,6 +146,7 @@ class Character : public Actor {
                 }
             } else {
                 vec3 targetVelocity = rotation * moveInput * moveSpeed;
+                // std::cout << "player move input: " << StringHelper::toString(moveInput) << std::endl;
                 velocity = MathHelper::lerp(velocity,targetVelocity,acceleration*dt);
                 position += velocity * dt;
 
@@ -196,7 +205,7 @@ class Character : public Actor {
             thirdPerson = true;
             ridingConstruction = construction;
             ridingConstructionPoint = point;
-            ridingConstructionRotation = rotation;
+            ridingConstructionRotation = rotation; //because the camera faces backwards
             //body->getCollider(0)->setIsTrigger(true);
         }
 
@@ -277,6 +286,8 @@ class Character : public Actor {
                 interactInput = true;
             }
 
+            brakeInput = input.getKey(GLFW_KEY_LEFT_SHIFT) || input.getKey(GLFW_KEY_RIGHT_SHIFT);
+
             if(input.getKeyPressed(GLFW_KEY_1)) {
                 setCurrentTool(0);
             }
@@ -311,6 +322,10 @@ class Character : public Actor {
             //check for cheats access
             if(input.getKeyPressed(GLFW_KEY_F1)) {
                 noClip = !noClip;
+            }
+
+            if(input.getKeyPressed(GLFW_KEY_X)) {
+                underGravity = !underGravity;
             }
 
             ItemStack* currentTool = inventory.getStack(currentToolItem);

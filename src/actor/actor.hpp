@@ -15,9 +15,13 @@ class World;
 
 class Actor {
 
-    public:
+    protected:
         vec3 position = vec3(0);
         quat rotation = vec3(0);
+
+
+    public:
+        
         Mesh<Vertex>* model = nullptr;
         Material material = Material::none;
         float modelScale = 1;
@@ -25,6 +29,22 @@ class Actor {
         bool destroyed = false;
 
         virtual ~Actor() {}
+
+        virtual void setPosition(vec3 position) {
+            this->position = position;
+        }
+
+        virtual vec3 getPosition() {
+            return position;
+        }
+
+        virtual void setRotation(quat rotation) {
+            this->rotation = rotation;
+        }
+
+        virtual quat getRotation() {
+            return rotation;
+        }
 
 
         virtual glm::mat4 getTransform() {
@@ -67,6 +87,10 @@ class Actor {
             return std::nullopt;
         }
 
+        virtual void spawn(World* world) {
+
+        }
+
         virtual void step(World* world,float dt) {
             
         }
@@ -85,7 +109,7 @@ class Actor {
             return false;
         }
 
-        virtual void destroy() {
+        virtual void destroy(World* world) {
             destroyed = true;
         }
 

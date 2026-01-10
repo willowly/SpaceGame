@@ -1,6 +1,7 @@
 #pragma once
 #include "tool.hpp"
 #include "actor/terrain.hpp"
+#include "helper/block-helper.hpp"
 
 
 class PlaceBlockTool: public Tool {
@@ -31,12 +32,12 @@ class PlaceBlockTool: public Tool {
                     vec3 placePointWorld = worldHit.hit.point + worldHit.hit.normal * 0.5f;
                     vec3 placePointLocal = construction->inverseTransformPoint(placePointWorld);
                     ivec3 placePointLocalInt = glm::round(placePointLocal);
-                    auto facing = Construction::getFacingFromVector(Construction::getRotationFromFacing(placeDirection) * construction->inverseTransformDirection(worldHit.hit.normal));
-                    construction->setBlock(placePointLocalInt,block,facing);
+                    auto facing = BlockHelper::getFacingFromVector(BlockHelper::getRotationFromFacing(placeDirection) * construction->inverseTransformDirection(worldHit.hit.normal));
+                    construction->placeBlock(placePointLocalInt,block,facing);
                 }
                 Terrain* terrain = dynamic_cast<Terrain*>(worldHit.actor);
                 if(terrain != nullptr) {
-                    world->spawn(Construction::makeInstance(world->constructionMaterial,block,worldHit.hit.point+glm::vec3(0,0.4,0),user.rotation));
+                    world->spawn(Construction::makeInstance(world->constructionMaterial,block,worldHit.hit.point+glm::vec3(0,0.4,0),user.getRotation()));
                 }
             } else {
                 world->spawn(Construction::makeInstance(world->constructionMaterial,block,ray.origin + ray.direction*10.0f,glm::quatLookAt(ray.direction,vec3(0,1,0))));

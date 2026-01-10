@@ -69,9 +69,10 @@ class Debug {
     struct Cube {
         vec3 origin;
         vec3 size;
+        quat rotation;
         Color color;
         float time;
-        Cube(vec3 origin,vec3 size,Color color = Color::green,float time = 0) : origin(origin), size(size), color(color), time(time) {}
+        Cube(vec3 origin,vec3 size,quat rotation,Color color = Color::green,float time = 0) : origin(origin), size(size), rotation(rotation), color(color), time(time) {}
     };
 
     private:
@@ -97,6 +98,8 @@ class Debug {
         MeshBuffer quad;
         MeshBuffer line;
         MeshBuffer cube;
+
+        Clock clock;
 
         
 
@@ -149,20 +152,19 @@ class Debug {
             debug.quad = vulkan.createMeshBuffers<DebugVertex>(data.vertices,data.indices);
 
             data.vertices = std::vector<DebugVertex> {
-                DebugVertex(vec3(0,0,0)),
-                DebugVertex(vec3(0,1,0)),
-                DebugVertex(vec3(1,1,0)),
-                DebugVertex(vec3(1,0,0)),
-                DebugVertex(vec3(0,0,1)),
-                DebugVertex(vec3(0,1,1)),
-                DebugVertex(vec3(1,1,1)),
-                DebugVertex(vec3(1,0,1))
+                DebugVertex(vec3(-0.5,-0.5,-0.5)),
+                DebugVertex(vec3(-0.5,0.5,-0.5)),
+                DebugVertex(vec3(0.5,0.5,-0.5)),
+                DebugVertex(vec3(0.5,-0.5,-0.5)),
+                DebugVertex(vec3(-0.5,-0.5,0.5)),
+                DebugVertex(vec3(-0.5,0.5,0.5)),
+                DebugVertex(vec3(0.5,0.5,0.5)),
+                DebugVertex(vec3(0.5,-0.5,0.5))
             };
             data.indices = std::vector<uint16_t> {
                 0,1,1,2,2,3,3,0,
                 4,5,5,6,6,7,7,4,
                 0,4,1,5,2,6,3,7
-                
             };
             
             debug.cube = vulkan.createMeshBuffers<DebugVertex>(data.vertices,data.indices);
@@ -277,24 +279,24 @@ class Debug {
         }
 
         //set the draw
-        static void drawPoint(vec3 position,Color color = Color::green) {
+        static void drawPoint(vec3 position,Color color = Color::green,float time = 0) {
             Debug& instance = getInstance();
-            instance.pointsToDraw.push_back(Point(position,color));
+            instance.pointsToDraw.push_back(Point(position,color,time));
         }
 
-        static void drawLine(vec3 a,vec3 b,Color color = Color::green) {
+        static void drawLine(vec3 a,vec3 b,Color color = Color::green,float time = 0) {
             Debug& instance = getInstance();
-            instance.linesToDraw.push_back(Line(a,b,color));
+            instance.linesToDraw.push_back(Line(a,b,color,time));
         }
 
-        static void drawRay(vec3 origin,vec3 direction,Color color = Color::green) {
+        static void drawRay(vec3 origin,vec3 direction,Color color = Color::green,float time = 0) {
             Debug& instance = getInstance();
-            instance.linesToDraw.push_back(Line(origin,origin + direction,color));
+            instance.linesToDraw.push_back(Line(origin,origin + direction,color,time));
         }
 
-        static void drawCube(vec3 origin,vec3 size,Color color = Color::green) {
+        static void drawCube(vec3 origin,vec3 size,quat rotation,Color color = Color::green,float time = 0) {
             Debug& instance = getInstance();
-            instance.cubesToDraw.push_back(Cube(origin,size,color));
+            instance.cubesToDraw.push_back(Cube(origin,size,rotation,color,time));
         }
 
         //actually render the shapes
@@ -312,7 +314,8 @@ class Debug {
                 auto mat = glm::mat4(1.0f);
                 mat = glm::translate(mat,p.position);
                 mat = glm::scale(mat,vec3(0.1));
-                vulkan.addMesh(instance.quad,instance.solidMaterial,mat);
+                vulkan.addMeshWithData(instance.quad,instance.solidMaterial,p.color.asVec4(),mat);
+                p.time -= instance.clock.getTime();
             }
     
 
@@ -321,10 +324,21 @@ class Debug {
                 auto mat = glm::mat4(1.0f);
                 mat = glm::translate(mat,l.a);
                 mat = glm::scale(mat,l.b-l.a);
-                vulkan.addMesh(instance.line,instance.wireFrameMaterial,mat);
+                vulkan.addMeshWithData(instance.line,instance.wireFrameMaterial,l.color.asVec4(),mat);
+                l.time -= instance.clock.getTime();
+            }
+
+            for (auto& cube : instance.cubesToDraw)
+            {
+                auto mat = glm::mat4(1.0f);
+                mat = glm::translate(mat,cube.origin);
+                mat *= glm::toMat4(cube.rotation);
+                mat = glm::scale(mat,cube.size);
+                vulkan.addMeshWithData(instance.cube,instance.wireFrameMaterial,cube.color.asVec4(),mat);
+                cube.time -= instance.clock.getTime();
             }
     
-
+            instance.clock.reset();
             // Model cubeModel;
             // cubeModel.loadFromFile("models/block.obj");
             // for (auto& c : instance->cubesToDraw)
@@ -346,9 +360,27 @@ class Debug {
 
         static void clearDebugShapes() {
             Debug& instance = getInstance();
-            instance.linesToDraw.clear();
-            instance.pointsToDraw.clear();
-            instance.cubesToDraw.clear();
+
+            // could use a template function :shrug:
+            for (int i = instance.linesToDraw.size() - 1; i >= 0; i--)
+            {
+                if(instance.linesToDraw.at(i).time <= 0) {
+                    instance.linesToDraw.erase(instance.linesToDraw.begin() + i);
+                }
+            }
+            for (int i = instance.pointsToDraw.size() - 1; i >= 0; i--)
+            {
+                if(instance.pointsToDraw.at(i).time <= 0) {
+                    instance.pointsToDraw.erase(instance.pointsToDraw.begin() + i);
+                }
+            }
+            for (int i = instance.cubesToDraw.size() - 1; i >= 0; i--)
+            {
+                if(instance.cubesToDraw.at(i).time <= 0) {
+                    instance.cubesToDraw.erase(instance.cubesToDraw.begin() + i);
+                }
+            }
+            
         }
 
 };

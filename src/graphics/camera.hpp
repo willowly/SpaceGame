@@ -15,7 +15,7 @@ class Camera {
         // float yaw;
         float fov = 45.0f;
         float nearClip = 0.1f;
-        float farClip = 1000.0f;
+        float farClip = 5000.0f;
         float aspect;
 
         void move(vec3 motion) {
@@ -40,12 +40,6 @@ class Camera {
             glm::mat4 view = glm::mat4(1.0f);
             view = glm::toMat4(glm::inverse(rotation)) * view;
             view = glm::translate(view,-position);
-            return view;
-        }
-
-        glm::mat4 getViewRotationMatrix() const {
-            glm::mat4 view = glm::mat4(1.0f);
-            view = glm::toMat4(glm::inverse(rotation)) * view;
             return view;
         }
 

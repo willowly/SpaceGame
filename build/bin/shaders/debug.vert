@@ -5,7 +5,7 @@
 
 layout(location = 0) in vec3 inPosition;
 
-#include "push_constant.hlsl"
+#include "debug_push_constant.hlsl"
 
 void main() {
 

@@ -51,8 +51,8 @@ struct Buffer {
 
     friend class Vulkan;
         int allocationIndex = -1;
-        VkBuffer buffer;
-        VkDeviceMemory memory;
+        VkBuffer buffer = VK_NULL_HANDLE;
+        VkDeviceMemory memory = VK_NULL_HANDLE;
 };
 
 struct Image {
@@ -366,7 +366,7 @@ class Vulkan {
             vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
             vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
-
+            // vkCmdSetLineWidth(commandBuffer,5.0f); sadly doesn't exist on mac so theres no point adding support now lol
 
             VkPipeline currentPipeline = VK_NULL_HANDLE;
             VkBuffer currentMeshBuffer = VK_NULL_HANDLE;
@@ -769,13 +769,13 @@ class Vulkan {
         };
 
         struct RenderObject {
-            MeshBuffer& meshBuffer;
+            MeshBuffer meshBuffer;
             glm::mat4 matrix;
             VkPipeline pipeline;
             MaterialHandle materialData;
             char extraData[48];
 
-            RenderObject(MeshBuffer& meshBuffer,glm::mat4 matrix,VkPipeline pipeline,MaterialHandle materialData) : meshBuffer(meshBuffer), matrix(matrix), pipeline(pipeline), materialData(materialData) {
+            RenderObject(MeshBuffer meshBuffer,glm::mat4 matrix,VkPipeline pipeline,MaterialHandle materialData) : meshBuffer(meshBuffer), matrix(matrix), pipeline(pipeline), materialData(materialData) {
 
             }
         };

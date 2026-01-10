@@ -424,5 +424,9 @@ namespace Physics {
         return intersectSphereBox(closestOnCapsuleLine,radius,position,halfSize);
     }
 
+    // std::optional<Contact> intersectTriangleBox(vec3 bottomCenter,vec3 topCenter,float radius,vec3 position,vec3 halfSize) {
+
+    // }
+
 
 };

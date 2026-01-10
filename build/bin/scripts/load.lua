@@ -20,7 +20,7 @@ materials.furnace = {
 }
 
 materials.player = {
-    texture = "solid"
+    texture = "player_face"
 }
 -- materials.cobalt_block = {"lit","cobalt_block"}
 materials.cockpit = {"lit","cockpit"}
@@ -52,27 +52,27 @@ print("Loading Blocks")
 
 -- blocks.cobalt = {"block","block","cobalt_block"}
 blocks.tin = {
-    type="block",
-    model="connected",
-    texture="block_sheet_clean"
+    type="connected",
+    texture="basic_block_sheet"
 }
 
 blocks.cockpit = {
     type = "cockpit",
-    model = "cockpit",
+    mesh = "cockpit",
     texture = "cockpit"
 }
 
 blocks.thruster = {
     type = "thruster",
-    model = "thruster",
-    texture = "solid",
-    force = 20
+    mesh = "thruster",
+    texture = "thruster",
+    force = 20,
+    sideForce = 5
 }
 
 blocks.furnace = {
     type = "furnace",
-    model = "furnace",
+    mesh = "furnace",
     texture = "furnace"
 }
 
@@ -140,3 +140,6 @@ items.pickaxe = {
 
 blocks.furnace.drop = items.furnace
 blocks.tin.drop = items.tin_plate
+blocks.thruster.drop = items.thruster
+blocks.cockpit.drop = items.cockpit
+

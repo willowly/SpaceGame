@@ -30,11 +30,14 @@ class FurnaceBlock : public Block {
 
         BlockWidget<FurnaceBlock>* widget;
         std::vector<Recipe*> recipes;
+
+        Mesh<Vertex>* mesh;
+        TextureID texture;
     
         FurnaceBlock() : Block() {
         }
 
-        virtual void onPlace(Construction* construction,ivec3 position,BlockState& state) {
+        virtual BlockState onPlace(Construction* construction,ivec3 position,BlockFacing facing) {
             auto storage = construction->addStorage(position);
             construction->addStepCallback(position);
             if(storage == nullptr) {
@@ -44,6 +47,7 @@ class FurnaceBlock : public Block {
             storage->setStack(INPUTSTACK_VAR,ItemStack(nullptr,0));
             storage->clearStack(INPUTSTACK_VAR);
             storage->setPointer<Recipe>(CURRENTRECIPE_VAR,nullptr);
+            return BlockState::encode(facing);
         }
 
         virtual void onInteract(Construction* construction,ivec3 position,BlockState& state,Character& character) {
@@ -53,6 +57,10 @@ class FurnaceBlock : public Block {
             }
             auto menuObj = std::make_unique<BlockMenuObject<FurnaceBlock>>(construction,position,*widget);
             character.openMenu(std::move(menuObj));
+        }
+
+        virtual void addToMesh(Construction* construction,MeshData<ConstructionVertex>& meshData,ivec3 position,BlockState& state) {
+            BlockHelper::addMesh(meshData,position,state.asFacing(),mesh,texture);
         }
 
         virtual void onStep(World* world,Construction* construction,ivec3 position,BlockState& state,float dt) {
