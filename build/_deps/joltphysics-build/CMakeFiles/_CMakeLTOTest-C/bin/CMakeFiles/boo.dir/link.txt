@@ -1,1 +1,0 @@
-/usr/bin/clang -flto=thin -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/boo.dir/main.c.o -o boo  libfoo.a
