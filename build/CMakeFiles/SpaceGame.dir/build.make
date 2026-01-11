@@ -113,6 +113,7 @@ bin/SpaceGame: _deps/glfw-build/src/libglfw3.a
 bin/SpaceGame: libSTB.a
 bin/SpaceGame: libSIMPLEXNOISE.a
 bin/SpaceGame: _deps/tracy-build/libTracyClient.a
+bin/SpaceGame: _deps/joltphysics-build/libJolt.a
 bin/SpaceGame: CMakeFiles/SpaceGame.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/willow/Documents/GitHub/SpaceGame/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable bin/SpaceGame"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/SpaceGame.dir/link.txt --verbose=$(VERBOSE)

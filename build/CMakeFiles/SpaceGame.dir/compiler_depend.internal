@@ -622,13 +622,58 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__mutex/tag_types.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__mutex/unique_lock.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__node_handle
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__numeric/accumulate.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__numeric/adjacent_difference.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__numeric/exclusive_scan.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__numeric/gcd_lcm.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__numeric/inclusive_scan.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__numeric/inner_product.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__numeric/iota.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__numeric/midpoint.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__numeric/partial_sum.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__numeric/pstl_reduce.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__numeric/pstl_transform_reduce.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__numeric/reduce.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__numeric/transform_exclusive_scan.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__numeric/transform_inclusive_scan.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__numeric/transform_reduce.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/bernoulli_distribution.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/binomial_distribution.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/cauchy_distribution.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/chi_squared_distribution.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/clamp_to_integral.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/default_random_engine.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/discard_block_engine.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/discrete_distribution.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/exponential_distribution.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/extreme_value_distribution.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/fisher_f_distribution.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/gamma_distribution.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/generate_canonical.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/geometric_distribution.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/independent_bits_engine.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/is_seed_sequence.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/is_valid.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/knuth_b.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/linear_congruential_engine.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/log2.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/lognormal_distribution.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/mersenne_twister_engine.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/negative_binomial_distribution.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/normal_distribution.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/piecewise_constant_distribution.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/piecewise_linear_distribution.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/poisson_distribution.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/random_device.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/ranlux.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/seed_seq.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/shuffle_order_engine.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/student_t_distribution.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/subtract_with_carry_engine.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/uniform_int_distribution.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/uniform_random_bit_generator.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/uniform_real_distribution.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__random/weibull_distribution.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__ranges/access.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__ranges/concepts.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/__ranges/container_compatible_range.h
@@ -882,11 +927,14 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/memory
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/mutex
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/new
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/numeric
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/optional
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/ostream
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/queue
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/random
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/ratio
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/set
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/shared_mutex
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/sstream
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/stack
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/stdbool.h
@@ -912,9 +960,25 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/wchar.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/c++/v1/wctype.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/ctype.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/dispatch/base.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/dispatch/block.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/dispatch/data.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/dispatch/dispatch.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/dispatch/dispatch_swift_shims.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/dispatch/group.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/dispatch/io.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/dispatch/object.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/dispatch/once.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/dispatch/queue.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/dispatch/semaphore.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/dispatch/source.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/dispatch/time.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/dispatch/workloop.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/errno.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/execinfo.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/fcntl.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/float.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/gethostuuid.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/i386/_limits.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/i386/_mcontext.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/i386/_param.h
@@ -1001,6 +1065,13 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/nl_types.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/os/availability.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/os/base.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/os/clock.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/os/object.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/os/workgroup.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/os/workgroup_base.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/os/workgroup_interval.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/os/workgroup_object.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/os/workgroup_parallel.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/pthread.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/pthread/pthread_impl.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/pthread/qos.h
@@ -1025,6 +1096,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_pthread/_pthread_rwlockattr_t.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_pthread/_pthread_t.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_pthread/_pthread_types.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_select.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_symbol_aliasing.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_types.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_types/_blkcnt_t.h
@@ -1041,6 +1113,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_types/_fd_set.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_types/_fd_setsize.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_types/_fd_zero.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_types/_filesec_t.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_types/_fsblkcnt_t.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_types/_fsfilcnt_t.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_types/_fsid_t.h
@@ -1062,10 +1135,14 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_types/_mode_t.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_types/_nlink_t.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_types/_null.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_types/_o_dsync.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_types/_o_sync.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_types/_off_t.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_types/_pid_t.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_types/_posix_vdisable.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_types/_rsize_t.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_types/_rune_t.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_types/_s_ifmt.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_types/_seek_set.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_types/_sigaltstack.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/_types/_sigset_t.h
@@ -1093,15 +1170,19 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/appleapiopts.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/cdefs.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/errno.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/fcntl.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/param.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/qos.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/resource.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/select.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/signal.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/stdio.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/syslimits.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/types.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/unistd.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/sys/wait.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/time.h
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/unistd.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/uuid/uuid.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/wchar.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/wctype.h
@@ -1115,13 +1196,227 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/xlocale/_wchar.h
  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/include/xlocale/_wctype.h
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/__stddef_max_align_t.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/__wmmintrin_aes.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/__wmmintrin_pclmul.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/adxintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/amxintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/avx2intrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/avx512bf16intrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/avx512bitalgintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/avx512bwintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/avx512cdintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/avx512dqintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/avx512erintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/avx512fintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/avx512fp16intrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/avx512ifmaintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/avx512ifmavlintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/avx512pfintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/avx512vbmi2intrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/avx512vbmiintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/avx512vbmivlintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/avx512vlbf16intrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/avx512vlbitalgintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/avx512vlbwintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/avx512vlcdintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/avx512vldqintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/avx512vlfp16intrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/avx512vlintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/avx512vlvbmi2intrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/avx512vlvnniintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/avx512vlvp2intersectintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/avx512vnniintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/avx512vp2intersectintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/avx512vpopcntdqintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/avx512vpopcntdqvlintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/avxintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/avxvnniintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/bmi2intrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/bmiintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/cetintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/cldemoteintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/clflushoptintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/clwbintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/crc32intrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/emmintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/enqcmdintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/f16cintrin.h
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/float.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/fmaintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/fxsrintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/gfniintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/hresetintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/immintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/invpcidintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/keylockerintrin.h
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/limits.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/lzcntintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/mm_malloc.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/mmintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/movdirintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/pconfigintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/pkuintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/pmmintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/popcntintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/ptwriteintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/rdseedintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/rtmintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/serializeintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/sgxintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/shaintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/smmintrin.h
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/stdarg.h
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/stdbool.h
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/stddef.h
  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/stdint.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/tmmintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/tsxldtrkintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/uintrintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/vaesintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/vpclmulqdqintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/waitpkgintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/wbnoinvdintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/wmmintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/x86gprintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/xmmintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/xsavecintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/xsaveintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/xsaveoptintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/xsavesintrin.h
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/15.0.0/include/xtestintrin.h
  /Users/willow/Documents/GitHub/SpaceGame/build/_deps/glfw-src/include/GLFW/glfw3.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/ARMNeon.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/Array.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/Atomics.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/Color.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/Core.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/Factory.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/FixedSizeFreeList.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/FixedSizeFreeList.inl
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/HashCombine.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/HashTable.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/IssueReporting.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/JobSystem.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/JobSystem.inl
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/JobSystemThreadPool.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/JobSystemWithBarrier.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/LockFreeHashMap.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/LockFreeHashMap.inl
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/Memory.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/Mutex.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/MutexArray.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/NonCopyable.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/Profiler.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/Profiler.inl
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/RTTI.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/Reference.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/Result.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/STLAllocator.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/STLTempAllocator.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/Semaphore.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/StaticArray.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/StreamIn.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/StreamOut.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/StreamUtils.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/StringTools.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/TempAllocator.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/TickCounter.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/UnorderedMap.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Core/UnorderedSet.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Geometry/AABox.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Geometry/IndexedTriangle.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Geometry/Plane.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Geometry/Sphere.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Geometry/Triangle.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Jolt.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Math/BVec16.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Math/BVec16.inl
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Math/DMat44.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Math/DMat44.inl
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Math/DVec3.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Math/DVec3.inl
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Math/Double3.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Math/Float3.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Math/Float4.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Math/GaussianElimination.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Math/Mat44.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Math/Mat44.inl
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Math/Math.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Math/MathTypes.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Math/Matrix.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Math/Quat.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Math/Quat.inl
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Math/Real.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Math/Swizzle.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Math/Trigonometry.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Math/UVec4.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Math/UVec4.inl
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Math/Vec3.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Math/Vec3.inl
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Math/Vec4.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Math/Vec4.inl
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Math/Vector.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/ObjectStream/ObjectStream.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/ObjectStream/ObjectStreamTypes.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/ObjectStream/SerializableAttribute.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/ObjectStream/SerializableObject.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Body/AllowedDOFs.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Body/Body.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Body/Body.inl
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Body/BodyAccess.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Body/BodyActivationListener.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Body/BodyCreationSettings.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Body/BodyFilter.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Body/BodyID.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Body/BodyInterface.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Body/BodyLock.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Body/BodyLockInterface.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Body/BodyManager.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Body/BodyPair.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Body/BodyType.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Body/MassProperties.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Body/MotionProperties.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Body/MotionProperties.inl
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Body/MotionQuality.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Body/MotionType.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Collision/BackFaceMode.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Collision/BroadPhase/BroadPhase.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Collision/BroadPhase/BroadPhaseLayer.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Collision/BroadPhase/BroadPhaseQuery.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Collision/CollisionCollector.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Collision/CollisionGroup.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Collision/ContactListener.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Collision/GroupFilter.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Collision/ManifoldBetweenTwoFaces.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Collision/NarrowPhaseQuery.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Collision/ObjectLayer.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Collision/PhysicsMaterial.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Collision/Shape/BoxShape.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Collision/Shape/ConvexShape.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Collision/Shape/Shape.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Collision/Shape/SphereShape.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Collision/Shape/SubShapeID.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Collision/Shape/SubShapeIDPair.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Collision/ShapeFilter.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Collision/TransformedShape.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Constraints/Constraint.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Constraints/ConstraintManager.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Constraints/ConstraintPart/AxisConstraintPart.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Constraints/ConstraintPart/DualAxisConstraintPart.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Constraints/ConstraintPart/SpringPart.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Constraints/ContactConstraintManager.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/Constraints/SpringSettings.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/DeterminismLog.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/EActivation.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/EPhysicsUpdateError.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/IslandBuilder.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/LargeIslandSplitter.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/PhysicsLock.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/PhysicsSettings.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/PhysicsSystem.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/PhysicsUpdateContext.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/Physics/StateRecorder.h
+ /Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Jolt/RegisterTypes.h
  /Users/willow/Documents/GitHub/SpaceGame/build/_deps/tracy-src/public/common/TracyAlign.hpp
  /Users/willow/Documents/GitHub/SpaceGame/build/_deps/tracy-src/public/common/TracyAlloc.hpp
  /Users/willow/Documents/GitHub/SpaceGame/build/_deps/tracy-src/public/common/TracyApi.h
@@ -1487,6 +1782,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o
  /Users/willow/Documents/GitHub/SpaceGame/src/helper/clock.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/helper/file-helper.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/helper/generic-storage.hpp
+ /Users/willow/Documents/GitHub/SpaceGame/src/helper/jolt-helper.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/helper/location-key.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/helper/math-helper.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/helper/random-helper.hpp
@@ -1516,6 +1812,7 @@ CMakeFiles/SpaceGame.dir/src/main.cpp.o
  /Users/willow/Documents/GitHub/SpaceGame/src/item/resource-item.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/item/tool.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/physics/intersections.hpp
+ /Users/willow/Documents/GitHub/SpaceGame/src/physics/jolt-layers.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/physics/physics-body.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/physics/resolution.hpp
  /Users/willow/Documents/GitHub/SpaceGame/src/physics/structs.hpp

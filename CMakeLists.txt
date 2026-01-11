@@ -70,6 +70,16 @@ FetchContent_Declare(
 ) 
 FetchContent_MakeAvailable(tracy)
 
+
+# Include Jolt
+FetchContent_Declare(
+        JoltPhysics
+        GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics"
+        GIT_TAG "v5.5.0"
+		SOURCE_SUBDIR "Build"
+)
+FetchContent_MakeAvailable(JoltPhysics)
+
 # include(FetchContent)
 # FetchContent_Declare(SFML
 #     GIT_REPOSITORY https://github.com/SFML/SFML.git
@@ -106,8 +116,11 @@ src/main.cpp
 include/volk.c
 )
 
+
+target_include_directories(SpaceGame PUBLIC ${JoltPhysics_SOURCE_DIR})
+
 target_compile_features(SpaceGame PRIVATE cxx_std_20 )
-target_link_libraries(SpaceGame PRIVATE ${LUA_LIBRARIES} glfw STB ${COCOA_LIBRARY} ${IOKIT_LIBRARY} SIMPLEXNOISE TracyClient Vulkan::Headers)
+target_link_libraries(SpaceGame PRIVATE ${LUA_LIBRARIES} glfw STB ${COCOA_LIBRARY} ${IOKIT_LIBRARY} SIMPLEXNOISE TracyClient Vulkan::Headers Jolt)
 
 
 add_custom_target(SHADERS)

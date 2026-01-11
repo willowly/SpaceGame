@@ -32,6 +32,10 @@
 #include "item/items-all.hpp"
 #include "item/recipe.hpp"
 
+#include "physics/jolt-layers.hpp"
+
+JPH_SUPPRESS_WARNINGS
+
 using std::string;
 
 
@@ -137,8 +141,6 @@ class GameApplication {
 
         std::atomic<bool> closing = false;
 
-        
-
         Mesh<Vertex> triangleMesh;
 
         vec3 testPointA;
@@ -234,6 +236,8 @@ class GameApplication {
             // Load
             lua.open_libraries(sol::lib::base, sol::lib::package);
             API::loadAPIAll(lua);
+            
+            // load from files and lua scripts
             loader.loadAll(registry,lua,vulkan);
 
             glfwPollEvents();
@@ -262,7 +266,7 @@ class GameApplication {
             planePrototype->model = registry.getModel("plane");
             planePrototype->material = registry.getMaterial("grid");
 
-            //world.spawn(Actor::makeInstance(planePrototype.get(),vec3(0,0,0)));
+            world.spawn(Actor::makeInstance(planePrototype.get(),vec3(0,0,0)));
 
             // terrain setup
 
@@ -366,23 +370,9 @@ class GameApplication {
             furnace->widget = &furnaceWidget;
 
             player->widget = &playerWidget;
-
-
             // wowie
 
-            testPointA = vec3(100,0,0);
-            testPointB = vec3(0,0,0);
-            testPointC = vec3(100,0,100);
-
-            triangleMesh.meshData.vertices.push_back(testPointA);
-            triangleMesh.meshData.vertices.push_back(testPointB);
-            triangleMesh.meshData.vertices.push_back(testPointC);
-
-            triangleMesh.meshData.indices.push_back(0);
-            triangleMesh.meshData.indices.push_back(1);
-            triangleMesh.meshData.indices.push_back(2);
-
-            triangleMesh.createBuffers(vulkan);
+            
 
             physicsActor = world.spawn(RigidbodyActor::makeInstance(physicsPrototype,player->getEyePosition(),player->getEyeRotation(),player->getEyeDirection()*20.0f,vec3(0.0f)));
             
@@ -454,6 +444,7 @@ class GameApplication {
                 glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
             }
 
+
             skybox.addRenderables(*vulkan,camera);
 
             // if(input.getKeyPressed(GLFW_KEY_R)) {
@@ -471,8 +462,8 @@ class GameApplication {
                 //world.spawn(RigidbodyActor::makeInstance(physicsPrototype,player->getEyePosition(),player->getRotation(),player->getEyeDirection()*20.0f,vec3(0)));
                 physicsActor->setPosition(player->getEyePosition());
                 physicsActor->setRotation(player->getEyeRotation());
-                physicsActor->body.setVelocity(player->getEyeDirection()*20.0f);
-                physicsActor->body.setAngularVelocity(vec3(0));
+                // physicsActor->body.setVelocity(player->getEyeDirection()*20.0f);
+                // physicsActor->body.setAngularVelocity(vec3(0));
             }
 
             if(input.getKeyPressed(GLFW_KEY_F2)) {

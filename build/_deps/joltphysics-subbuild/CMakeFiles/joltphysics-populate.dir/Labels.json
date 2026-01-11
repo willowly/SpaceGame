@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-subbuild/CMakeFiles/joltphysics-populate"
+		},
+		{
+			"file" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-subbuild/CMakeFiles/joltphysics-populate.rule"
+		},
+		{
+			"file" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-subbuild/CMakeFiles/joltphysics-populate-complete.rule"
+		},
+		{
+			"file" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-subbuild/joltphysics-populate-prefix/src/joltphysics-populate-stamp/joltphysics-populate-build.rule"
+		},
+		{
+			"file" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-subbuild/joltphysics-populate-prefix/src/joltphysics-populate-stamp/joltphysics-populate-configure.rule"
+		},
+		{
+			"file" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-subbuild/joltphysics-populate-prefix/src/joltphysics-populate-stamp/joltphysics-populate-download.rule"
+		},
+		{
+			"file" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-subbuild/joltphysics-populate-prefix/src/joltphysics-populate-stamp/joltphysics-populate-install.rule"
+		},
+		{
+			"file" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-subbuild/joltphysics-populate-prefix/src/joltphysics-populate-stamp/joltphysics-populate-mkdir.rule"
+		},
+		{
+			"file" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-subbuild/joltphysics-populate-prefix/src/joltphysics-populate-stamp/joltphysics-populate-patch.rule"
+		},
+		{
+			"file" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-subbuild/joltphysics-populate-prefix/src/joltphysics-populate-stamp/joltphysics-populate-test.rule"
+		},
+		{
+			"file" : "/Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-subbuild/joltphysics-populate-prefix/src/joltphysics-populate-stamp/joltphysics-populate-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"joltphysics-populate"
+		],
+		"name" : "joltphysics-populate"
+	}
+}

@@ -1,0 +1,4 @@
+/Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-build/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/foo.dir
+/Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-build/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/boo.dir
+/Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-build/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/edit_cache.dir
+/Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-build/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/rebuild_cache.dir

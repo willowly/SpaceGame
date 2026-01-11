@@ -265,6 +265,19 @@ TracyClient/fast:
 	$(MAKE) $(MAKESILENT) -f _deps/tracy-build/CMakeFiles/TracyClient.dir/build.make _deps/tracy-build/CMakeFiles/TracyClient.dir/build
 .PHONY : TracyClient/fast
 
+#=============================================================================
+# Target rules for targets named Jolt
+
+# Build rule for target.
+Jolt: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 Jolt
+.PHONY : Jolt
+
+# fast build rule for target.
+Jolt/fast:
+	$(MAKE) $(MAKESILENT) -f _deps/joltphysics-build/CMakeFiles/Jolt.dir/build.make _deps/joltphysics-build/CMakeFiles/Jolt.dir/build
+.PHONY : Jolt/fast
+
 include/SimplexNoise.o: include/SimplexNoise.cpp.o
 .PHONY : include/SimplexNoise.o
 
@@ -376,6 +389,7 @@ help:
 	@echo "... SHADERS"
 	@echo "... SpaceGame_Shaders"
 	@echo "... update_mappings"
+	@echo "... Jolt"
 	@echo "... SIMPLEXNOISE"
 	@echo "... STB"
 	@echo "... SpaceGame"

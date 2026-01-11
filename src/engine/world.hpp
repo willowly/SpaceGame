@@ -7,6 +7,21 @@
 #include <tracy/Tracy.hpp>
 #include "physics/physics-body.hpp"
 
+#include <Jolt/Jolt.h>
+
+#include <Jolt/RegisterTypes.h>
+#include <Jolt/Core/Factory.h>
+#include <Jolt/Core/TempAllocator.h>
+#include <Jolt/Core/JobSystemThreadPool.h>
+#include <Jolt/Physics/PhysicsSettings.h>
+#include <Jolt/Physics/PhysicsSystem.h>
+#include <Jolt/Physics/Collision/Shape/BoxShape.h>
+#include <Jolt/Physics/Collision/Shape/SphereShape.h>
+#include <Jolt/Physics/Body/BodyCreationSettings.h>
+#include <Jolt/Physics/Body/BodyActivationListener.h>
+
+#include "physics/jolt-layers.hpp"
+
 using glm::vec3, glm::quat, std::unique_ptr;
 
 #define WORLD
@@ -20,6 +35,16 @@ class World {
 
     float sinceLastStep;
 
+    //physics stuff
+    BPLayerInterfaceImpl broad_phase_layer_interface;
+    ObjectVsBroadPhaseLayerFilterImpl object_vs_broadphase_layer_filter;
+    ObjectLayerPairFilterImpl object_vs_object_layer_filter;
+
+    JPH::TempAllocatorImpl* temp_allocator;
+    JPH::JobSystemThreadPool* jobSystem;
+
+
+
     struct WorldRaycastHit {
         Actor* actor;
         RaycastHit hit;
@@ -28,24 +53,48 @@ class World {
 
         }
     };
-   
-    // class DebugCallback : public rp3d::RaycastCallback {
-    
-    //     public:
-    
-    //     virtual rp3d::decimal notifyRaycastHit(const rp3d::RaycastInfo& info) {
-    
-    //         // Display the world hit point coordinates
-    //         Debug::drawPoint(ph::toGlmVector(info.worldPoint));
 
-    //         std::cout << "Hit point : " << StringHelper::toString(ph::toGlmVector(info.worldPoint)) << std::endl;
-    
-    //         return info.hitFraction;
-    //     }
-    // };
+
+
+        void setupPhysics() {
+
+            JPH::RegisterDefaultAllocator(); //we use the default allocator for jolt
+            JPH::Factory::sInstance = new JPH::Factory(); //set the factory singleton
+            JPH::RegisterTypes(); //idfk
+
+            temp_allocator = new JPH::TempAllocatorImpl(10 * 1024 * 1024);
+            jobSystem = new JPH::JobSystemThreadPool(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers, std::thread::hardware_concurrency() - 1);
+            const uint cMaxBodies = 1024;
+
+            // This determines how many mutexes to allocate to protect rigid bodies from concurrent access. Set it to 0 for the default settings.
+            const uint cNumBodyMutexes = 0;
+            // Note: This value is low because this is a simple test. For a real project use something in the order of 65536.
+            const uint cMaxBodyPairs = 1024;
+            // Note: This value is low because this is a simple test. For a real project use something in the order of 10240.
+            const uint cMaxContactConstraints = 1024;
+
+            physics_system.Init(cMaxBodies, cNumBodyMutexes, cMaxBodyPairs, cMaxContactConstraints, broad_phase_layer_interface, object_vs_broadphase_layer_filter, object_vs_object_layer_filter);
+
+            JPH::BodyInterface& body_interface = physics_system.GetBodyInterfaceNoLock();
+
+            // create floor
+
+            JPH::BodyCreationSettings floor_settings(new JPH::BoxShape(JPH::Vec3(100.0f, 1.0f, 100.0f)), JPH::Vec3(0.0, -1.0, 0.0), JPH::Quat::sIdentity(), JPH::EMotionType::Static, Layers::NON_MOVING);
+
+            JPH::Body *floor = body_interface.CreateBody(floor_settings);
+
+            body_interface.AddBody(floor->GetID(), JPH::EActivation::DontActivate);
+
+
+        }
+
+                
         
 
     public:
+
+        // for now
+        JPH::PhysicsSystem physics_system;
 
         // not sure how to solve this one :)
         Material constructionMaterial = Material::none;
@@ -64,7 +113,7 @@ class World {
 
 
         World() {
-
+            setupPhysics();
         }
 
         vec3 testPointA;
@@ -140,28 +189,14 @@ class World {
             }
             iteratingActors--;
 
-            if(!pausePhysics || stepPhysics) {
-                physics(dt);
-                stepPhysics = false;
-            }
+            physics_system.SetGravity(JPH::Vec3(0.0,-10.0,0.0));
+
+            physics_system.Update(dt,1,temp_allocator,jobSystem);
 
             for(auto& actor : spawnedActors) {
                 actors.push_back(std::move(actor));
             }
             spawnedActors.clear();
-        }
-
-        void physics(float dt) {
-
-            for(auto& physicsBody : physicsBodies) {
-                vec3 gravity = getGravityVector(physicsBody->getPosition());
-                physicsBody->setVelocity(physicsBody->getVelocity() + gravity * dt);
-                physicsBody->integrate(dt);
-                physicsBody->collideWithTriangle(testPointA,testPointB,testPointC);
-            }
-            
-            
-
         }
 
         void applyGravityIfEnabled(Actor* actor,float dt) {

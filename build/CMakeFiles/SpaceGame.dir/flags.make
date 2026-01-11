@@ -3,15 +3,15 @@
 
 # compile C with /usr/bin/clang
 # compile CXX with /usr/bin/clang++
-C_DEFINES = -DTRACY_ENABLE -DTRACY_ON_DEMAND
+C_DEFINES = -DJPH_DEBUG_RENDERER -DJPH_OBJECT_STREAM -DJPH_PROFILE_ENABLED -DJPH_USE_AVX -DJPH_USE_AVX2 -DJPH_USE_F16C -DJPH_USE_FMADD -DJPH_USE_LZCNT -DJPH_USE_SSE4_1 -DJPH_USE_SSE4_2 -DJPH_USE_TZCNT -DTRACY_ENABLE -DTRACY_ON_DEMAND
 
-C_INCLUDES = -I/usr/local/include/lua -I/Users/willow/Documents/GitHub/SpaceGame/src -I/Users/willow/Documents/GitHub/SpaceGame/include -I/Users/willow/Documents/GitHub/SpaceGame/build/_deps/glfw-src/include -F/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks -isystem /Users/willow/Documents/GitHub/SpaceGame/build/_deps/tracy-src/public -isystem /Users/willow/VulkanSDK/1.4.321.0/macOS/include
+C_INCLUDES = -I/usr/local/include/lua -I/Users/willow/Documents/GitHub/SpaceGame/src -I/Users/willow/Documents/GitHub/SpaceGame/include -I/Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Build -I/Users/willow/Documents/GitHub/SpaceGame/build/_deps/glfw-src/include -I/Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Build/.. -F/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks -isystem /Users/willow/Documents/GitHub/SpaceGame/build/_deps/tracy-src/public -isystem /Users/willow/VulkanSDK/1.4.321.0/macOS/include
 
-C_FLAGS = -g -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk
+C_FLAGS = -g -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mavx2 -mbmi -mpopcnt -mlzcnt -mf16c -mfma -mfpmath=sse -pthread
 
-CXX_DEFINES = -DTRACY_ENABLE -DTRACY_ON_DEMAND
+CXX_DEFINES = -DJPH_DEBUG_RENDERER -DJPH_OBJECT_STREAM -DJPH_PROFILE_ENABLED -DJPH_USE_AVX -DJPH_USE_AVX2 -DJPH_USE_F16C -DJPH_USE_FMADD -DJPH_USE_LZCNT -DJPH_USE_SSE4_1 -DJPH_USE_SSE4_2 -DJPH_USE_TZCNT -DTRACY_ENABLE -DTRACY_ON_DEMAND
 
-CXX_INCLUDES = -I/usr/local/include/lua -I/Users/willow/Documents/GitHub/SpaceGame/src -I/Users/willow/Documents/GitHub/SpaceGame/include -I/Users/willow/Documents/GitHub/SpaceGame/build/_deps/glfw-src/include -F/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks -isystem /Users/willow/Documents/GitHub/SpaceGame/build/_deps/tracy-src/public -isystem /Users/willow/VulkanSDK/1.4.321.0/macOS/include
+CXX_INCLUDES = -I/usr/local/include/lua -I/Users/willow/Documents/GitHub/SpaceGame/src -I/Users/willow/Documents/GitHub/SpaceGame/include -I/Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Build -I/Users/willow/Documents/GitHub/SpaceGame/build/_deps/glfw-src/include -I/Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-src/Build/.. -F/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks -isystem /Users/willow/Documents/GitHub/SpaceGame/build/_deps/tracy-src/public -isystem /Users/willow/VulkanSDK/1.4.321.0/macOS/include
 
-CXX_FLAGS =  -fpermissive -Wall -Wextra -Werror=return-type -pedantic -Wno-unused-parameter -g -std=gnu++20 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk
+CXX_FLAGS =  -fpermissive -Wall -Wextra -Werror=return-type -pedantic -Wno-unused-parameter -g -std=gnu++20 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk -mavx2 -mbmi -mpopcnt -mlzcnt -mf16c -mfma -mfpmath=sse -pthread
 

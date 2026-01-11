@@ -30,3 +30,10 @@
 /Users/willow/Documents/GitHub/SpaceGame/build/_deps/tracy-build/CMakeFiles/install.dir
 /Users/willow/Documents/GitHub/SpaceGame/build/_deps/tracy-build/CMakeFiles/install/local.dir
 /Users/willow/Documents/GitHub/SpaceGame/build/_deps/tracy-build/CMakeFiles/install/strip.dir
+/Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-build/CMakeFiles/Jolt.dir
+/Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-build/CMakeFiles/edit_cache.dir
+/Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-build/CMakeFiles/rebuild_cache.dir
+/Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-build/CMakeFiles/list_install_components.dir
+/Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-build/CMakeFiles/install.dir
+/Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-build/CMakeFiles/install/local.dir
+/Users/willow/Documents/GitHub/SpaceGame/build/_deps/joltphysics-build/CMakeFiles/install/strip.dir

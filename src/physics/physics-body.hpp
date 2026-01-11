@@ -289,46 +289,59 @@ class PhysicsBody {
                 vec3(-contactPointDelta.y,  contactPointDelta.x,    0)
             );
 
-            mat3 torquePerUnitImpulse = impulseToTorque * mat3(1.0f);
-            mat3 rotationPerUnitImpulse = worldInverseInertiaTensor * torquePerUnitImpulse;
-            mat3 velocityPerUnitImpulse = rotationPerUnitImpulse * impulseToTorque;
-            velocityPerUnitImpulse *= -1;
-            float* velocityPerUnitImpulse_valueptr = glm::value_ptr(velocityPerUnitImpulse);
-            velocityPerUnitImpulse_valueptr[0] += inverseMass;
-            velocityPerUnitImpulse_valueptr[4] += inverseMass;
-            velocityPerUnitImpulse_valueptr[8] += inverseMass;
+            mat3 deltaVelWorld = impulseToTorque;
+            deltaVelWorld *= worldInverseInertiaTensor;
+            deltaVelWorld *= impulseToTorque;
+            deltaVelWorld *= -1;
+            
+            quat worldToContact = glm::rotation(vec3(1.0f,0,0),contact.normal); // get rotation
+            mat3 contactToWorldMatrix = glm::mat3(worldToContact*vec3(1.0f,0,0),worldToContact*vec3(0.0,1.0f,0.0),worldToContact*vec3(0.0f,0.0f,1.0f));
+            
+            mat3 deltaVelocity = glm::transpose(contactToWorldMatrix) * deltaVelWorld * contactToWorldMatrix;
 
-            mat3 impulseMatrix = glm::inverse(velocityPerUnitImpulse);
+            float* deltaVelocity_valuePtr = glm::value_ptr(deltaVelocity);
 
-            quat rotation = glm::rotation(contact.normal,vec3(0,1.0f,0)); // get rotation
+            deltaVelocity_valuePtr[0] += inverseMass;
+            deltaVelocity_valuePtr[4] += inverseMass;
+            deltaVelocity_valuePtr[8] += inverseMass;
 
-            vec3 closingVelocity = rotation * getVelocityAtPointRelative(contactPointDelta); //transform into contact space?
-            //if(closingVelocity.y > 0) return vec3(0.0f); //if its moving away, we dont need to apply any velocity
+            mat3 impulseMatrix = glm::inverse(deltaVelocity);
 
-            vec3 deltaVelocity = vec3(
-                -closingVelocity.x,
-                -closingVelocity.y * (1+restitution),
-                -closingVelocity.z
+
+            vec3 contactVelocity = worldToContact * getVelocityAtPointRelative(contactPointDelta); //transform into contact space?
+
+            //desiredDeltaVelocity = closingVelocity
+
+            if(contactVelocity.y > 0) return vec3(0.0f); //if its moving away, we dont need to apply any velocity
+
+            vec3 velKill = vec3(
+                -contactVelocity.x * (1+restitution),
+                -contactVelocity.y,
+                -contactVelocity.z
             );
-            vec3 impulse = impulseMatrix * deltaVelocity;
-            float planarImpulse = glm::length(vec2(impulse.x,impulse.z));
-            if(planarImpulse > friction * impulse.y) {
-                //scale the vector to be exactly the right size
-                impulse.x /= planarImpulse;
-                impulse.z /= planarImpulse;
 
-                impulse.y = //why are we modifying the y impulse??
-                    velocityPerUnitImpulse_valueptr[3] * friction * impulse.x + 
-                    velocityPerUnitImpulse_valueptr[4] + 
-                    velocityPerUnitImpulse_valueptr[5] * friction * impulse.z;
-                impulse.y = deltaVelocity.y / impulse.y;
-                impulse.x *= friction * impulse.y;
-                impulse.z *= friction * impulse.y;
+            vec3 impulseContact = velKill * impulseMatrix;
+
+            
+            float planarImpulse = glm::length(vec2(impulseContact.x,impulseContact.z));
+            if(planarImpulse > friction * impulseContact.y) {
+                //scale the vector to be exactly the right size
+                impulseContact.y /= planarImpulse;
+                impulseContact.z /= planarImpulse;
+
+                impulseContact.x = //why are we modifying the y impulse??
+                    deltaVelocity_valuePtr[0] +
+                    deltaVelocity_valuePtr[1] * friction * impulseContact.x + 
+                    deltaVelocity_valuePtr[2] * friction * impulseContact.z;
+
+                impulseContact.x = velKill.x / impulseContact.x;
+                impulseContact.y *= friction * impulseContact.x;
+                impulseContact.z *= friction * impulseContact.x;
 
             }
 
             //impulse.y = std::max(impulse.y,0.0f);
-            return glm::inverse(rotation) * impulse;
+            return glm::inverse(worldToContact) * impulseContact;
         }
 
         std::pair<vec3,vec3> resolveContactPosition(Contact& contact) {

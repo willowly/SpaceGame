@@ -15,6 +15,8 @@ set(CMAKE_MAKEFILE_DEPENDS
   "_deps/glfw-src/CMake/glfw3Config.cmake.in"
   "_deps/glfw-src/CMakeLists.txt"
   "_deps/glfw-src/src/CMakeLists.txt"
+  "_deps/joltphysics-src/Build/CMakeLists.txt"
+  "_deps/joltphysics-src/Jolt/Jolt.cmake"
   "_deps/tracy-src/CMakeLists.txt"
   "_deps/tracy-src/Config.cmake.in"
   "_deps/tracy-src/cmake/version.cmake"
@@ -30,6 +32,13 @@ set(CMAKE_MAKEFILE_DEPENDS
   "/usr/local/Cellar/cmake/3.29.2/share/cmake/Modules/CMakeSystemSpecificInformation.cmake"
   "/usr/local/Cellar/cmake/3.29.2/share/cmake/Modules/CMakeSystemSpecificInitialize.cmake"
   "/usr/local/Cellar/cmake/3.29.2/share/cmake/Modules/CheckCSourceCompiles.cmake"
+  "/usr/local/Cellar/cmake/3.29.2/share/cmake/Modules/CheckIPOSupported.cmake"
+  "/usr/local/Cellar/cmake/3.29.2/share/cmake/Modules/CheckIPOSupported/CMakeLists-C.txt.in"
+  "/usr/local/Cellar/cmake/3.29.2/share/cmake/Modules/CheckIPOSupported/CMakeLists-CXX.txt.in"
+  "/usr/local/Cellar/cmake/3.29.2/share/cmake/Modules/CheckIPOSupported/foo.c"
+  "/usr/local/Cellar/cmake/3.29.2/share/cmake/Modules/CheckIPOSupported/foo.cpp"
+  "/usr/local/Cellar/cmake/3.29.2/share/cmake/Modules/CheckIPOSupported/main.c"
+  "/usr/local/Cellar/cmake/3.29.2/share/cmake/Modules/CheckIPOSupported/main.cpp"
   "/usr/local/Cellar/cmake/3.29.2/share/cmake/Modules/CheckIncludeFile.cmake"
   "/usr/local/Cellar/cmake/3.29.2/share/cmake/Modules/CheckLibraryExists.cmake"
   "/usr/local/Cellar/cmake/3.29.2/share/cmake/Modules/Compiler/AppleClang-C.cmake"
@@ -73,6 +82,7 @@ set(CMAKE_MAKEFILE_OUTPUTS
 set(CMAKE_MAKEFILE_PRODUCTS
   "_deps/glfw-subbuild/CMakeLists.txt"
   "_deps/tracy-subbuild/CMakeLists.txt"
+  "_deps/joltphysics-subbuild/CMakeLists.txt"
   "CMakeFiles/CMakeDirectoryInformation.cmake"
   "_deps/glfw-build/src/glfw3Config.cmake"
   "_deps/glfw-build/src/glfw3ConfigVersion.cmake"
@@ -82,6 +92,13 @@ set(CMAKE_MAKEFILE_PRODUCTS
   "_deps/tracy-build/TracyConfig.cmake"
   "_deps/tracy-build/.gitignore"
   "_deps/tracy-build/CMakeFiles/CMakeDirectoryInformation.cmake"
+  "_deps/joltphysics-build/CMakeFiles/_CMakeLTOTest-CXX/src/CMakeLists.txt"
+  "_deps/joltphysics-build/CMakeFiles/_CMakeLTOTest-CXX/src/foo.cpp"
+  "_deps/joltphysics-build/CMakeFiles/_CMakeLTOTest-CXX/src/main.cpp"
+  "_deps/joltphysics-build/CMakeFiles/_CMakeLTOTest-C/src/CMakeLists.txt"
+  "_deps/joltphysics-build/CMakeFiles/_CMakeLTOTest-C/src/foo.c"
+  "_deps/joltphysics-build/CMakeFiles/_CMakeLTOTest-C/src/main.c"
+  "_deps/joltphysics-build/CMakeFiles/CMakeDirectoryInformation.cmake"
   )
 
 # Dependency information for all targets:
@@ -94,4 +111,5 @@ set(CMAKE_DEPEND_INFO_FILES
   "_deps/glfw-build/src/CMakeFiles/glfw.dir/DependInfo.cmake"
   "_deps/glfw-build/src/CMakeFiles/update_mappings.dir/DependInfo.cmake"
   "_deps/tracy-build/CMakeFiles/TracyClient.dir/DependInfo.cmake"
+  "_deps/joltphysics-build/CMakeFiles/Jolt.dir/DependInfo.cmake"
   )
