@@ -10,6 +10,11 @@
 
 #include <map>
 
+#include <Jolt/Physics/Collision/Shape/MeshShape.h>
+#include <Jolt/Physics/Body/BodyCreationSettings.h>
+
+#include <physics/jolt-terrain-shape.hpp>
+
 
 #define SURFACE_LVL 0.5
 
@@ -25,8 +30,7 @@ class TerrainChunk {
     ivec3 offset; //offset in overall terrain cell-space
 
     std::vector<VoxelData> terrainData;
-    std::vector<TerrainVertex> vertices;
-    std::vector<uint16_t> indices;
+    MeshData<TerrainVertex> meshData;
     int meshState = -1;
     MeshBuffer meshBuffer[FRAMES_IN_FLIGHT];
     bool gpuMeshOutOfDate = false;
@@ -38,6 +42,8 @@ class TerrainChunk {
 
     std::mutex mtx;
     std::atomic<bool> readyToRender = false;
+
+    JPH::Body* body = nullptr;
 
     // TerrainChunk(const TerrainChunk& chunk) = delete;
     // TerrainChunk& operator=(const TerrainChunk& chunk) = delete;
@@ -137,7 +143,7 @@ class TerrainChunk {
             int i = 0;
             for (int z = 0; z < size; z++)
             {
-                int percent = ((float)z/size)*100;
+                
                 //std::cout << "generating terrain " << percent << "%" << std::endl;
                 for (int y = 0; y < size; y++)
                 {
@@ -232,7 +238,37 @@ class TerrainChunk {
             }
         }
 
+        void updatePhysics(World* world,vec3 position) {
 
+            if(body == nullptr) {
+
+                if(meshData.vertices.size() == 0 || meshData.indices.size() == 0) return;
+
+                TerrainShapeSettings settings(&meshData,size*cellSize);
+
+                JPH::Shape::ShapeResult result;
+
+                // we can do something please
+                JPH::BodyCreationSettings bodySettings(new TerrainShape(settings,result), Physics::toJoltVec(position), JPH::Quat::sIdentity(), JPH::EMotionType::Static, Layers::NON_MOVING);
+
+
+
+                if(result.HasError()) {
+                    std::cout << result.GetError() << std::endl;
+                }
+
+                
+
+                body = world->physics_system.GetBodyInterface().CreateBody(bodySettings);
+                world->physics_system.GetBodyInterface().AddBody(body->GetID(),JPH::EActivation::Activate);
+
+
+
+            }
+            
+
+            
+        }
         
 
         void addRenderables(Vulkan* vulkan,float dt,vec3 position,Material material) {
@@ -241,16 +277,16 @@ class TerrainChunk {
             
             if(lock.try_lock()) {
                 if(meshState == -1) {
-                    if(vertices.size() == 0 || indices.size() == 0) return;
-                    meshBuffer[0] = vulkan->createMeshBuffers(vertices,indices);
-                    //meshBuffer[1] = vulkan->createMeshBuffers(vertices,indices);
+                    if(meshData.vertices.size() == 0 || meshData.indices.size() == 0) return;
+                    meshBuffer[0] = vulkan->createMeshBuffers(meshData.vertices,meshData.indices);
+                    //meshBuffer[1] = vulkan->createMeshBuffers(meshData.vertices,meshData.indices);
                     gpuMeshOutOfDate = false;
                     meshState = 0;
                 } else {
                     if(gpuMeshOutOfDate) {
                         meshState++;
                         if(meshState >= FRAMES_IN_FLIGHT) meshState = 0;
-                        vulkan->updateMeshBuffer(meshBuffer[meshState],vertices,indices);
+                        vulkan->updateMeshBuffer(meshBuffer[meshState],meshData.vertices,meshData.indices);
                         gpuMeshOutOfDate = false;
                     }
                 }
@@ -270,8 +306,8 @@ class TerrainChunk {
             
             std::scoped_lock lock(mtx);
             float clock = (float)glfwGetTime();
-            vertices.clear();
-            indices.clear();
+            meshData.vertices.clear();
+            meshData.indices.clear();
 
 
             int i = 0;
@@ -304,8 +340,8 @@ class TerrainChunk {
             //consolodate normals
             std::vector<TerrainVertex> newVertices;
             unordered_map<vec3,std::vector<TerrainVertex*>> vertexMap;
-            for(auto& i : indices) {
-                auto& vertex = vertices[i];
+            for(auto& i : meshData.indices) {
+                auto& vertex = meshData.vertices[i];
                 if(!vertexMap.contains(vertex.pos)) {
                     vertexMap[vertex.pos] = std::vector<TerrainVertex*>();
                 }
@@ -344,7 +380,7 @@ class TerrainChunk {
 
             const int* tris = TerrainHelper::triTable[config];
             int i = 0;
-            int startIndex = indices.size();
+            int startIndex = meshData.indices.size();
             int cellIndex = getPointIndex(cellPos.x,cellPos.y,cellPos.z);
             terrainData[cellIndex].verticesStart = startIndex;
             int face[3];
@@ -380,23 +416,23 @@ class TerrainChunk {
                 textureIDVec[vertIndex] = texture;
                 vertex.oreBlend[vertIndex] = 1;
                 
-                vertices.push_back(vertex);
-                face[vertIndex] = vertices.size()-1;
-                //std::cout << (vertices.size()-1) << std::endl;
-                indices.push_back(vertices.size()-1);
+                meshData.vertices.push_back(vertex);
+                face[vertIndex] = meshData.vertices.size()-1;
+                //std::cout << (meshData.vertices.size()-1) << std::endl;
+                meshData.indices.push_back(meshData.vertices.size()-1);
                 if(vertIndex == 2) {
-                    vec3 normal = MathHelper::normalFromPlanePoints(vertices[face[0]].pos,vertices[face[1]].pos,vertices[face[2]].pos);
-                    vertices[face[0]].normal = normal;
-                    vertices[face[0]].textureID = textureIDVec;
-                    vertices[face[1]].normal = normal;
-                    vertices[face[1]].textureID = textureIDVec;
-                    vertices[face[2]].normal = normal;
-                    vertices[face[2]].textureID = textureIDVec;
+                    vec3 normal = MathHelper::normalFromPlanePoints(meshData.vertices[face[0]].pos,meshData.vertices[face[1]].pos,meshData.vertices[face[2]].pos);
+                    meshData.vertices[face[0]].normal = normal;
+                    meshData.vertices[face[0]].textureID = textureIDVec;
+                    meshData.vertices[face[1]].normal = normal;
+                    meshData.vertices[face[1]].textureID = textureIDVec;
+                    meshData.vertices[face[2]].normal = normal;
+                    meshData.vertices[face[2]].textureID = textureIDVec;
                 }
                 i++;
             }
-            terrainData[cellIndex].verticesEnd = indices.size();
-            //indices.clear();
+            terrainData[cellIndex].verticesEnd = meshData.indices.size();
+            //meshData.indices.clear();
             
             
         }
@@ -423,9 +459,9 @@ class TerrainChunk {
                         for (int i = voxel.verticesStart;i < voxel.verticesEnd;i += 3)
                         {
                             
-                            vec3 a = vertices[indices[i]].pos + localOffset;
-                            vec3 b = vertices[indices[i+1]].pos + localOffset;
-                            vec3 c = vertices[indices[i+2]].pos + localOffset;
+                            vec3 a = meshData.vertices[meshData.indices[i]].pos + localOffset;
+                            vec3 b = meshData.vertices[meshData.indices[i+1]].pos + localOffset;
+                            vec3 c = meshData.vertices[meshData.indices[i+2]].pos + localOffset;
                             // Debug::drawLine(transformPoint(a),transformPoint(b),Color::white);
                             // Debug::drawLine(transformPoint(b),transformPoint(c),Color::white);
                             // Debug::drawLine(transformPoint(c),transformPoint(a),Color::white);
@@ -457,11 +493,11 @@ class TerrainChunk {
             Ray localRay = Ray(ray.origin-getTerrainLocalOffset(),ray.direction);
 
 
-            for(size_t i = 0;i+2 < indices.size();i += 3)
+            for(size_t i = 0;i+2 < meshData.indices.size();i += 3)
             {
-                vec3 a = vertices[indices[i]].pos;
-                vec3 b = vertices[indices[i+1]].pos;
-                vec3 c = vertices[indices[i+2]].pos;
+                vec3 a = meshData.vertices[meshData.indices[i]].pos;
+                vec3 b = meshData.vertices[meshData.indices[i+1]].pos;
+                vec3 c = meshData.vertices[meshData.indices[i+2]].pos;
 
                 auto hitopt = Physics::intersectRayTriangle(a,b,c,localRay);
                 if(hitopt) {

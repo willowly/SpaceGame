@@ -5,7 +5,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -Wall -Wextra -Werror=return-type -pedantic -Wno-unused-parameter")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -fsanitize=address -Wall -Wextra -Werror=return-type -pedantic -Wno-unused-parameter")
 
 if(APPLE)
     link_directories(${CMAKE_SOURCE_DIR}/lib/macos)
@@ -80,6 +80,8 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(JoltPhysics)
 
+target_compile_options(Jolt PUBLIC "-frtti")
+
 # include(FetchContent)
 # FetchContent_Declare(SFML
 #     GIT_REPOSITORY https://github.com/SFML/SFML.git
@@ -140,6 +142,10 @@ macro(compile_shader shader_path)
     list(APPEND SHADER_OUTPUTS "${CMAKE_SOURCE_DIR}/build/bin/shaders/compiled/${shader_path}_vert.spv")
 endmacro()
 
+add_custom_target(Assets
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/assets ${CMAKE_CURRENT_BINARY_DIR}/bin
+)
+add_dependencies(SpaceGame Assets)
 
 compile_shader("lit")
 compile_shader("terrain")

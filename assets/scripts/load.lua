@@ -66,8 +66,8 @@ blocks.thruster = {
     type = "thruster",
     mesh = "thruster",
     texture = "thruster",
-    force = 20,
-    sideForce = 5
+    force = 2000,
+    sideForce = 400
 }
 
 blocks.furnace = {

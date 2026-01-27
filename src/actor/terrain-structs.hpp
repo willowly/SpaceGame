@@ -3,6 +3,7 @@
 #include <vector>
 #include "glm/glm.hpp"
 #include "item/item.hpp"
+#include "item/item-stack.hpp"
 #include "SimplexNoise.h"
 
 using glm::vec3,glm::ivec4;

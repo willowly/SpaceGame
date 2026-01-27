@@ -7,7 +7,7 @@
 #include <Jolt/Jolt.h>
 
 
-namespace JHLP {
+namespace Physics {
 
     JPH::Vec3 toJoltVec(glm::vec3 v) {
         return JPH::Vec3(v.x,v.y,v.z);

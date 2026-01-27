@@ -278,12 +278,13 @@ class GameApplication {
             
             GenerationSettings settings;
             settings.noiseScale = 100;
+            settings.radius = 50;
             settings.stoneType.item = registry.getItem("stone");
             settings.stoneType.texture = registry.getTexture("rock");
             settings.oreType.item = registry.getItem("tin_ore");
             settings.oreType.texture = registry.getTexture("tin_ore");
 
-            //terrain = world.spawn(Terrain::makeInstance(terrainMaterial,settings,vec3(0,0,0)));
+            terrain = world.spawn(Terrain::makeInstance(terrainMaterial,settings,vec3(0,0,0)));
 
             physicsPrototype = registry.addActor<RigidbodyActor>("physics_block");
             
@@ -319,13 +320,13 @@ class GameApplication {
             makeCockpit.time = 5;
             
             // spawn player
-            player = world.spawn(Character::makeInstance(playerPrototype.get(),vec3(20.0,30.0,10.0)));
+            player = world.spawn(Character::makeInstance(playerPrototype.get(),vec3(0.0,50.0,0.0)));
             player->model = registry.getModel("capsule_thin");
             player->material = registry.getMaterial("player");
 
             
             // UI
-            toolbarWidget.solidSprite = registry.getSprite("solid");
+            toolbarWidget.solidSprite = registry.getSprite("item_slot");
 
 
             inventoryWidget.solid = registry.getSprite("solid");
@@ -336,9 +337,9 @@ class GameApplication {
             furnaceWidget.font = &font;
             furnaceWidget.tooltipTextTitle.font = &font;
 
-            itemSlotWidget.sprite = registry.getSprite("solid");
+            itemSlotWidget.sprite = registry.getSprite("item_slot");
             itemSlotWidget.font = &font;
-            itemSlotWidget.color = Color(0.1,0.1,0.1);
+            itemSlotWidget.color = Color(0.2,0.2,0.2);
 
             clearItemSlotWidget.sprite = registry.getSprite("solid");
             clearItemSlotWidget.font = &font;
@@ -346,7 +347,7 @@ class GameApplication {
 
             inventoryWidget.itemSlot = &itemSlotWidget;
             furnaceWidget.itemSlot = &itemSlotWidget;
-            toolbarWidget.itemSlot = &clearItemSlotWidget;
+            toolbarWidget.itemSlot = &itemSlotWidget;
             
             playerWidget.inventoryWidget = &inventoryWidget;
             playerWidget.toolbarWidget = &toolbarWidget;
@@ -372,6 +373,7 @@ class GameApplication {
             player->widget = &playerWidget;
             // wowie
 
+            
             
 
             physicsActor = world.spawn(RigidbodyActor::makeInstance(physicsPrototype,player->getEyePosition(),player->getEyeRotation(),player->getEyeDirection()*20.0f,vec3(0.0f)));
@@ -415,8 +417,6 @@ class GameApplication {
             //std::cout << "starting world frame" << std::endl;
             
             world.frame(vulkan,dt);
-            
-            triangleMesh.addToRender(vulkan,registry.getMaterial("grid"),glm::mat4(1.0f));
 
             //std::cout << "ending world frame" << std::endl;
 
@@ -459,11 +459,11 @@ class GameApplication {
             }
 
             if(input.getKeyPressed(GLFW_KEY_R)) {
-                //world.spawn(RigidbodyActor::makeInstance(physicsPrototype,player->getEyePosition(),player->getRotation(),player->getEyeDirection()*20.0f,vec3(0)));
-                physicsActor->setPosition(player->getEyePosition());
-                physicsActor->setRotation(player->getEyeRotation());
-                // physicsActor->body.setVelocity(player->getEyeDirection()*20.0f);
-                // physicsActor->body.setAngularVelocity(vec3(0));
+                world.spawn(RigidbodyActor::makeInstance(physicsPrototype,player->getEyePosition()+player->getEyeDirection()*2.0f,player->getRotation(),player->getEyeDirection()*20.0f,vec3(0)));
+                // physicsActor->setPosition(player->getEyePosition());
+                // physicsActor->setRotation(player->getEyeRotation());
+                // physicsActor->velocity = (player->getEyeDirection()*20.0f);
+                // physicsActor->angularVelocity = vec3(0);
             }
 
             if(input.getKeyPressed(GLFW_KEY_F2)) {
@@ -498,10 +498,10 @@ class GameApplication {
         }
 
         void chunkTask() {
-            // while(!closing) {
-            //     terrain->loadChunks(player->position,1,vulkan);
-            //     std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            // }
+            while(!closing) {
+                terrain->loadChunks(&world,player->getPosition(),1,vulkan);
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            }
             
         }
 

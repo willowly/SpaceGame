@@ -21,6 +21,8 @@
 #include <Jolt/Physics/Body/BodyActivationListener.h>
 
 #include "physics/jolt-layers.hpp"
+#include "physics/jolt-trace.hpp"
+#include "physics/jolt-terrain-shape.hpp"
 
 using glm::vec3, glm::quat, std::unique_ptr;
 
@@ -61,21 +63,26 @@ class World {
             JPH::RegisterDefaultAllocator(); //we use the default allocator for jolt
             JPH::Factory::sInstance = new JPH::Factory(); //set the factory singleton
             JPH::RegisterTypes(); //idfk
+            TerrainShape::sRegister();
 
             temp_allocator = new JPH::TempAllocatorImpl(10 * 1024 * 1024);
             jobSystem = new JPH::JobSystemThreadPool(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers, std::thread::hardware_concurrency() - 1);
-            const uint cMaxBodies = 1024;
+            const uint cMaxBodies = 65536;
+
+            JPH::Trace = Physics::TraceImpl;
+
+            JPH_IF_ENABLE_ASSERTS(JPH::AssertFailed = Physics::AssertFailedImpl;)
 
             // This determines how many mutexes to allocate to protect rigid bodies from concurrent access. Set it to 0 for the default settings.
             const uint cNumBodyMutexes = 0;
             // Note: This value is low because this is a simple test. For a real project use something in the order of 65536.
-            const uint cMaxBodyPairs = 1024;
+            const uint cMaxBodyPairs = 65536;
             // Note: This value is low because this is a simple test. For a real project use something in the order of 10240.
-            const uint cMaxContactConstraints = 1024;
+            const uint cMaxContactConstraints = 10240;
 
             physics_system.Init(cMaxBodies, cNumBodyMutexes, cMaxBodyPairs, cMaxContactConstraints, broad_phase_layer_interface, object_vs_broadphase_layer_filter, object_vs_object_layer_filter);
 
-            JPH::BodyInterface& body_interface = physics_system.GetBodyInterfaceNoLock();
+            JPH::BodyInterface& body_interface = physics_system.GetBodyInterface();
 
             // create floor
 
@@ -99,7 +106,7 @@ class World {
         // not sure how to solve this one :)
         Material constructionMaterial = Material::none;
 
-        float stepDt = 0.02;
+        float stepDt = 1.0f/60.0f;
 
         float stepProcessMs;
         float renderProcessMs;
@@ -171,6 +178,28 @@ class World {
             
         }
 
+        void physicsStep(float dt) {
+            
+            ZoneScoped;
+            iteratingActors++;
+            for (auto& actor : actors)
+            {
+                actor->prePhysics(this);
+            }
+            iteratingActors--;
+
+            physics_system.SetGravity(JPH::Vec3(0.0,-10.0,0.0));
+
+            physics_system.Update(dt,1,temp_allocator,jobSystem);
+
+            iteratingActors++;
+            for (auto& actor : actors)
+            {
+                actor->postPhysics(this);
+            }
+            iteratingActors--;
+        }
+
         void step(float dt) {
             ZoneScoped;
             
@@ -186,17 +215,18 @@ class World {
                 if(actor->destroyed) {
                     actors.erase(actors.begin()+i);
                 }
-            }
+            }   
             iteratingActors--;
 
-            physics_system.SetGravity(JPH::Vec3(0.0,-10.0,0.0));
-
-            physics_system.Update(dt,1,temp_allocator,jobSystem);
-
+            // this needs to happen first, because newly spawned actors need to have prePhysics() and postPhysics() called on them as well, since they are already in the physic system
             for(auto& actor : spawnedActors) {
                 actors.push_back(std::move(actor));
             }
             spawnedActors.clear();
+
+            physicsStep(dt);
+
+            
         }
 
         void applyGravityIfEnabled(Actor* actor,float dt) {

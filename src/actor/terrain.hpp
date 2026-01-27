@@ -16,6 +16,13 @@
 using std::unique_ptr;
 using glm::vec3, glm::ivec4,glm::vec4;
 
+#include <Jolt/Jolt.h>
+
+#include <Jolt/Physics/Collision/Shape/MeshShape.h>
+#include <Jolt/Physics/Body/BodyCreationSettings.h>
+
+#include "physics/jolt-conversions.hpp"
+
 
 class Terrain : public Actor {
 
@@ -41,7 +48,7 @@ class Terrain : public Actor {
     
 
 
-    void addChunk(ivec3 pos,Vulkan* vulkan) {
+    void addChunk(World* world,ivec3 pos,Vulkan* vulkan) {
         
         LocationKey key(pos);
         ivec3 offset = pos*chunkSize;
@@ -52,6 +59,8 @@ class Terrain : public Actor {
         chunk.generateData(settings);
         chunks.at(key).generateMesh();
         connect(chunk,pos,vulkan);
+
+        chunk.updatePhysics(world,position + (vec3)offset*cellSize);
 
         
     }
@@ -65,7 +74,7 @@ class Terrain : public Actor {
 
     
 
-    void loadChunks(vec3 position,int distance,Vulkan* vulkan) {
+    void loadChunks(World* world,vec3 position,int distance,Vulkan* vulkan) {
 
         position = inverseTransformPoint(position);
         ivec3 pos = glm::floor(position/((float)chunkSize*cellSize));
@@ -88,7 +97,7 @@ class Terrain : public Actor {
                         continue;
                     }
                     if(!chunks.contains(key)) {
-                        addChunk(chunkPos,vulkan);
+                        addChunk(world,chunkPos,vulkan);
                     }
                    
                 }

@@ -19,9 +19,15 @@
 
 #include <GLFW/glfw3.h>
 
+#include "physics/jolt-conversions.hpp"
 
 #include "interface/actor/actor-widget.hpp"
 #include "interface/menu-object.hpp"
+
+#include <Jolt/Jolt.h>
+
+#include <Jolt/Physics/Character/Character.h>
+#include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
 
 
 class Character : public Actor {
@@ -116,6 +122,9 @@ class Character : public Actor {
         ActorWidget<Character>* widget;
 
 
+        JPH::Character* physicsCharacter;
+
+
         void addRenderables(Vulkan* vulkan,float dt) {
             if(ridingConstruction != nullptr) return;
             ItemStack* currentTool = inventory.getStack(currentToolItem);
@@ -126,6 +135,37 @@ class Character : public Actor {
             if(thirdPerson) {
                 Actor::addRenderables(vulkan,dt);
             }
+        }
+
+        virtual void spawn(World* world) {
+
+            auto settings = JPH::CharacterSettings();
+            auto capsuleSettings = JPH::CapsuleShapeSettings(height,radius);
+
+            JPH::Shape::ShapeResult result;
+            settings.mShape = new JPH::CapsuleShape(capsuleSettings,result);
+            settings.mLayer = Layers::MOVING;
+            settings.mGravityFactor = 0.0f;
+
+            physicsCharacter = new JPH::Character(&settings,Physics::toJoltVec(position),Physics::toJoltQuat(rotation),0,&world->physics_system);
+            
+            world->physics_system.GetBodyInterface().AddBody(physicsCharacter->GetBodyID(),JPH::EActivation::Activate);
+
+            physicsCharacter->SetLinearVelocity(Physics::toJoltVec(velocity));
+
+
+        }
+
+        virtual void prePhysics(World* world) {
+            physicsCharacter->SetPositionAndRotation(Physics::toJoltVec(position),Physics::toJoltQuat(rotation).Normalized());
+            physicsCharacter->SetLinearVelocity(Physics::toJoltVec(velocity));
+        }
+
+        virtual void postPhysics(World* world) {
+            position = Physics::toGlmVec(physicsCharacter->GetPosition());
+            rotation = Physics::toGlmQuat(physicsCharacter->GetRotation());
+            velocity = Physics::toGlmVec(physicsCharacter->GetLinearVelocity());
+            physicsCharacter->PostSimulation(0.01f); // small number to be on the floor
         }
 
         void step(World* world,float dt) {
@@ -178,9 +218,9 @@ class Character : public Actor {
                 clickInput = false;
                 interactInput = false;
 
-                if(!noClip) {
-                    world->collideBasic(this,height,radius);
-                }
+                // if(!noClip) {
+                //     world->collideBasic(this,height,radius);
+                // }
             }
 
             if(currentRecipe != nullptr) {
@@ -202,6 +242,7 @@ class Character : public Actor {
             if(ridingConstruction != nullptr) {
                 dismount();
             }
+            physicsCharacter->SetLayer(Layers::DISABLED);
             thirdPerson = true;
             ridingConstruction = construction;
             ridingConstructionPoint = point;
@@ -210,6 +251,7 @@ class Character : public Actor {
         }
 
         void dismount() {
+            physicsCharacter->SetLayer(Layers::MOVING);
             position += ridingConstruction->transformDirection(vec3(0,1,0));
             ridingConstruction->resetTargets();
             ridingConstruction = nullptr;

@@ -18,7 +18,13 @@
 
 #include "helper/rect.hpp"
 
-#include <bitset> //for shenanigans, remove if unused
+#include <Jolt/Jolt.h>
+
+#include <Jolt/Physics/Collision/Shape/MutableCompoundShape.h>
+#include <Jolt/Physics/Collision/Shape/BoxShape.h>
+
+#include <physics/jolt-conversions.hpp>
+#include <physics/jolt-layers.hpp>
 
 using glm::ivec3,glm::vec3;
 using std::unordered_map;
@@ -85,6 +91,7 @@ class Construction : public Actor {
     struct BlockData {
         Block* block = nullptr; //eventually this will be a list of blocks in the construction
         BlockState state = BlockState::none;
+        std::optional<JPH::Shape*> shapeOpt;
         BlockData(Block* block,BlockState state) : block(block), state(state) {}
         BlockData() {}
     };
@@ -107,20 +114,40 @@ class Construction : public Actor {
 
     vec3 moveControl = {};
     quat targetRotation = glm::identity<quat>();
+    bool targetRotationEnabled = false;
     float turnForce = 1.5;
     vec3 velocity = {};
-
-    float inverseMass = 1; //make should be part of some rigidbody component :shrug:
 
     int blockCount = 0; //block count
 
     float timer = 0;
+
+    bool isStatic = false;
+
+    bool physicsShapeChanged = false;
+
+    vec3 accumulatedThrustForce; // acculated on step, applied on prePhysics
+
+    JPH::Body *body;
+    JPH::MutableCompoundShape* physicsShape;
+    JPH::Vec3 physicsOldCOM;
 
     Construction() : Actor() {
         blockData.push_back(BlockData()); //starting block
         blockCountX.push_back(0);
         blockCountY.push_back(0);
         blockCountZ.push_back(0);
+        
+        
+        JPH::MutableCompoundShapeSettings shapeSettings{};
+        JPH::Shape::ShapeResult result;
+
+        physicsShape = new JPH::MutableCompoundShape(shapeSettings,result);
+        physicsShape->SetEmbedded();
+
+        if(result.HasError()) {
+            std::cout << result.GetError() << std::endl;
+        }
     }
 
     
@@ -133,6 +160,8 @@ class Construction : public Actor {
         // 4 - LEFT
         // 5 - RIGHT
         float thrustForces[6];
+
+        
 
         // idk
         struct Location {
@@ -176,35 +205,38 @@ class Construction : public Actor {
 
             timer += dt;
 
-            
+            accumulatedThrustForce = vec3(0.0f);
             //i have no idea why z and x are inverted :shrug:
-            if(moveControl.z > 0) {
-                applyForce(vec3(0,0,1) * thrustForces[BlockFacing::BACKWARD] * moveControl.z * dt); //too move forward we must thrust backwards
+            if(moveControl.z > 0.01) {
+                applyForce(vec3(0,0,1) * thrustForces[BlockFacing::BACKWARD] * moveControl.z); //too move forward we must thrust backwards
             }
-            if(moveControl.z < 0) {
-                applyForce(vec3(0,0,1) * thrustForces[BlockFacing::FORWARD] * moveControl.z * dt);
+            if(moveControl.z < 0.01) {
+                applyForce(vec3(0,0,1) * thrustForces[BlockFacing::FORWARD] * moveControl.z);
             }
-            if(moveControl.x < 0) {
-                applyForce(vec3(1,0,0) * thrustForces[BlockFacing::RIGHT] * moveControl.x * dt);
+            if(moveControl.x < 0.01) {
+                applyForce(vec3(1,0,0) * thrustForces[BlockFacing::RIGHT] * moveControl.x);
             }
-            if(moveControl.x > 0) {
-                applyForce(vec3(1,0,0) * thrustForces[BlockFacing::LEFT] * moveControl.x * dt);
+            if(moveControl.x > 0.01) {
+                applyForce(vec3(1,0,0) * thrustForces[BlockFacing::LEFT] * moveControl.x);
             }
-            if(moveControl.y < 0) {
-                applyForce(vec3(0,1,0) * thrustForces[BlockFacing::UP] * moveControl.y * dt);
+            if(moveControl.y < 0.01) {
+                applyForce(vec3(0,1,0) * thrustForces[BlockFacing::UP] * moveControl.y);
             }
-            if(moveControl.y > 0) {
-                applyForce(vec3(0,1,0) * thrustForces[BlockFacing::DOWN] * moveControl.y * dt);
+            if(moveControl.y > 0.01) {
+                applyForce(vec3(0,1,0) * thrustForces[BlockFacing::DOWN] * moveControl.y);
             }
-            //velocity = MathHelper::moveTowards(velocity,rotation * targetVelocity,thrustForce * dt);
-            rotation = glm::slerp(rotation,targetRotation,turnForce * dt);
-            position += velocity * dt;
-            //std::cout << "velocity: " << StringHelper::toString(velocity) << "moveControl:" << StringHelper::toString(moveControl) << std::endl;
+            
+            if(targetRotationEnabled && !isStatic) {
+                
+                rotation = glm::slerp(rotation,targetRotation,turnForce * dt);
+                body->SetAngularVelocity(JPH::Vec3(0,0,0)); //maybe we have an actual variable for this instead of just relying
+            }
             
         }
 
+        // maybe we should accululate force and apply it prephysics :shrug:
         void applyForce(vec3 force) {
-            velocity += transformDirection(force) * inverseMass;
+            accumulatedThrustForce += transformDirection(force);
         }
 
         void generateMesh() {
@@ -284,7 +316,13 @@ class Construction : public Actor {
             Debug::drawRay(position,transformDirection(thrustForces[BlockFacing::LEFT]*    vec3(-0.1,0,0)),Color::red);
 
             // bounds
-            // Debug::drawCube(transformPoint((vec3)(max+min)/2.0f),(vec3)(max-min) + vec3(1),rotation,Color::red);
+            Debug::drawCube(transformPoint((vec3)(max+min)/2.0f),(vec3)(max-min) + vec3(1),rotation,Color::red);
+
+            for (auto subShape : physicsShape->GetSubShapes())
+            {
+                Debug::drawPoint(transformPoint(Physics::toGlmVec(subShape.GetPositionCOM())));
+            }
+            
         }
 
         void moveBounds(ivec3 amount) {
@@ -294,7 +332,7 @@ class Construction : public Actor {
 
         void setBounds(ivec3 newMin,ivec3 newMax) {
             if(newMin.x > newMax.x || newMin.y > newMax.y || newMin.x > newMax.x) {
-                Debug::warn("construction bounds min bigger than max, cancelling operation");
+                Debug::warn("construction bounds MIN bigger than MAX, cancelling operation");
                 return;
             }
             
@@ -338,6 +376,70 @@ class Construction : public Actor {
             //printBlockCounts();
 
             
+        }
+
+        virtual void spawn(World* world) {
+            
+            addBody(world);
+
+
+        }
+
+        void addBody(World* world) {
+            JPH::BodyCreationSettings bodySettings;
+
+            if(isStatic) {
+                bodySettings = JPH::BodyCreationSettings(physicsShape, Physics::toJoltVec(position), Physics::toJoltQuat(position), JPH::EMotionType::Static, Layers::NON_MOVING);
+            } else {
+                bodySettings = JPH::BodyCreationSettings(physicsShape, Physics::toJoltVec(position), Physics::toJoltQuat(position), JPH::EMotionType::Dynamic, Layers::MOVING);
+            }
+
+            bodySettings.mGravityFactor = 0.0f;
+
+            bodySettings.mOverrideMassProperties = JPH::EOverrideMassProperties::MassAndInertiaProvided;
+            bodySettings.mMassPropertiesOverride.mMass = 1.0f;
+            body = world->physics_system.GetBodyInterface().CreateBody(bodySettings);
+            world->physics_system.GetBodyInterface().AddBody(body->GetID(),JPH::EActivation::Activate);
+            std::cout << "new construction created with ID " << body->GetID().GetIndexAndSequenceNumber() << std::endl;
+            
+
+            // otherwise will error :3
+            if(!isStatic) body->SetLinearVelocity(Physics::toJoltVec(velocity));
+            body->SetRestitution(0.1f);
+            body->SetFriction(2.0);
+
+            
+        }
+        
+
+        virtual void prePhysics(World* world) {
+            if(physicsShapeChanged) {
+                physicsShapeChanged = false;
+                world->physics_system.GetBodyInterface().NotifyShapeChanged(body->GetID(),physicsOldCOM,false,JPH::EActivation::Activate);
+            }
+            if(!isStatic) {
+                if(physicsShape->GetMassProperties().mMass > 0.0f) {
+                    body->GetMotionProperties()->SetMassProperties(JPH::EAllowedDOFs::All,physicsShape->GetMassProperties());
+                }
+            }
+            
+            world->physics_system.GetBodyInterface().SetPosition(body->GetID(),Physics::toJoltVec(position),JPH::EActivation::DontActivate);
+            world->physics_system.GetBodyInterface().SetRotation(body->GetID(),Physics::toJoltQuat(rotation),JPH::EActivation::DontActivate);
+            if(!isStatic) world->physics_system.GetBodyInterface().SetLinearVelocity(body->GetID(),Physics::toJoltVec(velocity)); //if static it errors :3
+            world->physics_system.GetBodyInterface().AddForce(body->GetID(),Physics::toJoltVec(accumulatedThrustForce));
+        }
+
+        virtual void postPhysics(World* world) {
+            position = Physics::toGlmVec(body->GetPosition());
+            rotation = Physics::toGlmQuat(body->GetRotation().Normalized());
+            velocity = Physics::toGlmVec(body->GetLinearVelocity());
+        }
+
+        void destroy(World* world) {
+            Actor::destroy(world);
+
+            world->physics_system.GetBodyInterface().RemoveBody(body->GetID());
+            world->physics_system.GetBodyInterface().DestroyBody(body->GetID());
         }
 
         void printBlockCounts() {
@@ -419,35 +521,6 @@ class Construction : public Actor {
             actor->setPosition(transformPoint(localActorPosition));
         }
 
-        void setPivot(ivec3 location) {
-
-
-            position += transformDirection(location); //average is in local space, position is in world space :shrug:
-
-            moveBounds(-location); // this moves all the blocks
-        }
-
-        void recalculatePivot() {
-            setPivot((min+max)/2);
-        }
-        
-        // RIGIDBODY COMPONENT
-
-        float getMass() {
-            if(inverseMass == 0) return std::numeric_limits<float>::infinity();
-            return 1/inverseMass;
-        }
-        void setMass(float mass) {
-            if(mass == 0) mass = 0.0001;
-            inverseMass = 1/mass;
-        }
-
-        void changeMass(float change) {
-            float mass = getMass();
-            mass += change;
-            setMass(mass);
-        }
-
         vec3 getVelocity() {
             return velocity;
         }
@@ -461,9 +534,9 @@ class Construction : public Actor {
 
             removeBlockNoUpdate(location); //does the main removal, tracking, and storage/callback cleanup 
 
-            checkBlockAxisAll(location); //reduce bounds or break up construction. makes index invalid
+            recalculateBoundsFromBreak(location); //reduce bounds or break up construction. makes index invalid
 
-            recalculatePivot();
+            //recalculatePivot();
             generateMesh();
 
             calculateBreakup(world,location);
@@ -474,7 +547,7 @@ class Construction : public Actor {
         }
 
 
-        // used by placing and breaking. Handles removal, tracking, and storage/callback cleanup
+        // used by placing and breaking. Handles removal, tracking, physics, and storage/callback cleanup
         void removeBlockNoUpdate(ivec3 location) {
 
             int index = getIndex(location);
@@ -485,9 +558,26 @@ class Construction : public Actor {
                 blockCountX[location.x - min.x]--;
                 blockCountY[location.y - min.y]--;
                 blockCountZ[location.z - min.z]--;
+                
+                if(blockData[index].shapeOpt) {
+                    
+                    //JPH::SubShapeID remainder;
+                    //JPH::uint shapeIndex = physicsShape->GetSubShapeIndexFromID(blockData[index].shapeOpt.value().GetID(),remainder);
+
+                    for (size_t i = 0; i < physicsShape->GetSubShapes().size(); i++)
+                    {
+                        if(blockData[index].shapeOpt.value() == physicsShape->GetSubShape(i).mShape.GetPtr()) {
+                            physicsShape->RemoveShape(i);
+                            physicsShape->AdjustCenterOfMass();
+                            physicsShapeChanged = true;
+                        }
+                    }
+                }
+
                 blockData[index] = BlockData();
 
-                changeMass(-1); //just 1 for now
+                
+
 
                 if(blockStorage.contains(Location(location))) {
                     blockStorage.erase(Location(location));
@@ -507,7 +597,15 @@ class Construction : public Actor {
             int index = getIndex(location);
             auto state = block.onPlace(this,location,facing);
             blockData[index] = BlockData(&block,state);
-            changeMass(1); //just 1 for now
+
+            physicsOldCOM = physicsShape->GetCenterOfMass(); //temporary until custom shape (hopefully)
+            auto shape = new JPH::BoxShape(JPH::Vec3(0.5f,0.5f,0.5f));
+            physicsShape->AddShape(Physics::toJoltVec((vec3)location),JPH::Quat::sIdentity(),shape,0,UINT_MAX);
+            blockData[index].shapeOpt = static_cast<JPH::Shape*>(shape);
+            physicsShape->AdjustCenterOfMass();
+            physicsShapeChanged = true;
+
+            
         }
 
         // make the bounds
@@ -533,7 +631,7 @@ class Construction : public Actor {
             
             addBlockNoUpdate(location,*block,facing);
 
-            recalculatePivot();
+            //recalculatePivot();
             generateMesh();
         }
 
@@ -580,7 +678,7 @@ class Construction : public Actor {
                                     constructions[blockGroup-1] = this;
                                     continue;
                                 } else {
-                                    constructions[blockGroup-1] = world->spawn(Construction::makeInstance(material,worldLocation,rotation));
+                                    constructions[blockGroup-1] = world->spawn(Construction::makeInstance(material,worldLocation,rotation,isStatic));
                                     constructions[blockGroup-1]->velocity = velocity; //match velocities
                                 }
                             }
@@ -604,7 +702,7 @@ class Construction : public Actor {
             {
                 if(constructions[i] != nullptr) { //regenerate all at the end
                     constructions[i]->generateMesh();
-                    constructions[i]->recalculatePivot();
+                    constructions[i]->recalculateBounds();
                 }
             }
             
@@ -632,8 +730,54 @@ class Construction : public Actor {
             tryAddToGroup(group,location+ivec3(0,0,-1),blockGroups,locations);
         }
 
-        // reduces bounds or (in future) breaks up construction. call when block broken
-        void checkBlockAxisAll(ivec3 location) {
+        // recalculate bounds using the block counts
+        void recalculateBounds() {
+            ivec3 newMin = ivec3(0);
+            ivec3 newMax = ivec3(0);
+
+            printBlockCounts();
+
+            bool minSet = false;
+            for (size_t i = 0; i < blockCountX.size(); i++)
+            {
+                if(blockCountX[i] != 0) {
+                    newMax.x = i + min.x;
+                    if(!minSet) {
+                        minSet = true;
+                        newMin.x = i + min.x;
+                    }
+                }
+            }
+            minSet = false;
+            for (size_t i = 0; i < blockCountY.size(); i++)
+            {
+                if(blockCountY[i] != 0) {
+                    newMax.y = i + min.y;
+                    if(!minSet) {
+                        minSet = true;
+                        newMin.y = i + min.y;
+                    }
+                }
+            }
+            minSet = false;
+            for (size_t i = 0; i < blockCountZ.size(); i++)
+            {
+                if(blockCountZ[i] != 0) {
+                    newMax.z = i + min.z;
+                    if(!minSet) {
+                        minSet = true;
+                        newMin.z = i + min.z;
+                    }
+                }
+            }
+            if(newMin != min || newMax != max) {
+                setBounds(newMin,newMax);
+            }
+            
+        }
+
+        // reduces bounds, call when block broken
+        void recalculateBoundsFromBreak(ivec3 location) {
 
             // TODO should probably accumulate bounds change but its probably literally not an issue at all. It would have to be detached anyway
             ivec3 newMin = min;
@@ -674,11 +818,13 @@ class Construction : public Actor {
 
         void setTargetRotation(quat target) {
             targetRotation = target;
+            targetRotationEnabled = true;
         }
 
         void resetTargets() {
             moveControl = vec3(0,0,0);
             targetRotation = rotation;
+            targetRotationEnabled = false;
         }
 
         size_t getIndex(ivec3 location) {
@@ -748,17 +894,18 @@ class Construction : public Actor {
             }
         }
 
-        static std::unique_ptr<Construction> makeInstance(Material material,vec3 position,quat rotation = glm::identity<quat>()) {
+        static std::unique_ptr<Construction> makeInstance(Material material,vec3 position,quat rotation = glm::identity<quat>(),bool isStatic = false) {
             auto ptr = new Construction();
             ptr->position = position;
             ptr->rotation = rotation;
             ptr->targetRotation = rotation;
             ptr->material = material;
+            ptr->isStatic = isStatic;
             return std::unique_ptr<Construction>(ptr);
         }
 
-        static std::unique_ptr<Construction> makeInstance(Material material,Block* block,vec3 position,quat rotation = glm::identity<quat>()) {
-            auto ptr = makeInstance(material,position,rotation);
+        static std::unique_ptr<Construction> makeInstance(Material material,Block* block,vec3 position,quat rotation = glm::identity<quat>(),bool isStatic = false) {
+            auto ptr = makeInstance(material,position,rotation,isStatic);
             ptr->placeBlock(ivec3(0),block,BlockFacing::FORWARD);
             return ptr;
         }

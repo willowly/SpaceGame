@@ -20,7 +20,7 @@ class ToolbarWidget {
             //interface.drawRect(vulkan,glm::vec2(0,-3),glm::vec2(101,12),glm::vec2(0.5,1),vec2(0.5,1),Color(0.5,0.5,0.5),solidTexture);
             for (int i = 0; i < 9; i++)
             {
-                auto rect = Rect((i*10)-50,-11,10,10);
+                auto rect = Rect((i*12)-50,-11,12,12);
                 rect = Rect::anchored(rect,screen,vec2(0.5,1));
                 context.drawRect(rect,player.selectedTool == i ? selected : unselected,solidSprite);
 

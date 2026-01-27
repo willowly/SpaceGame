@@ -17,7 +17,8 @@ namespace Layers
 {
 	static constexpr JPH::ObjectLayer NON_MOVING = 0;
 	static constexpr JPH::ObjectLayer MOVING = 1;
-	static constexpr JPH::ObjectLayer NUM_LAYERS = 2;
+	static constexpr JPH::ObjectLayer DISABLED = 2;
+	static constexpr JPH::ObjectLayer NUM_LAYERS = 3;
 };
 
 /// Class that determines if two object layers can collide
@@ -32,6 +33,8 @@ public:
 			return inObject2 == Layers::MOVING; // Non moving only collides with moving
 		case Layers::MOVING:
 			return true; // Moving collides with everything
+		case Layers::DISABLED:
+			return false; // collides with nothing
 		default:
 			JPH_ASSERT(false);
 			return false;
@@ -48,7 +51,8 @@ namespace BroadPhaseLayers
 {
 	static constexpr JPH::BroadPhaseLayer NON_MOVING(0);
 	static constexpr JPH::BroadPhaseLayer MOVING(1);
-	static constexpr unsigned int NUM_LAYERS(2);
+	static constexpr JPH::BroadPhaseLayer DISABLED(2);
+	static constexpr unsigned int NUM_LAYERS(3);
 };
 
 // BroadPhaseLayerInterface implementation
@@ -61,6 +65,7 @@ public:
 		// Create a mapping table from object to broad phase layer
 		mObjectToBroadPhase[Layers::NON_MOVING] = BroadPhaseLayers::NON_MOVING;
 		mObjectToBroadPhase[Layers::MOVING] = BroadPhaseLayers::MOVING;
+		mObjectToBroadPhase[Layers::DISABLED] = BroadPhaseLayers::DISABLED;
 	}
 
 	virtual uint					GetNumBroadPhaseLayers() const override
@@ -81,6 +86,7 @@ public:
 		{
 		case (JPH::BroadPhaseLayer::Type)BroadPhaseLayers::NON_MOVING:	return "NON_MOVING";
 		case (JPH::BroadPhaseLayer::Type)BroadPhaseLayers::MOVING:		return "MOVING";
+		case (JPH::BroadPhaseLayer::Type)BroadPhaseLayers::DISABLED:		return "DISABLED";
 		default:													JPH_ASSERT(false); return "INVALID";
 		}
 	}
@@ -102,6 +108,8 @@ public:
 			return inLayer2 == BroadPhaseLayers::MOVING;
 		case Layers::MOVING:
 			return true;
+		case Layers::DISABLED:
+			return false;
 		default:
 			JPH_ASSERT(false);
 			return false;
