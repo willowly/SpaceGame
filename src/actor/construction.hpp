@@ -25,6 +25,7 @@
 
 #include <physics/jolt-conversions.hpp>
 #include <physics/jolt-layers.hpp>
+#include <physics/jolt-userdata.hpp>
 
 using glm::ivec3,glm::vec3;
 using std::unordered_map;
@@ -398,6 +399,7 @@ class Construction : public Actor {
 
             bodySettings.mOverrideMassProperties = JPH::EOverrideMassProperties::MassAndInertiaProvided;
             bodySettings.mMassPropertiesOverride.mMass = 1.0f;
+            // bodySettings.mUserData = ActorUserData(this).asUInt();
             body = world->physics_system.GetBodyInterface().CreateBody(bodySettings);
             world->physics_system.GetBodyInterface().AddBody(body->GetID(),JPH::EActivation::Activate);
             std::cout << "new construction created with ID " << body->GetID().GetIndexAndSequenceNumber() << std::endl;
@@ -529,8 +531,6 @@ class Construction : public Actor {
 
         // used when wanting to break a place, not replace
         void breakBlock(World* world,ivec3 location) {
-
-            int index = getIndex(location);
 
             removeBlockNoUpdate(location); //does the main removal, tracking, and storage/callback cleanup 
 

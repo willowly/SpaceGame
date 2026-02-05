@@ -14,6 +14,7 @@
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 
 #include <physics/jolt-terrain-shape.hpp>
+#include <physics/jolt-userdata.hpp>
 
 
 #define SURFACE_LVL 0.5
@@ -34,9 +35,13 @@ class TerrainChunk {
     int meshState = -1;
     MeshBuffer meshBuffer[FRAMES_IN_FLIGHT];
     bool gpuMeshOutOfDate = false;
+    bool physicsMeshOutOfDate = false;
     TerrainType terrainTypes[8];
     bool meshOutOfDate;
 
+    TerrainShape* physicsShape = nullptr;;
+
+    unsigned int id = 0;
     int size = 30;
     float cellSize = 0.5f;
 
@@ -44,6 +49,8 @@ class TerrainChunk {
     std::atomic<bool> readyToRender = false;
 
     JPH::Body* body = nullptr;
+
+    ActorUserData physicsUserData;
 
     // TerrainChunk(const TerrainChunk& chunk) = delete;
     // TerrainChunk& operator=(const TerrainChunk& chunk) = delete;
@@ -122,13 +129,17 @@ class TerrainChunk {
 
     public:
 
-        TerrainChunk(ivec3 offset,int chunkSize,float cellSize) : offset(offset), size(chunkSize), cellSize(cellSize) {
+        TerrainChunk(ivec3 offset,int chunkSize,float cellSize,unsigned int id) : offset(offset), size(chunkSize), cellSize(cellSize), id(id) {
 
             for (auto& buffer : meshBuffer)
             {
                 buffer.buffer = VK_NULL_HANDLE;
             }
             
+        }
+
+        unsigned int getID() {
+            return id;
         }
 
         void generateData(GenerationSettings settings) {
@@ -202,7 +213,7 @@ class TerrainChunk {
         void terraformSphere(vec3 pos,float radius,float change,TerraformResults& results) {
 
 
-
+            std::scoped_lock lock(mtx);
             
             auto posCellSpace = localToCellPos(pos);
             auto radiusCellSpace = radius/cellSize;
@@ -228,7 +239,7 @@ class TerrainChunk {
                             int terrainTypeID = terrainData[i].type;
                             
                             if(old > SURFACE_LVL && terrainData[i].amount < SURFACE_LVL) {
-                                results.addItem(ItemStack(terrainTypes[terrainTypeID].item,1));
+                            results.addItem(ItemStack(terrainTypes[terrainTypeID].item,1));
                             }
                             meshOutOfDate = true;
                         }
@@ -238,20 +249,31 @@ class TerrainChunk {
             }
         }
 
-        void updatePhysics(World* world,vec3 position) {
+        //adds a physics body if needed. terrain pointer is stored in userdata
+        void updatePhysics(World* world,Actor* parent,vec3 position) {
+
+            std::unique_lock lock(mtx,std::defer_lock);
+            
+            if(!lock.try_lock()) {
+                return; // we dont update physics today
+            }
 
             if(body == nullptr) {
 
                 if(meshData.vertices.size() == 0 || meshData.indices.size() == 0) return;
 
-                TerrainShapeSettings settings(&meshData,size*cellSize);
+                TerrainShapeSettings settings(meshData,size*cellSize);
 
                 JPH::Shape::ShapeResult result;
 
+                physicsShape = new TerrainShape(settings,result);
+
                 // we can do something please
-                JPH::BodyCreationSettings bodySettings(new TerrainShape(settings,result), Physics::toJoltVec(position), JPH::Quat::sIdentity(), JPH::EMotionType::Static, Layers::NON_MOVING);
+                JPH::BodyCreationSettings bodySettings(physicsShape, Physics::toJoltVec(position), JPH::Quat::sIdentity(), JPH::EMotionType::Static, Layers::NON_MOVING);
 
-
+                physicsUserData.actor = parent;
+                physicsUserData.component = id;
+                bodySettings.mUserData = ActorUserData::encode(&physicsUserData);
 
                 if(result.HasError()) {
                     std::cout << result.GetError() << std::endl;
@@ -262,12 +284,28 @@ class TerrainChunk {
                 body = world->physics_system.GetBodyInterface().CreateBody(bodySettings);
                 world->physics_system.GetBodyInterface().AddBody(body->GetID(),JPH::EActivation::Activate);
 
+                physicsMeshOutOfDate = false;
 
+            } else {
+                if(physicsShape != nullptr && physicsMeshOutOfDate) {
+                    physicsShape->UpdateMesh(meshData); //copy over the data :3
+                    physicsMeshOutOfDate = false;
+                }
+             }
 
-            }
+            
             
 
             
+        }
+
+        string getDebugInfo() {
+            string r;
+            r += std::format("\tchunk {}\n",id);
+            r += std::format("\t\tv {}\n",meshData.vertices.size());
+            r += std::format("\t\ti {}\n",meshData.indices.size());
+            r += std::format("\t\to {}\n",StringHelper::toString(offset));
+            return r;
         }
         
 
@@ -297,14 +335,43 @@ class TerrainChunk {
             }
         }
 
-        // force
-        void generateMesh() {
+        void drawDebug(vec3 position) {
 
-            if(!meshOutOfDate) {
+            std::unique_lock lock(mtx,std::defer_lock);
+
+            if(!lock.try_lock()) {
+                return;
+            }
+
+            auto totalOffset = position+((vec3)offset*cellSize);
+            for (size_t i = 0; i+2 < meshData.indices.size(); i += 3)
+            {
+                size_t indexA = meshData.indices[i];
+                size_t indexB = meshData.indices[i+1];
+                size_t indexC = meshData.indices[i+2];
+                //std::cout << indexA << " " << shape2->terrain->vertices.size() << " " << &shape2->terrain->vertices << std::endl;
+                vec3 a = meshData.vertices[indexA].pos + totalOffset;
+                vec3 b = meshData.vertices[indexB].pos + totalOffset;
+                vec3 c = meshData.vertices[indexC].pos + totalOffset;
+                Debug::drawLine(a,b);
+                Debug::drawLine(b,c);
+                Debug::drawLine(c,a);
+                if(i > 1000) {
+                    return;
+                }
+            }
+
+        }
+
+        // force
+        void generateMesh(bool force = false) {
+
+            if(!meshOutOfDate && !force) {
                 return;
             }
             
             std::scoped_lock lock(mtx);
+            
             float clock = (float)glfwGetTime();
             meshData.vertices.clear();
             meshData.indices.clear();
@@ -329,13 +396,30 @@ class TerrainChunk {
                         if(getPointInside(x+1,y+1,z)) config |= 32;
                         if(getPointInside(x+1,y+1,z+1)) config |= 64;
                         if(getPointInside(x,y+1,z+1)) config |= 128;
-                        addCell(config,vec3(x,y,z));
+                        addCellNoLock(config,vec3(x,y,z));
                         i++;
                     }
                 }
             }
 
             
+
+            smoothNormals();
+            
+            
+            readyToRender = true;
+            gpuMeshOutOfDate = true;
+            meshOutOfDate = false;
+            physicsMeshOutOfDate = true;
+        }
+
+        void generateEdges() {
+            std::scoped_lock lock(mtx);
+
+            
+        }
+
+        void smoothNormals() {
 
             //consolodate normals
             std::vector<TerrainVertex> newVertices;
@@ -347,6 +431,7 @@ class TerrainChunk {
                 }
                 vertexMap[vertex.pos].push_back(&vertex); //we can't resize the vector un
             }
+
             // smooth normals
             for (auto p : vertexMap)
             {
@@ -362,13 +447,9 @@ class TerrainChunk {
                     v->normal = normal;
                 }
             }
-            
-            readyToRender = true;
-            gpuMeshOutOfDate = true;
-            meshOutOfDate = false;
         }
 
-        void addCell(int config,vec3 cellPos) {
+        void addCellNoLock(int config,vec3 cellPos) {
             if(config < 0) {
                 std::cout << "out of range " << config << std::endl;
                 return;
@@ -398,6 +479,12 @@ class TerrainChunk {
                 
                 float t = (SURFACE_LVL - a)/(b-a);
                 t = std::min(std::max(t,0.0f),1.0f);
+                if(t < 0.0001f) { //hopefully this smooshes the unfavorable degen tris
+                    t = 0.0f;
+                }
+                if(t > 9.9999f) {
+                    t = 1.0f;
+                }
 
                 
                 int closestCellIndex;
@@ -413,14 +500,30 @@ class TerrainChunk {
                 // std::cout << vertIndex << std::endl;
                 
                 auto vertex = TerrainVertex((getEdgePos(edge,t) + cellPos)*cellSize);
+                
                 textureIDVec[vertIndex] = texture;
                 vertex.oreBlend[vertIndex] = 1;
+
+                #ifdef TERRAIN_DEBUG_CHECKER
+                    ivec3 chunkPos = offset/size;
+                    textureIDVec[vertIndex] = (chunkPos.x+chunkPos.y+chunkPos.z) % 2 ? 1 : 0;
+                    vertex.oreBlend[vertIndex] = 1;
+                #endif
                 
                 meshData.vertices.push_back(vertex);
                 face[vertIndex] = meshData.vertices.size()-1;
                 //std::cout << (meshData.vertices.size()-1) << std::endl;
+                assert(meshData.vertices.size()-1 < std::numeric_limits<uint16_t>().max());
+                assert(meshData.vertices.size()-1 >= 0);
                 meshData.indices.push_back(meshData.vertices.size()-1);
                 if(vertIndex == 2) {
+
+                    //remove "degenerate" triangles
+                    if(isDegenerate(face)) {
+                        meshData.vertices.erase(meshData.vertices.end()-3,meshData.vertices.end());
+                        meshData.indices.erase(meshData.indices.end()-3,meshData.indices.end());
+                    }
+
                     vec3 normal = MathHelper::normalFromPlanePoints(meshData.vertices[face[0]].pos,meshData.vertices[face[1]].pos,meshData.vertices[face[2]].pos);
                     meshData.vertices[face[0]].normal = normal;
                     meshData.vertices[face[0]].textureID = textureIDVec;
@@ -435,6 +538,14 @@ class TerrainChunk {
             //meshData.indices.clear();
             
             
+        }
+
+        bool isDegenerate(int face[3]) {
+            vec3 a = meshData.vertices[face[0]].pos;
+            vec3 b = meshData.vertices[face[1]].pos;
+            vec3 c = meshData.vertices[face[2]].pos;
+
+            return glm::length2(glm::cross((b - a),(c - a))) <= 1.0e-11f;
         }
 
         // need shape
@@ -517,6 +628,9 @@ class TerrainChunk {
         }
 
         void connectPosX(TerrainChunk* chunk) {
+
+            std::scoped_lock lock(mtx);
+
             if(posX != chunk) {
                 posX = chunk;
                 meshOutOfDate = true;
@@ -525,6 +639,9 @@ class TerrainChunk {
         }
 
         void connectPosZ(TerrainChunk* chunk) {
+
+            std::scoped_lock lock(mtx);
+
             if(posZ != chunk) {
                 posZ = chunk;
                 meshOutOfDate = true;
@@ -533,6 +650,9 @@ class TerrainChunk {
         }
 
         void connectPosY(TerrainChunk* chunk) {
+
+            std::scoped_lock lock(mtx);
+            
             if(posY != chunk) {
                 posY = chunk;
                 meshOutOfDate = true;

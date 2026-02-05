@@ -11,7 +11,7 @@
 #include "helper/math-helper.hpp"
 #include "helper/string-helper.hpp"
 #include "engine/world.hpp"
-#include "physics/physics-body.hpp"
+#include "physics/jolt-physics-body.hpp"
 
 #include <Jolt/Jolt.h>
 

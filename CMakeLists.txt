@@ -5,7 +5,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -fsanitize=address -Wall -Wextra -Werror=return-type -pedantic -Wno-unused-parameter")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -Wall -Wextra -Werror=return-type -pedantic -Wno-unused-parameter")
 
 if(APPLE)
     link_directories(${CMAKE_SOURCE_DIR}/lib/macos)
@@ -64,7 +64,7 @@ option(TRACY_ON_DEMAND "" ON)
 FetchContent_Declare( 
     tracy
     GIT_REPOSITORY https://github.com/wolfpld/tracy.git 
-    GIT_TAG master
+    GIT_TAG "v0.13.1"
     GIT_SHALLOW TRUE
     GIT_PROGRESS TRUE
 ) 
@@ -149,6 +149,7 @@ add_dependencies(SpaceGame Assets)
 
 compile_shader("lit")
 compile_shader("terrain")
+compile_shader("terrain-debug")
 compile_shader("ui")
 compile_shader("debug")
 compile_shader("skybox")

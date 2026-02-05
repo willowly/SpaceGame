@@ -151,9 +151,3 @@ class Actor {
         
 
 };
-
-
-// 
-struct ActorUserData {
-    Actor* actor;
-};

@@ -34,6 +34,8 @@
 
 #include "physics/jolt-layers.hpp"
 
+
+
 JPH_SUPPRESS_WARNINGS
 
 using std::string;
@@ -69,6 +71,7 @@ class GameApplication {
             setup();
 
             std::thread thread(&GameApplication::chunkTask,this);
+            //terrain->loadChunks(&world,player->getPosition(),2,vulkan);
             
 
             while (!glfwWindowShouldClose(window)) {
@@ -78,7 +81,7 @@ class GameApplication {
             
             
             closing = true;
-            thread.join();
+            //thread.join();
             vulkan->waitIdle();
 
         }
@@ -130,6 +133,7 @@ class GameApplication {
 
 
         Material terrainMaterial = Material::none;
+        Material terrainMaterialDebug = Material::none;
 
 
         Recipe makeAluminumPlate = Recipe(ItemStack(registry.getItem("tin_plate"),1));
@@ -140,12 +144,10 @@ class GameApplication {
         Skybox skybox;
 
         std::atomic<bool> closing = false;
+        std::atomic<bool> chunkLoadPaused = false;
 
-        Mesh<Vertex> triangleMesh;
-
-        vec3 testPointA;
-        vec3 testPointB;
-        vec3 testPointC;
+        float frametimes[60];
+        int currentFrameTimeIndex = 0;
         
 
         float lastTime = 0; //tells how long its been since the last update
@@ -266,7 +268,7 @@ class GameApplication {
             planePrototype->model = registry.getModel("plane");
             planePrototype->material = registry.getMaterial("grid");
 
-            world.spawn(Actor::makeInstance(planePrototype.get(),vec3(0,0,0)));
+            //world.spawn(Actor::makeInstance(planePrototype.get(),vec3(0,0,0)));
 
             // terrain setup
 
@@ -278,7 +280,7 @@ class GameApplication {
             
             GenerationSettings settings;
             settings.noiseScale = 100;
-            settings.radius = 50;
+            settings.radius = 40;
             settings.stoneType.item = registry.getItem("stone");
             settings.stoneType.texture = registry.getTexture("rock");
             settings.oreType.item = registry.getItem("tin_ore");
@@ -320,7 +322,7 @@ class GameApplication {
             makeCockpit.time = 5;
             
             // spawn player
-            player = world.spawn(Character::makeInstance(playerPrototype.get(),vec3(0.0,50.0,0.0)));
+            player = world.spawn(Character::makeInstance(playerPrototype.get(),vec3(3.9,1.4,26.1)));
             player->model = registry.getModel("capsule_thin");
             player->material = registry.getMaterial("player");
 
@@ -377,10 +379,6 @@ class GameApplication {
             
 
             physicsActor = world.spawn(RigidbodyActor::makeInstance(physicsPrototype,player->getEyePosition(),player->getEyeRotation(),player->getEyeDirection()*20.0f,vec3(0.0f)));
-            
-            world.testPointA = testPointA;
-            world.testPointB = testPointB;
-            world.testPointC = testPointC;
 
             // lua
             lua["player"] = player;
@@ -414,7 +412,22 @@ class GameApplication {
             player->setCamera(camera);
             player->processInput(input);
 
+            frametimes[currentFrameTimeIndex] = dt;
+            currentFrameTimeIndex++;
+            if(currentFrameTimeIndex >= 60) {
+                currentFrameTimeIndex = 0;
+            }
+
+            float averageTime = 0;
+            for (size_t i = 0; i < 60; i++)
+            {
+                averageTime += frametimes[i];
+            }
+            averageTime /= 60.0f;
+            
+
             //std::cout << "starting world frame" << std::endl;
+            //std::cout << StringHelper::toString(player->getPosition()) << std::endl;
             
             world.frame(vulkan,dt);
 
@@ -432,7 +445,7 @@ class GameApplication {
                 player->widget->draw(drawContext,*player);
             }
 
-            fpsText.draw(drawContext,vec2(0),std::to_string(1.0f/dt));
+            fpsText.draw(drawContext,vec2(0),std::to_string(1.0f/averageTime));
 
             
             if(player->inMenu) 
@@ -450,13 +463,21 @@ class GameApplication {
             // if(input.getKeyPressed(GLFW_KEY_R)) {
             //     terrain->loadChunks(player->position,3,vulkan);
             // }
+            // if(input.getKeyPressed(GLFW_KEY_G)) {
+            //     auto hitOpt = world.raycast(player->getLookRay(),100);
+            //     if(hitOpt) {
+            //         auto hit = hitOpt.value();
 
-            auto hitOpt = world.raycast(player->getLookRay(),10);
-            if(hitOpt) {
-                auto hit = hitOpt.value();
-                
-                Debug::drawRay(hit.hit.point,hit.hit.normal,Color::green);
-            }
+            //         auto terrain =  dynamic_cast<Terrain*>(hit.actor);
+            //         if(terrain != nullptr) {
+            //             terrain->selectedChunk = hit.component;
+            //             std::cout << terrain->getDebugInfo(hit.component) << std::endl;
+            //         }
+                    
+            //         Debug::drawRay(hit.hit.point,hit.hit.normal,Color::green);
+            //         Debug::drawPoint(hit.hit.point);
+            //     }
+            // }
 
             if(input.getKeyPressed(GLFW_KEY_R)) {
                 world.spawn(RigidbodyActor::makeInstance(physicsPrototype,player->getEyePosition()+player->getEyeDirection()*2.0f,player->getRotation(),player->getEyeDirection()*20.0f,vec3(0)));
@@ -477,6 +498,10 @@ class GameApplication {
             // if(hit) {
             //     Physics::resolveBasic(player->position,hit.value());
             // }
+            if(input.getKeyPressed(GLFW_KEY_RIGHT)) {
+                chunkLoadPaused = false;
+            }
+            
 
             
 
@@ -499,7 +524,10 @@ class GameApplication {
 
         void chunkTask() {
             while(!closing) {
-                terrain->loadChunks(&world,player->getPosition(),1,vulkan);
+                if(!chunkLoadPaused) {
+                    terrain->loadChunks(&world,player->getPosition(),1,vulkan);
+                }
+                //std::cout << "loading chunks" << std::endl;
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
             }
             

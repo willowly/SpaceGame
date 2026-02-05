@@ -5,7 +5,7 @@
 #include "actor/actor.hpp"
 #include <memory>
 #include <tracy/Tracy.hpp>
-#include "physics/physics-body.hpp"
+#include "physics/jolt-physics-body.hpp"
 
 #include <Jolt/Jolt.h>
 
@@ -19,10 +19,13 @@
 #include <Jolt/Physics/Collision/Shape/SphereShape.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Body/BodyActivationListener.h>
+#include <Jolt/Physics/Collision/RayCast.h>
+#include <Jolt/Physics/Collision/CastResult.h>
 
 #include "physics/jolt-layers.hpp"
 #include "physics/jolt-trace.hpp"
 #include "physics/jolt-terrain-shape.hpp"
+#include "physics/jolt-userdata.hpp"
 
 using glm::vec3, glm::quat, std::unique_ptr;
 
@@ -50,8 +53,9 @@ class World {
     struct WorldRaycastHit {
         Actor* actor;
         RaycastHit hit;
+        int component;
 
-        WorldRaycastHit(Actor* actor,RaycastHit hit) : actor(actor), hit(hit) {
+        WorldRaycastHit(Actor* actor,RaycastHit hit,int component = 0) : actor(actor), hit(hit), component(component) {
 
         }
     };
@@ -67,6 +71,7 @@ class World {
 
             temp_allocator = new JPH::TempAllocatorImpl(10 * 1024 * 1024);
             jobSystem = new JPH::JobSystemThreadPool(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers, std::thread::hardware_concurrency() - 1);
+            //jobSystem = new JPH::JobSystemThreadPool(1, 1, 1);
             const uint cMaxBodies = 65536;
 
             JPH::Trace = Physics::TraceImpl;
@@ -81,16 +86,6 @@ class World {
             const uint cMaxContactConstraints = 10240;
 
             physics_system.Init(cMaxBodies, cNumBodyMutexes, cMaxBodyPairs, cMaxContactConstraints, broad_phase_layer_interface, object_vs_broadphase_layer_filter, object_vs_object_layer_filter);
-
-            JPH::BodyInterface& body_interface = physics_system.GetBodyInterface();
-
-            // create floor
-
-            JPH::BodyCreationSettings floor_settings(new JPH::BoxShape(JPH::Vec3(100.0f, 1.0f, 100.0f)), JPH::Vec3(0.0, -1.0, 0.0), JPH::Quat::sIdentity(), JPH::EMotionType::Static, Layers::NON_MOVING);
-
-            JPH::Body *floor = body_interface.CreateBody(floor_settings);
-
-            body_interface.AddBody(floor->GetID(), JPH::EActivation::DontActivate);
 
 
         }
@@ -111,7 +106,7 @@ class World {
         float stepProcessMs;
         float renderProcessMs;
 
-        std::vector<PhysicsBody*> physicsBodies;
+        
         bool pausePhysics;
         bool stepPhysics; //trigger
 
@@ -181,23 +176,30 @@ class World {
         void physicsStep(float dt) {
             
             ZoneScoped;
-            iteratingActors++;
-            for (auto& actor : actors)
+
             {
-                actor->prePhysics(this);
+                ZoneScopedN("prePhysics")
+                iteratingActors++;
+                for (auto& actor : actors)
+                {
+                    actor->prePhysics(this);
+                }
+                iteratingActors--;
             }
-            iteratingActors--;
 
             physics_system.SetGravity(JPH::Vec3(0.0,-10.0,0.0));
 
             physics_system.Update(dt,1,temp_allocator,jobSystem);
 
-            iteratingActors++;
-            for (auto& actor : actors)
             {
-                actor->postPhysics(this);
+                ZoneScopedN("postPhysics")
+                iteratingActors++;
+                for (auto& actor : actors)
+                {
+                    actor->postPhysics(this);
+                }
+                iteratingActors--;
             }
-            iteratingActors--;
         }
 
         void step(float dt) {
@@ -235,26 +237,69 @@ class World {
 
         std::optional<WorldRaycastHit> raycast(Ray ray,float dist) {
             ZoneScoped;
-            std::optional<WorldRaycastHit> result = std::nullopt;
-            iteratingActors++;
-            for (auto& actor : actors)
-            {
-                auto hitopt = actor->raycast(ray,dist);
-                if(hitopt) {
-                    auto hit = hitopt.value();
-                    if(hit.distance <= dist) {
-                        if(result) {
-                            result.value().hit = hit;
-                            result.value().actor = actor.get();
-                        } else {
-                            result = WorldRaycastHit(actor.get(),hit);
-                        }
-                        dist = hit.distance;
+            //std::optional<WorldRaycastHit> result = std::nullopt; 
+            ray.direction = glm::normalize(ray.direction);
+
+            
+            JPH::RayCast raycast(Physics::toJoltVec(ray.origin),Physics::toJoltVec(ray.direction * dist));
+            JPH::RayCastResult result;
+
+            BroadPhaseLayerFilter broadFilter(BroadPhaseLayerTable{true,true,false}); // two new custom classes
+            ObjectLayerFilter filter(ObjectLayerTable{true,true,false,false}); //that are annoying as fuck to use because you can't copy them for some reason
+
+            // what the hell is the point of JPH::RayCast if I can't use it to raycast??
+            physics_system.GetNarrowPhaseQuery().CastRay((JPH::RRayCast)raycast,result,broadFilter,filter,JPH::BodyFilter());
+
+            if(result.mFraction < 1.0f) {
+                float distance = dist * result.mFraction;
+                vec3 point = ray.origin + ray.direction * distance;
+                auto shape = physics_system.GetBodyInterface().GetShape(result.mBodyID).GetPtr();
+
+                vec3 normal;
+                {
+                    JPH::BodyLockRead lock(physics_system.GetBodyLockInterface(), result.mBodyID);
+                    if (lock.Succeeded()) // body_id may no longer be valid
+                    {
+                        const JPH::Body &body = lock.GetBody();
+
+                        normal = Physics::toGlmVec(body.GetWorldSpaceSurfaceNormal(result.mSubShapeID2,Physics::toJoltVec(point)));
+                        
                     }
                 }
+
+                auto userData = physics_system.GetBodyInterface().GetUserData(result.mBodyID);
+                Actor* actor = nullptr;
+                int component = 0;
+                if(userData != 0) {
+                    auto userDataStruct = ActorUserData::decode(physics_system.GetBodyInterface().GetUserData(result.mBodyID));
+                    actor = userDataStruct->actor;
+                    component = userDataStruct->component;
+                }
+                return WorldRaycastHit(actor,RaycastHit(point,normal,distance),component);
             }
-            iteratingActors--;
-            return result;
+
+            return std::nullopt;
+
+            // just disable raycasting for now :shrug:
+            // iteratingActors++;
+            // for (auto& actor : actors)
+            // {
+            //     auto hitopt = actor->raycast(ray,dist);
+            //     if(hitopt) {
+            //         auto hit = hitopt.value();
+            //         if(hit.distance <= dist) {
+            //             if(result) {
+            //                 result.value().hit = hit;
+            //                 result.value().actor = actor.get();
+            //             } else {
+            //                 result = WorldRaycastHit(actor.get(),hit);
+            //             }
+            //             dist = hit.distance;
+            //         }
+            //     }
+            // }
+            // iteratingActors--;
+            //return result;
         }
 
         void collideBasic(Actor* actor,float height,float radius) {
@@ -268,14 +313,6 @@ class World {
                 
             }
             iteratingActors--;
-        }
-
-        void addPhysicsBody(PhysicsBody* body) {
-            physicsBodies.push_back(body);
-        }
-
-        void removePhysicsBody(PhysicsBody* body) {
-            std::erase(physicsBodies,body);
         }
 
         Camera& getCamera() {
