@@ -5,7 +5,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -Wall -Wextra -Werror=return-type -pedantic -Wno-unused-parameter")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -fsanitize=address -Wall -Wextra -Werror=return-type -pedantic -Wno-unused-parameter")
 
 if(APPLE)
     link_directories(${CMAKE_SOURCE_DIR}/lib/macos)
@@ -130,14 +130,12 @@ add_custom_target(SHADERS)
 macro(compile_shader shader_path)
     add_custom_command(
         OUTPUT "${CMAKE_SOURCE_DIR}/build/bin/shaders/compiled/${shader_path}_frag.spv"
-        COMMAND glslc "${CMAKE_SOURCE_DIR}/build/bin/shaders/${shader_path}.frag" -o "${CMAKE_SOURCE_DIR}/build/bin/shaders/compiled/${shader_path}_frag.spv"
-        DEPENDS "${CMAKE_SOURCE_DIR}/build/bin/shaders/${shader_path}.frag"
+        COMMAND glslc "${CMAKE_SOURCE_DIR}/assets/shaders/${shader_path}.frag" -o "${CMAKE_SOURCE_DIR}/build/bin/shaders/compiled/${shader_path}_frag.spv"
     )
     list(APPEND SHADER_OUTPUTS "${CMAKE_SOURCE_DIR}/build/bin/shaders/compiled/${shader_path}_frag.spv")
     add_custom_command(
         OUTPUT "${CMAKE_SOURCE_DIR}/build/bin/shaders/compiled/${shader_path}_vert.spv"
-        COMMAND glslc "${CMAKE_SOURCE_DIR}/build/bin/shaders/${shader_path}.vert" -o "${CMAKE_SOURCE_DIR}/build/bin/shaders/compiled/${shader_path}_vert.spv"
-        DEPENDS "${CMAKE_SOURCE_DIR}/build/bin/shaders/${shader_path}.vert"
+        COMMAND glslc "${CMAKE_SOURCE_DIR}/assets/shaders/${shader_path}.vert" -o "${CMAKE_SOURCE_DIR}/build/bin/shaders/compiled/${shader_path}_vert.spv"
     )
     list(APPEND SHADER_OUTPUTS "${CMAKE_SOURCE_DIR}/build/bin/shaders/compiled/${shader_path}_vert.spv")
 endmacro()
@@ -154,6 +152,8 @@ compile_shader("ui")
 compile_shader("debug")
 compile_shader("skybox")
 compile_shader("construction")
+
+compile_shader("test")
 
 add_custom_target(SpaceGame_Shaders DEPENDS ${SHADER_OUTPUTS})
 add_dependencies(SpaceGame SpaceGame_Shaders)
