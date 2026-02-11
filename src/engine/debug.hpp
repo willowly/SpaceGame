@@ -23,7 +23,7 @@ enum InfoPriority{
 class Debug {
 
     struct DebugVertex {
-        glm::vec3 pos;
+        glm::vec3 pos = {};
         DebugVertex() {}
 
         DebugVertex(glm::vec3 pos) : pos(pos) {}
@@ -49,35 +49,37 @@ class Debug {
     };
 
     struct DebugMaterialData {
-        vec3 color;
+        vec3 color= {};
         DebugMaterialData () {}
         DebugMaterialData (vec3 color) : color(color) {}
     };
 
     struct Point {
-        vec3 position;
+        vec3 position = {};
         Color color;
         float time;
         Point(vec3 position,Color color = Color::green,float time = 0) : position(position), color(color), time(time) {}
     };
 
     struct Line {
-        vec3 a;
-        vec3 b;
+        vec3 a = {};
+        vec3 b = {};
         Color color;
         float time;
         Line(vec3 a,vec3 b,Color color = Color::green,float time = 0) : a(a), b(b), color(color), time(time) {}
     };
     struct Cube {
-        vec3 origin;
-        vec3 size;
-        quat rotation;
+        vec3 origin = {};
+        vec3 size = {};
+        quat rotation = {};
         Color color;
         float time;
         Cube(vec3 origin,vec3 size,quat rotation,Color color = Color::green,float time = 0) : origin(origin), size(size), rotation(rotation), color(color), time(time) {}
     };
 
     private:
+
+        bool logInfo = false;
         static std::unique_ptr<Debug> _instance;
 
         vector<string> trace;
@@ -173,6 +175,7 @@ class Debug {
 
             debug.readyToRender = true;
         }
+        
 
         static Debug& getInstance() {
             if(_instance == nullptr) {
@@ -189,6 +192,11 @@ class Debug {
         //     }
         //     return instance->_quadModel.get();
         // }
+
+        static void setLogInfoEnabled(bool state) {
+            Debug& instance = getInstance();
+            instance.logInfo = state;
+        }
 
         static string getVertShaderSource() {
             return R"(
@@ -276,6 +284,8 @@ class Debug {
 
         static void info(string string,InfoPriority priority) {
             Debug& instance = getInstance();
+            if(!instance.logInfo) return;
+
             std::cout << "[INFO] " << string << traceString() << std::endl;
             instance.logFile << "[INFO] " << string << traceString() << std::endl;
         }
@@ -296,7 +306,7 @@ class Debug {
             instance.linesToDraw.push_back(Line(origin,origin + direction,color,time));
         }
 
-        static void drawCube(vec3 origin,vec3 size,quat rotation,Color color = Color::green,float time = 0) {
+        static void drawCube(vec3 origin,vec3 size,quat rotation = glm::identity<quat>(),Color color = Color::green,float time = 0) {
             Debug& instance = getInstance();
             instance.cubesToDraw.push_back(Cube(origin,size,rotation,color,time));
         }

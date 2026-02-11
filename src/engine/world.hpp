@@ -38,7 +38,7 @@ class World {
 
     Camera camera;
 
-    float sinceLastStep;
+    float sinceLastStep = 0;
 
     //physics stuff
     BPLayerInterfaceImpl broad_phase_layer_interface;
@@ -117,10 +117,6 @@ class World {
         World() {
             setupPhysics();
         }
-
-        vec3 testPointA;
-        vec3 testPointB;
-        vec3 testPointC;
 
         template<typename T>
         T* spawn(unique_ptr<T> spawned) {
@@ -255,7 +251,7 @@ class World {
                 vec3 point = ray.origin + ray.direction * distance;
                 auto shape = physics_system.GetBodyInterface().GetShape(result.mBodyID).GetPtr();
 
-                vec3 normal;
+                vec3 normal = {};
                 {
                     JPH::BodyLockRead lock(physics_system.GetBodyLockInterface(), result.mBodyID);
                     if (lock.Succeeded()) // body_id may no longer be valid

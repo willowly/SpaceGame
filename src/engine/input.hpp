@@ -12,8 +12,8 @@ class Input {
 
 
     public:
-        vec2 lastMousePosition;
-        vec2 currentMousePosition;
+        vec2 lastMousePosition = {};
+        vec2 currentMousePosition = {};
         map<int,bool> keys;
         map<int,bool> keysPressed;
         map<int,bool> keysReleased;

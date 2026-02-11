@@ -5,8 +5,8 @@
 #include <array>
 
 struct SkyboxVertex {
-    vec3 pos;
-    vec2 texCoord;
+    vec3 pos = {};
+    vec2 texCoord = {};
     int face;
     SkyboxVertex(vec3 pos,vec2 texCoord,int face) : pos(pos), texCoord(texCoord), face(face) {}
     static VkVertexInputBindingDescription getBindingDescription() {

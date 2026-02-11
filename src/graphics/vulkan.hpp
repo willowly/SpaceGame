@@ -869,7 +869,7 @@ class Vulkan {
         Image depthImage;
         VkImageView depthImageView;
 
-        vec2 screenSize;
+        vec2 screenSize = {};
 
         std::vector<std::optional<Buffer>> managedBuffers;
         int totalAllocatedBuffersCount = 0; //for the unique ids
@@ -933,7 +933,9 @@ class Vulkan {
                 requiredExtensions.emplace_back(glfwExtensions[i]);
             }
 
-            requiredExtensions.emplace_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+            #ifdef __APPLE__
+                requiredExtensions.emplace_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+            #endif
             requiredExtensions.emplace_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
             requiredExtensions.emplace_back(VK_KHR_DEVICE_GROUP_CREATION_EXTENSION_NAME);
 
@@ -998,8 +1000,8 @@ class Vulkan {
             VmaVulkanFunctions vulkanFunctions = {};
 
             VmaDeviceMemoryCallbacks callback{};
-            callback.pfnAllocate = &Vulkan::debugAllocate;
-            callback.pfnFree = &Vulkan::debugFree;
+            // callback.pfnAllocate = &Vulkan::debugAllocate;
+            // callback.pfnFree = &Vulkan::debugFree;
             
             VmaAllocatorCreateInfo allocatorCreateInfo = {};
             allocatorCreateInfo.flags = VMA_ALLOCATOR_CREATE_EXT_MEMORY_BUDGET_BIT | VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
@@ -1905,8 +1907,6 @@ class Vulkan {
                 // addressInfo.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
                 // addressInfo.buffer = uniformBuffers[i].buffer;
                 // auto bda = vkGetBufferDeviceAddressKHR(device, &addressInfo);
-
-                std::cout << "setting uniform buffer " << i << " to buffer at " << uniformBuffers[i].buffer << std::endl;
 
 
                 VkWriteDescriptorSet cameraObjectWrite{};

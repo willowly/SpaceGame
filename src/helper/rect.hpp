@@ -4,8 +4,8 @@
 using glm::vec2;
 
 struct Rect {
-    vec2 position;
-    vec2 size;
+    vec2 position = {};
+    vec2 size = {};
 
     Rect(vec2 size) : position(vec2(0)), size(size) {
 

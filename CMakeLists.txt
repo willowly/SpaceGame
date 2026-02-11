@@ -6,7 +6,7 @@ set(OUTPUT_DIR ${OUTPUT_DIR}/bin)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
 if(WIN32)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall /fsanitize=address /bigobj")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /bigobj")
 endif()
 
 if(APPLE)
@@ -136,27 +136,28 @@ if(OSX)
     set(OUTPUT_DIR "${CMAKE_BINARY_DIR}/bin")
 endif(OSX)
 
-
+add_custom_target(Assets
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/assets ${OUTPUT_DIR}
+)
+add_dependencies(SpaceGame Assets)
 
 macro(compile_shader shader_path)
     add_custom_command(
         OUTPUT "${OUTPUT_DIR}/shaders/compiled/${shader_path}_frag.spv"
         COMMAND glslc "${OUTPUT_DIR}/shaders/${shader_path}.frag" -o "${OUTPUT_DIR}/shaders/compiled/${shader_path}_frag.spv"
-        DEPENDS "${OUTPUT_DIR}/shaders/${shader_path}.frag"
+        DEPENDS Assets
     )
     list(APPEND SHADER_OUTPUTS "${OUTPUT_DIR}/shaders/compiled/${shader_path}_frag.spv")
     add_custom_command(
         OUTPUT "${OUTPUT_DIR}/shaders/compiled/${shader_path}_vert.spv"
         COMMAND glslc "${OUTPUT_DIR}/shaders/${shader_path}.vert" -o "${OUTPUT_DIR}/shaders/compiled/${shader_path}_vert.spv"
-        DEPENDS "${OUTPUT_DIR}/shaders/${shader_path}.vert"
+        DEPENDS Assets
     )
     list(APPEND SHADER_OUTPUTS "${OUTPUT_DIR}/shaders/compiled/${shader_path}_vert.spv")
 endmacro()
 
-add_custom_target(Assets
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/assets ${CMAKE_CURRENT_BINARY_DIR}/bin
-)
-add_dependencies(SpaceGame Assets)
+
+message("output dir: ${OUTPUT_DIR}")
 
 compile_shader("lit")
 compile_shader("terrain")

@@ -9,8 +9,8 @@
 using glm::vec3,glm::ivec4;
 
 struct TerrainVertex {
-    vec3 pos;
-    vec3 normal;
+    vec3 pos = {};
+    vec3 normal = {};
     ivec4 textureID = ivec4(0);
     vec4 oreBlend = vec4(0.0);
     TerrainVertex(vec3 pos,ivec4 textureID,vec4 oreBlend) : pos(pos),textureID(textureID),oreBlend(oreBlend)  {}
@@ -81,4 +81,11 @@ struct TerraformResults {
         }
         items.push_back(giveStack);
     }
+};
+
+struct VoxelData {
+    float amount = 0;
+    int type;
+    int verticesStart = 0;
+    int verticesEnd = 0;
 };

@@ -28,7 +28,7 @@ class Block {
         Item* drop; // everthing gets turned into functions...
 
         struct PlacementData {
-            vec3 normal;
+            vec3 normal = {};
         };
 
         bool solid = false; // should probably also be a function just unsure rn

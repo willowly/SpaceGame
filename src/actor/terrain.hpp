@@ -151,20 +151,20 @@ class Terrain : public Actor {
     void prePhysics(World* world) override {
 
         // ZoneScopedN("prePhysicsTerrain")
-        // Clock clock;
-        // std::scoped_lock lock(chunksMtx);
-        // auto time = clock.getTime();
-        // if(time > 0.01f) {
-        //     Debug::warn(" main thread blocked for " + std::to_string((int)(time*1000)) + "ms");
-        // }
+        Clock clock;
+        std::scoped_lock lock(chunksMtx);
+        auto time = clock.getTime();
+        if(time > 0.01f) {
+            Debug::warn(" main thread blocked for " + std::to_string((int)(time*1000)) + "ms");
+        }
 
         
-        // for(auto& pair : chunks) {
-        //     auto& chunk = pair.second;
-        //     ivec3 pos = pair.first.asVec3();
-        //     vec3 offset = pos*chunkSize;
-        //     chunk.updatePhysics(world,this,position + (vec3)offset*cellSize);
-        // }
+        for(auto& pair : chunks) {
+            auto& chunk = pair.second;
+            ivec3 pos = pair.first.asVec3();
+            vec3 offset = pos*chunkSize;
+            chunk.updatePhysics(world,this,position + (vec3)offset*cellSize);
+        }
     }
 
     

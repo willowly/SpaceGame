@@ -70,16 +70,22 @@ class GameApplication {
 
             setup();
 
+            std::thread thread(&GameApplication::chunkTask,this);
+            terrain->loadChunks(&world,player->getPosition(),2,vulkan);
+            
+
             while (!glfwWindowShouldClose(window)) {
                 loop();
+
+                if(input.getKey(GLFW_KEY_ESCAPE)) {
+                    break;
+                }
             }
-
-
 
             
             
             closing = true;
-            //thread.join();
+            thread.join();
             vulkan->waitIdle();
 
         }
@@ -134,6 +140,11 @@ class GameApplication {
         Material terrainMaterialDebug = Material::none;
 
 
+        Recipe makeAluminumPlate = Recipe(ItemStack(registry.getItem("tin_plate"),1));
+        Recipe makeFurnace = Recipe(ItemStack(registry.getItem("furnace_item"),1));
+        Recipe makeThruster = Recipe(ItemStack(registry.getItem("thruster"),1));
+        Recipe makeCockpit = Recipe(ItemStack(registry.getItem("cockpit"),1));
+
         Skybox skybox;
 
         std::atomic<bool> closing = false;
@@ -141,9 +152,6 @@ class GameApplication {
 
         float frametimes[60];
         int currentFrameTimeIndex = 0;
-
-        Mesh<Vertex> model;
-        Material material = Material::none;
         
 
         float lastTime = 0; //tells how long its been since the last update
@@ -232,19 +240,156 @@ class GameApplication {
         void setup() {
 
             // Load
+            lua.open_libraries(sol::lib::base, sol::lib::package);
+            API::loadAPIAll(lua);
+            
+            // load from files and lua scripts
+            loader.loadAll(registry,lua,vulkan);
 
-            model.meshData.vertices.push_back(Vertex(vec3(0.0f,0.0f,0.0f)));
-            model.meshData.indices.push_back(0);
-            model.meshData.indices.push_back(1);
-            model.meshData.indices.push_back(2);
-            model.meshData.indices.push_back(3);
-            model.meshData.indices.push_back(4);
-            model.meshData.indices.push_back(5);
-            model.createBuffers(vulkan);
+            glfwPollEvents();
+            input.clearInputBuffers(); // reset mouse position;
 
-            auto pipeline = vulkan->createManagedPipeline<Vertex>("shaders/compiled/test_vert.spv","shaders/compiled/test_frag.spv");
+            Debug::loadRenderResources(*vulkan);
+            interface.loadRenderResources(*vulkan);
 
-            material = vulkan->createMaterial(pipeline,LitMaterialData());
+            Debug::setLogInfoEnabled(false);
+
+            lastTime = (float)glfwGetTime();
+
+            // prototypes
+
+            auto playerPrototype = Character::makeDefaultPrototype();
+
+            SkyboxMaterialData skyboxMaterial;
+            skyboxMaterial.top = registry.getTexture("space_up");
+            skyboxMaterial.bottom = registry.getTexture("space_dn");
+            skyboxMaterial.left = registry.getTexture("space_lf");
+            skyboxMaterial.right = registry.getTexture("space_rt");
+            skyboxMaterial.front = registry.getTexture("space_ft");
+            skyboxMaterial.back = registry.getTexture("space_bk");
+
+            skybox.loadResources(*vulkan,skyboxMaterial);
+
+            auto planePrototype = Actor::makeDefaultPrototype();
+            planePrototype->model = registry.getModel("plane");
+            planePrototype->material = registry.getMaterial("grid");
+
+            //world.spawn(Actor::makeInstance(planePrototype.get(),vec3(0,0,0)));
+
+            // terrain setup
+
+            VkPipeline terrainPipeline = vulkan->createManagedPipeline<TerrainVertex>(Vulkan::vertCodePath("terrain"),Vulkan::fragCodePath("terrain"));
+            terrainMaterial = vulkan->createMaterial(terrainPipeline,LitMaterialData(registry.getTexture("rock")));
+
+            VkPipeline constructionPipeline = vulkan->createManagedPipeline<ConstructionVertex>(Vulkan::vertCodePath("construction"),Vulkan::fragCodePath("construction"));
+            world.constructionMaterial = vulkan->createMaterial(constructionPipeline,LitMaterialData(registry.getTexture("rock")));
+            
+            GenerationSettings settings;
+            settings.noiseScale = 100;
+            settings.radius = 50;
+            settings.stoneType.item = registry.getItem("stone");
+            settings.stoneType.texture = registry.getTexture("rock");
+            settings.oreType.item = registry.getItem("tin_ore");
+            settings.oreType.texture = registry.getTexture("tin_ore");
+
+            terrain = world.spawn(Terrain::makeInstance(terrainMaterial,settings,vec3(0,0,0)));
+
+            physicsPrototype = registry.addActor<RigidbodyActor>("physics_block");
+            
+            physicsPrototype->model = registry.getModel("cube");
+            physicsPrototype->material = registry.getMaterial("tin_block");
+
+
+            // terrain->terrainTypes[0].item = registry.getItem("stone");
+            // terrain->terrainTypes[0].texture = registry.getTexture("rock");
+            // terrain->terrainTypes[1].item = registry.getItem("tin_ore");
+            // terrain->terrainTypes[1].texture = registry.getTexture("tin_ore");
+            // terrain->terrainTypes[2].item = registry.getItem("tin_ore");
+            // terrain->terrainTypes[2].texture = registry.getTexture("coal_ore");
+
+            makeAluminumPlate.result = ItemStack(registry.getItem("tin_plate"),1);
+
+            makeAluminumPlate.ingredients.push_back(ItemStack(registry.getItem("tin_ore"),5));
+            makeAluminumPlate.time = 10;
+
+            makeFurnace.result = ItemStack(registry.getItem("furnace"),1);
+
+            makeFurnace.ingredients.push_back(ItemStack(registry.getItem("stone"),10));
+            makeFurnace.time = 3;
+
+            makeThruster.result = ItemStack(registry.getItem("thruster"),1);
+
+            makeThruster.ingredients.push_back(ItemStack(registry.getItem("tin_plate"),5));
+            makeThruster.time = 5;
+
+            makeCockpit.result = ItemStack(registry.getItem("cockpit"),1);
+
+            makeCockpit.ingredients.push_back(ItemStack(registry.getItem("tin_plate"),3));
+            makeCockpit.time = 5;
+            
+            // spawn player
+            player = world.spawn(Character::makeInstance(playerPrototype.get(),vec3(3.9,1.4,26.1)));
+            player->model = registry.getModel("capsule_thin");
+            player->material = registry.getMaterial("player");
+
+            
+            // UI
+            toolbarWidget.solidSprite = registry.getSprite("item_slot");
+
+
+            inventoryWidget.solid = registry.getSprite("solid");
+            inventoryWidget.font = &font;
+            inventoryWidget.tooltipTextTitle.font = &font;
+
+            furnaceWidget.solid = registry.getSprite("solid");
+            furnaceWidget.font = &font;
+            furnaceWidget.tooltipTextTitle.font = &font;
+
+            itemSlotWidget.sprite = registry.getSprite("item_slot");
+            itemSlotWidget.font = &font;
+            itemSlotWidget.color = Color(0.2,0.2,0.2);
+
+            clearItemSlotWidget.sprite = registry.getSprite("solid");
+            clearItemSlotWidget.font = &font;
+            clearItemSlotWidget.color = Color::clear;
+
+            inventoryWidget.itemSlot = &itemSlotWidget;
+            furnaceWidget.itemSlot = &itemSlotWidget;
+            toolbarWidget.itemSlot = &itemSlotWidget;
+            
+            playerWidget.inventoryWidget = &inventoryWidget;
+            playerWidget.toolbarWidget = &toolbarWidget;
+
+
+            font.texture = registry.getTexture("characters");
+            font.start = '0';
+            font.charSize = vec2(8,12);
+            font.textureSize = vec2(312,12);
+            font.characters = "0123456789x.ABCDEFGHIJKLMNOPQRSTUVWXYZ ";
+
+            fpsText.font = &font;
+
+            // recipes
+            player->recipes.push_back(&makeFurnace);
+            player->recipes.push_back(&makeCockpit);
+            player->recipes.push_back(&makeThruster);
+            
+            FurnaceBlock* furnace = static_cast<FurnaceBlock*>(registry.getBlock("furnace"));
+            furnace->recipes.push_back(&makeAluminumPlate);
+            furnace->widget = &furnaceWidget;
+
+            player->widget = &playerWidget;
+            // wowie
+
+            
+            
+
+            //physicsActor = world.spawn(RigidbodyActor::makeInstance(physicsPrototype,player->getEyePosition(),player->getEyeRotation(),player->getEyeDirection()*20.0f,vec3(0.0f)));
+
+            // lua
+            lua["player"] = player;
+
+            lua.do_file("scripts/start.lua");
 
         }
 
@@ -264,18 +409,110 @@ class GameApplication {
             float dt = (float)glfwGetTime() - lastTime;
             lastTime = glfwGetTime();
 
-            camera.position = vec3(0,0,-10);
+            camera.setAspect(frameWidth,frameHeight);
+            
+            // test inputs
+            //camera.rotate(vec3(mouseDelta.y * dt,mouseDelta.x * dt,0));
+            camera.rotate(vec3(0,dt*-10,0));
 
-            if(input.getKey(GLFW_KEY_SPACE)) {
-                camera.rotate(vec3(0,dt*30,0));
+            player->setCamera(camera);
+            player->processInput(input);
+
+            frametimes[currentFrameTimeIndex] = dt;
+            currentFrameTimeIndex++;
+            if(currentFrameTimeIndex >= 60) {
+                currentFrameTimeIndex = 0;
             }
 
-            if(input.getKeyPressed(GLFW_KEY_P)) {
-                vulkan->printVMAstats();
+            float averageTime = 0;
+            for (size_t i = 0; i < 60; i++)
+            {
+                averageTime += frametimes[i];
+            }
+            averageTime /= 60.0f;
+            
+
+            //std::cout << "starting world frame" << std::endl;
+            //std::cout << StringHelper::toString(player->getPosition()) << std::endl;
+            
+            world.frame(vulkan,dt);
+
+            //std::cout << "ending world frame" << std::endl;
+
+            DrawContext drawContext(interface,*vulkan,input);
+            Rect screenRect = Rect(drawContext.getScreenSize());
+
+            // cursor
+            Sprite solidSprite = registry.getSprite("solid");
+            interface.drawRect(*vulkan,Rect::anchored(Rect::centered(vec2(4,0.5)),screenRect,vec2(0.5,0.5)),Color::white,solidSprite);
+            interface.drawRect(*vulkan,Rect::anchored(Rect::centered(vec2(0.5,4)),screenRect,vec2(0.5,0.5)),Color::white,solidSprite);
+
+            if(player->widget != nullptr) {
+                player->widget->draw(drawContext,*player);
             }
 
-            model.addToRender(vulkan,material,glm::mat4(1.0f));
+            fpsText.draw(drawContext,vec2(0),std::to_string(1.0f/averageTime));
 
+            
+            if(player->inMenu) 
+            {
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            } 
+            else 
+            {
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            }
+
+
+            skybox.addRenderables(*vulkan,camera);
+
+            // if(input.getKeyPressed(GLFW_KEY_R)) {
+            //     terrain->loadChunks(player->position,3,vulkan);
+            // }
+            // if(input.getKeyPressed(GLFW_KEY_G)) {
+            //     auto hitOpt = world.raycast(player->getLookRay(),100);
+            //     if(hitOpt) {
+            //         auto hit = hitOpt.value();
+
+            //         auto terrain =  dynamic_cast<Terrain*>(hit.actor);
+            //         if(terrain != nullptr) {
+            //             terrain->selectedChunk = hit.component;
+            //             std::cout << terrain->getDebugInfo(hit.component) << std::endl;
+            //         }
+                    
+            //         Debug::drawRay(hit.hit.point,hit.hit.normal,Color::green);
+            //         Debug::drawPoint(hit.hit.point);
+            //     }
+            // }
+
+            if(input.getKeyPressed(GLFW_KEY_R)) {
+                world.spawn(RigidbodyActor::makeInstance(physicsPrototype,player->getEyePosition()+player->getEyeDirection()*2.0f,player->getRotation(),player->getEyeDirection()*20.0f,vec3(0)));
+                // physicsActor->setPosition(player->getEyePosition());
+                // physicsActor->setRotation(player->getEyeRotation());
+                // physicsActor->velocity = (player->getEyeDirection()*20.0f);
+                // physicsActor->angularVelocity = vec3(0);
+            }
+
+            if(input.getKeyPressed(GLFW_KEY_F2)) {
+                world.pausePhysics = !world.pausePhysics;
+            }
+            if(input.getKeyPressed(GLFW_KEY_RIGHT)) {
+                world.stepPhysics = true;
+            }
+
+            // auto hit = Physics::intersectCapsuleBox(player->position,player->getEyePosition(),player->radius,vec3(0),vec3(0.5f));
+            // if(hit) {
+            //     Physics::resolveBasic(player->position,hit.value());
+            // }
+            if(input.getKeyPressed(GLFW_KEY_RIGHT)) {
+                chunkLoadPaused = false;
+            }
+            
+
+            
+
+            Debug::addRenderables(*vulkan);
+            
             // do all the end of frame code in vulkan
             vulkan->render(camera);
             vulkan->clearObjects();
@@ -287,9 +524,19 @@ class GameApplication {
             input.clearInputBuffers();
 
             //FrameMark;
-            //FrameMark;
             
 
+        }
+
+        void chunkTask() {
+            while(!closing) {
+                if(!chunkLoadPaused) {
+                    terrain->loadChunks(&world,player->getPosition(),1,vulkan);
+                }
+                //std::cout << "loading chunks" << std::endl;
+                //std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            }
+            
         }
 
         

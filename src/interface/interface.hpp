@@ -13,8 +13,8 @@
 using glm::ivec2, glm::vec2;
 
 struct UIVertex {
-    vec2 pos;
-    vec2 uv;
+    vec2 pos= {};
+    vec2 uv = {};
     UIVertex () {}
     UIVertex (vec2 pos,vec2 uv) : pos(pos), uv(uv) {}
 
@@ -48,8 +48,8 @@ struct UIMaterialData {
 
 struct UIExtraPushData {
     vec4 color;
-    vec2 spriteOffset;
-    vec2 spriteSize;
+    vec2 spriteOffset= {};
+    vec2 spriteSize = {};
     TextureID texture; // at the end for alignment
     UIExtraPushData(vec4 color,Sprite sprite) : color(color), spriteOffset(sprite.rect.position),spriteSize(sprite.rect.size),texture(sprite.texture) {}
 };
@@ -60,7 +60,7 @@ class Interface {
         MeshBuffer quadMesh;
         Material material = Material::none;
         bool readyToRender = false;
-        float scale = 10;
+        float scale = 6;
 
         Interface() {
 
@@ -120,7 +120,7 @@ struct DrawContext {
         }
 
         vec2 getMousePosition() {
-            return (input.currentMousePosition / interface.scale) * 2.0f; // double size because of mac retina lol;
+            return (input.currentMousePosition / interface.scale);
         }
 
         Input& getInput() {

@@ -44,7 +44,7 @@ class Character : public Actor {
         //     InMenu
         // } action = Action::Neutral;
 
-        vec3 lastPosition;
+        vec3 lastPosition = {};
 
 
         // prototype
@@ -69,10 +69,10 @@ class Character : public Actor {
 
         bool noClip = false;
 
-        vec3 moveInput;
+        vec3 moveInput = {};
 
-        vec3 velocity;
-        vec3 rotationVelocity;
+        vec3 velocity = {};
+        vec3 rotationVelocity = {};
         
 
         Item* currentToolItem = nullptr;
@@ -92,11 +92,11 @@ class Character : public Actor {
         } heldItemData;
 
         Construction* ridingConstruction = nullptr;
-        ivec3 ridingConstructionPoint;
-        quat ridingConstructionRotation;
+        ivec3 ridingConstructionPoint = {};
+        quat ridingConstructionRotation = {};
 
         vec3 thirdPersonCameraOffset = vec3(1,0.5,10);
-        vec3 thirdPersonCameraRot;
+        vec3 thirdPersonCameraRot = {};
 
         Inventory inventory;
 
@@ -173,6 +173,8 @@ class Character : public Actor {
             } else {
                 world->physics_system.GetBodyInterface().SetObjectLayer(body->GetID(),Layers::DISABLED);
             }
+            auto bounds = body->GetWorldSpaceBounds();
+            // Debug::drawCube(Physics::toGlmVec(bounds.GetCenter()),Physics::toGlmVec(bounds.GetSize()),glm::identity<quat>(),Color::green,0.01f);
         }
 
         virtual void postPhysics(World* world) {
