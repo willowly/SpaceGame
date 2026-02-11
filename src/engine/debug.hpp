@@ -10,6 +10,8 @@
 
 #include <fstream>
 
+#include <array>
+
 using std::vector, std::string, glm::vec3;
 
 enum InfoPriority{

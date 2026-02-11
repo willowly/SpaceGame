@@ -23,8 +23,8 @@
 #include <thread>
 #include <chrono>
 
-#include <tracy/Tracy.hpp>
-#include <tracy/TracyVulkan.hpp>
+// #include <tracy/Tracy.hpp>
+// #include <tracy/TracyVulkan.hpp>
 
 #include "interface/actor/player-widget.hpp"
 #include "interface/block/furnace-widget.hpp"
@@ -68,17 +68,16 @@ class GameApplication {
 
             setup();
 
-            std::thread thread(&GameApplication::chunkTask,this);
-            
-
             while (!glfwWindowShouldClose(window)) {
                 loop();
             }
 
+
+
             
             
             closing = true;
-            thread.join();
+            //thread.join();
             vulkan->waitIdle();
 
         }
@@ -390,7 +389,7 @@ class GameApplication {
         void loop() 
         {
 
-            ZoneScoped;
+            //ZoneScoped;
 
             // Get inputs, window resize, and more
             glfwPollEvents();
@@ -415,8 +414,7 @@ class GameApplication {
             //std::cout << "starting world frame" << std::endl;
             
             world.frame(vulkan,dt);
-            
-            triangleMesh.addToRender(vulkan,registry.getMaterial("grid"),glm::mat4(1.0f));
+         
 
             //std::cout << "ending world frame" << std::endl;
 
@@ -492,7 +490,8 @@ class GameApplication {
 
             input.clearInputBuffers();
 
-            FrameMark;
+            //FrameMark;
+            //FrameMark;
             
 
         }

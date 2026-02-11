@@ -24,10 +24,13 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 
-#include <tracy/Tracy.hpp>
-#include <tracy/TracyVulkan.hpp>
+// #include <tracy/Tracy.hpp>
+// #include <tracy/TracyVulkan.hpp>
 
 #include <chrono>
+#include <mutex>
+#include <array>
+#include <algorithm>
 
 #include "camera.hpp"
 
@@ -64,7 +67,7 @@ struct Image {
 
 };
 
-typedef uint TextureID;
+typedef unsigned int TextureID;
 typedef VkDeviceAddress MaterialHandle;
 
 
@@ -114,7 +117,7 @@ struct MeshBuffer : Buffer {
 
 struct MeshPushConstant {
     glm::mat4 matrix = glm::mat4(1.0f);
-    uint frameIndex;
+    unsigned int frameIndex;
     MaterialHandle materialData;
     char extraData[48];
 
@@ -175,7 +178,7 @@ class Vulkan {
             createDescriptorPool();
             createDescriptorSets(); // also includes the texture
 
-            tracyCtx = TracyVkContext(physicalDevice, device, graphicsQueue, commandBuffers[0]);
+            //tracyCtx = TracyVkContext(physicalDevice, device, graphicsQueue, commandBuffers[0]);
 
             //initImGui();
             
@@ -236,7 +239,7 @@ class Vulkan {
                 vkDestroyDebugUtilsMessengerEXT(vkInstance, debugMessenger, nullptr);
             }
 
-            TracyVkDestroy(tracyCtx);
+            //TracyVkDestroy(tracyCtx);
             
             
             vkDestroyPipelineLayout(device,pipelineLayout,nullptr);
@@ -279,7 +282,7 @@ class Vulkan {
 
         void render(const Camera& camera) {
 
-            ZoneScoped;
+            //ZoneScoped;
 
             
            
@@ -332,7 +335,7 @@ class Vulkan {
             }
 
             {
-            TracyVkZone(tracyCtx,commandBuffers[frameIndex],"DrawFrame");
+            //TracyVkZone(tracyCtx,commandBuffers[frameIndex],"DrawFrame");
 
             VkRenderPassBeginInfo renderPassInfo{};
             renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -405,7 +408,7 @@ class Vulkan {
 
             vkCmdEndRenderPass(commandBuffer);
 
-            TracyVkCollect(tracyCtx,commandBuffer);
+            //TracyVkCollect(tracyCtx,commandBuffer);
             }
 
             vkEndCommandBuffer(commandBuffer);
@@ -529,7 +532,7 @@ class Vulkan {
         template<typename Vertex>
         MeshBuffer createMeshBuffers(std::vector<Vertex>& vertices,std::vector<uint16_t>& indices) {
 
-            ZoneScoped;
+            //ZoneScoped;
             
             VkDeviceSize vertexBufferSize = sizeof(vertices[0]) * vertices.size();
             VkDeviceSize indexBufferSize = sizeof(indices[0]) * indices.size();
@@ -831,8 +834,8 @@ class Vulkan {
         std::vector<VkSemaphore> submitSemaphores;
         VkFence inFlightFences[FRAMES_IN_FLIGHT];
         VkCommandBuffer commandBuffers[FRAMES_IN_FLIGHT];
-        uint frameIndex = 0;
-        uint testIndex = 0;
+        unsigned int frameIndex = 0;
+        unsigned int testIndex = 0;
 
         bool frameBufferResized = false;
 
@@ -866,7 +869,7 @@ class Vulkan {
 
         VkDebugUtilsMessengerEXT debugMessenger;
 
-        TracyVkCtx tracyCtx;
+        //TracyVkCtx tracyCtx;
 
         void createVkInstance(string name) {
 
@@ -1338,10 +1341,9 @@ class Vulkan {
             createInfo.pQueueCreateInfos = queueCreateInfos.data();
             createInfo.pNext = &deviceFeatures;
 
-            if(true) { //we have to check for this at some point
-                deviceExtensions.push_back("VK_KHR_portability_subset");
-                //deviceExtensions.push_back("VK_KHR_get_physical_device_properties2");
-            }
+            #ifdef __APPLE__
+                deviceExtensions.push_back("VK_KHR_portability_subset"); //I think this is for moltenVK
+            #endif
 
             createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
             createInfo.ppEnabledExtensionNames = deviceExtensions.data();
@@ -1353,8 +1355,39 @@ class Vulkan {
                 createInfo.enabledLayerCount = 0;
             }
 
-            if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &device) != VK_SUCCESS) {
-                throw std::runtime_error("failed to create logical device!");
+            uint32_t count = 0;
+            auto enumerateExtensionResult = vkEnumerateDeviceExtensionProperties(physicalDevice,nullptr, &count, nullptr);
+            if (enumerateExtensionResult != VK_SUCCESS) {
+                throw std::runtime_error("failed to get supported extensions count! " + enumerateExtensionResult);
+            }
+
+            std::vector<VkExtensionProperties> supportedExtensions(count);
+            enumerateExtensionResult = vkEnumerateDeviceExtensionProperties(physicalDevice,nullptr, &count, supportedExtensions.data());
+            if (enumerateExtensionResult != VK_SUCCESS) {
+                throw std::runtime_error("failed to get supported extensions! " + enumerateExtensionResult);
+            }
+
+            for (auto instanceExtension : deviceExtensions)
+            {
+                bool supported = false;
+                for (auto supportedExtension : supportedExtensions)
+                {
+                    if(supportedExtension.extensionName == (string)instanceExtension) { // convert to string to make sure the compare works
+                        supported = true; // the extension is found
+                        break;
+                    }
+                }
+                if(!supported) {
+                    //the extension was not found
+                    throw std::runtime_error("missing extension: " + (string)instanceExtension);
+                }
+                
+            }
+            
+
+            auto deviceResult = vkCreateDevice(physicalDevice, &createInfo, nullptr, &device);
+            if (deviceResult != VK_SUCCESS) {
+                 throw std::runtime_error("failed to create logical device! " + deviceResult);
             }
 
             vkGetDeviceQueue(device, families.graphicsFamily.value(), 0, &graphicsQueue);
@@ -1691,9 +1724,9 @@ class Vulkan {
             beginCommands(transfer.commandBuffer);
 
             {
-            TracyVkZone(tracyCtx,transfer.commandBuffer,"Copy Buffer");
-            TracyPlotConfig("Buffer Size",tracy::PlotFormatType::Memory,true,true,0);
-            TracyPlot("Buffer Size", (int64_t)size);
+            // TracyVkZone(tracyCtx,transfer.commandBuffer,"Copy Buffer");
+            // TracyPlotConfig("Buffer Size",tracy::PlotFormatType::Memory,true,true,0);
+            // TracyPlot("Buffer Size", (int64_t)size);
 
             VkBufferCopy copyRegion{};
             copyRegion.srcOffset = 0; // Optional
@@ -1701,7 +1734,7 @@ class Vulkan {
             copyRegion.size = size;
             vkCmdCopyBuffer(transfer.commandBuffer, transfer.stagingBuffer.buffer, dstBuffer.buffer, 1, &copyRegion);
 
-            TracyVkCollect(tracyCtx,transfer.commandBuffer);
+            //TracyVkCollect(tracyCtx,transfer.commandBuffer);
             }
             
             submitCommands(transfer.commandBuffer,transfer.fence);

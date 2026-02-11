@@ -240,7 +240,7 @@ class Terrain : public Actor {
 
     virtual std::optional<RaycastHit> raycast(Ray ray, float dist) {
 
-        ZoneScopedN("terrain raycast");
+        //ZoneScopedN("terrain raycast");
         Ray localRay = Ray(inverseTransformPoint(ray.origin),inverseTransformDirection(ray.direction));
 
         std::optional<RaycastHit> result = std::nullopt;

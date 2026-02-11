@@ -2,6 +2,7 @@
 
 #include "vulkan.hpp"
 #include "engine/debug.hpp"
+#include <array>
 
 struct SkyboxVertex {
     vec3 pos;

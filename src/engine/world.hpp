@@ -4,7 +4,7 @@
 
 #include "actor/actor.hpp"
 #include <memory>
-#include <tracy/Tracy.hpp>
+// #include <tracy/Tracy.hpp>
 #include "physics/physics-body.hpp"
 
 #include <Jolt/Jolt.h>
@@ -64,14 +64,14 @@ class World {
 
             temp_allocator = new JPH::TempAllocatorImpl(10 * 1024 * 1024);
             jobSystem = new JPH::JobSystemThreadPool(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers, std::thread::hardware_concurrency() - 1);
-            const uint cMaxBodies = 1024;
+            const unsigned int cMaxBodies = 1024;
 
             // This determines how many mutexes to allocate to protect rigid bodies from concurrent access. Set it to 0 for the default settings.
-            const uint cNumBodyMutexes = 0;
+            const unsigned int cNumBodyMutexes = 0;
             // Note: This value is low because this is a simple test. For a real project use something in the order of 65536.
-            const uint cMaxBodyPairs = 1024;
+            const unsigned int cMaxBodyPairs = 1024;
             // Note: This value is low because this is a simple test. For a real project use something in the order of 10240.
-            const uint cMaxContactConstraints = 1024;
+            const unsigned int cMaxContactConstraints = 1024;
 
             physics_system.Init(cMaxBodies, cNumBodyMutexes, cMaxBodyPairs, cMaxContactConstraints, broad_phase_layer_interface, object_vs_broadphase_layer_filter, object_vs_object_layer_filter);
 
@@ -141,7 +141,7 @@ class World {
         // do rendering, step and everything else
         void frame(Vulkan* vulkan,float dt) {
             
-            ZoneScoped;
+            //ZoneScoped;
             
             float clock = glfwGetTime();
             addRenderables(vulkan,dt);
@@ -163,7 +163,7 @@ class World {
         }
 
         void addRenderables(Vulkan* vulkan,float dt) {
-            ZoneScoped;
+            //ZoneScoped;
             for (auto& actor : actors)
             {
                 actor->addRenderables(vulkan,dt);
@@ -172,7 +172,7 @@ class World {
         }
 
         void step(float dt) {
-            ZoneScoped;
+            //ZoneScoped;
             
             iteratingActors++;
             for (auto& actor : actors)
@@ -204,7 +204,7 @@ class World {
         }
 
         std::optional<WorldRaycastHit> raycast(Ray ray,float dist) {
-            ZoneScoped;
+            //ZoneScoped;
             std::optional<WorldRaycastHit> result = std::nullopt;
             iteratingActors++;
             for (auto& actor : actors)
@@ -228,7 +228,7 @@ class World {
         }
 
         void collideBasic(Actor* actor,float height,float radius) {
-            ZoneScoped;
+            //ZoneScoped;
             iteratingActors++;
             for (auto& colliderActor : actors)
             {
