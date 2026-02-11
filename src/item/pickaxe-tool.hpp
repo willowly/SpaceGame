@@ -79,9 +79,9 @@ class PickaxeTool : public Tool {
                 user.inventory.give(stack);
             }
 
-            for(auto& stack : results.items) {
-                user.inventory.give(stack);
-            }
+            // for(auto& stack : results.items) {
+            //     user.inventory.give(stack);
+            // }
         }
 
         virtual void equip(Character& user) {

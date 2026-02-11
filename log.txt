@@ -1,0 +1,4 @@
+[WARNING] no item prototype called "tin_plate" ()
+[WARNING] no item prototype called "furnace_item" ()
+[WARNING] no item prototype called "thruster" ()
+[WARNING] no item prototype called "cockpit" ()

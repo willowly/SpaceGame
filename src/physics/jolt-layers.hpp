@@ -17,7 +17,9 @@ namespace Layers
 {
 	static constexpr JPH::ObjectLayer NON_MOVING = 0;
 	static constexpr JPH::ObjectLayer MOVING = 1;
-	static constexpr JPH::ObjectLayer NUM_LAYERS = 2;
+	static constexpr JPH::ObjectLayer PLAYER = 2;
+	static constexpr JPH::ObjectLayer DISABLED = 3;
+	static constexpr JPH::ObjectLayer NUM_LAYERS = 4;
 };
 
 /// Class that determines if two object layers can collide
@@ -32,6 +34,10 @@ public:
 			return inObject2 == Layers::MOVING; // Non moving only collides with moving
 		case Layers::MOVING:
 			return true; // Moving collides with everything
+		case Layers::PLAYER:
+			return true; // Moving collides with everything
+		case Layers::DISABLED:
+			return false; // collides with nothing
 		default:
 			JPH_ASSERT(false);
 			return false;
@@ -48,7 +54,8 @@ namespace BroadPhaseLayers
 {
 	static constexpr JPH::BroadPhaseLayer NON_MOVING(0);
 	static constexpr JPH::BroadPhaseLayer MOVING(1);
-	static constexpr unsigned int NUM_LAYERS(2);
+	static constexpr JPH::BroadPhaseLayer DISABLED(2);
+	static constexpr unsigned int NUM_LAYERS(3);
 };
 
 // BroadPhaseLayerInterface implementation
@@ -61,6 +68,8 @@ public:
 		// Create a mapping table from object to broad phase layer
 		mObjectToBroadPhase[Layers::NON_MOVING] = BroadPhaseLayers::NON_MOVING;
 		mObjectToBroadPhase[Layers::MOVING] = BroadPhaseLayers::MOVING;
+		mObjectToBroadPhase[Layers::PLAYER] = BroadPhaseLayers::MOVING;
+		mObjectToBroadPhase[Layers::DISABLED] = BroadPhaseLayers::DISABLED;
 	}
 
 	virtual unsigned int					GetNumBroadPhaseLayers() const override
@@ -81,6 +90,7 @@ public:
 		{
 		case (JPH::BroadPhaseLayer::Type)BroadPhaseLayers::NON_MOVING:	return "NON_MOVING";
 		case (JPH::BroadPhaseLayer::Type)BroadPhaseLayers::MOVING:		return "MOVING";
+		case (JPH::BroadPhaseLayer::Type)BroadPhaseLayers::DISABLED:		return "DISABLED";
 		default:													JPH_ASSERT(false); return "INVALID";
 		}
 	}
@@ -100,11 +110,55 @@ public:
 		{
 		case Layers::NON_MOVING:
 			return inLayer2 == BroadPhaseLayers::MOVING;
+		case Layers::PLAYER:
+			return true;
 		case Layers::MOVING:
 			return true;
+		case Layers::DISABLED:
+			return false;
 		default:
 			JPH_ASSERT(false);
 			return false;
 		}
+	}
+};
+
+using BroadPhaseLayerTable = std::array<bool, BroadPhaseLayers::NUM_LAYERS>;
+
+class BroadPhaseLayerFilter : public JPH::BroadPhaseLayerFilter
+{
+public:
+
+	BroadPhaseLayerTable table;
+
+	BroadPhaseLayerFilter(BroadPhaseLayerTable table) : table(table) { }
+	// static const BroadPhaseLayerFilter movingOnly;
+	// static const BroadPhaseLayerFilter staticOnly;
+
+	virtual bool ShouldCollide(JPH::BroadPhaseLayer inLayer) const override
+	{
+		return table[inLayer.GetValue()];
+	}
+};
+
+using ObjectLayerTable = std::array<bool, Layers::NUM_LAYERS>;
+
+class ObjectLayerFilter : public JPH::ObjectLayerFilter
+{
+public:
+
+	ObjectLayerTable table;
+
+	ObjectLayerFilter(ObjectLayerTable table) : table(table) {
+
+	}
+
+
+	// static const BroadPhaseLayerFilter movingOnly;
+	// static const BroadPhaseLayerFilter staticOnly;
+
+	virtual bool ShouldCollide(JPH::ObjectLayer inLayer) const override
+	{
+		return table[inLayer];
 	}
 };

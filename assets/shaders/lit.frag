@@ -1,5 +1,6 @@
 #version 450
 
+
 #include "scene_data.hlsl"
 
 layout(location = 0) in vec3 normal;

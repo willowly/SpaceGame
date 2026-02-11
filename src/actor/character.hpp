@@ -19,9 +19,17 @@
 
 #include <GLFW/glfw3.h>
 
+#include "physics/jolt-conversions.hpp"
 
 #include "interface/actor/actor-widget.hpp"
 #include "interface/menu-object.hpp"
+
+#include <Jolt/Jolt.h>
+
+#include <Jolt/Physics/Character/Character.h>
+#include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
+
+#include "physics/jolt-userdata.hpp"
 
 
 class Character : public Actor {
@@ -35,6 +43,8 @@ class Character : public Actor {
         //     Neutral,
         //     InMenu
         // } action = Action::Neutral;
+
+        vec3 lastPosition;
 
 
         // prototype
@@ -116,6 +126,9 @@ class Character : public Actor {
         ActorWidget<Character>* widget;
 
 
+        JPH::Body* body;
+
+
         void addRenderables(Vulkan* vulkan,float dt) {
             if(ridingConstruction != nullptr) return;
             ItemStack* currentTool = inventory.getStack(currentToolItem);
@@ -126,6 +139,48 @@ class Character : public Actor {
             if(thirdPerson) {
                 Actor::addRenderables(vulkan,dt);
             }
+        }
+
+        virtual void spawn(World* world) {
+
+            JPH::Shape::ShapeResult result;
+            auto capsuleSettings = JPH::CapsuleShapeSettings(height/2,radius);
+            JPH::BodyCreationSettings bodySettings(new JPH::CapsuleShape(capsuleSettings,result), Physics::toJoltVec(position), Physics::toJoltQuat(position), JPH::EMotionType::Dynamic, Layers::MOVING);
+
+            bodySettings.mGravityFactor = 0.0f;
+
+            // bodySettings.mUserData = ActorUserData(this).asUInt();
+            bodySettings.mObjectLayer = Layers::PLAYER;
+            bodySettings.mAllowedDOFs = (JPH::EAllowedDOFs::TranslationX | JPH::EAllowedDOFs::TranslationY | JPH::EAllowedDOFs::TranslationZ);
+
+            
+            body = world->physics_system.GetBodyInterface().CreateBody(bodySettings);
+            
+            world->physics_system.GetBodyInterface().AddBody(body->GetID(),JPH::EActivation::Activate);
+
+            body->SetLinearVelocity(Physics::toJoltVec(velocity));
+
+
+        }
+
+        virtual void prePhysics(World* world) {
+            world->physics_system.GetBodyInterface().SetPosition(body->GetID(),Physics::toJoltVec(position),JPH::EActivation::DontActivate);
+            world->physics_system.GetBodyInterface().SetRotation(body->GetID(),Physics::toJoltQuat(rotation).Normalized(),JPH::EActivation::DontActivate);
+            body->SetLinearVelocity(Physics::toJoltVec(velocity));
+            body->SetAngularVelocity(Physics::toJoltVec(vec3(0.0)));
+            if(ridingConstruction == nullptr) {
+                world->physics_system.GetBodyInterface().SetObjectLayer(body->GetID(),Layers::PLAYER);
+            } else {
+                world->physics_system.GetBodyInterface().SetObjectLayer(body->GetID(),Layers::DISABLED);
+            }
+        }
+
+        virtual void postPhysics(World* world) {
+            lastPosition = position;
+            position = Physics::toGlmVec(body->GetPosition());
+            rotation = Physics::toGlmQuat(body->GetRotation());
+            velocity = Physics::toGlmVec(body->GetLinearVelocity());
+            //physicsCharacter->PostSimulation(0.01f); // small number to be on the floor
         }
 
         void step(World* world,float dt) {
@@ -178,9 +233,9 @@ class Character : public Actor {
                 clickInput = false;
                 interactInput = false;
 
-                if(!noClip) {
-                    world->collideBasic(this,height,radius);
-                }
+                // if(!noClip) {
+                //     world->collideBasic(this,height,radius);
+                // }
             }
 
             if(currentRecipe != nullptr) {
@@ -202,6 +257,7 @@ class Character : public Actor {
             if(ridingConstruction != nullptr) {
                 dismount();
             }
+            //body->
             thirdPerson = true;
             ridingConstruction = construction;
             ridingConstructionPoint = point;
@@ -210,6 +266,7 @@ class Character : public Actor {
         }
 
         void dismount() {
+            //body->SetLayer(Layers::MOVING);
             position += ridingConstruction->transformDirection(vec3(0,1,0));
             ridingConstruction->resetTargets();
             ridingConstruction = nullptr;

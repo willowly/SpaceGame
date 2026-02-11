@@ -13,8 +13,15 @@
 #include <thread>
 #include <chrono>
 
-using std::unique_ptr;
+using std::unique_ptr, std::string;
 using glm::vec3, glm::ivec4,glm::vec4;
+
+#include <Jolt/Jolt.h>
+
+#include <Jolt/Physics/Collision/Shape/MeshShape.h>
+#include <Jolt/Physics/Body/BodyCreationSettings.h>
+
+#include "physics/jolt-conversions.hpp"
 
 
 class Terrain : public Actor {
@@ -36,22 +43,32 @@ class Terrain : public Actor {
 
     int size = 5;
 
+    unsigned int nextChunkId;
+    
     public:
-
+    
+    // DEBUG
+    int selectedChunk = 0;
+    // DEBUG
     
 
-
-    void addChunk(ivec3 pos,Vulkan* vulkan) {
+    // adds a chunk to the terrain. Able to be called on loader thread
+    void addChunk(World* world,ivec3 pos,Vulkan* vulkan) {
         
         LocationKey key(pos);
         ivec3 offset = pos*chunkSize;
+
         chunksMtx.lock();
-        chunks.emplace(std::piecewise_construct,std::make_tuple(key),std::make_tuple(offset,chunkSize,cellSize));
-        chunksMtx.unlock();
+        chunks.emplace(std::piecewise_construct,std::make_tuple(key),std::make_tuple(offset,chunkSize,cellSize,nextChunkId));
         auto& chunk = chunks.at(key);
+        chunksMtx.unlock();
+
+        nextChunkId++;
+
         chunk.generateData(settings);
-        chunks.at(key).generateMesh();
-        connect(chunk,pos,vulkan);
+        //chunk.generateMesh();
+        
+        connect(chunk,pos,vulkan); // this will end up generating the mesh for us :)
 
         
     }
@@ -63,9 +80,20 @@ class Terrain : public Actor {
         return glm::round(position/((float)chunkSize*cellSize));
     }
 
-    
+    string getDebugInfo(int component = -1) {
+        string r;
+        r += std::format("terrain \n");
 
-    void loadChunks(vec3 position,int distance,Vulkan* vulkan) {
+        std::scoped_lock lock(chunksMtx);
+        for(auto& pair : chunks) {
+            if(pair.second.getID() == component) {
+                r += pair.second.getDebugInfo();
+            }
+        }
+        return r;
+    }
+
+    void loadChunks(World* world,vec3 position,int distance,Vulkan* vulkan) {
 
         position = inverseTransformPoint(position);
         ivec3 pos = glm::floor(position/((float)chunkSize*cellSize));
@@ -88,7 +116,8 @@ class Terrain : public Actor {
                         continue;
                     }
                     if(!chunks.contains(key)) {
-                        addChunk(chunkPos,vulkan);
+                        addChunk(world,chunkPos,vulkan);
+                        return;
                     }
                    
                 }
@@ -119,9 +148,29 @@ class Terrain : public Actor {
         // }
     }
 
+    void prePhysics(World* world) override {
+
+        // ZoneScopedN("prePhysicsTerrain")
+        // Clock clock;
+        // std::scoped_lock lock(chunksMtx);
+        // auto time = clock.getTime();
+        // if(time > 0.01f) {
+        //     Debug::warn(" main thread blocked for " + std::to_string((int)(time*1000)) + "ms");
+        // }
+
+        
+        // for(auto& pair : chunks) {
+        //     auto& chunk = pair.second;
+        //     ivec3 pos = pair.first.asVec3();
+        //     vec3 offset = pos*chunkSize;
+        //     chunk.updatePhysics(world,this,position + (vec3)offset*cellSize);
+        // }
+    }
+
     
     void connect(TerrainChunk& chunk,ivec3 pos,Vulkan* vulkan) {
 
+        chunksMtx.lock();
         LocationKey keyPosX(pos+ivec3(1,0,0));
         if(chunks.contains(keyPosX)) {
             chunk.connectPosX(&chunks.at(keyPosX));
@@ -149,7 +198,9 @@ class Terrain : public Actor {
             chunks.at(keyNegZ).connectPosZ(&chunk);
         }
 
-        
+        std::vector<TerrainChunk*> chunksSurrounding; 
+
+        chunksSurrounding.reserve(8);
 
         for (int z = 0; z <= 1; z++)
         {
@@ -160,10 +211,17 @@ class Terrain : public Actor {
                     ivec3 chunkPos = pos - ivec3(x,y,z);
                     LocationKey key(chunkPos);
                     if(chunks.contains(key)) {
-                        chunks.at(key).generateMesh();
+                        chunksSurrounding.push_back(&chunks.at(key));
+                        
                     }
                 }
             }
+        }
+        chunksMtx.unlock();
+
+        // to leave things locked for less time
+        for(auto chunkRegen : chunksSurrounding) {
+            chunkRegen->generateMesh(true);
         }
         
     }
@@ -180,7 +238,8 @@ class Terrain : public Actor {
     }
 
     TerraformResults terraformSphere(vec3 pos,float radius,float change) {
-
+            
+        chunksMtx.lock();
         TerraformResults results;
         vec3 localPosition = inverseTransformPoint(pos);
 
@@ -192,6 +251,7 @@ class Terrain : public Actor {
             auto& chunk = pair.second;
             chunk.generateMesh(); //only generates if it needs an update
         }
+        chunksMtx.unlock();
 
         return results;
 
@@ -225,11 +285,21 @@ class Terrain : public Actor {
     //     }
     // }
 
-    virtual void addRenderables(Vulkan* vulkan,float dt) {
-        
+    virtual void addRenderables(Vulkan* vulkan,float dt) override {
+
+        Clock clock;
+        std::scoped_lock lock(chunksMtx);
+        auto time = clock.getTime();
+        if(time > 0.01f) {
+            Debug::warn(" render thread blocked for " + std::to_string((int)(time*1000)) + "ms");
+        }
+
         for(auto& pair : chunks) {
             auto& chunk = pair.second;
             chunk.addRenderables(vulkan,dt,position,material);
+            if(chunk.getID() == selectedChunk) {
+                chunk.drawDebug(position);
+            }
         }
         //std::cout << "render time: " << (float)glfwGetTime() - clock << std::endl;
     }
@@ -240,7 +310,13 @@ class Terrain : public Actor {
 
     virtual std::optional<RaycastHit> raycast(Ray ray, float dist) {
 
+
+
         //ZoneScopedN("terrain raycast");
+
+        std::unique_lock lock(chunksMtx,std::defer_lock);
+
+
         Ray localRay = Ray(inverseTransformPoint(ray.origin),inverseTransformDirection(ray.direction));
 
         std::optional<RaycastHit> result = std::nullopt;

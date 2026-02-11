@@ -11,7 +11,7 @@
 #include "helper/math-helper.hpp"
 #include "helper/string-helper.hpp"
 #include "engine/world.hpp"
-#include "physics/physics-body.hpp"
+#include "physics/jolt-physics-body.hpp"
 
 #include <Jolt/Jolt.h>
 
@@ -26,7 +26,7 @@
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Body/BodyActivationListener.h>
 
-#include "helper/jolt-helper.hpp"
+#include "physics/jolt-conversions.hpp"
 
 using std::optional,glm::vec3,glm::mat3,MathHelper::lerp;
 
@@ -50,15 +50,6 @@ class RigidbodyActor : public Actor {
         vec3 angularVelocity;
 
         JPH::Body *body;
-        
-        virtual void setPosition(vec3 position) {
-            this->position = position;
-            //body->move (JHLP::toJoltVec(position));
-        }
-        virtual void setRotation(quat rotation) {
-            this->rotation = rotation;
-            //body->SetRotation(JHLP::toJoltQuat(rotation));
-        }
 
         static std::unique_ptr<RigidbodyActor> makeDefaultPrototype() {
             auto ptr = new RigidbodyActor(nullptr,Material::none);
@@ -69,6 +60,8 @@ class RigidbodyActor : public Actor {
             auto instance = makeInstanceFromPrototype<RigidbodyActor>(prototype);
             instance->position = position;
             instance->rotation = rotation;
+            instance->velocity = velocity;
+            instance->angularVelocity = angularVelocity;
 
             // update body
             return instance;
@@ -76,39 +69,48 @@ class RigidbodyActor : public Actor {
 
         virtual void spawn(World* world) {
 
-            JPH::BodyCreationSettings bodySettings(new JPH::BoxShape(JPH::Vec3(1.0f, 1.0f, 1.0f)), JHLP::toJoltVec(position), JHLP::toJoltQuat(position), JPH::EMotionType::Dynamic, Layers::MOVING);
+            JPH::BodyCreationSettings bodySettings(new JPH::BoxShape(JPH::Vec3(1.0f, 1.0f, 1.0f)), Physics::toJoltVec(position), Physics::toJoltQuat(position), JPH::EMotionType::Dynamic, Layers::MOVING);
 
-            body = world->physics_system.GetBodyInterfaceNoLock().CreateBody(bodySettings);
-            world->physics_system.GetBodyInterfaceNoLock().AddBody(body->GetID(),JPH::EActivation::Activate);
+            body = world->physics_system.GetBodyInterface().CreateBody(bodySettings);
+            world->physics_system.GetBodyInterface().AddBody(body->GetID(),JPH::EActivation::Activate);
 
-            body->SetLinearVelocity(JHLP::toJoltVec(velocity));
-            body->SetAngularVelocity(JHLP::toJoltVec(angularVelocity));
+            body->SetLinearVelocity(Physics::toJoltVec(velocity));
+            body->SetAngularVelocity(Physics::toJoltVec(angularVelocity));
+            body->SetRestitution(0.1f);
+            body->SetFriction(2.0);
 
 
         }
 
-        virtual void step(World* world,float dt) {
+        void step(World* world,float dt) {
 
-            position = JHLP::toGlmVec(body->GetPosition());
-            rotation = JHLP::toGlmQuat(body->GetRotation());
-
-            std::cout << StringHelper::toString(position) << std::endl;
-            std::cout << StringHelper::toString(JHLP::toGlmVec(body->GetLinearVelocity())) << std::endl;
             
-            // we aren't doing any modifications just yet
-
-            // body.setPosition(position);
-            // body.setRotation(rotation);
             
         }
+
+        virtual void prePhysics(World* world) {
+            world->physics_system.GetBodyInterface().SetPosition(body->GetID(),Physics::toJoltVec(position),JPH::EActivation::DontActivate);
+            world->physics_system.GetBodyInterface().SetRotation(body->GetID(),Physics::toJoltQuat(rotation),JPH::EActivation::DontActivate);
+            world->physics_system.GetBodyInterface().SetLinearVelocity(body->GetID(),Physics::toJoltVec(velocity));
+            world->physics_system.GetBodyInterface().SetAngularVelocity(body->GetID(),Physics::toJoltVec(angularVelocity));
+        }
+
+        virtual void postPhysics(World* world) {
+            position = Physics::toGlmVec(body->GetPosition());
+            rotation = Physics::toGlmQuat(body->GetRotation().Normalized());
+            velocity = Physics::toGlmVec(body->GetLinearVelocity());
+            angularVelocity = Physics::toGlmVec(body->GetAngularVelocity());
+        }
+
+        
         
 
-        virtual void destroy(World* world) {
+        void destroy(World* world) {
             //world->removePhysicsBody(&body);
             Actor::destroy(world);
         }
 
-        virtual void addRenderables(Vulkan* vulkan,float dt) {
+        void addRenderables(Vulkan* vulkan,float dt) {
             if(model == nullptr) return; //if no model, nothing to render :)
             glm::mat4 matrix(1.0f);
             matrix = glm::translate(matrix,position);

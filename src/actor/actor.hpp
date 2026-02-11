@@ -30,19 +30,19 @@ class Actor {
 
         virtual ~Actor() {}
 
-        virtual void setPosition(vec3 position) {
+        void setPosition(vec3 position) {
             this->position = position;
         }
 
-        virtual vec3 getPosition() {
+        vec3 getPosition() {
             return position;
         }
 
-        virtual void setRotation(quat rotation) {
+        void setRotation(quat rotation) {
             this->rotation = rotation;
         }
 
-        virtual quat getRotation() {
+        quat getRotation() {
             return rotation;
         }
 
@@ -88,6 +88,14 @@ class Actor {
         }
 
         virtual void spawn(World* world) {
+
+        }
+
+        virtual void prePhysics(World* world) {
+
+        }
+
+        virtual void postPhysics(World* world) {
 
         }
 
@@ -142,10 +150,4 @@ class Actor {
         }
         
 
-};
-
-
-// 
-struct ActorUserData {
-    Actor* actor;
 };

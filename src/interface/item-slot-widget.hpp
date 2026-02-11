@@ -13,6 +13,7 @@ class ItemSlotWidget {
         Font* font;
 
         float barWidth = 1.0;
+        float padding = 2.0;
 
         bool draw(DrawContext context,Rect rect,std::optional<ItemStack>& stackOpt) {
             if(stackOpt) {
@@ -37,6 +38,7 @@ class ItemSlotWidget {
             if(stack.item == nullptr || stack.amount == 0) {
                 return context.mouseInside(rect);
             }
+            rect = Rect::anchored(Rect::centered(rect.size-padding),rect,vec2(0.5f,0.5f));
             context.drawRect(rect,Color::white,stack.item->getIcon());
 
             if(stack.amount) {

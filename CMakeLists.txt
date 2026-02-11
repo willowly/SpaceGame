@@ -5,7 +5,14 @@ set(OUTPUT_DIR ${OUTPUT_DIR}/bin)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
+if(WIN32)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall /fsanitize=address /bigobj")
+endif()
+
+if(APPLE)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -fsanitize=address -Wall -Wextra -Werror=return-type -pedantic -Wno-unused-parameter")
+endif()
+
 
 if(APPLE)
     link_directories(${CMAKE_SOURCE_DIR}/lib/macos)
@@ -146,19 +153,20 @@ macro(compile_shader shader_path)
     list(APPEND SHADER_OUTPUTS "${OUTPUT_DIR}/shaders/compiled/${shader_path}_vert.spv")
 endmacro()
 
-
 add_custom_target(Assets
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/assets ${OUTPUT_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/assets ${CMAKE_CURRENT_BINARY_DIR}/bin
 )
-
 add_dependencies(SpaceGame Assets)
 
-# compile_shader("lit")
-# compile_shader("terrain")
-# compile_shader("ui")
-# compile_shader("debug")
-# compile_shader("skybox")
-# compile_shader("construction")
+compile_shader("lit")
+compile_shader("terrain")
+compile_shader("terrain-debug")
+compile_shader("ui")
+compile_shader("debug")
+compile_shader("skybox")
+compile_shader("construction")
+
+compile_shader("test")
 
 add_custom_target(SpaceGame_Shaders DEPENDS ${SHADER_OUTPUTS})
 add_dependencies(SpaceGame_Shaders Assets)

@@ -37,10 +37,10 @@ class PlaceBlockTool: public Tool {
                 }
                 Terrain* terrain = dynamic_cast<Terrain*>(worldHit.actor);
                 if(terrain != nullptr) {
-                    world->spawn(Construction::makeInstance(world->constructionMaterial,block,worldHit.hit.point+glm::vec3(0,0.4,0),user.getRotation()));
+                    world->spawn(Construction::makeInstance(world->constructionMaterial,block,worldHit.hit.point+glm::vec3(0,0.4,0),user.getRotation(),true));
                 }
             } else {
-                world->spawn(Construction::makeInstance(world->constructionMaterial,block,ray.origin + ray.direction*10.0f,glm::quatLookAt(ray.direction,vec3(0,1,0))));
+                world->spawn(Construction::makeInstance(world->constructionMaterial,block,ray.origin + ray.direction*10.0f,glm::quatLookAt(ray.direction,vec3(0,1,0)),false));
             }
             placeAnimationTimer = placeAnimationTime;
         }
