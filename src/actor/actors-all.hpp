@@ -3,3 +3,4 @@
 #include "construction.hpp"
 #include "rigidbody-actor.hpp"
 #include "terrain.hpp"
+#include "particle-system-actor.hpp"

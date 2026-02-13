@@ -83,9 +83,9 @@ class Actor {
             rotation *= glm::angleAxis(glm::radians(eulerAngles.z),vec3(0,0,1));
         }
 
-        virtual std::optional<RaycastHit> raycast(Ray ray, float dist) {
-            return std::nullopt;
-        }
+        // virtual std::optional<RaycastHit> raycast(Ray ray, float dist) {
+        //     return std::nullopt;
+        // }
 
         virtual void spawn(World* world) {
 
@@ -103,9 +103,9 @@ class Actor {
             
         }
 
-        virtual void collideBasic(Actor* actor,float height,float radius) {
+        // virtual void collideBasic(Actor* actor,float height,float radius) {
 
-        }
+        // }
 
         virtual void addRenderables(Vulkan* vulkan,float dt) {
             if(model == nullptr) return; //if no model, nothing to render :)

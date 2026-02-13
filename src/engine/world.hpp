@@ -298,18 +298,18 @@ class World {
             //return result;
         }
 
-        void collideBasic(Actor* actor,float height,float radius) {
-            //ZoneScoped;
-            iteratingActors++;
-            for (auto& colliderActor : actors)
-            {
-                if(actor != colliderActor.get()) {
-                    colliderActor->collideBasic(actor,height,radius);
-                }
+        // void collideBasic(Actor* actor,float height,float radius) {
+        //     //ZoneScoped;
+        //     iteratingActors++;
+        //     for (auto& colliderActor : actors)
+        //     {
+        //         if(actor != colliderActor.get()) {
+        //             colliderActor->collideBasic(actor,height,radius);
+        //         }
                 
-            }
-            iteratingActors--;
-        }
+        //     }
+        //     iteratingActors--;
+        // }
 
         Camera& getCamera() {
             return camera;
