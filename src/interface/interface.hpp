@@ -98,7 +98,7 @@ class Interface {
 
             glm::mat4 model = glm::translate(glm::mat4(1.0f),vec3(rect.position,1));
             model = glm::scale(model,vec3(rect.size * scale,1));
-            vulkan.addMeshWithData<UIExtraPushData>(quadMesh,material,UIExtraPushData(color.asVec4(),sprite),model);
+            vulkan.addMesh<UIExtraPushData>(quadMesh,material,UIExtraPushData(color.asVec4(),sprite),model);
         }
 
 };

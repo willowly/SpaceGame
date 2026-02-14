@@ -98,6 +98,8 @@ class ParticleEffect {
             auto matrix = glm::mat4(1.0f);
             matrix = glm::translate(matrix,particle.pos);
             matrix = glm::scale(matrix,vec3(particleSize));
-            mesh->addToRender(vulkan,material,matrix);
+            RenderingSettings settings;
+            settings.faceCamera = true;
+            vulkan->addMesh(mesh->meshBuffer,material,settings,matrix);
         }
 };

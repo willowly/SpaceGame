@@ -50,6 +50,10 @@ struct SceneDataBufferObject {
     vec3 viewDir;
 };
 
+struct RenderingSettings {
+    bool faceCamera = false;
+
+};
  
 class Vulkan;
 
@@ -273,18 +277,22 @@ class Vulkan {
         }
 
         void addMesh(MeshBuffer& mesh,Material material, glm::mat4 matrix = glm::mat4(1.0f)) {
-            // if(mesh.buffer == VK_NULL_HANDLE) {
-            //     throw std::runtime_error("guh");
-            // }
+
             renderObjects.push_back(RenderObject(mesh,matrix,material.pipeline,material.data));
 
         }
 
+        void addMesh(MeshBuffer& mesh,Material material,RenderingSettings settings, glm::mat4 matrix = glm::mat4(1.0f)) {
+
+            renderObjects.push_back(RenderObject(mesh,matrix,material.pipeline,material.data,settings));
+
+        }
+
         template<typename T>
-        void addMeshWithData(MeshBuffer& mesh,Material material,T data, glm::mat4 matrix = glm::mat4(1.0f)) {
+        void addMesh(MeshBuffer& mesh,Material material,T data, glm::mat4 matrix = glm::mat4(1.0f),RenderingSettings settings = RenderingSettings()) {
 
             static_assert(sizeof(T) <= 48);
-            auto renderObject = RenderObject(mesh,matrix,material.pipeline,material.data);
+            auto renderObject = RenderObject(mesh,matrix,material.pipeline,material.data,settings);
             std::memcpy(&renderObject.extraData,&data,sizeof(T));
             renderObjects.push_back(renderObject);
 
@@ -408,6 +416,9 @@ class Vulkan {
                 MeshPushConstant pushConstant(renderObject.matrix);
                 pushConstant.frameIndex = frameIndex;
                 pushConstant.materialData = renderObject.materialData;
+                if(renderObject.settings.faceCamera) {
+                    pushConstant.matrix *= glm::toMat4(camera.rotation);
+                }
                 std::copy(std::begin(renderObject.extraData),std::end(renderObject.extraData),std::begin(pushConstant.extraData));
                 //std::cout << sizeof(MeshPushConstant) << std::endl;
                 vkCmdPushConstants(commandBuffer,pipelineLayout,VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,0,sizeof(MeshPushConstant),&pushConstant);
@@ -789,9 +800,10 @@ class Vulkan {
             glm::mat4 matrix;
             VkPipeline pipeline;
             MaterialHandle materialData;
+            RenderingSettings settings;
             char extraData[48];
 
-            RenderObject(MeshBuffer meshBuffer,glm::mat4 matrix,VkPipeline pipeline,MaterialHandle materialData) : meshBuffer(meshBuffer), matrix(matrix), pipeline(pipeline), materialData(materialData) {
+            RenderObject(MeshBuffer meshBuffer,glm::mat4 matrix,VkPipeline pipeline,MaterialHandle materialData,RenderingSettings settings = RenderingSettings()) : meshBuffer(meshBuffer), matrix(matrix), pipeline(pipeline), materialData(materialData), settings(settings) {
 
             }
         };

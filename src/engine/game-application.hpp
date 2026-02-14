@@ -380,13 +380,13 @@ class GameApplication {
 
             player->widget = &playerWidget;
             // wowie
-
             auto effectPrototype = registry.addActor<ParticleEffectActor>("effect");
             auto& effect = effectPrototype->effect;
-            effect.spawnRate = 500;
-            effect.initialVelocity = 5;
-            effect.mesh = registry.addModel("block");
+            effect.spawnRate = 10;
+            effect.initialVelocity = 1;
+            effect.mesh = registry.getModel("quad");
             effect.material = registry.getMaterial("grid");
+            effect.lifeTime = 5;
             
             world.spawn(ParticleEffectActor::makeInstance(effectPrototype,player->getPosition()));
 
