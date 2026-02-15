@@ -31,7 +31,7 @@ void main() {
 
     vec3 lightDir = normalize(vec3(0.5,1.0,0.1));
     vec3 lightColor = vec3(3,3,3);
-    vec3 ambient = vec3(0.1,0.1,0.13);
+    vec3 ambient = vec3(0.3,0.3,0.5);
 
     float diff = max(dot(normal, lightDir), 0.0);
 

@@ -9,6 +9,7 @@ class ParticleEffectActor : public Actor {
 
     public:
         ParticleEffect effect;
+        bool destroyWhenZeroParticles = true;
 
         virtual ~ParticleEffectActor() noexcept = default;
 
@@ -23,7 +24,7 @@ class ParticleEffectActor : public Actor {
 
         void spawn(World* world) override {
 
-            effect.spawn();
+            effect.spawn(getPosition(),getRotation());
             
         }
 
@@ -33,7 +34,10 @@ class ParticleEffectActor : public Actor {
 
         void step(World* world,float dt) {
             effect.step(getPosition(),getRotation(),dt);
-            
+            if(effect.getParticlesAlive() == 0 && destroyWhenZeroParticles) {
+                destroy(world);
+                std::cout << "destroying particle actor" << std::endl;
+            }
         }
 
         

@@ -129,7 +129,6 @@ class GameApplication {
 
         Font font;
 
-        PickaxeTool pickaxe;
 
         RigidbodyActor* physicsPrototype;
 
@@ -360,6 +359,14 @@ class GameApplication {
             playerWidget.inventoryWidget = &inventoryWidget;
             playerWidget.toolbarWidget = &toolbarWidget;
 
+            PipelineOptions options;
+            options.blend = VK_TRUE;
+            VkPipeline particlePipeline = vulkan->createManagedPipeline<Vertex>(Vulkan::vertCodePath("lit"),Vulkan::fragCodePath("lit"),options);
+            LitMaterialData materialData;
+
+            materialData.texture = registry.getTexture("rock");
+            auto particleMaterial = vulkan->createMaterial(particlePipeline,materialData);
+
 
             font.texture = registry.getTexture("characters");
             font.start = '0';
@@ -382,11 +389,18 @@ class GameApplication {
             // wowie
             auto effectPrototype = registry.addActor<ParticleEffectActor>("effect");
             auto& effect = effectPrototype->effect;
-            effect.spawnRate = 10;
-            effect.initialVelocity = 1;
-            effect.mesh = registry.getModel("quad");
-            effect.material = registry.getMaterial("grid");
-            effect.lifeTime = 5;
+            effect.spawnRate = 0;
+            effect.initialSpawnCount = 20;
+            effect.initialVelocity = {0.0f,5.0f};
+            effect.emitterShape.radius = 0.5f;
+            effect.mesh = registry.getModel("rock_shard");
+            effect.material = particleMaterial;
+            effect.lifeTime = {0.5f,1.0f};
+            effect.particleSize = {0.2f,0.0f};
+            effect.initialAngularVelocity = {0.0f,90.0f};
+
+            auto pickaxe = dynamic_cast<PickaxeTool*>(registry.getItem("pickaxe")); 
+            pickaxe->testEffect = effectPrototype;
             
             world.spawn(ParticleEffectActor::makeInstance(effectPrototype,player->getPosition()));
 

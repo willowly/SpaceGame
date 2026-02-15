@@ -37,6 +37,8 @@ class PickaxeTool : public Tool {
 
         const int DAMAGE_VAR = 0;
 
+        ParticleEffectActor* testEffect;
+
         void pickaxe(World* world,Character& user,ItemStack& stack,Ray ray) {
             
             int damage = stack.storage.getInt(DAMAGE_VAR,0);
@@ -56,13 +58,16 @@ class PickaxeTool : public Tool {
                         // give at the end to avoid errors
                     }
                     construction->breakBlock(world,placePointLocalInt);
+                    user.shake.startShake();
                     damage++;
-            }
+                }
                 Terrain* terrain = dynamic_cast<Terrain*>(worldHit.actor);
                 if(terrain != nullptr) {
                     results = terrain->terraformSphere(worldHit.hit.point,mineRadius,-mineAmount);
                     // give at the end to avoid errors
-                    
+                    world->spawn(ParticleEffectActor::makeInstance(testEffect,worldHit.hit.point)); //hmm
+
+                    user.shake.startShake();
     
                     damage++;
                 }

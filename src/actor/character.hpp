@@ -30,7 +30,7 @@
 #include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
 
 #include "physics/jolt-userdata.hpp"
-
+#include "components/camera-shake.hpp"
 
 class Character : public Actor {
 
@@ -119,7 +119,7 @@ class Character : public Actor {
             jumpForce = character.jumpForce;
         }
 
-    
+        CameraShake shake;
 
         bool inMenu;
 
@@ -139,6 +139,7 @@ class Character : public Actor {
             if(thirdPerson) {
                 Actor::addRenderables(vulkan,dt);
             }
+            shake.step(dt);
         }
 
         virtual void spawn(World* world) {
@@ -377,6 +378,9 @@ class Character : public Actor {
             if(input.getKeyPressed(GLFW_KEY_Z)) {
                 thirdPerson = !thirdPerson;
             }
+            if(input.getKeyPressed(GLFW_KEY_T)) {
+                shake.startShake();
+            }
 
             //check for cheats access
             if(input.getKeyPressed(GLFW_KEY_F1)) {
@@ -488,11 +492,10 @@ class Character : public Actor {
         void setCamera(Camera& camera) {
             if(ridingConstruction == nullptr && !thirdPerson) {
                 camera.position = getEyePosition();
-                camera.rotation = getEyeRotation();
             } else {
                 camera.position = position + getEyeRotation() * thirdPersonCameraOffset;
-                camera.rotation = getEyeRotation();
             }
+            camera.rotation = getEyeRotation() * shake.getRotation();
             
         }
 
