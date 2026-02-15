@@ -104,6 +104,9 @@ class Material {
     Material() {}
     public:
         static const Material none;
+        bool isValid() {
+            return data != 0;
+        }
 };
 
 const Material Material::none = Material();

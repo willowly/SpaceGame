@@ -6,11 +6,6 @@ materials.grid = {
     texture=textures.grid_dark,
 }
 
-
-materials.pickaxe = {
-    texture=textures.pickaxe_smooth,
-}
-
 materials.tin_block = {
     texture=textures.tin_block,
 }
@@ -26,8 +21,10 @@ materials.player = {
 materials.cockpit = {"lit","cockpit"}
 materials.thruster = {"lit","solid",color(0.15,0.15,0.2)}
 
-materials.terrain = {"lit","solid",color(0.2,0.2,0.8)}
 
+materials.pickaxe = {
+    texture="pickaxe_smooth"
+}
 -- print("Loading Actors")
 
 actors.plane = {
@@ -67,7 +64,7 @@ blocks.thruster = {
     mesh = "thruster",
     texture = "thruster",
     force = 20000,
-    sideForce = 4000
+    side_force = 4000
 }
 
 blocks.furnace = {
@@ -106,7 +103,7 @@ items.furnace = {
     model = "furnace",
     material = "thruster",
     block = "furnace",
-    placeDirection = 2,
+    place_direction = 2,
 }
 
 items.thruster = {

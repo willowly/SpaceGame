@@ -17,7 +17,7 @@ namespace API {
     };
 
 
-    ObjLoadType getObjectLoadType(sol::this_state& thisState,sol::object solObject) {
+    ObjLoadType getObjectLoadType(sol::object solObject) {
 
         sol::table table = solObject;
         if(table == sol::lua_nil) {
@@ -40,7 +40,7 @@ namespace API {
     }
 
     template<typename T> 
-    void get(sol::table table,variant<string,int> key,T* pointer,bool required = false) {
+    void get(sol::table table,variant<string,int> key,T& ref,bool required = false) {
         Debug::addTrace(keyAsString(key));
         sol::object obj = table[key];
         if(obj == sol::lua_nil) {
@@ -51,98 +51,120 @@ namespace API {
             return;
         }
         if(obj.is<T>()) {
-            *pointer = obj.as<T>();
+            ref = obj.as<T>();
         } else {
             Debug::warn("wrong type");
         }
         Debug::subtractTrace();
     }
 
-    void getColorAsVec3(sol::table table,variant<string,int> key,vec3* pointer,bool required = false) {
-        Color color(*pointer);
-        get<Color>(table,key,&color,false);
-        *pointer = color.asVec3();
+    void getColorAsVec3(sol::table table,variant<string,int> key,vec3& ref,bool required = false) {
+        Color color(ref);
+        get<Color>(table,key,color,false);
+        ref = color.asVec3();
     }
-    void getColorAsVec4(sol::table table,variant<string,int> key,vec4* pointer,bool required = false) {
-        Color color(*pointer);
-        get<Color>(table,key,&color,false);
-        *pointer = color.asVec4();
+    void getColorAsVec4(sol::table table,variant<string,int> key,vec4& ref,bool required = false) {
+        Color color(ref);
+        get<Color>(table,key,color,false);
+        ref = color.asVec4();
     }
 
-    void getTexture(sol::table table,std::variant<string,int> key,TextureID* pointer,Registry& registry,bool required = false) {
+    void getTexture(sol::table table,std::variant<string,int> key,TextureID& ref,Registry& registry,bool required = false) {
         Debug::addTrace(keyAsString(key));
         sol::object obj = table[key];
         if(obj.is<string>()) {
             string str = obj.as<string>();
-            *pointer = registry.getTexture(str);
+            ref = registry.getTexture(str);
             Debug::subtractTrace();
             return;
             
         }
         Debug::subtractTrace();
-        get<TextureID>(table,key,pointer,required);
+        get<TextureID>(table,key,ref,required);
     }
 
-    void getSprite(sol::table table,std::variant<string,int> key,Sprite* pointer,Registry& registry,bool required = false) {
+    void getSprite(sol::table table,std::variant<string,int> key,Sprite& ref,Registry& registry,bool required = false) {
         Debug::addTrace(keyAsString(key));
         sol::object obj = table[key];
         if(obj.is<string>()) {
             string str = obj.as<string>();
-            *pointer = registry.getSprite(str);
+            ref = registry.getSprite(str);
             Debug::subtractTrace();
             return;
             
         }
         //TODO add extra here
         Debug::subtractTrace();
-        get<Sprite>(table,key,pointer,required);
+        get<Sprite>(table,key,ref,required);
     }
 
-    void getMesh(sol::table table,std::variant<string,int> key,Mesh<Vertex>** pointer,Registry& registry,bool required = false) {
+    void getMesh(sol::table table,std::variant<string,int> key,Mesh<Vertex>*& ref,Registry& registry,bool required = false) {
         Debug::addTrace(keyAsString(key));
         sol::object obj = table[key];
         if(obj.is<string>()) {
             string str = obj.as<string>();
-            *pointer = registry.getModel(str);
+            ref = registry.getModel(str);
             Debug::subtractTrace();
             return;
             
         }
         Debug::subtractTrace();
-        get<Mesh<Vertex>*>(table,key,pointer,required);
+        get<Mesh<Vertex>*>(table,key,ref,required);
     }
 
     //i actually think these should go in here, otherwise theres a dependancy nightmare
-    void getMaterial(sol::table table,std::variant<string,int> key,Material* pointer,Registry& registry,bool required = false) {
-        Debug::addTrace(keyAsString(key)); 
-        sol::object obj = table[key];
-        if(obj.is<string>()) {
-            string str = obj.as<string>();
-            *pointer = registry.getMaterial(str);
-            Debug::subtractTrace();
-            return;
-            
+
+    Material createLitMaterial(sol::object obj,Registry& registry,Vulkan* vulkan) {
+        LitMaterialData materialData;
+        VkPipeline pipeline = registry.litShader;
+        sol::table table = obj;
+        switch (getObjectLoadType(obj)) {
+            case ObjLoadType::ARRAY:
+                getTexture(table,2,materialData.texture,registry,true);
+                getColorAsVec4(table,3,materialData.color,false);
+                break;
+            case ObjLoadType::TABLE:
+                getTexture(table,"texture",materialData.texture,registry,true);
+                getColorAsVec4(table,"color",materialData.color,false);
+                break;
+            case ObjLoadType::INVALID:
+                Debug::warn("object is invalid");
+                break;
         }
-        Debug::subtractTrace();
-        get<Material>(table,key,pointer,required);
+        return vulkan->createMaterial(pipeline,materialData);
     }
 
-    void getBlock(sol::table table,std::variant<string,int> key,Block** pointer,Registry& registry,bool required = false) {
+    void getMaterial(sol::table table,std::variant<string,int> key,Material& ref,Registry& registry,bool required = false) {
         Debug::addTrace(keyAsString(key)); 
         sol::object obj = table[key];
         if(obj.is<string>()) {
             string str = obj.as<string>();
-            *pointer = registry.getBlock(str);
+            ref = registry.getMaterial(str);
+            Debug::subtractTrace();
+            return;
+            
+        }
+        
+        Debug::subtractTrace();
+        get<Material>(table,key,ref,required);
+    }
+
+    void getBlock(sol::table table,std::variant<string,int> key,Block*& ref,Registry& registry,bool required = false) {
+        Debug::addTrace(keyAsString(key)); 
+        sol::object obj = table[key];
+        if(obj.is<string>()) {
+            string str = obj.as<string>();
+            ref = registry.getBlock(str);
             Debug::subtractTrace();
             return;
             
         }
         Debug::subtractTrace();
-        get<Block*>(table,key,pointer,required);
+        get<Block*>(table,key,ref,required);
     }
 
     // honestly fuck this for now
-    // void getVec3(sol::table table,variant<string,int> key,vec3* pointer,bool required = false) {
+    // void getVec3(sol::table table,variant<string,int> key,vec3* ref,bool required = false) {
     //     Debug::addTrace(keyAsString(key)); 
     //     sol::table obj = table[key];
     //     if(obj != sol::lua_nil) {
@@ -152,27 +174,27 @@ namespace API {
     //         if(x.is<)
     //         sol::table table = solObject;
     //         string str = obj.as<string>();
-    //         *pointer = registry.getBlock(str);
+    //         *ref = registry.getBlock(str);
     //         Debug::subtractTrace();
     //         return;
             
     //     }
     //     Debug::subtractTrace();
-    //     get<Block*>(table,key,pointer,required);
+    //     get<Block*>(table,key,ref,required);
     // }
 
 
 
-    string getType(sol::this_state& thisState,sol::object obj) {
+    string getType(sol::object obj) {
         string type;
-        ObjLoadType loadType = getObjectLoadType(thisState,obj);
+        ObjLoadType loadType = getObjectLoadType(obj);
         sol::table table = obj;
         switch (loadType) {
             case ObjLoadType::ARRAY:
-                get<string>(table,1,&type,true);
+                get<string>(table,1,type,true);
                 break;
             case ObjLoadType::TABLE:
-                get<string>(table,"type",&type,true);
+                get<string>(table,"type",type,true);
                 break;
             case ObjLoadType::INVALID:
                 type = "invalid";

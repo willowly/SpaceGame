@@ -130,11 +130,6 @@ class GameApplication {
         Font font;
 
 
-        RigidbodyActor* physicsPrototype;
-
-        RigidbodyActor* physicsActor;
-
-
         Material terrainMaterial = Material::none;
         Material terrainMaterialDebug = Material::none;
 
@@ -269,12 +264,6 @@ class GameApplication {
 
             skybox.loadResources(*vulkan,skyboxMaterial);
 
-            auto planePrototype = Actor::makeDefaultPrototype();
-            planePrototype->model = registry.getModel("plane");
-            planePrototype->material = registry.getMaterial("grid");
-
-            //world.spawn(Actor::makeInstance(planePrototype.get(),vec3(0,0,0)));
-
             // terrain setup
 
             VkPipeline terrainPipeline = vulkan->createManagedPipeline<TerrainVertex>(Vulkan::vertCodePath("terrain"),Vulkan::fragCodePath("terrain"));
@@ -292,11 +281,6 @@ class GameApplication {
             settings.oreType.texture = registry.getTexture("tin_ore");
 
             terrain = world.spawn(Terrain::makeInstance(terrainMaterial,settings,vec3(0,0,0)));
-
-            physicsPrototype = registry.addActor<RigidbodyActor>("physics_block");
-            
-            physicsPrototype->model = registry.getModel("cube");
-            physicsPrototype->material = registry.getMaterial("tin_block");
 
 
             // terrain->terrainTypes[0].item = registry.getItem("stone");
@@ -401,8 +385,6 @@ class GameApplication {
 
             auto pickaxe = dynamic_cast<PickaxeTool*>(registry.getItem("pickaxe")); 
             pickaxe->testEffect = effectPrototype;
-            
-            world.spawn(ParticleEffectActor::makeInstance(effectPrototype,player->getPosition()));
 
             //physicsActor = world.spawn(RigidbodyActor::makeInstance(physicsPrototype,player->getEyePosition(),player->getEyeRotation(),player->getEyeDirection()*20.0f,vec3(0.0f)));
 

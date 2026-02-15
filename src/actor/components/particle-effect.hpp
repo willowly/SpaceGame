@@ -31,12 +31,12 @@ class ParticleEffect {
 
     public:
 
-        struct Range {
+        struct FloatRange {
             float start = 0.0f;
             float end = 0.0f;
-            Range() {};
-            Range(float constant) : start(constant), end(constant) {}
-            Range(float start,float end) : start(start), end(end) {}
+            FloatRange() {};
+            FloatRange(float constant) : start(constant), end(constant) {}
+            FloatRange(float start,float end) : start(start), end(end) {}
 
             float sample(float t) {
                 return MathHelper::lerp(start,end,t);
@@ -50,12 +50,12 @@ class ParticleEffect {
 
         Mesh<Vertex>* mesh = nullptr;
         Material material = Material::none;
-        int spawnRate = 1;
+        float spawnRate = 1;
         int initialSpawnCount = 0;
-        Range initialVelocity = 1.0f;
-        Range lifeTime = 1;
-        Range particleSize = 0.2f;
-        Range initialAngularVelocity;
+        FloatRange initialVelocity = 1.0f;
+        FloatRange lifeTime = 1;
+        FloatRange particleSize = 0.2f;
+        FloatRange initialAngularVelocity;
 
        
 

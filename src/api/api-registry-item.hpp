@@ -13,39 +13,39 @@ using std::string,std::variant;
 namespace API {
 
     void loadItemBaseType(ObjLoadType loadType,sol::table table,Item* item,Registry& registry) {
-        get<string>(table,"name",&item->name,true);
-        getSprite(table,"icon",&item->defaultSprite,registry,true);
+        get<string>(table,"name",item->name,true);
+        getSprite(table,"icon",item->defaultSprite,registry,true);
     }
 
     void loadItemToolType(ObjLoadType loadType,sol::table table,Tool* item,Registry& registry) {
         loadItemBaseType(loadType,table,item,registry);
-        get<float>(table,"lookLerp",&item->lookLerp,false);
-        getMesh(table,"model",&item->heldModel,registry,false);
-        getMaterial(table,"material",&item->heldModelMaterial,registry,false);
-        get<vec3>(table,"offset",&item->modelOffset,false);
-        get<quat>(table,"rotation",&item->modelRotation,false);
-        get<float>(table,"scale",&item->modelScale,false);
+        get<float>(table,"look_lerp",item->lookLerp,false);
+        getMesh(table,"model",item->heldModel,registry,false);
+        getMaterial(table,"material",item->heldModelMaterial,registry,false);
+        get<vec3>(table,"offset",item->modelOffset,false);
+        get<quat>(table,"rotation",item->modelRotation,false);
+        get<float>(table,"scale",item->modelScale,false);
     }
 
     void loadItemPlaceTool(ObjLoadType loadType,sol::table table,PlaceBlockTool* item,Registry& registry) {
         loadItemToolType(loadType,table,item,registry);
-        getBlock(table,"block",&item->block,registry,false);
+        getBlock(table,"block",item->block,registry,false);
 
         int placeDirection = (int)item->placeDirection;
-        get<int>(table,"placeDirection",&placeDirection,false); //put this in a get function at some point
+        get<int>(table,"place_direction",placeDirection,false); //put this in a get function at some point
         item->placeDirection = (BlockFacing)placeDirection;
     }
 
     void loadItemPickaxe(ObjLoadType loadType,sol::table table,PickaxeTool* item,Registry& registry) {
         loadItemToolType(loadType,table,item,registry);
-        get<float>(table,"mine_amount",&item->mineAmount,false);
-        get<float>(table,"mine_radius",&item->mineRadius,false);
-        get<int>(table,"durability",&item->durability,false);
+        get<float>(table,"mine_amount",item->mineAmount,false);
+        get<float>(table,"mine_radius",item->mineRadius,false);
+        get<int>(table,"durability",item->durability,false);
         // this will all become part of the animation system
-        get<quat> (table,"anticipation_rotation",&item->anticipationRotation,false);
-        get<float>(table,"anticipation_time",    &item->anticipationTime,false); 
-        get<quat> (table,"cooldown_rotation",&item->cooldownRotation,false);
-        get<float>(table,"cooldown_time",    &item->cooldownTime,false);
+        get<quat> (table,"anticipation_rotation",item->anticipationRotation,false);
+        get<float>(table,"anticipation_time",    item->anticipationTime,false); 
+        get<quat> (table,"cooldown_rotation",item->cooldownRotation,false);
+        get<float>(table,"cooldown_time",    item->cooldownTime,false);
     }
 
     void addItemWithTypeAndLoad(string type,string name,ObjLoadType loadType,sol::table table,Registry& registry) {
@@ -90,13 +90,13 @@ namespace API {
             sol::table table = obj; //this will be null if it doesnt work, so be careful
 
             string type = "";
-            ObjLoadType loadType = getObjectLoadType(lua,obj);
-            switch (getObjectLoadType(lua,obj)) {
+            ObjLoadType loadType = getObjectLoadType(obj);
+            switch (getObjectLoadType(obj)) {
                 case ObjLoadType::ARRAY:
-                    get<string>(table,1,&type,true);
+                    get<string>(table,1,type,true);
                     break;
                 case ObjLoadType::TABLE:
-                    get<string>(table,"type",&type,true);
+                    get<string>(table,"type",type,true);
                     break;
                 case ObjLoadType::INVALID:
                     type = "invalid";
