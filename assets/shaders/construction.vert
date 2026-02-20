@@ -11,8 +11,11 @@ layout(location = 3) in int inTextureID;
 layout(location = 0) out vec3 outNormal;
 layout(location = 1) out vec2 outTexCoord;
 layout(location = 2) out int outTextureID;
+layout(location = 3) out vec4 lightSpacePosition;
 
 #include "push_constant.hlsl"
+
+#include "shadow_maps.hlsl"
 
 void main() {
 
@@ -23,5 +26,6 @@ void main() {
     outNormal = normalize(mat3(transpose(inverse(modelMatrix))) * inNormal);
     outTexCoord = inTexCoord;
     outTextureID = inTextureID;
+    lightSpacePosition = getLightSpacePos(frameIndex,modelMatrix,inPosition);
     
 }

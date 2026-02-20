@@ -27,6 +27,8 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 
+#include "color.hpp"
+
 // #include <tracy/Tracy.hpp>
 // #include <tracy/TracyVulkan.hpp>
 
@@ -48,11 +50,15 @@ struct SceneDataBufferObject {
     glm::mat4 proj;
     glm::mat4 screen;
     vec3 viewDir;
+    vec3 mainLightColor;
+    vec3 mainLightDirection;
+    vec3 ambientLightColor;
 };
 
 struct RenderingSettings {
     bool faceCamera = false;
-
+    bool mainPass = true;
+    bool shadowPass = true;
 };
  
 class Vulkan;
@@ -99,8 +105,10 @@ struct LitMaterialData {
 class Material {
     friend Vulkan;
     VkPipeline pipeline = VK_NULL_HANDLE;
+    VkPipeline shadowPipeline = VK_NULL_HANDLE;
     MaterialHandle data = 0;
     Material(VkPipeline pipeline, MaterialHandle data) : pipeline(pipeline), data(data) {}
+    Material(VkPipeline pipeline,VkPipeline shadowPipeline, MaterialHandle data) : pipeline(pipeline), shadowPipeline(shadowPipeline), data(data) {}
     Material() {}
     public:
         static const Material none;
@@ -145,6 +153,8 @@ struct PipelineOptions {
     VkCompareOp depthCompareOp = VK_COMPARE_OP_LESS;
     VkBlendOp blendOp = VK_BLEND_OP_ADD;
     VkBool32 blend = VK_FALSE;
+    bool shadowPass;
+    VkCullModeFlagBits cullMode = VK_CULL_MODE_NONE;
 };
 
 // class DynamicMeshBuffer {
@@ -163,6 +173,17 @@ class Vulkan {
         bool enableValidationLayers = true;
 
         GLFWwindow* window;
+        
+
+        struct DirectionalLight {
+            vec3 direction = vec3(0.5f,-1.0f,0.3f);
+            Color color = Color(3,3,3);
+        } mainLight;
+
+        Color ambientLight = Color(0.1f,0.1f,0.1f);
+
+        unsigned int shadowMapSize = 10000;
+        float shadowDist = 20;
 
         Vulkan(string name,GLFWwindow* window) {
             this->window = window;
@@ -178,6 +199,7 @@ class Vulkan {
             createCommandPool();
             createFrameCommandBuffers();
             createDepthResources();
+            createShadowResources();
             createFrameBuffers();
             createSyncObjects();
 
@@ -192,7 +214,6 @@ class Vulkan {
             createDescriptorSets(); // also includes the texture
 
             //tracyCtx = TracyVkContext(physicalDevice, device, graphicsQueue, commandBuffers[0]);
-
             //initImGui();
             
         }
@@ -209,6 +230,13 @@ class Vulkan {
                 destroyTextureResources(texture);
             }
 
+            // shadows
+            destroyImage(shadowImage);
+            vkDestroyImageView(device,shadowImageView,nullptr);
+            vkDestroyFramebuffer(device,shadowFramebuffer,nullptr);
+            vkDestroySampler(device,shadowSampler,nullptr);
+            vkDestroyRenderPass(device,shadowRenderPass,nullptr);
+
             for(auto pipeline : managedPipelines) {
                 vkDestroyPipeline(device,pipeline,nullptr);
             }
@@ -219,6 +247,7 @@ class Vulkan {
                 vkDestroySemaphore(device, acquireSemaphores[i], nullptr);
                 vkDestroyFence(device, inFlightFences[i], nullptr);
                 destroyBuffer(uniformBuffers[i]);
+                destroyBuffer(uniformBuffers[i+FRAMES_IN_FLIGHT]); //shadows. probably need a better way to do this
             }
             
             for (size_t i = 0; i < submitSemaphores.size(); i++)
@@ -281,13 +310,13 @@ class Vulkan {
 
         void addMesh(MeshBuffer& mesh,Material material, glm::mat4 matrix = glm::mat4(1.0f)) {
 
-            renderObjects.push_back(RenderObject(mesh,matrix,material.pipeline,material.data));
+            renderObjects.push_back(RenderObject(mesh,matrix,material));
 
         }
 
         void addMesh(MeshBuffer& mesh,Material material,RenderingSettings settings, glm::mat4 matrix = glm::mat4(1.0f)) {
 
-            renderObjects.push_back(RenderObject(mesh,matrix,material.pipeline,material.data,settings));
+            renderObjects.push_back(RenderObject(mesh,matrix,material,settings));
 
         }
 
@@ -295,7 +324,7 @@ class Vulkan {
         void addMesh(MeshBuffer& mesh,Material material,T data, glm::mat4 matrix = glm::mat4(1.0f),RenderingSettings settings = RenderingSettings()) {
 
             static_assert(sizeof(T) <= 48);
-            auto renderObject = RenderObject(mesh,matrix,material.pipeline,material.data,settings);
+            auto renderObject = RenderObject(mesh,matrix,material,settings);
             std::memcpy(&renderObject.extraData,&data,sizeof(T));
             renderObjects.push_back(renderObject);
 
@@ -303,6 +332,161 @@ class Vulkan {
 
         vec2 getScreenSize() {
             return screenSize;
+        }
+
+        void recordShadowRenderPass(VkCommandBuffer commandBuffer,const Camera& camera) {
+            // Shadow Pass
+            VkRenderPassBeginInfo renderPassInfo{};
+            renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+            renderPassInfo.renderPass = shadowRenderPass;
+            renderPassInfo.framebuffer = shadowFramebuffer;
+            
+            renderPassInfo.renderArea.offset = {0, 0};
+            renderPassInfo.renderArea.extent = {shadowMapSize,shadowMapSize};
+            
+            std::array<VkClearValue, 1> clearValues{};
+            clearValues[0].depthStencil = {1.0f, 0};
+            
+            renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+            renderPassInfo.pClearValues = clearValues.data();
+            
+            vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+            //TracyVkZone(tracyCtx,commandBuffers[frameIndex],"DrawFrame");
+
+            VkViewport viewport{};
+            viewport.x = 0.0f;
+            viewport.y = 0.0f;
+            viewport.width = static_cast<float>(shadowMapSize);
+            viewport.height = static_cast<float>(shadowMapSize);
+            viewport.minDepth = 0.0f;
+            viewport.maxDepth = 1.0f;
+            vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+
+            VkRect2D scissor{};
+            scissor.offset = {0, 0};
+            scissor.extent = {shadowMapSize,shadowMapSize};
+            vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+
+            VkPipeline currentPipeline = VK_NULL_HANDLE;
+            VkBuffer currentMeshBuffer = VK_NULL_HANDLE;
+
+            for (auto& renderObject : renderObjects)
+            {
+                if(!renderObject.settings.shadowPass) continue;
+
+                MeshBuffer meshBuffer = renderObject.meshBuffer;
+                if(currentMeshBuffer != meshBuffer.buffer) {
+                    
+                    VkBuffer vertexBuffers[] = {meshBuffer.buffer};
+                    VkDeviceSize offsets[] = {0};
+                    vkCmdBindVertexBuffers(commandBuffer,0,1,vertexBuffers,offsets);
+                    vkCmdBindIndexBuffer(commandBuffer, meshBuffer.buffer, meshBuffer.indexOffset, VK_INDEX_TYPE_UINT16);
+                    currentMeshBuffer = meshBuffer.buffer;
+                }
+
+                if(renderObject.material.shadowPipeline != currentPipeline) {
+                    vkCmdBindPipeline(commandBuffer,VK_PIPELINE_BIND_POINT_GRAPHICS,renderObject.material.shadowPipeline);
+                    currentPipeline = renderObject.material.shadowPipeline;
+                }
+                
+                MeshPushConstant pushConstant(renderObject.matrix);
+                pushConstant.frameIndex = frameIndex+FRAMES_IN_FLIGHT; // select the shadow scene_data
+                pushConstant.materialData = renderObject.material.data;
+                if(renderObject.settings.faceCamera) {
+                    pushConstant.matrix *= glm::toMat4(camera.rotation);
+                }
+                std::copy(std::begin(renderObject.extraData),std::end(renderObject.extraData),std::begin(pushConstant.extraData));
+                //std::cout << sizeof(MeshPushConstant) << std::endl;
+                vkCmdPushConstants(commandBuffer,pipelineLayout,VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,0,sizeof(MeshPushConstant),&pushConstant);
+                
+                if(currentMeshBuffer == VK_NULL_HANDLE) {
+                    std::cout << "drawing null mesh" << std::endl;
+                }
+                
+                vkCmdDrawIndexed(commandBuffer, meshBuffer.indexCount, 1, 0, 0, 0);
+
+            }
+
+            vkCmdEndRenderPass(commandBuffer);
+
+        }
+
+
+        void recordMainRenderPass(VkCommandBuffer commandBuffer,const Camera& camera) {
+            VkRenderPassBeginInfo renderPassInfo{};
+            renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+            renderPassInfo.renderPass = renderPass;
+            renderPassInfo.framebuffer = swapChainFramebuffers[imageIndex];
+
+            renderPassInfo.renderArea.offset = {0, 0};
+            renderPassInfo.renderArea.extent = swapChainExtent;
+
+            std::array<VkClearValue, 2> clearValues{};
+            clearValues[0].color = {{0.0f, 0.0f, 0.01f, 1.0f}};
+            clearValues[1].depthStencil = {1.0f, 0};
+
+            renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+            renderPassInfo.pClearValues = clearValues.data();
+
+            vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+            VkViewport viewport{};
+            viewport.x = 0.0f;
+            viewport.y = 0.0f;
+            viewport.width = static_cast<float>(swapChainExtent.width);
+            viewport.height = static_cast<float>(swapChainExtent.height);
+            viewport.minDepth = 0.0f;
+            viewport.maxDepth = 1.0f;
+            vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+
+            VkRect2D scissor{};
+            scissor.offset = {0, 0};
+            scissor.extent = swapChainExtent;
+            vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+            // vkCmdSetLineWidth(commandBuffer,5.0f); sadly doesn't exist on mac so theres no point adding support now lol
+
+            VkPipeline currentPipeline = VK_NULL_HANDLE;
+            VkBuffer currentMeshBuffer = VK_NULL_HANDLE;
+
+            for (auto& renderObject : renderObjects)
+            {
+
+                if(!renderObject.settings.mainPass) continue;
+
+                MeshBuffer meshBuffer = renderObject.meshBuffer;
+                if(currentMeshBuffer != meshBuffer.buffer) {
+                    
+                    VkBuffer vertexBuffers[] = {meshBuffer.buffer};
+                    VkDeviceSize offsets[] = {0};
+                    vkCmdBindVertexBuffers(commandBuffer,0,1,vertexBuffers,offsets);
+                    vkCmdBindIndexBuffer(commandBuffer, meshBuffer.buffer, meshBuffer.indexOffset, VK_INDEX_TYPE_UINT16);
+                    currentMeshBuffer = meshBuffer.buffer;
+                }
+
+                if(renderObject.material.pipeline != currentPipeline) {
+                    vkCmdBindPipeline(commandBuffer,VK_PIPELINE_BIND_POINT_GRAPHICS,renderObject.material.pipeline);
+                    currentPipeline = renderObject.material.pipeline;
+                }
+                
+                MeshPushConstant pushConstant(renderObject.matrix);
+                pushConstant.frameIndex = frameIndex;
+                pushConstant.materialData = renderObject.material.data;
+                if(renderObject.settings.faceCamera) {
+                    pushConstant.matrix *= glm::toMat4(camera.rotation);
+                }
+                std::copy(std::begin(renderObject.extraData),std::end(renderObject.extraData),std::begin(pushConstant.extraData));
+                //std::cout << sizeof(MeshPushConstant) << std::endl;
+                vkCmdPushConstants(commandBuffer,pipelineLayout,VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,0,sizeof(MeshPushConstant),&pushConstant);
+                
+                if(currentMeshBuffer == VK_NULL_HANDLE) {
+                    std::cout << "drawing null mesh" << std::endl;
+                }
+                
+                vkCmdDrawIndexed(commandBuffer, meshBuffer.indexCount, 1, 0, 0, 0);
+
+            }
+
+            vkCmdEndRenderPass(commandBuffer);
         }
 
         void render(const Camera& camera) {
@@ -359,85 +543,11 @@ class Vulkan {
                 throw std::runtime_error("failed to begin recording command buffer!");
             }
 
-            {
-            //TracyVkZone(tracyCtx,commandBuffers[frameIndex],"DrawFrame");
-
-            VkRenderPassBeginInfo renderPassInfo{};
-            renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-            renderPassInfo.renderPass = renderPass;
-            renderPassInfo.framebuffer = swapChainFramebuffers[imageIndex];
-
-            renderPassInfo.renderArea.offset = {0, 0};
-            renderPassInfo.renderArea.extent = swapChainExtent;
-
-            std::array<VkClearValue, 2> clearValues{};
-            clearValues[0].color = {{0.0f, 0.0f, 0.01f, 1.0f}};
-            clearValues[1].depthStencil = {1.0f, 0};
-
-            renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-            renderPassInfo.pClearValues = clearValues.data();
-
-            vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-            VkViewport viewport{};
-            viewport.x = 0.0f;
-            viewport.y = 0.0f;
-            viewport.width = static_cast<float>(swapChainExtent.width);
-            viewport.height = static_cast<float>(swapChainExtent.height);
-            viewport.minDepth = 0.0f;
-            viewport.maxDepth = 1.0f;
-            vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-
-            VkRect2D scissor{};
-            scissor.offset = {0, 0};
-            scissor.extent = swapChainExtent;
-            vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-
             vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
-            // vkCmdSetLineWidth(commandBuffer,5.0f); sadly doesn't exist on mac so theres no point adding support now lol
 
-            VkPipeline currentPipeline = VK_NULL_HANDLE;
-            VkBuffer currentMeshBuffer = VK_NULL_HANDLE;
-
-            for (auto& renderObject : renderObjects)
-            {
-                MeshBuffer meshBuffer = renderObject.meshBuffer;
-                if(currentMeshBuffer != meshBuffer.buffer) {
-                    
-                    VkBuffer vertexBuffers[] = {meshBuffer.buffer};
-                    VkDeviceSize offsets[] = {0};
-                    vkCmdBindVertexBuffers(commandBuffer,0,1,vertexBuffers,offsets);
-                    vkCmdBindIndexBuffer(commandBuffer, meshBuffer.buffer, meshBuffer.indexOffset, VK_INDEX_TYPE_UINT16);
-                    currentMeshBuffer = meshBuffer.buffer;
-                }
-
-                if(renderObject.pipeline != currentPipeline) {
-                    vkCmdBindPipeline(commandBuffer,VK_PIPELINE_BIND_POINT_GRAPHICS,renderObject.pipeline);
-                    currentPipeline = renderObject.pipeline;
-                }
-                
-                MeshPushConstant pushConstant(renderObject.matrix);
-                pushConstant.frameIndex = frameIndex;
-                pushConstant.materialData = renderObject.materialData;
-                if(renderObject.settings.faceCamera) {
-                    pushConstant.matrix *= glm::toMat4(camera.rotation);
-                }
-                std::copy(std::begin(renderObject.extraData),std::end(renderObject.extraData),std::begin(pushConstant.extraData));
-                //std::cout << sizeof(MeshPushConstant) << std::endl;
-                vkCmdPushConstants(commandBuffer,pipelineLayout,VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,0,sizeof(MeshPushConstant),&pushConstant);
-                
-                if(currentMeshBuffer == VK_NULL_HANDLE) {
-                    std::cout << "drawing null mesh" << std::endl;
-                }
-                
-                vkCmdDrawIndexed(commandBuffer, meshBuffer.indexCount, 1, 0, 0, 0);
-
-            }
-
-            vkCmdEndRenderPass(commandBuffer);
-
-            //TracyVkCollect(tracyCtx,commandBuffer);
-            }
+            recordShadowRenderPass(commandBuffer,camera);
+            
+            recordMainRenderPass(commandBuffer,camera);
 
             vkEndCommandBuffer(commandBuffer);
 
@@ -526,12 +636,16 @@ class Vulkan {
             return s;
         }
 
+        
+
         template<typename MaterialData>
-        Material createMaterial(VkPipeline pipeline,MaterialData material) {
+        Material createMaterial(VkPipeline pipeline,VkPipeline shadowPipeline,MaterialData material) {
 
             VkDeviceSize bufferSize = sizeof(MaterialData);
 
             auto& transfer = getNextTransfer();
+
+            
 
             transfer.stagingBuffer = createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,0,VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT,"material transfer");
             
@@ -553,7 +667,19 @@ class Vulkan {
             
             auto bda = vkGetBufferDeviceAddressKHR(device, &addressInfo);
 
-            return Material(pipeline,bda);
+            return Material(pipeline,shadowPipeline,bda);
+        }
+
+        template<typename MaterialData,typename Vertex>
+        Material createMaterial(string shaderName,MaterialData materialData,PipelineOptions options = {}) {
+
+            options.shadowPass = false;
+            VkPipeline pipeline = createManagedPipeline<Vertex>(vertCodePath(shaderName),fragCodePath(shaderName),options);
+            options.shadowPass = true;
+            //options.cullMode = VK_CULL_MODE_FRONT_BIT;
+            VkPipeline shadowPipeline = createManagedPipeline<Vertex>(vertCodePath(shaderName),fragCodePath(shaderName),options);
+
+            return createMaterial(pipeline,shadowPipeline,materialData);
         }
 
         template<typename Vertex>
@@ -674,8 +800,13 @@ class Vulkan {
             VkViewport viewport{};
             viewport.x = 0.0f;
             viewport.y = 0.0f;
-            viewport.width = (float) swapChainExtent.width;
-            viewport.height = (float) swapChainExtent.height;
+            if(pipelineOptions.shadowPass) {
+                viewport.width = (float) shadowMapSize;
+                viewport.height = (float) shadowMapSize;
+            } else {
+                viewport.width = (float) swapChainExtent.width;
+                viewport.height = (float) swapChainExtent.height;
+            }
             viewport.minDepth = 0.0f;
             viewport.maxDepth = 1.0f;
 
@@ -696,7 +827,7 @@ class Vulkan {
             rasterizer.depthClampEnable = VK_FALSE;
             rasterizer.polygonMode = pipelineOptions.polygonMode;
             rasterizer.lineWidth = 1.0f;
-            rasterizer.cullMode = VK_CULL_MODE_NONE;
+            rasterizer.cullMode = pipelineOptions.cullMode;
             rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
             rasterizer.depthBiasEnable = VK_FALSE;
             rasterizer.depthBiasConstantFactor = 0.0f;  // Optional
@@ -753,7 +884,11 @@ class Vulkan {
 
             pipelineInfo.layout = pipelineLayout;
 
-            pipelineInfo.renderPass = renderPass;
+            if(pipelineOptions.shadowPass) {
+                pipelineInfo.renderPass = shadowRenderPass;
+            } else {
+                pipelineInfo.renderPass = renderPass;
+            }
             pipelineInfo.subpass = 0;
 
             pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
@@ -801,12 +936,11 @@ class Vulkan {
         struct RenderObject {
             MeshBuffer meshBuffer;
             glm::mat4 matrix;
-            VkPipeline pipeline;
-            MaterialHandle materialData;
+            Material material;
             RenderingSettings settings;
             char extraData[48];
 
-            RenderObject(MeshBuffer meshBuffer,glm::mat4 matrix,VkPipeline pipeline,MaterialHandle materialData,RenderingSettings settings = RenderingSettings()) : meshBuffer(meshBuffer), matrix(matrix), pipeline(pipeline), materialData(materialData), settings(settings) {
+            RenderObject(MeshBuffer meshBuffer,glm::mat4 matrix,Material material,RenderingSettings settings = RenderingSettings()) : meshBuffer(meshBuffer), matrix(matrix), material(material), settings(settings) {
 
             }
         };
@@ -879,10 +1013,17 @@ class Vulkan {
 
         std::vector<TextureResources> textures;
 
-        Buffer uniformBuffers[FRAMES_IN_FLIGHT+1];
+        std::array<Buffer,FRAMES_IN_FLIGHT*2> uniformBuffers;
 
         Image depthImage;
         VkImageView depthImageView;
+
+        VkFramebuffer shadowFramebuffer;
+        VkRenderPass shadowRenderPass;
+
+        Image shadowImage;
+        VkImageView shadowImageView;
+        VkSampler shadowSampler;
 
         vec2 screenSize = {};
 
@@ -1241,15 +1382,20 @@ class Vulkan {
 
         void updateUniformBuffer(uint32_t currentFrame,const Camera& camera) {
             
+            vec3 normalizedLightDirection = glm::normalize(mainLight.direction);
 
             SceneDataBufferObject ubo{};
 
             ubo.view = camera.getViewMatrix();
 
             ubo.proj = camera.getProjectionMatrix();
-
             ubo.proj[1][1] *= -1; //flip the y because theres discrepancy
+            
             ubo.viewDir = camera.rotation * vec3(0,0,1);
+
+            ubo.mainLightColor = mainLight.color.asVec3();
+            ubo.mainLightDirection = normalizedLightDirection;
+            ubo.ambientLightColor = ambientLight.asVec3();
             
             int width, height;
             glfwGetFramebufferSize(window,&width,&height);
@@ -1258,6 +1404,25 @@ class Vulkan {
             ubo.screen = glm::ortho(0.0f,screenSize.x,0.0f,screenSize.y);
 
             memcpy(uniformBuffers[currentFrame].allocationInfo.pMappedData, &ubo, sizeof(ubo)); //uniform buffer is always mapped
+
+            // the shadow pass has its own UBO
+            SceneDataBufferObject shadowUBO{};
+            
+            //Camera shadowCamera;
+
+            glm::mat4 view = glm::mat4(1.0f);
+            view = glm::toMat4(glm::inverse(glm::quatLookAt(normalizedLightDirection,vec3(0.0f,1.0f,0.0f)))) * view;
+            view = glm::translate(view,-camera.position);
+
+            shadowUBO.view = view;
+
+            shadowUBO.proj = glm::ortho(-shadowDist,shadowDist,shadowDist,-shadowDist,-shadowDist,shadowDist);
+            shadowUBO.viewDir = normalizedLightDirection;
+
+            shadowUBO.mainLightColor = vec3(7.0f,9.0f,3.0f);
+
+            memcpy(uniformBuffers[currentFrame+FRAMES_IN_FLIGHT].allocationInfo.pMappedData, &shadowUBO, sizeof(shadowUBO));
+
         }
 
          void recreateSwapChain() {
@@ -1827,6 +1992,7 @@ class Vulkan {
             
             submitCommands(transfer.commandBuffer,transfer.fence);
         }
+        #define SHADOW_IMAGE_COUNT 4
 
         void createDescriptorSetLayout() {
 
@@ -1844,16 +2010,24 @@ class Vulkan {
             samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT; //this is gonna be used in the fragment shader
             samplerLayoutBinding.pImmutableSamplers = nullptr; // Optional
 
+            VkDescriptorSetLayoutBinding shadowSamplerLayoutBinding{};
+            shadowSamplerLayoutBinding.binding = 2;
+            shadowSamplerLayoutBinding.descriptorCount = SHADOW_IMAGE_COUNT;
+            shadowSamplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            shadowSamplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT; //this is gonna be used in the fragment shader
+            shadowSamplerLayoutBinding.pImmutableSamplers = nullptr; // Optional
+
             VkDescriptorSetLayoutBindingFlagsCreateInfo descriptorBindingFlagsCreateInfo{}; //for bindless
             descriptorBindingFlagsCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
             std::vector<VkDescriptorBindingFlags> bindingFlags = {
+                VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT | VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT,
                 VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT | VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT,
                 VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT | VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT,
             };
             descriptorBindingFlagsCreateInfo.bindingCount =  static_cast<uint32_t>(bindingFlags.size());
             descriptorBindingFlagsCreateInfo.pBindingFlags = bindingFlags.data();
 
-            std::array<VkDescriptorSetLayoutBinding, 2> bindings = {uboLayoutBinding, samplerLayoutBinding};
+            std::array<VkDescriptorSetLayoutBinding, 3> bindings = {uboLayoutBinding, samplerLayoutBinding,shadowSamplerLayoutBinding};
             VkDescriptorSetLayoutCreateInfo layoutInfo{};
             layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
             layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
@@ -1869,11 +2043,13 @@ class Vulkan {
 
         void createDescriptorPool() {
 
-            std::array<VkDescriptorPoolSize, 2> poolSizes{};
+            std::array<VkDescriptorPoolSize, 3> poolSizes{};
             poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
             poolSizes[0].descriptorCount = static_cast<uint32_t>(DESCRIPTOR_COUNT);
             poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
             poolSizes[1].descriptorCount = static_cast<uint32_t>(DESCRIPTOR_COUNT);
+            poolSizes[2].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            poolSizes[2].descriptorCount = static_cast<uint32_t>(SHADOW_IMAGE_COUNT);
 
             VkDescriptorPoolCreateInfo poolInfo{};
             poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -1907,9 +2083,9 @@ class Vulkan {
 
             std::vector<VkWriteDescriptorSet> descriptorWrites{};
 
-            VkDescriptorBufferInfo bufferInfo[FRAMES_IN_FLIGHT];
+            std::vector<VkDescriptorBufferInfo> bufferInfo = std::vector<VkDescriptorBufferInfo>(uniformBuffers.size());
 
-            for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
+            for (size_t i = 0; i < uniformBuffers.size(); i++)
             {
 
                 bufferInfo[i] = VkDescriptorBufferInfo{};
@@ -1917,18 +2093,11 @@ class Vulkan {
                 bufferInfo[i].offset = 0;
                 bufferInfo[i].range = sizeof(SceneDataBufferObject);
 
-
-                // VkBufferDeviceAddressInfoKHR addressInfo{};
-                // addressInfo.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
-                // addressInfo.buffer = uniformBuffers[i].buffer;
-                // auto bda = vkGetBufferDeviceAddressKHR(device, &addressInfo);
-
-
                 VkWriteDescriptorSet cameraObjectWrite{};
                 cameraObjectWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
                 cameraObjectWrite.dstSet = descriptorSet;
                 cameraObjectWrite.dstBinding = 0;
-                cameraObjectWrite.dstArrayElement = i;
+                cameraObjectWrite.dstArrayElement = static_cast<uint32_t>(i);
                 cameraObjectWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
                 cameraObjectWrite.descriptorCount = 1;
                 cameraObjectWrite.pBufferInfo = &bufferInfo[i];
@@ -1952,13 +2121,35 @@ class Vulkan {
                 textureWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
                 textureWrite.dstSet = descriptorSet;
                 textureWrite.dstBinding = 1;
-                textureWrite.dstArrayElement = i;
+                textureWrite.dstArrayElement = static_cast<uint32_t>(i);
                 textureWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
                 textureWrite.descriptorCount = 1;
                 textureWrite.pImageInfo = &descriptorImageInfos[i];
 
                 descriptorWrites.push_back(textureWrite);
             }
+
+            std::vector<VkDescriptorImageInfo> descriptorShadowImageInfos;
+
+            descriptorShadowImageInfos.resize(1);
+
+            // just one shadow
+            descriptorShadowImageInfos[0] = VkDescriptorImageInfo{};
+            descriptorShadowImageInfos[0].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            descriptorShadowImageInfos[0].imageView = shadowImageView;
+            descriptorShadowImageInfos[0].sampler = shadowSampler;
+
+            VkWriteDescriptorSet shadowWrite{};
+            shadowWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            shadowWrite.dstSet = descriptorSet;
+            shadowWrite.dstBinding = 2;
+            shadowWrite.dstArrayElement = 0;
+            shadowWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            shadowWrite.descriptorCount = 1;
+            shadowWrite.pImageInfo = &descriptorShadowImageInfos[0];
+
+            descriptorWrites.push_back(shadowWrite);
+
             
             vkUpdateDescriptorSets(device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
         }
@@ -1968,6 +2159,10 @@ class Vulkan {
 
             for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++) {
                 uniformBuffers[i] = createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,0,VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT,"uniform" + std::to_string(i));
+            }
+            // shadow projections
+            for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++) {
+                uniformBuffers[i+FRAMES_IN_FLIGHT] = createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,0,VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT,"shadow" + std::to_string(i));
             }
         }
 
@@ -2070,21 +2265,21 @@ class Vulkan {
             return createImageView(image, VK_FORMAT_R8G8B8A8_SRGB,VK_IMAGE_ASPECT_COLOR_BIT);
         }
 
-        VkSampler createTextureSampler(Image image) {
+        VkSampler createTextureSampler(Image image,VkFilter filter = VK_FILTER_NEAREST,VkSamplerAddressMode samplerAddressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT,VkBorderColor borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK) {
             VkSamplerCreateInfo samplerInfo{};
             samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-            samplerInfo.magFilter = VK_FILTER_NEAREST;
-            samplerInfo.minFilter = VK_FILTER_NEAREST;
-            samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-            samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-            samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+            samplerInfo.magFilter = filter;
+            samplerInfo.minFilter = filter;
+            samplerInfo.addressModeU = samplerAddressMode;
+            samplerInfo.addressModeV = samplerAddressMode;
+            samplerInfo.addressModeW = samplerAddressMode;
             samplerInfo.anisotropyEnable = VK_TRUE;
 
             VkPhysicalDeviceProperties properties{};
             vkGetPhysicalDeviceProperties(physicalDevice, &properties);
 
             samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy; //we have to query the device for this info 
-            samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+            samplerInfo.borderColor = borderColor;
             samplerInfo.unnormalizedCoordinates = VK_FALSE; //if true, it would use pixel coordiantes 
             samplerInfo.compareEnable = VK_FALSE;
             samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
@@ -2217,6 +2412,71 @@ class Vulkan {
 
             transitionImageLayout(depthImage, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
             
+        }
+
+        void createShadowResources() {
+
+            VkFormat depthFormat = findDepthFormat();
+            shadowImage = createImage(shadowMapSize, shadowMapSize, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+            shadowImageView = createImageView(shadowImage, depthFormat,VK_IMAGE_ASPECT_DEPTH_BIT);
+
+            shadowSampler = createTextureSampler(shadowImage,VK_FILTER_LINEAR,VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE);
+
+            VkAttachmentDescription depthAttachment{};
+            depthAttachment.format = findDepthFormat();
+            depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+            depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+            depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+            depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+            depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+            depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+            depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+            VkAttachmentReference depthAttachmentRef{};
+            depthAttachmentRef.attachment = 0;
+            depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+            VkSubpassDescription subpass{};
+            subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+            subpass.colorAttachmentCount = 0;
+            subpass.pColorAttachments = nullptr;
+            subpass.pDepthStencilAttachment = &depthAttachmentRef;
+
+            VkSubpassDependency dependency{}; //honestly, i have no idea what this does
+            dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+            dependency.dstSubpass = 0;
+            dependency.srcStageMask =  VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+            dependency.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+            dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+            dependency.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
+            std::array<VkAttachmentDescription, 1> attachments = {depthAttachment};
+            VkRenderPassCreateInfo renderPassInfo{};
+            renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+            renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+            renderPassInfo.pAttachments = attachments.data();
+            renderPassInfo.subpassCount = 1;
+            renderPassInfo.pSubpasses = &subpass;
+            renderPassInfo.dependencyCount = 1;
+            renderPassInfo.pDependencies = &dependency;
+
+
+            if (vkCreateRenderPass(device, &renderPassInfo, nullptr, &shadowRenderPass) != VK_SUCCESS) {
+                throw std::runtime_error("failed to create shadow render pass!");
+            }
+
+            VkFramebufferCreateInfo framebufferInfo{};
+            framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+            framebufferInfo.renderPass = shadowRenderPass;
+            framebufferInfo.attachmentCount = 1;
+            framebufferInfo.pAttachments = &shadowImageView;
+            framebufferInfo.width = shadowMapSize;
+            framebufferInfo.height = shadowMapSize;
+            framebufferInfo.layers = 1;
+
+            if (vkCreateFramebuffer(device, &framebufferInfo, nullptr, &shadowFramebuffer) != VK_SUCCESS) {
+                throw std::runtime_error("failed to create framebuffer!");
+            }
         }
 
         VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features) {

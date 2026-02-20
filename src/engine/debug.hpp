@@ -121,12 +121,10 @@ class Debug {
             PipelineOptions pOptions;
             pOptions.polygonMode = VK_POLYGON_MODE_LINE;
             pOptions.topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
-            auto wireFramePipeline = vulkan.createManagedPipeline<DebugVertex>("shaders/compiled/debug_vert.spv","shaders/compiled/debug_frag.spv",pOptions);
-            debug.wireFrameMaterial = vulkan.createMaterial(wireFramePipeline,DebugMaterialData(vec3(0,1,0)));
+            debug.wireFrameMaterial = vulkan.createMaterial<DebugMaterialData,DebugVertex>("debug",DebugMaterialData(vec3(0,1,0)),pOptions);
 
             pOptions = PipelineOptions();
-            auto solidPipeline = vulkan.createManagedPipeline<DebugVertex>("shaders/compiled/debug_vert.spv","shaders/compiled/debug_frag.spv",pOptions);
-            debug.solidMaterial = vulkan.createMaterial(solidPipeline,DebugMaterialData(vec3(0,1,0)));
+            debug.solidMaterial = vulkan.createMaterial<DebugMaterialData,DebugVertex>("debug",DebugMaterialData(vec3(0,1,0)),pOptions);
             
             //debug.solidPipeline = vulkan.createManagedPipeline<DebugVertex>("shaders/compiled/debug_vert.spv","shaders/compiled/debug_frag.spv");
 

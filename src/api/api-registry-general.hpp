@@ -118,6 +118,7 @@ namespace API {
         LitMaterialData materialData;
         VkPipeline pipeline = registry.litShader;
         sol::table table = obj;
+        string shader = "lit";
         switch (getObjectLoadType(obj)) {
             case ObjLoadType::ARRAY:
                 getTexture(table,2,materialData.texture,registry,true);
@@ -126,12 +127,13 @@ namespace API {
             case ObjLoadType::TABLE:
                 getTexture(table,"texture",materialData.texture,registry,true);
                 getColorAsVec4(table,"color",materialData.color,false);
+                get<string>(table,"shader",shader);
                 break;
             case ObjLoadType::INVALID:
                 Debug::warn("object is invalid");
                 break;
         }
-        return vulkan->createMaterial(pipeline,materialData);
+        return vulkan->createMaterial<LitMaterialData,Vertex>(shader,materialData);
     }
 
     void getMaterial(sol::table table,std::variant<string,int> key,Material& ref,Registry& registry,bool required = false) {
@@ -161,6 +163,26 @@ namespace API {
         }
         Debug::subtractTrace();
         get<Block*>(table,key,ref,required);
+    }
+
+    template<typename T> 
+    void getWidget(sol::table table,std::variant<string,int> key,T*& ref,Registry& registry,bool required = false) {
+        Debug::addTrace(keyAsString(key)); 
+        bool propertySet = false;
+        sol::object obj = table[key];
+        if(obj.is<string>()) {
+            bool propertySet = false;
+            string str = obj.as<string>();
+            T* widget = registry.getWidget<T>(str); //emits warning for us
+            if(widget != nullptr) {
+                ref = widget;
+                propertySet = true;
+            }
+        }
+        if(!propertySet && required) {
+            Debug::warn("No value found for widget! " + (string)typeid(T).name());
+        }
+        Debug::subtractTrace();
     }
 
     // honestly fuck this for now

@@ -18,10 +18,11 @@ layout(binding = 1) uniform sampler2D texSampler[];
 
 void main() {
     MaterialData material = push.material;
+    uint frameIndex = push.frameIndex;
 
-    vec3 lightDir = normalize(vec3(0.5,1.0,0.1));
-    vec3 lightColor = vec3(3,3,3);
-    vec3 ambient = vec3(0.3,0.3,0.5);
+    vec3 lightDir = sceneData[frameIndex].mainLightDirection;
+    vec3 lightColor = sceneData[frameIndex].mainLightColor;
+    vec3 ambient = sceneData[frameIndex].ambientLightColor;
 
 
     vec3 diffuse = lightColor;

@@ -136,9 +136,10 @@ class Character : public Actor {
                 heldItemData.animationTimer += dt;
                 currentTool->item->addRenderables(vulkan,*this,dt);
             }
-            if(thirdPerson) {
-                Actor::addRenderables(vulkan,dt);
-            }
+            RenderingSettings settings;
+            settings.mainPass = thirdPerson;
+            if(model == nullptr) return; //if no model, nothing to render :)
+            model->addToRender(vulkan,material,position,rotation,vec3(modelScale),settings);
             shake.step(dt);
         }
 
@@ -301,7 +302,7 @@ class Character : public Actor {
             }
         }
 
-        //could layer be abstracted to a controller
+        //could later be abstracted to a controller
         void processInput(Input& input) {
 
             // eventually we want an enum for keys instead of using the defines

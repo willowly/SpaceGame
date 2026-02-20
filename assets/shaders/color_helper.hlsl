@@ -1,4 +1,4 @@
-
+#pragma once
 
 vec3 toLinear(vec3 inColor) {
     float gamma = 2.2;

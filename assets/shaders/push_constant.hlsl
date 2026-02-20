@@ -1,3 +1,5 @@
+#ifndef PUSH_CONST
+#define PUSH_CONST
 #extension GL_EXT_nonuniform_qualifier : enable
 #extension GL_EXT_buffer_reference : require
 
@@ -11,3 +13,5 @@ layout( push_constant ) uniform constants
     uint frameIndex;
     MaterialData material;
 } push;
+
+#endif

@@ -65,8 +65,7 @@ class Skybox {
 
         PipelineOptions opts;
         opts.depthCompareOp = VK_COMPARE_OP_EQUAL;
-        auto pipeline = vulkan.createManagedPipeline<SkyboxVertex>(Vulkan::vertCodePath("skybox"),Vulkan::fragCodePath("skybox"),opts);
-        material = vulkan.createMaterial(pipeline,materialData);
+        material = vulkan.createMaterial<SkyboxMaterialData,SkyboxVertex>("skybox",materialData,opts);
 
         
 
