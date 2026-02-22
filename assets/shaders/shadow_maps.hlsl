@@ -4,7 +4,7 @@
 
 layout(binding = 2) uniform sampler2D shadowMaps[];
 
-float texelSize = 1.0f/10000.0f;
+float texelSize = 0.5f/10000.0f;
 
 float getShadow(vec4 lightSpacePosition) {
 

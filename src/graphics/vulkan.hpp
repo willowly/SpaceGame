@@ -183,7 +183,7 @@ class Vulkan {
         Color ambientLight = Color(0.1f,0.1f,0.1f);
 
         unsigned int shadowMapSize = 10000;
-        float shadowDist = 20;
+        float shadowDist = 50;
 
         Vulkan(string name,GLFWwindow* window) {
             this->window = window;
@@ -197,7 +197,7 @@ class Vulkan {
             createImageViews();
             createRenderPass();
             createCommandPool();
-            createFrameCommandBuffers();
+            createFrameCommandBuffers();    
             createDepthResources();
             createShadowResources();
             createFrameBuffers();

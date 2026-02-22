@@ -432,8 +432,6 @@ class GameApplication {
                 averageTime += frametimes[i];
             }
             averageTime /= 60.0f;
-
-            interface.drawRect(*vulkan,Rect(50,50),Color::white,Sprite(0,Rect::unitSquare),registry.getMaterial("shadow_test"));
             
             // vulkan->mainLight.direction = vulkan->mainLight.direction * glm::quat(glm::radians(vec3(0,dt*90,0)));
             // std::cout << StringHelper::toString(vulkan->mainLight.direction) << std::endl;
