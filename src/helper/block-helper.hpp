@@ -48,6 +48,7 @@ namespace BlockHelper {
                     return glm::angleAxis(glm::radians(-90.0f),vec3(0,1.0f,0));
                     break;
             }
+            return glm::angleAxis(glm::radians(0.0f),vec3(0,1.0f,0));
         }
 
         BlockFacing rotateFacingByFacing(BlockFacing a, BlockFacing b) {

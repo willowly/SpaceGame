@@ -170,7 +170,7 @@ class Mesh {
                                     meshData.indices.push_back(vertexMap[vertex]);
                                 } else {
                                     meshData.vertices.push_back(vertex);
-                                    int index = meshData.vertices.size()-1;
+                                    size_t index = meshData.vertices.size()-1;
                                     vertexMap[vertex] = index;
                                     meshData.indices.push_back(index);
                                 }
@@ -232,21 +232,21 @@ class Mesh {
 
         }
 
-        void addToRender(Vulkan* vulkan,Material material,glm::mat4 matrix = glm::mat4(1.0f)) {
+        void addToRender(Vulkan* vulkan,Material material,glm::mat4 matrix = glm::mat4(1.0f),RenderingSettings settings = {}) {
             if(!buffersLoaded) {
                 Debug::warn("Tried to draw model that is not loaded");
                 return;
             }
-            vulkan->addMesh(meshBuffer,material,matrix);
+            vulkan->addMesh(meshBuffer,material,settings,matrix);
 
             
             
         }
 
-        void addToRender(Vulkan* vulkan,Material material,vec3 position,quat rotation = quat(1.0f,0.0f,0.0f,0.0f),vec3 scale = vec3(1)) {
+        void addToRender(Vulkan* vulkan,Material material,vec3 position,quat rotation = quat(1.0f,0.0f,0.0f,0.0f),vec3 scale = vec3(1),RenderingSettings settings = {}) {
             
             auto matrix = MathHelper::getTransformMatrix(position,rotation,scale);
-            addToRender(vulkan,material,matrix);
+            addToRender(vulkan,material,matrix,settings);
 
         }
 

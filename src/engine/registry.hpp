@@ -6,6 +6,8 @@
 #include "item/item.hpp"
 #include "helper/sprite.hpp"
 #include "interface/widget.hpp"
+#include "actor/components/particle-effect.hpp"
+#include "interface/font.hpp"
 #include <map>
 #include <memory>
 
@@ -27,6 +29,8 @@ class Registry {
     map<string,unique_ptr<Block>> blocks;
     map<string,unique_ptr<Item>> items;
     map<string,unique_ptr<Widget>> widgets;
+
+    map<string,ParticleEffect> particleEffects;
     
     TextureID errorTexture = 0; 
 
@@ -62,6 +66,10 @@ class Registry {
 
         bool hasWidget(string name) {
             return widgets.contains(name);
+        }
+
+        bool hasParticleEffect(string name) {
+            return particleEffects.contains(name);
         }
 
         Mesh<Vertex>* getModel(string name) {
@@ -135,6 +143,30 @@ class Registry {
             return nullptr;
         }
 
+        template<typename T>
+        T* getWidget(string name) {
+            Widget* widget = getWidget(name);
+            if(widget == nullptr) return nullptr;
+
+            T* typedWidget = dynamic_cast<T*>(widget);
+            if(typedWidget != nullptr) {
+                return typedWidget;
+            } else {
+                Debug::warn("widget \"" + name + "\" not of type " + typeid(T).name());
+                return nullptr;
+            }
+            
+        }
+
+        ParticleEffect* getParticleEffect(string name) {
+            if(particleEffects.contains(name)) {
+                return &particleEffects.at(name);
+            } else {
+                Debug::warn("no effect called \"" + name + "\"");
+            }
+            return nullptr;
+        }
+
         Mesh<Vertex>* addModel(string name) {
             models.emplace(name,Mesh<Vertex>());
             return &models.at(name);
@@ -171,11 +203,17 @@ class Registry {
         template <typename T>
         T* addWidget(string name) {
             widgets.emplace(name,std::make_unique<T>());
-            return dynamic_cast<T*>(items.at(name).get());
+            return dynamic_cast<T*>(widgets.at(name).get());
+        }
+
+        void addParticleEffect(string name,ParticleEffect effect) {
+            particleEffects.emplace(name,effect);
         }
 
         VkPipeline litShader;
         VkPipeline textShader;
         VkPipeline uiShader;
+
+        Font font;
 
 };

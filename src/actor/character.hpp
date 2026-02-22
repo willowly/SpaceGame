@@ -30,7 +30,7 @@
 #include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
 
 #include "physics/jolt-userdata.hpp"
-
+#include "components/camera-shake.hpp"
 
 class Character : public Actor {
 
@@ -44,7 +44,7 @@ class Character : public Actor {
         //     InMenu
         // } action = Action::Neutral;
 
-        vec3 lastPosition;
+        vec3 lastPosition = {};
 
 
         // prototype
@@ -69,10 +69,10 @@ class Character : public Actor {
 
         bool noClip = false;
 
-        vec3 moveInput;
+        vec3 moveInput = {};
 
-        vec3 velocity;
-        vec3 rotationVelocity;
+        vec3 velocity = {};
+        vec3 rotationVelocity = {};
         
 
         Item* currentToolItem = nullptr;
@@ -92,11 +92,11 @@ class Character : public Actor {
         } heldItemData;
 
         Construction* ridingConstruction = nullptr;
-        ivec3 ridingConstructionPoint;
-        quat ridingConstructionRotation;
+        ivec3 ridingConstructionPoint = {};
+        quat ridingConstructionRotation = {};
 
         vec3 thirdPersonCameraOffset = vec3(1,0.5,10);
-        vec3 thirdPersonCameraRot;
+        vec3 thirdPersonCameraRot = {};
 
         Inventory inventory;
 
@@ -119,7 +119,7 @@ class Character : public Actor {
             jumpForce = character.jumpForce;
         }
 
-    
+        CameraShake shake;
 
         bool inMenu;
 
@@ -136,9 +136,11 @@ class Character : public Actor {
                 heldItemData.animationTimer += dt;
                 currentTool->item->addRenderables(vulkan,*this,dt);
             }
-            if(thirdPerson) {
-                Actor::addRenderables(vulkan,dt);
-            }
+            RenderingSettings settings;
+            settings.mainPass = thirdPerson;
+            if(model == nullptr) return; //if no model, nothing to render :)
+            model->addToRender(vulkan,material,position,rotation,vec3(modelScale),settings);
+            shake.step(dt);
         }
 
         virtual void spawn(World* world) {
@@ -173,6 +175,8 @@ class Character : public Actor {
             } else {
                 world->physics_system.GetBodyInterface().SetObjectLayer(body->GetID(),Layers::DISABLED);
             }
+            auto bounds = body->GetWorldSpaceBounds();
+            // Debug::drawCube(Physics::toGlmVec(bounds.GetCenter()),Physics::toGlmVec(bounds.GetSize()),glm::identity<quat>(),Color::green,0.01f);
         }
 
         virtual void postPhysics(World* world) {
@@ -298,7 +302,7 @@ class Character : public Actor {
             }
         }
 
-        //could layer be abstracted to a controller
+        //could later be abstracted to a controller
         void processInput(Input& input) {
 
             // eventually we want an enum for keys instead of using the defines
@@ -374,6 +378,9 @@ class Character : public Actor {
             }
             if(input.getKeyPressed(GLFW_KEY_Z)) {
                 thirdPerson = !thirdPerson;
+            }
+            if(input.getKeyPressed(GLFW_KEY_T)) {
+                shake.startShake();
             }
 
             //check for cheats access
@@ -486,11 +493,10 @@ class Character : public Actor {
         void setCamera(Camera& camera) {
             if(ridingConstruction == nullptr && !thirdPerson) {
                 camera.position = getEyePosition();
-                camera.rotation = getEyeRotation();
             } else {
                 camera.position = position + getEyeRotation() * thirdPersonCameraOffset;
-                camera.rotation = getEyeRotation();
             }
+            camera.rotation = getEyeRotation() * shake.getRotation();
             
         }
 

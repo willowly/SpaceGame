@@ -4,8 +4,9 @@
 #include <actor/character.hpp>
 #include "helper/rect.hpp"
 #include "interface/item-slot-widget.hpp"
+#include "interface/widget.hpp"
 
-class ToolbarWidget {
+class ToolbarWidget : public Widget {
     
     public:
         Sprite solidSprite;

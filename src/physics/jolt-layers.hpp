@@ -72,7 +72,7 @@ public:
 		mObjectToBroadPhase[Layers::DISABLED] = BroadPhaseLayers::DISABLED;
 	}
 
-	virtual uint					GetNumBroadPhaseLayers() const override
+	virtual unsigned int					GetNumBroadPhaseLayers() const override
 	{
 		return BroadPhaseLayers::NUM_LAYERS;
 	}

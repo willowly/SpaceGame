@@ -6,6 +6,8 @@
 #include "item/item-stack.hpp"
 #include "block/block.hpp"
 
+#include <variant>
+
 typedef std::variant<Item*,Recipe*,Block*> ResourcePointer;
 
 

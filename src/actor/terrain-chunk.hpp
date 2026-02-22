@@ -21,14 +21,7 @@
 
 class TerrainChunk {
 
-    struct VoxelData {
-        float amount = 0;
-        int type;
-        int verticesStart = 0;
-        int verticesEnd = 0;
-    };
-
-    ivec3 offset; //offset in overall terrain cell-space
+    ivec3 offset = {}; //offset in overall terrain cell-space
 
     std::vector<VoxelData> terrainData;
     MeshData<TerrainVertex> meshData;
@@ -260,9 +253,12 @@ class TerrainChunk {
 
             if(body == nullptr) {
 
-                if(meshData.vertices.size() == 0 || meshData.indices.size() == 0) return;
+                if(meshData.vertices.size() == 0 || meshData.indices.size() == 0) {
+                    physicsMeshOutOfDate = true;
+                    return;
+                }
 
-                TerrainShapeSettings settings(meshData,size*cellSize);
+                TerrainShapeSettings settings(meshData,terrainData,size*cellSize);
 
                 JPH::Shape::ShapeResult result;
 
@@ -288,7 +284,7 @@ class TerrainChunk {
 
             } else {
                 if(physicsShape != nullptr && physicsMeshOutOfDate) {
-                    physicsShape->UpdateMesh(meshData); //copy over the data :3
+                    physicsShape->UpdateMesh(meshData,terrainData); //copy over the data :3
                     physicsMeshOutOfDate = false;
                 }
              }
@@ -408,8 +404,8 @@ class TerrainChunk {
             
             
             readyToRender = true;
-            gpuMeshOutOfDate = true;
             meshOutOfDate = false;
+            gpuMeshOutOfDate = true;
             physicsMeshOutOfDate = true;
         }
 
@@ -522,15 +518,22 @@ class TerrainChunk {
                     if(isDegenerate(face)) {
                         meshData.vertices.erase(meshData.vertices.end()-3,meshData.vertices.end());
                         meshData.indices.erase(meshData.indices.end()-3,meshData.indices.end());
+                    } else {
+                    
+                        int aIndex = face[0];
+                        int bIndex = face[1];
+                        int cIndex = face[2];
+                        TerrainVertex& aVert = meshData.vertices[aIndex];
+                        TerrainVertex& bVert = meshData.vertices[bIndex];
+                        TerrainVertex& cVert = meshData.vertices[cIndex];
+                        vec3 normal = MathHelper::normalFromPlanePoints(aVert.pos,bVert.pos,cVert.pos);
+                        aVert.normal = normal;
+                        aVert.textureID = textureIDVec;
+                        bVert.normal = normal;
+                        bVert.textureID = textureIDVec;
+                        cVert.normal = normal;
+                        cVert.textureID = textureIDVec;
                     }
-
-                    vec3 normal = MathHelper::normalFromPlanePoints(meshData.vertices[face[0]].pos,meshData.vertices[face[1]].pos,meshData.vertices[face[2]].pos);
-                    meshData.vertices[face[0]].normal = normal;
-                    meshData.vertices[face[0]].textureID = textureIDVec;
-                    meshData.vertices[face[1]].normal = normal;
-                    meshData.vertices[face[1]].textureID = textureIDVec;
-                    meshData.vertices[face[2]].normal = normal;
-                    meshData.vertices[face[2]].textureID = textureIDVec;
                 }
                 i++;
             }

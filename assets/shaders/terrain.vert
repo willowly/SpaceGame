@@ -12,8 +12,11 @@ layout(location = 0) out vec3 outPosition;
 layout(location = 1) out vec3 outNormal;
 layout(location = 2) out ivec4 outTextureID;
 layout(location = 3) out vec4 outOreBlend;
+layout(location = 4) out vec4 outLightSpacePosition;
 
 #include "push_constant.hlsl"
+
+#include "shadow_maps.hlsl"
 
 void main() {
 
@@ -26,5 +29,6 @@ void main() {
     outTextureID = inTextureID;
     outOreBlend = inOreBlend;
 
+    outLightSpacePosition = getLightSpacePos(frameIndex,modelMatrix,inPosition);
     
 }

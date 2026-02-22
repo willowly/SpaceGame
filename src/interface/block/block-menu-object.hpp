@@ -13,7 +13,7 @@ class BlockMenuObject : public MenuObject {
     public:
 
         Construction* construction;
-        ivec3 location;
+        ivec3 location = {};
         BlockWidget<BlockType>& widget;
 
         BlockMenuObject(Construction* construction,ivec3 location,BlockWidget<BlockType>& widget) : construction(construction), location(location), widget(widget) {}

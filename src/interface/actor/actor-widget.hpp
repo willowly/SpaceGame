@@ -2,9 +2,10 @@
 #pragma once
 
 #include "interface/interface.hpp"
+#include "interface/widget.hpp"
 
 template<typename ActorType>
-class ActorWidget {
+class ActorWidget : public Widget{
 
     public:
 

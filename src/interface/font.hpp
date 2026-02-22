@@ -10,8 +10,8 @@ class Font {
     public:
         TextureID texture;
         char start;
-        vec2 charSize;
-        vec2 textureSize;
+        vec2 charSize = {};
+        vec2 textureSize = {};
         string characters;
 
 

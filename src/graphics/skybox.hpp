@@ -2,10 +2,11 @@
 
 #include "vulkan.hpp"
 #include "engine/debug.hpp"
+#include <array>
 
 struct SkyboxVertex {
-    vec3 pos;
-    vec2 texCoord;
+    vec3 pos = {};
+    vec2 texCoord = {};
     int face;
     SkyboxVertex(vec3 pos,vec2 texCoord,int face) : pos(pos), texCoord(texCoord), face(face) {}
     static VkVertexInputBindingDescription getBindingDescription() {
@@ -64,8 +65,7 @@ class Skybox {
 
         PipelineOptions opts;
         opts.depthCompareOp = VK_COMPARE_OP_EQUAL;
-        auto pipeline = vulkan.createManagedPipeline<SkyboxVertex>(Vulkan::vertCodePath("skybox"),Vulkan::fragCodePath("skybox"),opts);
-        material = vulkan.createMaterial(pipeline,materialData);
+        material = vulkan.createMaterial<SkyboxMaterialData,SkyboxVertex>("skybox",materialData,opts);
 
         
 

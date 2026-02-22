@@ -32,9 +32,9 @@ using std::unordered_map;
 
 
 struct ConstructionVertex {
-    glm::vec3 pos;
-    glm::vec3 normal;
-    glm::vec2 texCoord;
+    glm::vec3 pos = {};
+    glm::vec3 normal = {};
+    glm::vec2 texCoord = {};
     int textureID;
 
     ConstructionVertex() {}
@@ -127,11 +127,13 @@ class Construction : public Actor {
 
     bool physicsShapeChanged = false;
 
-    vec3 accumulatedThrustForce; // acculated on step, applied on prePhysics
+    vec3 accumulatedThrustForce = {}; // acculated on step, applied on prePhysics
 
+    // Rigidbody Class
     JPH::Body *body;
     JPH::MutableCompoundShape* physicsShape;
     JPH::Vec3 physicsOldCOM;
+    ActorUserData physicsUserData;
 
     Construction() : Actor() {
         blockData.push_back(BlockData()); //starting block
@@ -139,7 +141,12 @@ class Construction : public Actor {
         blockCountY.push_back(0);
         blockCountZ.push_back(0);
         
+        for (size_t i = 0; i < 6; i++)
+        {
+            thrustForces[i] = 0;
+        }
         
+
         JPH::MutableCompoundShapeSettings shapeSettings{};
         JPH::Shape::ShapeResult result;
 
@@ -309,20 +316,20 @@ class Construction : public Actor {
             // Debug::drawPoint(position,Color::green);
 
             // thrust forces
-            Debug::drawRay(position,transformDirection(thrustForces[BlockFacing::FORWARD]* vec3(0,0,0.1)), Color::blue);
-            Debug::drawRay(position,transformDirection(thrustForces[BlockFacing::BACKWARD]*vec3(0,0,-0.1)),Color::blue);
-            Debug::drawRay(position,transformDirection(thrustForces[BlockFacing::UP]*      vec3(0,0.1,0)),Color::yellow);
-            Debug::drawRay(position,transformDirection(thrustForces[BlockFacing::DOWN]*    vec3(0,-0.1,0)), Color::yellow);
-            Debug::drawRay(position,transformDirection(thrustForces[BlockFacing::RIGHT]*   vec3(0.1,0,0)), Color::red);
-            Debug::drawRay(position,transformDirection(thrustForces[BlockFacing::LEFT]*    vec3(-0.1,0,0)),Color::red);
+            // Debug::drawRay(position,transformDirection(thrustForces[BlockFacing::FORWARD]* vec3(0,0,0.1)), Color::blue);
+            // Debug::drawRay(position,transformDirection(thrustForces[BlockFacing::BACKWARD]*vec3(0,0,-0.1)),Color::blue);
+            // Debug::drawRay(position,transformDirection(thrustForces[BlockFacing::UP]*      vec3(0,0.1,0)),Color::yellow);
+            // Debug::drawRay(position,transformDirection(thrustForces[BlockFacing::DOWN]*    vec3(0,-0.1,0)), Color::yellow);
+            // Debug::drawRay(position,transformDirection(thrustForces[BlockFacing::RIGHT]*   vec3(0.1,0,0)), Color::red);
+            // Debug::drawRay(position,transformDirection(thrustForces[BlockFacing::LEFT]*    vec3(-0.1,0,0)),Color::red);
 
-            // bounds
-            Debug::drawCube(transformPoint((vec3)(max+min)/2.0f),(vec3)(max-min) + vec3(1),rotation,Color::red);
+            // // bounds
+            // Debug::drawCube(transformPoint((vec3)(max+min)/2.0f),(vec3)(max-min) + vec3(1),rotation,Color::red);
 
-            for (auto subShape : physicsShape->GetSubShapes())
-            {
-                Debug::drawPoint(transformPoint(Physics::toGlmVec(subShape.GetPositionCOM())));
-            }
+            // for (auto subShape : physicsShape->GetSubShapes())
+            // {
+            //     Debug::drawPoint(transformPoint(Physics::toGlmVec(subShape.GetPositionCOM())));
+            // }
             
         }
 
@@ -399,7 +406,8 @@ class Construction : public Actor {
 
             bodySettings.mOverrideMassProperties = JPH::EOverrideMassProperties::MassAndInertiaProvided;
             bodySettings.mMassPropertiesOverride.mMass = 1.0f;
-            // bodySettings.mUserData = ActorUserData(this).asUInt();
+            physicsUserData.actor = this;
+            bodySettings.mUserData = ActorUserData::encode(&physicsUserData);
             body = world->physics_system.GetBodyInterface().CreateBody(bodySettings);
             world->physics_system.GetBodyInterface().AddBody(body->GetID(),JPH::EActivation::Activate);
             std::cout << "new construction created with ID " << body->GetID().GetIndexAndSequenceNumber() << std::endl;
@@ -719,7 +727,7 @@ class Construction : public Actor {
                 //std::cout << "group is " << group << std::endl;
                 return;
             }
-            Debug::drawCube(transformPoint(location),vec3(1),rotation,debugGroupColors[group-1],1);
+            //Debug::drawCube(transformPoint(location),vec3(1),rotation,debugGroupColors[group-1],1);
             blockGroups[index] = group;
             //locations.push_back(location);
             tryAddToGroup(group,location+ivec3(1,0,0),blockGroups,locations);

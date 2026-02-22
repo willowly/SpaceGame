@@ -3,8 +3,9 @@
 
 #include "interface/interface.hpp"
 #include "font.hpp"
+#include "interface/widget.hpp"
 
-class TextWidget {
+class TextWidget : public Widget {
 
     public:
 
@@ -12,7 +13,7 @@ class TextWidget {
         float ratio = 1.5;
         float spacing = 0.25f;
         Color color = Color::white;
-        Font* font;
+        Font* font = nullptr;
 
 
     void draw(DrawContext context,vec2 position,string text) {

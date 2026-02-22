@@ -46,8 +46,8 @@ class RigidbodyActor : public Actor {
 
         //float mass;
 
-        vec3 velocity;
-        vec3 angularVelocity;
+        vec3 velocity = {};
+        vec3 angularVelocity = {};
 
         JPH::Body *body;
 

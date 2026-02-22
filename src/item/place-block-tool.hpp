@@ -21,7 +21,7 @@ class PlaceBlockTool: public Tool {
 
         float placeAnimationTimer = 0;
     
-        void place(World* world,Character& user) {
+        bool place(World* world,Character& user) {
 
             Ray ray = user.getLookRay();
             auto worldHitOpt = world->raycast(ray,10);
@@ -34,15 +34,18 @@ class PlaceBlockTool: public Tool {
                     ivec3 placePointLocalInt = glm::round(placePointLocal);
                     auto facing = BlockHelper::getFacingFromVector(BlockHelper::getRotationFromFacing(placeDirection) * construction->inverseTransformDirection(worldHit.hit.normal));
                     construction->placeBlock(placePointLocalInt,block,facing);
+                    return true;
                 }
                 Terrain* terrain = dynamic_cast<Terrain*>(worldHit.actor);
                 if(terrain != nullptr) {
                     world->spawn(Construction::makeInstance(world->constructionMaterial,block,worldHit.hit.point+glm::vec3(0,0.4,0),user.getRotation(),true));
+                    return true;
                 }
             } else {
                 world->spawn(Construction::makeInstance(world->constructionMaterial,block,ray.origin + ray.direction*10.0f,glm::quatLookAt(ray.direction,vec3(0,1,0)),false));
+                return true;
             }
-            placeAnimationTimer = placeAnimationTime;
+            return false;
         }
 
         virtual std::pair<quat,vec3> animate(Character& user,float dt) {
@@ -59,9 +62,11 @@ class PlaceBlockTool: public Tool {
         virtual void step(World* world,Character& user,ItemStack& stack,float dt) {
             if(clickInput) {
                 clickInput = false;
-                place(world,user);
-                stack.amount--;
-                user.refreshTool(); //in case we run out
+                if(place(world,user)) {
+                    placeAnimationTimer = placeAnimationTime; //animate
+                    stack.amount--;
+                    user.refreshTool(); //in case we run out
+                }
             }
         }
 

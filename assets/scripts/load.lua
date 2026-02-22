@@ -1,56 +1,9 @@
-print("Loading Materials")
+dofile("scripts/load/materials.lua")
+dofile("scripts/load/widgets.lua")
 
-
-materials.grid = {
-    --shader=shaders.lit,
-    texture=textures.grid_dark,
-}
-
-
-materials.pickaxe = {
-    texture=textures.pickaxe_smooth,
-}
-
-materials.tin_block = {
-    texture=textures.tin_block,
-}
-
-materials.furnace = {
-    texture="furnace"
-}
-
-materials.player = {
-    texture = "player_face"
-}
--- materials.cobalt_block = {"lit","cobalt_block"}
-materials.cockpit = {"lit","cockpit"}
-materials.thruster = {"lit","solid",color(0.15,0.15,0.2)}
-
-materials.terrain = {"lit","solid",color(0.2,0.2,0.8)}
-
--- print("Loading Actors")
-
-actors.plane = {
-    type="actor",
-    model="plane",
-    material=materials.grid
-}
-
--- actors.pickaxe = {
---     type="actor",
---     model="pickaxe",
---     material="pickaxe"
--- }
-
-actors.asteroid = {
-    type="actor",
-    model="asteroid",
-    material="grid"
-}
 
 print("Loading Blocks")
 
--- blocks.cobalt = {"block","block","cobalt_block"}
 blocks.tin = {
     type="connected",
     texture="basic_block_sheet"
@@ -66,8 +19,8 @@ blocks.thruster = {
     type = "thruster",
     mesh = "thruster",
     texture = "thruster",
-    force = 2000,
-    sideForce = 400
+    force = 20000,
+    side_force = 4000
 }
 
 blocks.furnace = {
@@ -106,7 +59,7 @@ items.furnace = {
     model = "furnace",
     material = "thruster",
     block = "furnace",
-    placeDirection = 2,
+    place_direction = 2,
 }
 
 items.thruster = {
@@ -143,3 +96,13 @@ blocks.tin.drop = items.tin_plate
 blocks.thruster.drop = items.thruster
 blocks.cockpit.drop = items.cockpit
 
+
+actors.plane = {
+    model = "plane",
+    material = "grid"
+}
+
+actors.cube = {
+    model = "cube",
+    material = "grid"
+}

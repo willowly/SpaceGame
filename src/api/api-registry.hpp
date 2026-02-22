@@ -10,6 +10,8 @@
 #include <api/api-registry-actor.hpp>
 #include <api/api-registry-block.hpp>
 #include <api/api-registry-item.hpp>
+#include <api/api-registry-particle-effect.hpp>
+#include <api/api-registry-widget.hpp>
 
 using std::string,std::variant;
 
@@ -46,6 +48,11 @@ namespace API {
 
         itemRegistry["__index"] = &ItemRegistry::index;
         itemRegistry["__newindex"] = &ItemRegistry::newindex;
+
+        sol::usertype<WidgetRegistry> widgetRegistry = lua.new_usertype<WidgetRegistry>("widgetRegistry",sol::no_constructor);
+
+        widgetRegistry["__index"] = &WidgetRegistry::index;
+        widgetRegistry["__newindex"] = &WidgetRegistry::newindex;
 
     }
 

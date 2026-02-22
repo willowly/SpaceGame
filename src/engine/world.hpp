@@ -4,7 +4,7 @@
 
 #include "actor/actor.hpp"
 #include <memory>
-#include <tracy/Tracy.hpp>
+//#include <tracy/Tracy.hpp>
 #include "physics/jolt-physics-body.hpp"
 
 #include <Jolt/Jolt.h>
@@ -38,7 +38,7 @@ class World {
 
     Camera camera;
 
-    float sinceLastStep;
+    float sinceLastStep = 0;
 
     //physics stuff
     BPLayerInterfaceImpl broad_phase_layer_interface;
@@ -72,18 +72,18 @@ class World {
             temp_allocator = new JPH::TempAllocatorImpl(10 * 1024 * 1024);
             jobSystem = new JPH::JobSystemThreadPool(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers, std::thread::hardware_concurrency() - 1);
             //jobSystem = new JPH::JobSystemThreadPool(1, 1, 1);
-            const uint cMaxBodies = 65536;
+            const JPH::uint cMaxBodies = 65536;
 
             JPH::Trace = Physics::TraceImpl;
 
             JPH_IF_ENABLE_ASSERTS(JPH::AssertFailed = Physics::AssertFailedImpl;)
 
             // This determines how many mutexes to allocate to protect rigid bodies from concurrent access. Set it to 0 for the default settings.
-            const uint cNumBodyMutexes = 0;
+            const JPH::uint cNumBodyMutexes = 0;
             // Note: This value is low because this is a simple test. For a real project use something in the order of 65536.
-            const uint cMaxBodyPairs = 65536;
+            const JPH::uint cMaxBodyPairs = 65536;
             // Note: This value is low because this is a simple test. For a real project use something in the order of 10240.
-            const uint cMaxContactConstraints = 10240;
+            const JPH::uint cMaxContactConstraints = 10240;
 
             physics_system.Init(cMaxBodies, cNumBodyMutexes, cMaxBodyPairs, cMaxContactConstraints, broad_phase_layer_interface, object_vs_broadphase_layer_filter, object_vs_object_layer_filter);
 
@@ -118,10 +118,6 @@ class World {
             setupPhysics();
         }
 
-        vec3 testPointA;
-        vec3 testPointB;
-        vec3 testPointC;
-
         template<typename T>
         T* spawn(unique_ptr<T> spawned) {
             T* rawSpawned = spawned.get();
@@ -143,7 +139,7 @@ class World {
         // do rendering, step and everything else
         void frame(Vulkan* vulkan,float dt) {
             
-            ZoneScoped;
+            //ZoneScoped;
             
             float clock = glfwGetTime();
             addRenderables(vulkan,dt);
@@ -165,7 +161,7 @@ class World {
         }
 
         void addRenderables(Vulkan* vulkan,float dt) {
-            ZoneScoped;
+            //ZoneScoped;
             for (auto& actor : actors)
             {
                 actor->addRenderables(vulkan,dt);
@@ -175,10 +171,10 @@ class World {
 
         void physicsStep(float dt) {
             
-            ZoneScoped;
+            //ZoneScoped;
 
             {
-                ZoneScopedN("prePhysics")
+                //ZoneScopedN("prePhysics")
                 iteratingActors++;
                 for (auto& actor : actors)
                 {
@@ -192,7 +188,7 @@ class World {
             physics_system.Update(dt,1,temp_allocator,jobSystem);
 
             {
-                ZoneScopedN("postPhysics")
+                //ZoneScopedN("postPhysics")
                 iteratingActors++;
                 for (auto& actor : actors)
                 {
@@ -203,7 +199,7 @@ class World {
         }
 
         void step(float dt) {
-            ZoneScoped;
+            //ZoneScoped;
             
             iteratingActors++;
             for (auto& actor : actors)
@@ -236,7 +232,7 @@ class World {
         }
 
         std::optional<WorldRaycastHit> raycast(Ray ray,float dist) {
-            ZoneScoped;
+            //ZoneScoped;
             //std::optional<WorldRaycastHit> result = std::nullopt; 
             ray.direction = glm::normalize(ray.direction);
 
@@ -255,7 +251,7 @@ class World {
                 vec3 point = ray.origin + ray.direction * distance;
                 auto shape = physics_system.GetBodyInterface().GetShape(result.mBodyID).GetPtr();
 
-                vec3 normal;
+                vec3 normal = {};
                 {
                     JPH::BodyLockRead lock(physics_system.GetBodyLockInterface(), result.mBodyID);
                     if (lock.Succeeded()) // body_id may no longer be valid
@@ -302,18 +298,18 @@ class World {
             //return result;
         }
 
-        void collideBasic(Actor* actor,float height,float radius) {
-            ZoneScoped;
-            iteratingActors++;
-            for (auto& colliderActor : actors)
-            {
-                if(actor != colliderActor.get()) {
-                    colliderActor->collideBasic(actor,height,radius);
-                }
+        // void collideBasic(Actor* actor,float height,float radius) {
+        //     //ZoneScoped;
+        //     iteratingActors++;
+        //     for (auto& colliderActor : actors)
+        //     {
+        //         if(actor != colliderActor.get()) {
+        //             colliderActor->collideBasic(actor,height,radius);
+        //         }
                 
-            }
-            iteratingActors--;
-        }
+        //     }
+        //     iteratingActors--;
+        // }
 
         Camera& getCamera() {
             return camera;

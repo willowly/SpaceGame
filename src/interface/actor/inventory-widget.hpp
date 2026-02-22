@@ -8,10 +8,10 @@
 #include "interface/text-widget.hpp"
 #include "interface/item-slot-widget.hpp"
 
-class InventoryWidget {
+class InventoryWidget : public Widget{
     
     public:
-        Sprite solid;
+        Sprite backgroundSprite;
         Font* font;
         vec2 size = vec2(150,40);
         float padding = 3;
@@ -20,7 +20,7 @@ class InventoryWidget {
 
         ItemSlotWidget* itemSlot;
 
-        TextWidget tooltipTextTitle;
+        TextWidget* tooltipTextTitle;
 
         void draw(DrawContext context,Character& player) {
 
@@ -32,7 +32,7 @@ class InventoryWidget {
             //interface.drawRect(vulkan,glm::vec2(0,-3),glm::vec2(101,12),glm::vec2(0.5,1),vec2(0.5,1),Color(0.5,0.5,0.5),solidTexture);
             
             Rect mainPanel = Rect::anchored(Rect::withPivot(vec2(0,3),size,vec2(0.5f,0)),screen,vec2(0.5,0.5));
-            context.drawRect(mainPanel,background,solid);
+            context.drawRect(mainPanel,background,backgroundSprite);
 
 
             float width = 1.5;
@@ -66,7 +66,7 @@ class InventoryWidget {
                     Debug::warn("null recipe in player");
                     continue;
                 }
-                context.drawRect(item,slots,solid);
+                context.drawRect(item,slots,backgroundSprite);
                 context.drawRect(item,Color::white,recipe->result.item->getIcon());
                 if(context.mouseInside(item)) {
                     selectedRecipe = recipe;
@@ -88,7 +88,7 @@ class InventoryWidget {
                     float progressPercent = player.recipeTimer/recipe->time;
                     //context.drawRect(item,slots,solid);
                     Rect fill(item.position + vec2(0,(1-progressPercent)*item.size.y),vec2(item.size.x,item.size.y * progressPercent));
-                    context.drawRect(fill,Color(1,1,1,0.2),solid);
+                    context.drawRect(fill,Color(1,1,1,0.2),backgroundSprite);
                     std::cout << "crafting this recipe " << progressPercent << std::endl;
                 }
                 
@@ -118,10 +118,10 @@ class InventoryWidget {
         void drawTooltip(DrawContext context,ItemStack& stack) {
             
             Rect tooltip = Rect(context.getMousePosition()+vec2(3,3),vec2(40,7));
-            tooltip.size.x = tooltipTextTitle.getSize(stack.item->name).x + 4.0f;
-            context.drawRect(tooltip,Color(0.05,0.05,0.05),solid);
+            tooltip.size.x = tooltipTextTitle->getSize(stack.item->name).x + 4.0f;
+            context.drawRect(tooltip,Color(0.05,0.05,0.05),backgroundSprite);
 
-            tooltipTextTitle.draw(context,tooltip.position + vec2(2.0f,2.0f),stack.item->name);
+            tooltipTextTitle->draw(context,tooltip.position + vec2(2.0f,2.0f),stack.item->name);
         }
 
         void drawTooltip(DrawContext context,Recipe& recipe) {
@@ -130,9 +130,9 @@ class InventoryWidget {
 
             string text = "CRAFT " + recipe.result.item->name;
 
-            tooltip.size.x = tooltipTextTitle.getSize(text).x + 4.0f;
-            context.drawRect(tooltip,Color(0.05,0.05,0.05),solid);
+            tooltip.size.x = tooltipTextTitle->getSize(text).x + 4.0f;
+            context.drawRect(tooltip,Color(0.05,0.05,0.05),backgroundSprite);
 
-            tooltipTextTitle.draw(context,tooltip.position + vec2(2.0f,2.0f),text);
+            tooltipTextTitle->draw(context,tooltip.position + vec2(2.0f,2.0f),text);
         }
 };

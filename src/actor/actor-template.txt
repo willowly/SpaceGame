@@ -1,0 +1,57 @@
+#pragma once
+#include "actor.hpp"
+#include <glm/glm.hpp>
+
+
+class Character : public Actor {
+
+
+    public: 
+
+       
+
+        Character(const Character& character) {
+            
+        }
+
+    
+
+
+
+        void addRenderables(Vulkan* vulkan,float dt) {
+            
+        }
+
+        virtual void spawn(World* world) {
+
+        }
+
+        virtual void prePhysics(World* world) {
+           
+        }
+
+        virtual void postPhysics(World* world) {
+
+        }
+
+        void step(World* world,float dt) {
+
+        }
+
+        static std::unique_ptr<Character> makeDefaultPrototype() {
+            auto ptr = new Character();
+            return std::unique_ptr<Character>(ptr);
+        }
+
+        static std::unique_ptr<Character> makeInstance(Character* prototype,vec3 position = vec3(0),quat rotation = glm::identity<quat>()) {
+            return makeInstanceFromPrototype<Character>(prototype,position,rotation);
+        }
+
+       
+
+    protected:
+        Character() : Actor() {
+            
+        }
+
+};

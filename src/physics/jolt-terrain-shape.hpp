@@ -10,11 +10,14 @@
 #include "Jolt/Physics/Collision/CollisionDispatch.h"
 #include "Jolt/Geometry/RayTriangle.h"
 
+#include <cmath> // for cube root
+#include <math.h>
+
 
 class TerrainShapeSettings : public JPH::ShapeSettings {
 
     public:
-    TerrainShapeSettings(MeshData<TerrainVertex>& terrain,float size) : terrain(terrain), size(size) {
+    TerrainShapeSettings(MeshData<TerrainVertex>& terrain,std::vector<VoxelData>& voxelData,float size) : terrain(terrain), voxelData(voxelData), size(size) {
         
     }
 
@@ -23,6 +26,7 @@ class TerrainShapeSettings : public JPH::ShapeSettings {
     
 
     MeshData<TerrainVertex>& terrain;
+    std::vector<VoxelData>& voxelData;
     float size;
 
 };
@@ -37,7 +41,10 @@ class TerrainShape : public JPH::Shape {
     
 
     MeshData<TerrainVertex> meshData;
+    std::vector<VoxelData> voxelData;
     JPH::AABox localBounds;
+    int sizeInCells;
+    float cellSize;
     
     JPH::AABox GetLocalBounds() const override {
 
@@ -47,9 +54,11 @@ class TerrainShape : public JPH::Shape {
     
     public:
     TerrainShape() : Shape(TERRAIN_SHAPE_TYPE,TERRAIN_SHAPE_SUB_TYPE) {};
-    TerrainShape(const TerrainShapeSettings &inSettings, ShapeResult &outResult) : Shape(TERRAIN_SHAPE_TYPE,TERRAIN_SHAPE_SUB_TYPE), meshData(inSettings.terrain) {
+    TerrainShape(const TerrainShapeSettings &inSettings, ShapeResult &outResult) : Shape(TERRAIN_SHAPE_TYPE,TERRAIN_SHAPE_SUB_TYPE), meshData(inSettings.terrain), voxelData(inSettings.voxelData) {
         localBounds.mMin = JPH::Vec3(0.0f,0.0f,0.0f);
         localBounds.mMax = Physics::toJoltVec(glm::vec3(inSettings.size));
+        sizeInCells = (int)std::cbrt((float)voxelData.size());
+        cellSize = inSettings.size / sizeInCells;
     }
 
     struct Triangle {
@@ -70,8 +79,9 @@ class TerrainShape : public JPH::Shape {
         return tri;
     }
 
-    void UpdateMesh(const MeshData<TerrainVertex>& newMeshData) {
+    void UpdateMesh(const MeshData<TerrainVertex>& newMeshData,const std::vector<VoxelData>& newVoxelData) {
         meshData = newMeshData;
+        voxelData = newVoxelData;
     }
 
     inline unsigned int GetSubShapeIDBitsRecursive() const override { return 0; } // no sub shapes I think?
@@ -167,7 +177,7 @@ class TerrainShape : public JPH::Shape {
 
     inline void CollidePoint(JPH::Vec3Arg inPoint, const JPH::SubShapeIDCreator &inSubShapeIDCreator, JPH::CollidePointCollector &ioCollector, const JPH::ShapeFilter &inShapeFilter = { }) const override { }
 
-    inline void CollideSoftBodyVertices(JPH::Mat44Arg inCenterOfMassTransform, JPH::Vec3Arg inScale, const JPH::CollideSoftBodyVertexIterator &inVertices, uint inNumVertices, int inCollidingShapeIndex) const override { }
+    inline void CollideSoftBodyVertices(JPH::Mat44Arg inCenterOfMassTransform, JPH::Vec3Arg inScale, const JPH::CollideSoftBodyVertexIterator &inVertices, unsigned int inNumVertices, int inCollidingShapeIndex) const override { }
 
     inline virtual JPH::Shape::Stats GetStats() const override { 
         return JPH::Shape::Stats(sizeof(this),meshData.vertices.size());
@@ -184,6 +194,13 @@ class TerrainShape : public JPH::Shape {
 
     #endif // JPH_DEBUG_RENDERER
 
+    static int getPointIndex(int x,int y,int z,int size) {
+        x = std::clamp(x,0,size-1);
+        y = std::clamp(y,0,size-1);
+        z = std::clamp(z,0,size-1);
+        return x + y * size + z * size * size;
+    }
+
     inline static void sCollideConvexVsMesh(const Shape *inShape1, const Shape *inShape2, JPH::Vec3Arg inScale1, JPH::Vec3Arg inScale2, JPH::Mat44Arg inCenterOfMassTransform1, JPH::Mat44Arg inCenterOfMassTransform2, const JPH::SubShapeIDCreator &inSubShapeIDCreator1, const JPH::SubShapeIDCreator &inSubShapeIDCreator2, const JPH::CollideShapeSettings &inCollideShapeSettings, JPH::CollideShapeCollector &ioCollector, [[maybe_unused]] const JPH::ShapeFilter &inShapeFilter)
     {
         //JPH_PROFILE_FUNCTION();
@@ -198,22 +215,54 @@ class TerrainShape : public JPH::Shape {
 	    const TerrainShape *shape2 = static_cast<const TerrainShape *>(inShape2);
 
         auto collide = JPH::CollideConvexVsTriangles(shape1,inScale1,inScale2,inCenterOfMassTransform1,inCenterOfMassTransform2,inSubShapeIDCreator1.GetID(), inCollideShapeSettings, ioCollector);
+            
+        auto bounds1 = inShape1->GetWorldSpaceBounds(inCenterOfMassTransform1,inScale1);
 
-        auto& terrain = shape2->meshData;
-        for (size_t i = 0; i+2 < terrain.indices.size(); i += 3)
+        auto transformedBounds1 = bounds1.Transformed(inCenterOfMassTransform2.Inversed()); //Inverse transform into shape 2 local space
+
+        auto cellSize = shape2->cellSize;
+        transformedBounds1.mMin /= cellSize;
+        transformedBounds1.mMax /= cellSize;
+
+        auto& voxelData = shape2->voxelData;
+        auto& meshData = shape2->meshData;
+
+        //std::cout << "min: " <<  StringHelper::toString(Physics::toGlmVec(transformedBounds1.mMin)) << std::endl;
+
+        for (int z = std::max(0,(int)floor(transformedBounds1.mMin.GetZ())); z <= std::min(shape2->sizeInCells-1,(int)ceil(transformedBounds1.mMax.GetZ())); z++)
         {
-            size_t indexA = terrain.indices[i];
-            size_t indexB = terrain.indices[i+1];
-            size_t indexC = terrain.indices[i+2];
-            //std::cout << indexA << " " << shape2->terrain->vertices.size() << " " << &shape2->terrain->vertices << std::endl;
-            JPH::Vec3 a = Physics::toJoltVec(terrain.vertices[indexA].pos);
-            JPH::Vec3 b = Physics::toJoltVec(terrain.vertices[indexB].pos);
-            JPH::Vec3 c = Physics::toJoltVec(terrain.vertices[indexC].pos);
+            for (int y = std::max(0,(int)floor(transformedBounds1.mMin.GetY())); y <= std::min(shape2->sizeInCells-1,(int)ceil(transformedBounds1.mMax.GetY())); y++)
+            {
+                for (int x = std::max(0,(int)floor(transformedBounds1.mMin.GetX())); x <= std::min(shape2->sizeInCells-1,(int)ceil(transformedBounds1.mMax.GetX())); x++)
+                {
+
+                    auto voxel = voxelData[getPointIndex(x,y,z,shape2->sizeInCells)];
+                    for (int i = voxel.verticesStart;i < voxel.verticesEnd;i += 3)
+                    {
+                        
+                        size_t indexA = meshData.indices[i];
+                        size_t indexB = meshData.indices[i+1];
+                        size_t indexC = meshData.indices[i+2];
+                        //std::cout << indexA << " " << shape2->terrain->vertices.size() << " " << &shape2->terrain->vertices << std::endl;
+                        JPH::Vec3 a = Physics::toJoltVec(meshData.vertices[indexA].pos);
+                        JPH::Vec3 b = Physics::toJoltVec(meshData.vertices[indexB].pos);
+                        JPH::Vec3 c = Physics::toJoltVec(meshData.vertices[indexC].pos);
+
+                        // Debug::drawLine(meshData.vertices[indexA].pos,meshData.vertices[indexB].pos,Color::green,0.01f);
+                        // Debug::drawLine(meshData.vertices[indexB].pos,meshData.vertices[indexC].pos,Color::green,0.01f);
+                        // Debug::drawLine(meshData.vertices[indexC].pos,meshData.vertices[indexA].pos,Color::green,0.01f);
 
 
-            int id = i/3;
-            auto triangle_id = inSubShapeIDCreator2.PushID(id,32);
-            collide.Collide(a,b,c,255,triangle_id.GetID());
+                        int id = i/3;
+                        auto triangle_id = inSubShapeIDCreator2.PushID(id,32);
+                        collide.Collide(a,b,c,255,triangle_id.GetID());
+                            
+                    } 
+                    //Debug::drawCube((vec3(x,y,z)+vec3(0.5f))*cellSize + Physics::toGlmVec(inCenterOfMassTransform2.GetTranslation()),vec3(cellSize),glm::identity<quat>(),Color::green,0.03f);
+                    //std::cout << "draw cube " << StringHelper::toString((vec3(x,y,z)+vec3(0.5f))) << std::endl;
+                }
+
+            }
         }
         
     }

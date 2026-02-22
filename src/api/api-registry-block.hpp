@@ -35,26 +35,26 @@ namespace API {
     // }
 
     void loadBlockThruster(sol::table table,ThrusterBlock* block,Registry& registry) {
-        getMesh(table,"mesh",&block->mesh,registry,true);
-        getTexture(table,"texture",&block->texture,registry,true);
-        get<float>(table,"force",&block->force,false);
-        get<float>(table,"sideForce",&block->sideForce,false);
+        getMesh(table,"mesh",block->mesh,registry,true);
+        getTexture(table,"texture",block->texture,registry,true);
+        get<float>(table,"force",block->force,false);
+        get<float>(table,"side_force",block->sideForce,false);
     }
 
     void loadBlockConnected(sol::table table,ConnectedBlock* block,Registry& registry) {
-        getTexture(table,"texture",&block->texture,registry,true);
-        get<bool>(table,"solid",&block->solid,false);
+        getTexture(table,"texture",block->texture,registry,true);
+        get<bool>(table,"solid",block->solid,false);
     }
     
     void loadBlockCockpit(sol::table table,CockpitBlock* block,Registry& registry) {
-        getMesh(table,"mesh",&block->mesh,registry,true);
-        getTexture(table,"texture",&block->texture,registry,true);
+        getMesh(table,"mesh",block->mesh,registry,true);
+        getTexture(table,"texture",block->texture,registry,true);
     }
     void loadBlockFurnace(sol::table table,FurnaceBlock* block,Registry& registry) {
-        getMesh(table,"mesh",&block->mesh,registry,true);
-        getTexture(table,"texture",&block->texture,registry,true);
-        get<float>(table,"fuel_max",&block->fuelMax,false);
-        get<float>(table,"speed",&block->craftSpeed,false);
+        getMesh(table,"mesh",block->mesh,registry,true);
+        getTexture(table,"texture",block->texture,registry,true);
+        get<float>(table,"fuel_max",block->fuelMax,false);
+        get<float>(table,"speed",block->craftSpeed,false);
         // should be other stuff like speed etc
     }
 
@@ -106,14 +106,14 @@ namespace API {
             sol::table table = obj; //this will be null if it doesnt work, so be careful
 
             string type = "";
-            ObjLoadType loadType = getObjectLoadType(lua,obj);
-            switch (getObjectLoadType(lua,obj)) {
+            ObjLoadType loadType = getObjectLoadType(obj);
+            switch (getObjectLoadType(obj)) {
                 case ObjLoadType::ARRAY:
                     type = "invalid";
                     Debug::warn("can't load blocks in array mode");
                     break;
                 case ObjLoadType::TABLE:
-                    get<string>(table,"type",&type,true);
+                    get<string>(table,"type",type,true);
                     break;
                 case ObjLoadType::INVALID:
                     type = "invalid";
