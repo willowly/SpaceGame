@@ -102,11 +102,25 @@ include_directories(src)
 
 include_directories(include)
 
+
+include_directories(include/imgui)
+
 # include(tracy/public/tracy/tracy.hpp)
 
 add_executable(SpaceGame 
 src/main.cpp
 include/volk.c
+
+include/imgui/imgui.h
+include/imgui/imgui.cpp
+
+include/imgui/imgui_demo.cpp
+include/imgui/imgui_draw.cpp
+include/imgui/imgui_widgets.cpp
+include/imgui/imgui_tables.cpp
+
+include/imgui/backends/imgui_impl_vulkan.cpp
+include/imgui/backends/imgui_impl_glfw.cpp
 )
 
 

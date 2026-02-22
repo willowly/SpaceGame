@@ -39,6 +39,11 @@
 
 #include "camera.hpp"
 
+
+#include "imgui/imgui.h"
+#include "imgui/backends/imgui_impl_glfw.h"
+#include "imgui/backends/imgui_impl_vulkan.h"
+
 #define FRAMES_IN_FLIGHT 2
 #define DESCRIPTOR_COUNT 128
 #define TRANSFER_COUNT 16
@@ -174,6 +179,7 @@ class Vulkan {
 
         GLFWwindow* window;
         
+        const uint32_t apiVersion = VK_API_VERSION_1_3;
 
         struct DirectionalLight {
             vec3 direction = vec3(0.5f,-1.0f,0.3f);
@@ -214,11 +220,15 @@ class Vulkan {
             createDescriptorSets(); // also includes the texture
 
             //tracyCtx = TracyVkContext(physicalDevice, device, graphicsQueue, commandBuffers[0]);
-            //initImGui();
+            initImgui();
             
         }
-
+        
         ~Vulkan() {
+
+            vkDestroyDescriptorPool(device,imguiPool,nullptr);
+            
+            ImGui_ImplVulkan_Shutdown();
 
             cleanupSwapChain();
 
@@ -677,7 +687,7 @@ class Vulkan {
             VkPipeline pipeline = createManagedPipeline<Vertex>(vertCodePath(shaderName),fragCodePath(shaderName),options);
             options.shadowPass = true;
             //options.cullMode = VK_CULL_MODE_FRONT_BIT;
-            VkPipeline shadowPipeline = createManagedPipeline<Vertex>(vertCodePath(shaderName),fragCodePath(shaderName),options);
+            VkPipeline shadowPipeline = createManagedPipeline<Vertex>(vertCodePath(shaderName),"",options);
 
             return createMaterial(pipeline,shadowPipeline,materialData);
         }
@@ -736,15 +746,20 @@ class Vulkan {
         template<typename Vertex>
         VkPipeline createManagedPipeline(string vertCodePath,string fragCodePath,PipelineOptions pipelineOptions = PipelineOptions()) {
             auto vertShaderCode = FileHelper::readBinary(vertCodePath);
-            auto fragShaderCode = FileHelper::readBinary(fragCodePath);
+            std::vector<char> fragShaderCode;
+            if(fragCodePath != "") { //allow pipeline to not have a fragment shader
+                fragShaderCode = FileHelper::readBinary(fragCodePath);
+            }
             return createManagedPipelineFromMemory<Vertex>(vertShaderCode,fragShaderCode,pipelineOptions);
         }
 
         template<typename Vertex>
         VkPipeline createManagedPipelineFromMemory(std::vector<char> vertShaderCode,std::vector<char> fragShaderCode,PipelineOptions pipelineOptions = PipelineOptions()) {
 
+            std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
+            
+            // vertex shader
             VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
-            VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
 
             VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
             vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -752,13 +767,21 @@ class Vulkan {
             vertShaderStageInfo.module = vertShaderModule;
             vertShaderStageInfo.pName = "main";
 
-            VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
-            fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-            fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-            fragShaderStageInfo.module = fragShaderModule;
-            fragShaderStageInfo.pName = "main";
+            shaderStages.push_back(vertShaderStageInfo);
 
-            VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
+            std::optional<VkShaderModule> fragShaderModule = {};
+            // fragment shader
+            VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
+            if(fragShaderCode.size() > 0) {
+
+                fragShaderModule = createShaderModule(fragShaderCode);
+
+                fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+                fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+                fragShaderStageInfo.module = fragShaderModule.value();
+                fragShaderStageInfo.pName = "main";
+                shaderStages.push_back(fragShaderStageInfo);
+            }
 
             VkPipelineDepthStencilStateCreateInfo depthStencil{};
             depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
@@ -870,8 +893,8 @@ class Vulkan {
 
             VkGraphicsPipelineCreateInfo pipelineInfo{};
             pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-            pipelineInfo.stageCount = 2;
-            pipelineInfo.pStages = shaderStages;
+            pipelineInfo.stageCount = shaderStages.size();
+            pipelineInfo.pStages = shaderStages.data();
 
             pipelineInfo.pVertexInputState = &vertexInputInfo;
             pipelineInfo.pInputAssemblyState = &inputAssembly;
@@ -900,7 +923,9 @@ class Vulkan {
                 throw std::runtime_error("failed to create graphics pipeline!");
             }
 
-            vkDestroyShaderModule(device, fragShaderModule, nullptr);
+            if(fragShaderModule) {
+                vkDestroyShaderModule(device, fragShaderModule.value(), nullptr);
+            }
             vkDestroyShaderModule(device, vertShaderModule, nullptr);
             
             managedPipelines.push_back(pipeline);
@@ -1039,6 +1064,8 @@ class Vulkan {
 
         VkDebugUtilsMessengerEXT debugMessenger;
 
+        VkDescriptorPool imguiPool;
+
         //TracyVkCtx tracyCtx;
 
         void createVkInstance(string name) {
@@ -1058,7 +1085,7 @@ class Vulkan {
             appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
             appInfo.pEngineName = "No Engine";
             appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-            appInfo.apiVersion = VK_API_VERSION_1_3;
+            appInfo.apiVersion = apiVersion;
 
             //set up create info
             VkInstanceCreateInfo createInfo{};
@@ -1409,10 +1436,17 @@ class Vulkan {
             SceneDataBufferObject shadowUBO{};
             
             //Camera shadowCamera;
-
+            
+            vec3 shadowBoundsPos = camera.position;
+            quat shadowBoundsRot = glm::quatLookAt(normalizedLightDirection,vec3(0.0f,1.0f,0.0f));
+            shadowBoundsPos = glm::inverse(shadowBoundsRot) * shadowBoundsPos;
+            float roundFactor = (shadowMapSize/(shadowDist*2));
+            shadowBoundsPos.x = glm::floor(shadowBoundsPos.x * roundFactor) / roundFactor;
+            shadowBoundsPos.y = glm::floor(shadowBoundsPos.y * roundFactor) / roundFactor;
+            shadowBoundsPos = shadowBoundsRot * shadowBoundsPos;
             glm::mat4 view = glm::mat4(1.0f);
-            view = glm::toMat4(glm::inverse(glm::quatLookAt(normalizedLightDirection,vec3(0.0f,1.0f,0.0f)))) * view;
-            view = glm::translate(view,-camera.position);
+            view = glm::toMat4(glm::inverse(shadowBoundsRot)) * view;
+            view = glm::translate(view,-shadowBoundsPos);
 
             shadowUBO.view = view;
 
@@ -2420,7 +2454,7 @@ class Vulkan {
             shadowImage = createImage(shadowMapSize, shadowMapSize, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
             shadowImageView = createImageView(shadowImage, depthFormat,VK_IMAGE_ASPECT_DEPTH_BIT);
 
-            shadowSampler = createTextureSampler(shadowImage,VK_FILTER_LINEAR,VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE);
+            shadowSampler = createTextureSampler(shadowImage,VK_FILTER_NEAREST,VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE);
 
             VkAttachmentDescription depthAttachment{};
             depthAttachment.format = findDepthFormat();
@@ -2580,6 +2614,75 @@ class Vulkan {
             std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
 
             return VK_FALSE;
+        }
+
+
+        void initImgui() {
+            //1: create descriptor pool for IMGUI
+            // the size of the pool is very oversize, but it's copied from imgui demo itself.
+            VkDescriptorPoolSize pool_sizes[] =
+            {
+                { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
+                { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
+                { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
+                { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
+                { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
+                { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
+                { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
+                { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
+                { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
+                { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
+                { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
+            };
+
+            VkDescriptorPoolCreateInfo pool_info = {};
+            pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+            pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+            pool_info.maxSets = 1000;
+            pool_info.poolSizeCount = std::size(pool_sizes);
+            pool_info.pPoolSizes = pool_sizes;
+
+            VkDescriptorPool imguiPool;
+            if(vkCreateDescriptorPool(device, &pool_info, nullptr, &imguiPool) != VK_SUCCESS) {
+                throw std::runtime_error("Failed to create descriptor pool for imgui");
+            }
+
+
+            // 2: initialize imgui library
+
+            //this initializes the core structures of imgui
+            ImGui::CreateContext();
+
+            //this initializes imgui for GLFW
+            ImGui_ImplGlfw_InitForVulkan(window,true);
+
+            //this initializes imgui for Vulkan
+            ImGui_ImplVulkan_InitInfo init_info = {};
+            init_info.ApiVersion = apiVersion; //standardize this
+            init_info.Instance = vkInstance;
+            init_info.PhysicalDevice = physicalDevice;
+            init_info.Device = device;
+            init_info.Queue = graphicsQueue;
+            init_info.DescriptorPool = imguiPool;
+            init_info.RenderPass = renderPass;
+            init_info.Subpass = 0;
+            init_info.MinImageCount = 3;
+            init_info.ImageCount = 3;
+            init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+
+            ImGui_ImplVulkan_Init(&init_info);
+
+            //execute a gpu command to upload imgui font textures
+            // auto cmd = beginSingleTimeCommands();
+
+            // ImGui_ImplVulkan_CreateFontsTexture(cmd);
+            
+            // submitCommandsWaitAndFree(cmd);
+
+            // //clear font textures from cpu data
+            // ImGui_ImplVulkan_DestroyFontUploadObjects();
+
+
         }
 
         

@@ -35,6 +35,7 @@
 #include "physics/jolt-layers.hpp"
 
 
+#include "imgui/imgui.h"
 
 JPH_SUPPRESS_WARNINGS
 
