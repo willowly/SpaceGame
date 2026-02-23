@@ -496,6 +496,8 @@ class Vulkan {
 
             }
 
+            ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
+
             vkCmdEndRenderPass(commandBuffer);
         }
 
@@ -503,7 +505,7 @@ class Vulkan {
 
             //ZoneScoped;
 
-            
+            ImGui::Render();
            
 
             Clock clock;

@@ -146,6 +146,8 @@ class GameApplication {
 
         float frametimes[60];
         int currentFrameTimeIndex = 0;
+
+        bool debugUIOpen = false;
         
 
         float lastTime = 0; //tells how long its been since the last update
@@ -396,6 +398,27 @@ class GameApplication {
             
         }
 
+        void debugUI(float dt) {
+            
+            if(input.getKeyPressed(GLFW_KEY_F1)) {
+                debugUIOpen = !debugUIOpen;
+            }
+            
+
+            ImGui_ImplVulkan_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+
+            ImGui::NewFrame();
+
+            if(!debugUIOpen) return;
+            //imgui commands
+            ImGui::Begin("Info");
+            ImGui::Text("FPS: %8.1f",1.0f/dt);
+            auto playerPos = player->getPosition();
+            ImGui::Text("<%.1f,%.1f,%.1f>",playerPos.x,playerPos.y,playerPos.z);
+            ImGui::End();
+        }
+
         void loop() 
         {
 
@@ -507,6 +530,8 @@ class GameApplication {
             
 
             Debug::addRenderables(*vulkan);
+
+            debugUI(dt); 
             
             // do all the end of frame code in vulkan
             vulkan->render(camera);
