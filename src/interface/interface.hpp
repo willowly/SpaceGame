@@ -58,7 +58,7 @@ class Interface {
     public:
 
         MeshBuffer quadMesh;
-        Material material = Material::none;
+        Material defaultMaterial = Material::none;
         bool readyToRender = false;
         float scale = 6;
 
@@ -82,23 +82,31 @@ class Interface {
             options.depthTestEnabled = VK_TRUE;
             options.depthCompareOp = VK_COMPARE_OP_ALWAYS;
             options.blend = VK_TRUE;
-            VkPipeline pipeline = vulkan.createManagedPipeline<UIVertex>(Vulkan::vertCodePath("ui"),Vulkan::fragCodePath("ui"),options);
             UIMaterialData materialData;
-            material = vulkan.createMaterial(pipeline,materialData);
+            defaultMaterial = vulkan.createMaterial<UIMaterialData,UIVertex>("ui",materialData,options);
             readyToRender = true;
         }
 
 
-        void drawRect(Vulkan& vulkan,Rect rect,Color color,Sprite sprite) {
+        
+
+        void drawRect(Vulkan& vulkan,Rect rect,Color color,Sprite sprite,Material material) {
             if(!readyToRender) {
                 Debug::warn("Interface not ready to render");
                 return;
             } 
+
             rect.position *= scale;
 
             glm::mat4 model = glm::translate(glm::mat4(1.0f),vec3(rect.position,1));
             model = glm::scale(model,vec3(rect.size * scale,1));
-            vulkan.addMeshWithData<UIExtraPushData>(quadMesh,material,UIExtraPushData(color.asVec4(),sprite),model);
+            RenderingSettings settings = {};
+            settings.shadowPass = false;
+            vulkan.addMesh<UIExtraPushData>(quadMesh,material,UIExtraPushData(color.asVec4(),sprite),model,settings);
+        }
+
+        void drawRect(Vulkan& vulkan,Rect rect,Color color,Sprite sprite) {
+            drawRect(vulkan,rect,color,sprite,defaultMaterial);
         }
 
 };

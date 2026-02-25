@@ -121,12 +121,10 @@ class Debug {
             PipelineOptions pOptions;
             pOptions.polygonMode = VK_POLYGON_MODE_LINE;
             pOptions.topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
-            auto wireFramePipeline = vulkan.createManagedPipeline<DebugVertex>("shaders/compiled/debug_vert.spv","shaders/compiled/debug_frag.spv",pOptions);
-            debug.wireFrameMaterial = vulkan.createMaterial(wireFramePipeline,DebugMaterialData(vec3(0,1,0)));
+            debug.wireFrameMaterial = vulkan.createMaterial<DebugMaterialData,DebugVertex>("debug",DebugMaterialData(vec3(0,1,0)),pOptions);
 
             pOptions = PipelineOptions();
-            auto solidPipeline = vulkan.createManagedPipeline<DebugVertex>("shaders/compiled/debug_vert.spv","shaders/compiled/debug_frag.spv",pOptions);
-            debug.solidMaterial = vulkan.createMaterial(solidPipeline,DebugMaterialData(vec3(0,1,0)));
+            debug.solidMaterial = vulkan.createMaterial<DebugMaterialData,DebugVertex>("debug",DebugMaterialData(vec3(0,1,0)),pOptions);
             
             //debug.solidPipeline = vulkan.createManagedPipeline<DebugVertex>("shaders/compiled/debug_vert.spv","shaders/compiled/debug_frag.spv");
 
@@ -326,7 +324,7 @@ class Debug {
                 auto mat = glm::mat4(1.0f);
                 mat = glm::translate(mat,p.position);
                 mat = glm::scale(mat,vec3(0.1));
-                vulkan.addMeshWithData(instance.quad,instance.solidMaterial,p.color.asVec4(),mat);
+                vulkan.addMesh(instance.quad,instance.solidMaterial,p.color.asVec4(),mat);
                 p.time -= instance.clock.getTime();
             }
     
@@ -336,7 +334,7 @@ class Debug {
                 auto mat = glm::mat4(1.0f);
                 mat = glm::translate(mat,l.a);
                 mat = glm::scale(mat,l.b-l.a);
-                vulkan.addMeshWithData(instance.line,instance.wireFrameMaterial,l.color.asVec4(),mat);
+                vulkan.addMesh(instance.line,instance.wireFrameMaterial,l.color.asVec4(),mat);
                 l.time -= instance.clock.getTime();
             }
 
@@ -346,7 +344,7 @@ class Debug {
                 mat = glm::translate(mat,cube.origin);
                 mat *= glm::toMat4(cube.rotation);
                 mat = glm::scale(mat,cube.size);
-                vulkan.addMeshWithData(instance.cube,instance.wireFrameMaterial,cube.color.asVec4(),mat);
+                vulkan.addMesh(instance.cube,instance.wireFrameMaterial,cube.color.asVec4(),mat);
                 cube.time -= instance.clock.getTime();
             }
     

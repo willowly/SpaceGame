@@ -3,16 +3,17 @@
 #include <interface/interface.hpp>
 #include "item/item-stack.hpp"
 #include "text-widget.hpp"
+#include "interface/widget.hpp"
 
 
-class ItemSlotWidget {
+class ItemSlotWidget : public Widget {
 
     public:
         Sprite sprite;
         Color color;
         Font* font;
 
-        float barWidth = 1.0;
+        float barWidth = 1.0; // the bottom bar to (normally) show durability
         float padding = 2.0;
 
         bool draw(DrawContext context,Rect rect,std::optional<ItemStack>& stackOpt) {

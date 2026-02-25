@@ -1,3 +1,4 @@
+#pragma once
 #extension GL_EXT_nonuniform_qualifier : enable
 #extension GL_EXT_buffer_reference : require
 

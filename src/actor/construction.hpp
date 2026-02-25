@@ -727,7 +727,7 @@ class Construction : public Actor {
                 //std::cout << "group is " << group << std::endl;
                 return;
             }
-            Debug::drawCube(transformPoint(location),vec3(1),rotation,debugGroupColors[group-1],1);
+            //Debug::drawCube(transformPoint(location),vec3(1),rotation,debugGroupColors[group-1],1);
             blockGroups[index] = group;
             //locations.push_back(location);
             tryAddToGroup(group,location+ivec3(1,0,0),blockGroups,locations);

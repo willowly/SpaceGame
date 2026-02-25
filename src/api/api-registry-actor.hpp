@@ -15,12 +15,12 @@ namespace API {
         switch (loadType) {
             case ObjLoadType::ARRAY:
                 // type is in slot 1 (hopefully)
-                getMesh(table,2,&actor->model,registry,false);
-                getMaterial(table,3,&actor->material,registry,false);
+                getMesh(table,2,actor->model,registry,false);
+                getMaterial(table,3,actor->material,registry,false);
                 break;
             case ObjLoadType::TABLE:
-                getMesh(table,"model",&actor->model,registry,false);
-                getMaterial(table,"material",&actor->material,registry,false);
+                getMesh(table,"model",actor->model,registry,false);
+                getMaterial(table,"material",actor->material,registry,false);
                 break;
             case ObjLoadType::INVALID:
                 //registry.materials.erase(name);
@@ -57,13 +57,13 @@ namespace API {
             sol::table table = obj; //this will be null if it doesnt work, so be careful
 
             string type = "";
-            ObjLoadType loadType = getObjectLoadType(lua,obj);
-            switch (getObjectLoadType(lua,obj)) {
+            ObjLoadType loadType = getObjectLoadType(obj);
+            switch (getObjectLoadType(obj)) {
                 case ObjLoadType::ARRAY:
-                    get<string>(table,1,&type,true);
+                    get<string>(table,1,type,true);
                     break;
                 case ObjLoadType::TABLE:
-                    get<string>(table,"type",&type,true);
+                    get<string>(table,"type",type,true);
                     break;
                 case ObjLoadType::INVALID:
                     type = "invalid";

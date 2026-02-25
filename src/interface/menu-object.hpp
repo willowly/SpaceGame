@@ -1,9 +1,10 @@
 #pragma once
 #include "interface/interface.hpp"
+#include "widget.hpp"
 
 class Character;
 
-class MenuObject {
+class MenuObject : public Widget {
     public:
         virtual void drawMenu(DrawContext context,Character& user) = 0;
 

@@ -21,8 +21,11 @@ class Loader {
             loadModels(registry,vulkan);
             loadTextures(registry,vulkan);
             loadShaders(registry,vulkan);
+            loadFonts(registry,vulkan);
             runLoadScript(registry,vulkan,lua);
         }
+
+
 
         void loadModels(Registry& registry,Vulkan* vulkan) {
             Debug::addTrace("models");
@@ -100,6 +103,15 @@ class Loader {
             Debug::subtractTrace();
         }
 
+        void loadFonts(Registry& registry,Vulkan* vulkan) {
+            auto& font = registry.font;
+            font.texture = registry.getTexture("characters");
+            font.start = '0';
+            font.charSize = vec2(8,12);
+            font.textureSize = vec2(312,12);
+            font.characters = "0123456789x.ABCDEFGHIJKLMNOPQRSTUVWXYZ ";
+        }
+
         void runLoadScript(Registry& registry,Vulkan* vulkan,sol::state& lua) {
             std::cout << "Running load.lua" << std::endl;
             lua["textures"] = API::TextureRegistry(registry);
@@ -108,6 +120,8 @@ class Loader {
             lua["actors"] = API::ActorRegistry(registry);
             lua["blocks"] = API::BlockRegistry(registry);
             lua["items"] = API::ItemRegistry(registry);
+            lua["widgets"] = API::WidgetRegistry(registry);
+            lua["particle_effects"] = API::ParticleEffectRegistry(registry);
             lua.do_file("scripts/load.lua");
         }
 

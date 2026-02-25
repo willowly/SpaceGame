@@ -30,7 +30,7 @@
 #include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
 
 #include "physics/jolt-userdata.hpp"
-
+#include "components/camera-shake.hpp"
 
 class Character : public Actor {
 
@@ -119,7 +119,7 @@ class Character : public Actor {
             jumpForce = character.jumpForce;
         }
 
-    
+        CameraShake shake;
 
         bool inMenu;
 
@@ -136,9 +136,11 @@ class Character : public Actor {
                 heldItemData.animationTimer += dt;
                 currentTool->item->addRenderables(vulkan,*this,dt);
             }
-            if(thirdPerson) {
-                Actor::addRenderables(vulkan,dt);
-            }
+            RenderingSettings settings;
+            settings.mainPass = thirdPerson;
+            if(model == nullptr) return; //if no model, nothing to render :)
+            model->addToRender(vulkan,material,position,rotation,vec3(modelScale),settings);
+            shake.step(dt);
         }
 
         virtual void spawn(World* world) {
@@ -300,7 +302,7 @@ class Character : public Actor {
             }
         }
 
-        //could layer be abstracted to a controller
+        //could later be abstracted to a controller
         void processInput(Input& input) {
 
             // eventually we want an enum for keys instead of using the defines
@@ -376,6 +378,9 @@ class Character : public Actor {
             }
             if(input.getKeyPressed(GLFW_KEY_Z)) {
                 thirdPerson = !thirdPerson;
+            }
+            if(input.getKeyPressed(GLFW_KEY_T)) {
+                shake.startShake();
             }
 
             //check for cheats access
@@ -488,11 +493,10 @@ class Character : public Actor {
         void setCamera(Camera& camera) {
             if(ridingConstruction == nullptr && !thirdPerson) {
                 camera.position = getEyePosition();
-                camera.rotation = getEyeRotation();
             } else {
                 camera.position = position + getEyeRotation() * thirdPersonCameraOffset;
-                camera.rotation = getEyeRotation();
             }
+            camera.rotation = getEyeRotation() * shake.getRotation();
             
         }
 

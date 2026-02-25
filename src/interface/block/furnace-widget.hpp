@@ -22,7 +22,7 @@ class FurnaceWidget : public BlockWidget<FurnaceBlock> {
 
         ItemSlotWidget* itemSlot;
 
-        TextWidget tooltipTextTitle;
+        TextWidget* tooltipTextTitle;
 
         void draw(DrawContext context,Character& user,FurnaceBlock& furnace,BlockStorage& storage,BlockState& state) {
 
@@ -108,10 +108,10 @@ class FurnaceWidget : public BlockWidget<FurnaceBlock> {
         void drawTooltip(DrawContext context,ItemStack& stack) {
             
             Rect tooltip = Rect(context.getMousePosition()+vec2(3,3),vec2(40,7));
-            tooltip.size.x = tooltipTextTitle.getSize(stack.item->name).x + 4.0f;
+            tooltip.size.x = tooltipTextTitle->getSize(stack.item->name).x + 4.0f;
             context.drawRect(tooltip,Color(0.05,0.05,0.05),solid);
 
-            tooltipTextTitle.draw(context,tooltip.position + vec2(2.0f,2.0f),stack.item->name);
+            tooltipTextTitle->draw(context,tooltip.position + vec2(2.0f,2.0f),stack.item->name);
         }
 
         void drawTooltip(DrawContext context,Recipe& recipe) {
@@ -120,9 +120,9 @@ class FurnaceWidget : public BlockWidget<FurnaceBlock> {
 
             string text = "CRAFT " + recipe.result.item->name;
 
-            tooltip.size.x = tooltipTextTitle.getSize(text).x + 4.0f;
+            tooltip.size.x = tooltipTextTitle->getSize(text).x + 4.0f;
             context.drawRect(tooltip,Color(0.05,0.05,0.05),solid);
 
-            tooltipTextTitle.draw(context,tooltip.position + vec2(2.0f,2.0f),text);
+            tooltipTextTitle->draw(context,tooltip.position + vec2(2.0f,2.0f),text);
         }
 };

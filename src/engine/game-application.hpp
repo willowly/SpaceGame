@@ -71,7 +71,7 @@ class GameApplication {
             setup();
 
             std::thread thread(&GameApplication::chunkTask,this);
-            terrain->loadChunks(&world,player->getPosition(),2,vulkan);
+            //terrain->loadChunks(&world,player->getPosition(),2,vulkan);
             
 
             while (!glfwWindowShouldClose(window)) {
@@ -121,19 +121,12 @@ class GameApplication {
         PlayerWidget playerWidget;
         ToolbarWidget toolbarWidget;
         InventoryWidget inventoryWidget;
-        ItemSlotWidget itemSlotWidget;
         ItemSlotWidget clearItemSlotWidget;
         TextWidget fpsText;
 
         FurnaceWidget furnaceWidget;
 
         Font font;
-
-        PickaxeTool pickaxe;
-
-        RigidbodyActor* physicsPrototype;
-
-        RigidbodyActor* physicsActor;
 
 
         Material terrainMaterial = Material::none;
@@ -270,19 +263,11 @@ class GameApplication {
 
             skybox.loadResources(*vulkan,skyboxMaterial);
 
-            auto planePrototype = Actor::makeDefaultPrototype();
-            planePrototype->model = registry.getModel("plane");
-            planePrototype->material = registry.getMaterial("grid");
-
-            //world.spawn(Actor::makeInstance(planePrototype.get(),vec3(0,0,0)));
-
             // terrain setup
 
-            VkPipeline terrainPipeline = vulkan->createManagedPipeline<TerrainVertex>(Vulkan::vertCodePath("terrain"),Vulkan::fragCodePath("terrain"));
-            terrainMaterial = vulkan->createMaterial(terrainPipeline,LitMaterialData(registry.getTexture("rock")));
+            terrainMaterial = vulkan->createMaterial<LitMaterialData,TerrainVertex>("terrain",LitMaterialData(registry.getTexture("rock")));
 
-            VkPipeline constructionPipeline = vulkan->createManagedPipeline<ConstructionVertex>(Vulkan::vertCodePath("construction"),Vulkan::fragCodePath("construction"));
-            world.constructionMaterial = vulkan->createMaterial(constructionPipeline,LitMaterialData(registry.getTexture("rock")));
+            world.constructionMaterial = vulkan->createMaterial<LitMaterialData,ConstructionVertex>("construction",LitMaterialData(registry.getTexture("rock")));
             
             GenerationSettings settings;
             settings.noiseScale = 100;
@@ -294,10 +279,9 @@ class GameApplication {
 
             terrain = world.spawn(Terrain::makeInstance(terrainMaterial,settings,vec3(0,0,0)));
 
-            physicsPrototype = registry.addActor<RigidbodyActor>("physics_block");
-            
-            physicsPrototype->model = registry.getModel("cube");
-            physicsPrototype->material = registry.getMaterial("tin_block");
+            // world.spawn(Actor::makeInstance(registry.getActor("cube"),vec3(0,3,0)));
+
+            // world.spawn(Actor::makeInstance(registry.getActor("plane"),vec3(0,0,0)));
 
 
             // terrain->terrainTypes[0].item = registry.getItem("stone");
@@ -328,44 +312,43 @@ class GameApplication {
             makeCockpit.time = 5;
             
             // spawn player
-            player = world.spawn(Character::makeInstance(playerPrototype.get(),vec3(3.9,1.4,26.1)));
+            player = world.spawn(Character::makeInstance(playerPrototype.get(),vec3(0,5,5)));
             player->model = registry.getModel("capsule_thin");
             player->material = registry.getMaterial("player");
 
             
             // UI
             toolbarWidget.solidSprite = registry.getSprite("item_slot");
+            
 
-
-            inventoryWidget.solid = registry.getSprite("solid");
+            inventoryWidget.backgroundSprite = registry.getSprite("solid");
             inventoryWidget.font = &font;
-            inventoryWidget.tooltipTextTitle.font = &font;
+            inventoryWidget.tooltipTextTitle = registry.getWidget<TextWidget>("text_default");
 
             furnaceWidget.solid = registry.getSprite("solid");
             furnaceWidget.font = &font;
-            furnaceWidget.tooltipTextTitle.font = &font;
+            furnaceWidget.tooltipTextTitle = registry.getWidget<TextWidget>("text_default");
 
-            itemSlotWidget.sprite = registry.getSprite("item_slot");
-            itemSlotWidget.font = &font;
-            itemSlotWidget.color = Color(0.2,0.2,0.2);
+            auto itemSlotWidget = registry.getWidget<ItemSlotWidget>("item_slot");
 
             clearItemSlotWidget.sprite = registry.getSprite("solid");
             clearItemSlotWidget.font = &font;
             clearItemSlotWidget.color = Color::clear;
 
-            inventoryWidget.itemSlot = &itemSlotWidget;
-            furnaceWidget.itemSlot = &itemSlotWidget;
-            toolbarWidget.itemSlot = &itemSlotWidget;
+            inventoryWidget.itemSlot = itemSlotWidget;
+            furnaceWidget.itemSlot = itemSlotWidget;
+            toolbarWidget.itemSlot = itemSlotWidget;
             
             playerWidget.inventoryWidget = &inventoryWidget;
             playerWidget.toolbarWidget = &toolbarWidget;
 
+            PipelineOptions options;
+            options.blend = VK_TRUE;
+            LitMaterialData materialData;
 
-            font.texture = registry.getTexture("characters");
-            font.start = '0';
-            font.charSize = vec2(8,12);
-            font.textureSize = vec2(312,12);
-            font.characters = "0123456789x.ABCDEFGHIJKLMNOPQRSTUVWXYZ ";
+            materialData.texture = registry.getTexture("rock");
+            auto particleMaterial = vulkan->createMaterial<LitMaterialData,Vertex>("lit",materialData,options);
+
 
             fpsText.font = &font;
 
@@ -380,15 +363,27 @@ class GameApplication {
 
             player->widget = &playerWidget;
             // wowie
-
             auto effectPrototype = registry.addActor<ParticleEffectActor>("effect");
             auto& effect = effectPrototype->effect;
-            effect.spawnRate = 500;
-            effect.initialVelocity = 5;
-            effect.mesh = registry.addModel("block");
-            effect.material = registry.getMaterial("grid");
-            
-            world.spawn(ParticleEffectActor::makeInstance(effectPrototype,player->getPosition()));
+            effect.spawnRate = 0;
+            effect.initialSpawnCount = 20;
+            effect.initialVelocity = {0.0f,5.0f};
+            effect.emitterShape.radius = 0.5f;
+            effect.mesh = registry.getModel("rock_shard");
+            effect.material = particleMaterial;
+            effect.lifeTime = {0.5f,1.0f};
+            effect.particleSize = {0.2f,0.0f};
+            effect.initialAngularVelocity = {0.0f,90.0f};
+
+            auto pickaxe = dynamic_cast<PickaxeTool*>(registry.getItem("pickaxe")); 
+            pickaxe->testEffect = effectPrototype;
+
+            options = {};
+            options.depthTestEnabled = VK_TRUE;
+            options.depthCompareOp = VK_COMPARE_OP_ALWAYS;
+            options.blend = VK_TRUE;
+
+            registry.addMaterial("shadow_test",vulkan->createMaterial<UIMaterialData,UIVertex>("shadow_test",UIMaterialData(),options));
 
             //physicsActor = world.spawn(RigidbodyActor::makeInstance(physicsPrototype,player->getEyePosition(),player->getEyeRotation(),player->getEyeDirection()*20.0f,vec3(0.0f)));
 
@@ -397,6 +392,7 @@ class GameApplication {
 
             lua.do_file("scripts/start.lua");
 
+            
         }
 
         void loop() 
@@ -437,8 +433,8 @@ class GameApplication {
             }
             averageTime /= 60.0f;
             
-
-            //std::cout << "starting world frame" << std::endl;
+            // vulkan->mainLight.direction = vulkan->mainLight.direction * glm::quat(glm::radians(vec3(0,dt*90,0)));
+            // std::cout << StringHelper::toString(vulkan->mainLight.direction) << std::endl;
             //std::cout << StringHelper::toString(player->getPosition()) << std::endl;
             
             world.frame(vulkan,dt);
@@ -490,14 +486,6 @@ class GameApplication {
             //         Debug::drawPoint(hit.hit.point);
             //     }
             // }
-
-            if(input.getKeyPressed(GLFW_KEY_R)) {
-                world.spawn(RigidbodyActor::makeInstance(physicsPrototype,player->getEyePosition()+player->getEyeDirection()*2.0f,player->getRotation(),player->getEyeDirection()*20.0f,vec3(0)));
-                // physicsActor->setPosition(player->getEyePosition());
-                // physicsActor->setRotation(player->getEyeRotation());
-                // physicsActor->velocity = (player->getEyeDirection()*20.0f);
-                // physicsActor->angularVelocity = vec3(0);
-            }
 
             if(input.getKeyPressed(GLFW_KEY_F2)) {
                 world.pausePhysics = !world.pausePhysics;

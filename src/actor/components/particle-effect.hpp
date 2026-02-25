@@ -10,30 +10,73 @@
 
 using glm::vec3;
 
+
+
 class ParticleEffect {
 
     private:
         struct Particle {
             vec3 pos = {};
             vec3 velocity = {};
-            float lifeTime = -1; // -1 means they aren't spawned
+            quat rotation = {};
+            vec3 angularVelocity = {};
+            float age = -1; // -1 means they aren't spawned
+            float lifeTime;
         };
 
         std::vector<Particle> particles;
-        int nextIndex = 0;
+        size_t nextIndex = 0;
         float spawnTimer = 0;
+        int particlesAlive = 0;
 
     public:
+
+        struct FloatRange {
+            float start = 0.0f;
+            float end = 0.0f;
+            FloatRange() {};
+            FloatRange(float constant) : start(constant), end(constant) {}
+            FloatRange(float start,float end) : start(start), end(end) {}
+
+            float sample(float t) {
+                return MathHelper::lerp(start,end,t);
+            }
+
+            float sampleRandom() {
+                return MathHelper::lerp(start,end,glm::linearRand(0.0f,1.0f));
+            }
+        };
+
+
         Mesh<Vertex>* mesh = nullptr;
         Material material = Material::none;
-        int spawnRate = 1;
-        float initialVelocity = 1;
-        float lifeTime = 1;
-        float particleSize = 0.2f;
+        float spawnRate = 1;
+        int initialSpawnCount = 0;
+        FloatRange initialVelocity = 1.0f;
+        FloatRange lifeTime = 1;
+        FloatRange particleSize = 0.2f;
+        FloatRange initialAngularVelocity;
 
-        void spawn() {
+       
 
-            int amount = spawnRate * lifeTime + 1;
+        struct SphereShape {
+
+            // sphere
+            float radius;
+
+            void setPositionAndDirection(Particle& particle,vec3 position,quat rotation) {
+
+                vec3 spherePos = glm::sphericalRand(1.0f);
+                particle.pos = (glm::linearRand(0.0f,1.0f) * spherePos) + position;
+                particle.velocity = spherePos;
+            }
+
+
+        } emitterShape;
+
+        void spawn(vec3 position,quat rotation) {
+
+            int amount = ceil(spawnRate * lifeTime.end) + 1 + initialSpawnCount;
 
             particles.clear();
 
@@ -42,6 +85,11 @@ class ParticleEffect {
             for (size_t i = 0; i < amount; i++)
             {
                 particles.push_back(Particle());
+            }
+
+            for (size_t i = 0; i < initialSpawnCount; i++)
+            {
+                spawnParticle(position,rotation);
             }
             
         }
@@ -60,44 +108,61 @@ class ParticleEffect {
             }
             while(spawnTimer <= 0) {
                 spawnParticle(position,rotation);
-                spawnTimer += 1.0f / spawnRate;
+                spawnTimer += 1.0f;
             }
-            spawnTimer -= dt;
+            spawnTimer -= dt * spawnRate;
             
         }
 
         void spawnParticle(vec3 position,quat rotation) {
             auto& newParticle = particles[nextIndex];
 
-            if(newParticle.lifeTime > 0) {
+            if(newParticle.age > 0) {
                 Debug::warn("particle count not high enough!");
             }
-            newParticle.pos = position;
-            newParticle.lifeTime = 0;
-            newParticle.velocity = glm::normalize(glm::sphericalRand(1.0f)); //shape
-            newParticle.velocity *= initialVelocity;
+
+            //vec3 spawnPosRelative = 
+            emitterShape.setPositionAndDirection(newParticle,position,rotation);
+            newParticle.age = 0;
+            newParticle.velocity *= initialVelocity.sampleRandom();
+
+            newParticle.lifeTime = lifeTime.sampleRandom();
+
+            newParticle.rotation = glm::quat(glm::linearRand(vec3(-360),vec3(360)));
+            newParticle.angularVelocity = glm::linearRand(vec3(-360),vec3(360)) * initialAngularVelocity.sampleRandom();
             nextIndex++;
             if(nextIndex >= particles.size()) {
                 nextIndex = 0;
             }
+            particlesAlive++;
         }
 
         void particleStep(Particle& particle,float dt) {
-            if(particle.lifeTime < 0) return;
+            if(particle.age < 0) return;
 
-            particle.lifeTime += dt;
+            particle.age += dt;
             particle.pos += particle.velocity * dt;
-            if(particle.lifeTime > lifeTime) {
-                particle.lifeTime = -1; // destroy;
+            if(particle.age > particle.lifeTime) {
+                particle.age = -1; // destroy;
+                particlesAlive--;
             }
         }
 
         void particleRender(Particle& particle,Vulkan* vulkan,float dt) {
-            if(particle.lifeTime < 0) return;
+            if(particle.age < 0) return;
+
+            float t = particle.age/particle.lifeTime;
 
             auto matrix = glm::mat4(1.0f);
             matrix = glm::translate(matrix,particle.pos);
-            matrix = glm::scale(matrix,vec3(particleSize));
-            mesh->addToRender(vulkan,material,matrix);
+            matrix *= glm::toMat4(particle.rotation);
+            matrix = glm::scale(matrix,vec3(particleSize.sample(t)));
+            RenderingSettings settings;
+            //settings.faceCamera = true;
+            vulkan->addMesh(mesh->meshBuffer,material,settings,matrix);
+        }
+
+        int getParticlesAlive() {
+            return particlesAlive;
         }
 };
