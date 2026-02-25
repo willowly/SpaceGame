@@ -1242,7 +1242,12 @@ class Vulkan {
             
             ubo.screen = glm::ortho(0.0f,screenSize.x,0.0f,screenSize.y);
 
-            memcpy(uniformBuffers[currentFrame].allocationInfo.pMappedData, &ubo, sizeof(ubo)); //uniform buffer is always mapped
+            // lord forgive me
+            #ifdef __APPLE__
+                vmaCopyMemoryToAllocation(allocator, &ubo, uniformBuffers[currentFrame].allocation, 0, sizeof(ubo));
+            #else
+                memcpy(uniformBuffers[currentFrame].allocationInfo.pMappedData, &ubo, sizeof(ubo)); //uniform buffer is always mapped
+            #endif
         }
 
          void recreateSwapChain() {
