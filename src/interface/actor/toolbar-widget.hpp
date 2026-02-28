@@ -24,19 +24,19 @@ class ToolbarWidget : public Widget {
                 auto rect = Rect((i*12)-50,-11,12,12);
                 rect = Rect::anchored(rect,screen,vec2(0.5,1));
                 context.drawRect(rect,player.selectedTool == i ? selected : unselected,solidSprite);
+                if(context.mouseInside(rect)) {
+                    if(context.mouseLeftClicked()) {
+                        player.setToolbar(i,player.replaceCursor(player.toolbar[i]));
+                    }
+                }
 
-                Item* tool = player.toolbar[i];
-                ItemStack* stack = player.inventory.getStack(tool);
-                if(stack != nullptr) {
+                auto& stack = player.toolbar[i];
+                if(!stack.isEmpty()) {
                     if(itemSlot == nullptr) {
                         Debug::warn("Itemslot Widget is null!");
                         break;
                     }
-                    if(itemSlot->draw(context,rect,*stack)) {
-                        if(context.mouseLeftClicked()) {
-                            player.setToolbar(i,nullptr);
-                        }
-                    }
+                    itemSlot->draw(context,rect,stack);
                 }
             }
             

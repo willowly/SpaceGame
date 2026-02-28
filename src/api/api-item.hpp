@@ -3,6 +3,7 @@
 #include <sol/sol.hpp>
 #include "api-general.hpp"
 #include "item/item.hpp"
+#include "item/item-stack.hpp"
 
 namespace API {
 
@@ -13,5 +14,11 @@ namespace API {
         
         item["defaultSprite"] = &Item::defaultSprite;
         item["name"] = &Item::name;
+
+
+        sol::usertype<ItemStack> itemStack = lua.new_usertype<ItemStack>("item_stack",sol::constructors<ItemStack(Item*,int)>());
+
+        itemStack["item"] = &ItemStack::item;
+        itemStack["amount"] = &ItemStack::amount;
     }
 }

@@ -28,9 +28,12 @@
 
 #include <Jolt/Physics/Character/Character.h>
 #include <Jolt/Physics/Collision/Shape/CapsuleShape.h>
+#include <Jolt/Physics/Collision/Shape/OffsetCenterOfMassShape.h>
 
 #include "physics/jolt-userdata.hpp"
 #include "components/camera-shake.hpp"
+
+#include "interface/item-slot-interact-options.hpp"
 
 class Character : public Actor {
 
@@ -74,11 +77,9 @@ class Character : public Actor {
         vec3 velocity = {};
         vec3 rotationVelocity = {};
         
-
-        Item* currentToolItem = nullptr;
         int selectedTool = 0;
 
-        Item* toolbar[9] = {};
+        ItemStack toolbar[9] = {};
 
         struct HeldItemData {
             float actionTimer;
@@ -99,6 +100,8 @@ class Character : public Actor {
         vec3 thirdPersonCameraRot = {};
 
         Inventory inventory;
+
+        ItemStack cursorStack;
 
         std::unique_ptr<MenuObject> openMenuObject;
 
@@ -131,10 +134,10 @@ class Character : public Actor {
 
         void addRenderables(Vulkan* vulkan,float dt) {
             if(ridingConstruction != nullptr) return;
-            ItemStack* currentTool = inventory.getStack(currentToolItem);
-            if(currentTool != nullptr) {
+            
+            if(!toolbar[selectedTool].isEmpty()) {
                 heldItemData.animationTimer += dt;
-                currentTool->item->addRenderables(vulkan,*this,dt);
+                toolbar[selectedTool].item->addRenderables(vulkan,*this,dt);
             }
             RenderingSettings settings;
             settings.mainPass = thirdPerson;
@@ -227,9 +230,8 @@ class Character : public Actor {
                     if(interactInput) {
                         interact(world);
                     }
-                    ItemStack* currentTool = inventory.getStack(currentToolItem);
-                    if(currentTool != nullptr) {
-                        currentTool->item->step(world,*this,*currentTool,dt);
+                    if(!toolbar[selectedTool].isEmpty()) {
+                        toolbar[selectedTool].item->step(world,*this,toolbar[selectedTool],dt);
                         heldItemData.actionTimer += dt;
                     }
                 }
@@ -392,9 +394,8 @@ class Character : public Actor {
                 underGravity = !underGravity;
             }
 
-            ItemStack* currentTool = inventory.getStack(currentToolItem);
-            if(currentTool != nullptr) {
-                currentTool->item->processInput(input);
+            if(!toolbar[selectedTool].isEmpty()) {
+                toolbar[selectedTool].item->processInput(input);
             }
 
             if(input.getKeyPressed(GLFW_KEY_TAB)) {
@@ -416,32 +417,24 @@ class Character : public Actor {
 
         void setCurrentTool(int index) {
 
-            auto newTool = inventory.getStack(toolbar[index]);
-            auto currentTool = inventory.getStack(currentToolItem);
-            if(newTool == currentTool) return; //dont do anything if its the same tool
+            
+            if(index == selectedTool) return; //dont do anything if its the same tool
 
-            if(currentTool != nullptr) {
-                currentTool->item->unequip(*this);
+            if(!toolbar[selectedTool].isEmpty()) {
+                toolbar[selectedTool].item->unequip(*this);
             }
             selectedTool = index;
-            if(newTool != nullptr) {
-                newTool->item->equip(*this);
+            if(!toolbar[selectedTool].isEmpty()) {
+                toolbar[selectedTool].item->equip(*this);
                 heldItemData.setAction(0); // reset actions
-                currentToolItem = newTool->item;
-            } else {
-                currentToolItem = nullptr;
+                
             }
             
             
         }
 
-        void setToolbar(int index,Item* item) {
-            for(auto&& itemInBar : toolbar) {
-                if(itemInBar == item) {
-                    itemInBar = nullptr;
-                }
-            }
-            toolbar[index] = item;
+        void setToolbar(int index,ItemStack stack) {
+            toolbar[index] = stack;
         }
 
         // for tools to do when they reduce count etc
@@ -452,6 +445,8 @@ class Character : public Actor {
         void closeMenu() {
             inMenu = false;
             openMenuObject = nullptr;
+            
+            returnCursor();
         }
 
         void openMenu() {
@@ -477,6 +472,53 @@ class Character : public Actor {
         void cancelCraft() {
             currentRecipe = nullptr;
             recipeTimer = 0;
+        }
+
+        void itemSlotHoverActions(DrawContext context,ItemStack& stack,ItemSlotInteractOptions options = {}) {
+            if(!options.allowInsert && !cursorStack.isEmpty()) {
+                return; // block insertion
+            }
+            if(!options.allowRemove && !stack.isEmpty()) {
+                return; // block removal
+            }
+            if(context.mouseLeftClicked()) {
+                stack = replaceCursor(stack);
+                return;
+            }
+            // insert or take one TODO: IDK what to do lol
+            if(context.mouseRightClicked()) {
+                if(!cursorStack.isEmpty() && stack.canInsert(cursorStack)) {
+                    // place one
+                    cursorStack.amount--;
+                    stack.tryInsert(ItemStack(cursorStack.item,1,cursorStack.storage));
+                    return;
+                } 
+                if(!stack.isEmpty() && cursorStack.canInsert(stack)) {
+                    stack.amount--;
+                    cursorStack.tryInsert(ItemStack(stack.item,1,stack.storage));
+                    return;
+                }
+                
+            }
+        }
+
+        // returns the itemstack in cursor
+        ItemStack replaceCursor(ItemStack stack) {
+            ItemStack returnStack = cursorStack;
+            cursorStack = stack;
+            return returnStack;
+        }
+
+        // when theres no item to replace
+        ItemStack dropCursor() {
+            ItemStack returnStack = cursorStack;
+            cursorStack.clear();
+            return returnStack;
+        }
+
+        void returnCursor() {
+            inventory.give(cursorStack);
+            cursorStack.clear();
         }
 
         void moveMouse(vec2 delta) {
@@ -514,7 +556,7 @@ class Character : public Actor {
         }
 
         vec3 getEyePosition() {
-            return transformPoint(vec3(0,height,0));
+            return transformPoint(vec3(0,height/2.0f,0));
         }
 
         quat getEyeRotation() {

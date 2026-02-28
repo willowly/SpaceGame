@@ -24,7 +24,7 @@ class PickaxeTool : public Tool {
         };
 
         quat anticipationRotation = glm::quat(vec3(0,0,glm::radians(50.0f)));
-        float anticipationTime = 0.3;
+        float anticipationTime = 0.3f;
         quat cooldownRotation = glm::quat(vec3(0,0,glm::radians(-50.0f)));
         float cooldownTime = 0.5;
 
@@ -78,15 +78,15 @@ class PickaxeTool : public Tool {
                 stack.clear();
             }
             
-            // good enough for now
+            // good enough for now make sure these happen after, since they can invalidate stack references
             if(resultStack) {
                 auto stack = resultStack.value();
                 user.inventory.give(stack);
             }
 
-            // for(auto& stack : results.items) {
-            //     user.inventory.give(stack);
-            // }
+            for(auto& stack : results.items) {
+                user.inventory.give(stack);
+            }
         }
 
         virtual void equip(Character& user) {
@@ -94,7 +94,7 @@ class PickaxeTool : public Tool {
         }
 
         virtual ItemDisplayData getItemDisplay(ItemStack& stack) {
-            float damage = stack.storage.getInt(DAMAGE_VAR,0);
+            float damage = static_cast<float>(stack.storage.getInt(DAMAGE_VAR,0));
             return ItemDisplayData(1-(damage/durability));
         }
 
@@ -114,12 +114,12 @@ class PickaxeTool : public Tool {
                     normTime = animationTimer/anticipationTime;
                     if(normTime > 0.9f) {
                         normTime = (normTime - 0.9f) / 0.1f;
-                        normTime = fmin(fmax(normTime,0),1);
+                        normTime = fmin(fmax(normTime,0.0f),1.0f);
                         easedTime = Anim::easeOutCubic(normTime);
                         animation.first = glm::slerp(anticipationRotation,cooldownRotation,easedTime);
                     } else {
                         normTime = (normTime / 0.9f);
-                        normTime = fmin(fmax(normTime,0),1);
+                        normTime = fmin(fmax(normTime,0.0f),1.0f);
                         easedTime = Anim::easeInSine(normTime);
                         animation.first = glm::slerp(glm::identity<quat>(),anticipationRotation,easedTime);
                     }

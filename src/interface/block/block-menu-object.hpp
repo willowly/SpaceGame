@@ -41,6 +41,7 @@ class BlockMenuObject : public MenuObject {
             }
 
             widget.draw(context,user,*block,*storage,state);
+            Debug::subtractTrace();
         }
 
     

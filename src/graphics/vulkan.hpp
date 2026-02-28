@@ -226,9 +226,9 @@ class Vulkan {
         
         ~Vulkan() {
 
-            vkDestroyDescriptorPool(device,imguiPool,nullptr);
-            
             ImGui_ImplVulkan_Shutdown();
+            
+            vkDestroyDescriptorPool(device,imguiPool,nullptr);
 
             cleanupSwapChain();
 

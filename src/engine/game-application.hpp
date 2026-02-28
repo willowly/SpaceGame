@@ -296,7 +296,7 @@ class GameApplication {
 
             makeAluminumPlate.result = ItemStack(registry.getItem("tin_plate"),1);
 
-            makeAluminumPlate.ingredients.push_back(ItemStack(registry.getItem("tin_ore"),5));
+            makeAluminumPlate.ingredients.push_back(ItemStack(registry.getItem("tin_ore"),2));
             makeAluminumPlate.time = 10;
 
             makeFurnace.result = ItemStack(registry.getItem("furnace"),1);
@@ -307,7 +307,7 @@ class GameApplication {
             makeThruster.result = ItemStack(registry.getItem("thruster"),1);
 
             makeThruster.ingredients.push_back(ItemStack(registry.getItem("tin_plate"),5));
-            makeThruster.time = 5;
+            makeThruster.time = 2;
 
             makeCockpit.result = ItemStack(registry.getItem("cockpit"),1);
 
@@ -315,7 +315,7 @@ class GameApplication {
             makeCockpit.time = 5;
             
             // spawn player
-            player = world.spawn(Character::makeInstance(playerPrototype.get(),vec3(0,5,5)));
+            player = world.spawn(Character::makeInstance(playerPrototype.get(),vec3(-10,5,-5)));
             player->model = registry.getModel("capsule_thin");
             player->material = registry.getMaterial("player");
 
@@ -331,6 +331,7 @@ class GameApplication {
             furnaceWidget.solid = registry.getSprite("solid");
             furnaceWidget.font = &font;
             furnaceWidget.tooltipTextTitle = registry.getWidget<TextWidget>("text_default");
+            furnaceWidget.recipeSlot = registry.getWidget<ItemSlotWidget>("recipe_slot");
 
             auto itemSlotWidget = registry.getWidget<ItemSlotWidget>("item_slot");
 
@@ -339,11 +340,13 @@ class GameApplication {
             clearItemSlotWidget.color = Color::clear;
 
             inventoryWidget.itemSlot = itemSlotWidget;
+            inventoryWidget.recipeSlot = registry.getWidget<ItemSlotWidget>("recipe_slot");
             furnaceWidget.itemSlot = itemSlotWidget;
-            toolbarWidget.itemSlot = itemSlotWidget;
+            toolbarWidget.itemSlot = registry.getWidget<ItemSlotWidget>("clear_item_slot");
             
             playerWidget.inventoryWidget = &inventoryWidget;
             playerWidget.toolbarWidget = &toolbarWidget;
+            playerWidget.cursorSlotWidget = registry.getWidget<ItemSlotWidget>("clear_item_slot");
 
             PipelineOptions options;
             options.blend = VK_TRUE;
@@ -462,6 +465,7 @@ class GameApplication {
             //std::cout << StringHelper::toString(player->getPosition()) << std::endl;
             
             world.frame(vulkan,dt);
+            skybox.addRenderables(*vulkan,camera); // draw before UI
 
             //std::cout << "ending world frame" << std::endl;
 
@@ -490,8 +494,7 @@ class GameApplication {
             }
 
 
-            skybox.addRenderables(*vulkan,camera);
-
+            
             // if(input.getKeyPressed(GLFW_KEY_R)) {
             //     terrain->loadChunks(player->position,3,vulkan);
             // }

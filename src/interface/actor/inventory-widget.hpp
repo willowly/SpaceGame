@@ -21,6 +21,7 @@ class InventoryWidget : public Widget{
         ItemSlotWidget* itemSlot;
 
         TextWidget* tooltipTextTitle;
+        ItemSlotWidget* recipeSlot;
 
         void draw(DrawContext context,Character& player) {
 
@@ -46,16 +47,31 @@ class InventoryWidget : public Widget{
 
             ItemStack* selectedItem = nullptr;
             Recipe* selectedRecipe = nullptr;
+            bool itemHover = false;
             for (auto stack : player.inventory.getItems())
             {
                 if(stack != nullptr) {
                     if(itemSlot->draw(context,item,*stack)) {
-                        selectedItem = stack;
+                        itemHover = true;
+                        if(context.mouseLeftClicked()) {
+                            auto droppedStack = player.replaceCursor(*stack);
+                            player.inventory.take(*stack);
+                            player.inventory.give(droppedStack);
+                        } else {
+                            selectedItem = stack; //if we pick it up, its no longer selected
+                        }
                     }
                 }
                 
                 item.position.x += slotSize.x + spacing;
                 
+            }
+
+            if(!itemHover && context.mouseInside(mainPanel)) {
+                if(context.mouseLeftClicked()) {
+                    auto droppedStack = player.dropCursor();
+                    player.inventory.give(droppedStack);
+                }
             }
 
             item = Rect::anchored(Rect::withPivot(vec2(padding,-padding),slotSize,vec2(1,0)),mainPanel,vec2(1,0));
@@ -66,22 +82,8 @@ class InventoryWidget : public Widget{
                     Debug::warn("null recipe in player");
                     continue;
                 }
-                context.drawRect(item,slots,backgroundSprite);
-                context.drawRect(item,Color::white,recipe->result.item->getIcon());
-                if(context.mouseInside(item)) {
+                if(recipeSlot->draw(context,item,recipe->result)) {
                     selectedRecipe = recipe;
-                }
-
-                if(recipe->result.amount > 1) {
-                    std::string str = "" + std::to_string((int)recipe->result.amount);
-
-                    vec2 position = vec2(0.0f);
-                    std::reverse(str.begin(),str.end());
-                    for(char c : str) {
-                        context.drawRect(Rect::anchored(Rect::withPivot(position,vec2(width,width*ratio),vec2(1,1)),item,vec2(1,1)),Color::white,font->getSprite(c));
-                        position.x -= width + padding;
-                        
-                    }
                 }
 
                 if(player.currentRecipe == recipe) {
@@ -89,7 +91,6 @@ class InventoryWidget : public Widget{
                     //context.drawRect(item,slots,solid);
                     Rect fill(item.position + vec2(0,(1-progressPercent)*item.size.y),vec2(item.size.x,item.size.y * progressPercent));
                     context.drawRect(fill,Color(1,1,1,0.2),backgroundSprite);
-                    std::cout << "crafting this recipe " << progressPercent << std::endl;
                 }
                 
                 item.position.x -= slotSize.x + spacing;
@@ -105,9 +106,11 @@ class InventoryWidget : public Widget{
             } else {
                 if(selectedItem != nullptr) {
                     drawTooltip(context,*selectedItem);
-                    for(int i = 0; i <= 9; i++)
-                    if(context.getInput().getKeyPressed(GLFW_KEY_1 + i)) {
-                        player.setToolbar(i,selectedItem->item);
+                    for(int i = 0; i <= 9; i++) {
+                        if(context.getInput().getKeyPressed(GLFW_KEY_1 + i)) {
+                            player.setToolbar(i,*selectedItem);
+                            player.inventory.take(*selectedItem);
+                        }
                     }
                 }
             }

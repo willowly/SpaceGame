@@ -9,6 +9,7 @@
 #include "interface/item-slot-widget.hpp"
 #include "block/furnace-block.hpp"
 #include "block-widget.hpp"
+#include "interface/item-slot-interact-options.hpp"
 
 class FurnaceWidget : public BlockWidget<FurnaceBlock> {
     
@@ -21,6 +22,7 @@ class FurnaceWidget : public BlockWidget<FurnaceBlock> {
         float spacing = 2;
 
         ItemSlotWidget* itemSlot;
+        ItemSlotWidget* recipeSlot;
 
         TextWidget* tooltipTextTitle;
 
@@ -48,6 +50,11 @@ class FurnaceWidget : public BlockWidget<FurnaceBlock> {
             auto slotRect = Rect::anchored(Rect(vec2(padding),slotSize),mainPanel,vec2(0,0));
             if(itemSlot->draw(context,slotRect,inputStack)) {
                 selectedSlot = &inputStack;
+                Item* lastItem = inputStack.item; 
+                user.itemSlotHoverActions(context,inputStack);
+                if(lastItem != inputStack.item) {
+                    furnace.trySetMatchingRecipe(currentRecipe,inputStack);
+                }
             }
 
             auto barRect = Rect::withPivot(slotRect.topRight()+vec2(15-slotRect.size.x*0.5f,slotRect.size.y*0.5f),vec2(15.0-slotRect.size.x*0.5f,3.0),vec2(0.5f));
@@ -64,6 +71,9 @@ class FurnaceWidget : public BlockWidget<FurnaceBlock> {
             slotRect.position += vec2(30,0);
             if(itemSlot->draw(context,slotRect,outputStack)) {
                 selectedSlot = &outputStack;
+                ItemSlotInteractOptions options;
+                options.allowInsert = false;
+                user.itemSlotHoverActions(context,outputStack,options);
             }
 
             Rect item = Rect::anchored(Rect::withPivot(vec2(-padding,padding),slotSize,vec2(1,0)),mainPanel,vec2(1,0));
@@ -72,8 +82,11 @@ class FurnaceWidget : public BlockWidget<FurnaceBlock> {
 
             for (auto& recipe : furnace.recipes)
             {
-
-                if(itemSlot->draw(context,item,recipe->result)) {
+                if(recipe == nullptr) {
+                    Debug::warn("null recipe in furnace");
+                    continue;
+                }
+                if(recipeSlot->draw(context,item,recipe->result)) {
                     selectedRecipe = recipe;
                 }
                 
@@ -91,14 +104,11 @@ class FurnaceWidget : public BlockWidget<FurnaceBlock> {
             } else {
                 if(selectedSlot != nullptr && selectedSlot->item != nullptr) {
                     drawTooltip(context,*selectedSlot);
-                    if(context.mouseLeftClicked()) {
-                        user.inventory.give(*selectedSlot); //make this a call to the furnace :)
-                        selectedSlot->clear();
-                    }
+                    
                 }
                 
             }
-
+            storage.setPointer<Recipe>(furnace.CURRENTRECIPE_VAR,currentRecipe);
             storage.setStack(furnace.INPUTSTACK_VAR,inputStack);
             storage.setStack(furnace.OUTPUTSTACK_VAR,outputStack);
             

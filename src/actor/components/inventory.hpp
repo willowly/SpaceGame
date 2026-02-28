@@ -23,25 +23,29 @@ class Inventory {
         }
 
 
-        void give(ItemStack stack) {
-            give(stack.item,stack.amount);
+        void give(Item* item,float amount) {
+            give(ItemStack(item,amount));
+            
         }
 
-        void give(Item* item,float amount) {
-            auto stack = getStack(item);
-            if(stack != nullptr) {
-                stack->amount += amount;
-            } else {
-                items.push_back(ItemStack{item,amount});
+        void give(ItemStack newStack) {
+            if(newStack.isEmpty()) return;
+            auto stack = getStack(newStack.item);
+            // if the stack is null, try inserting. If inserting fails, add a new item. Kinda weird syntax maybe i can make it better idk
+            if(stack == nullptr || !stack->tryInsert(newStack)) {
+                items.push_back(newStack);
             }
             
         }
+
+
 
         float take(ItemStack stack) {
             return take(stack.item,stack.amount);
         }
         //returns amount actually taken
         float take(Item* item,float amount) {
+            if(item == nullptr) return 0;
             auto stack = getStack(item);
             if(stack != nullptr) {
                 if(stack->amount <= amount) {
@@ -60,7 +64,7 @@ class Inventory {
         ItemStack* getStack(Item* item) {
             for (auto stack : getItems())
             {
-                if(stack->amount > 0 && stack->item == item) {
+                if(stack->item == item) {
                     return stack;
                 }
             }
@@ -69,10 +73,10 @@ class Inventory {
         }
 
         ItemStack* getStackIncludeEmpty(Item* item) {
-            for (auto stack : getItems())
+            for (auto& stack : items)
             {
-                if(stack->item == item) {
-                    return stack;
+                if(stack.item == item) {
+                    return &stack;
                 }
             }
             return nullptr;

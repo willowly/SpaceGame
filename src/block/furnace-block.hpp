@@ -71,11 +71,11 @@ class FurnaceBlock : public Block {
 
             float fuel = storage->getFloat(FUEL_VAR);
             float craftTimer = storage->getFloat(TIMER_VAR);
-            Recipe* recipe = storage->getPointer<Recipe>(CURRENTRECIPE_VAR);
+            Recipe* currentRecipe = storage->getPointer<Recipe>(CURRENTRECIPE_VAR);
             ItemStack inputStackOpt = storage->getStack(INPUTSTACK_VAR);
             ItemStack outputStackOpt = storage->getStack(OUTPUTSTACK_VAR);
-            if(recipe != nullptr) {
-                craftStep(craftTimer,*recipe,inputStackOpt,outputStackOpt,dt);
+            if(currentRecipe != nullptr) {
+                craftStep(craftTimer,currentRecipe,inputStackOpt,outputStackOpt,dt);
             }
             storage->setFloat(FUEL_VAR,fuel);
             storage->setFloat(TIMER_VAR,craftTimer);
@@ -83,25 +83,36 @@ class FurnaceBlock : public Block {
             storage->setStack(OUTPUTSTACK_VAR,outputStackOpt);
         }
 
-        void craftStep(float& craftTimer,Recipe& recipe,ItemStack& inputStack,ItemStack& outputStack,float dt) {
-            if(recipe.ingredients.size() == 1) {
-                auto ingredient = recipe.ingredients[0];
-                std::cout << "furnace crafting " << recipe.result.item->name << " " << craftTimer << std::endl;
+        void trySetMatchingRecipe(Recipe*& currentRecipe,ItemStack& inputStack) {
+            for(auto recipe : recipes) {
+                if(inputStack.has(recipe->ingredients[0])) { //for just one ingredient
+                    currentRecipe = recipe;
+                    return;
+                }
+            }
+            currentRecipe = nullptr;
+        }
+
+        void craftStep(float& craftTimer,Recipe*& currentRecipe,ItemStack& inputStack,ItemStack& outputStack,float dt) {
+            if(currentRecipe->ingredients.size() == 1) {
+                auto ingredient = currentRecipe->ingredients[0];
                 if(!inputStack.has(ingredient)) {
+                    craftTimer = 0;
+                    trySetMatchingRecipe(currentRecipe,inputStack);
                     return;
                 }
                 craftTimer += dt * craftSpeed;
-                if(craftTimer > recipe.time) {
+                if(craftTimer > currentRecipe->time) {
                     
                     if(inputStack.has(ingredient)) {
-                        if(outputStack.tryInsert(recipe.result)) {
+                        if(outputStack.tryInsert(currentRecipe->result)) {
                             inputStack.amount -= ingredient.amount;
                             craftTimer = 0;
                         }
                     }
                 }
             } else {
-                Debug::warn("furnace recipe has " + std::to_string(recipe.ingredients.size()) + " ingredients (must be 1)");
+                Debug::warn("furnace recipe has " + std::to_string(currentRecipe->ingredients.size()) + " ingredients (must be 1)");
                 return;
             }
         }
@@ -127,7 +138,7 @@ class FurnaceBlock : public Block {
                 character.inventory.take(recipe.ingredients[0]);
             } else {
                 // try to take the item out
-                if(!inputStack.empty()) {
+                if(!inputStack.isEmpty()) {
                     character.inventory.give(inputStack);
                     inputStack.clear();
                     // try again

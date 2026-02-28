@@ -5,17 +5,18 @@
 
 struct ItemStack {
     Item* item = nullptr; 
-    float amount = 0;
+    int amount = 0;
     GenericStorage storage;
-    ItemStack(Item* item,float amount,GenericStorage storage) : item(item), amount(amount), storage(storage) {}
-    ItemStack(Item* item,float amount) : item(item), amount(amount) {}
+    ItemStack(Item* item,int amount,GenericStorage storage) : item(item), amount(amount), storage(storage) {}
+    ItemStack(Item* item,int amount) : item(item), amount(amount) {}
     ItemStack() {}
 
     bool has(ItemStack stack) {
         return item == stack.item && amount >= stack.amount;
     }
 
-    bool empty() {
+    // false must guarentee item is non-null and valid
+    bool isEmpty() {
         return item == nullptr || amount == 0;
     }
 
@@ -24,8 +25,18 @@ struct ItemStack {
         storage.clear();
     }
 
+    bool canInsert(ItemStack stack) {
+        if(isEmpty()) {
+            return true;
+        }
+        if(item == stack.item) {
+            return true;
+        }
+        return false;
+    }
+
     bool tryInsert(ItemStack stack) {
-        if(empty()) {
+        if(isEmpty()) {
             *this = stack;
             return true;
         }

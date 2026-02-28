@@ -15,6 +15,8 @@ class PlayerWidget : public ActorWidget<Character> {
 
         InventoryWidget* inventoryWidget;
         ToolbarWidget* toolbarWidget;
+        ItemSlotWidget* cursorSlotWidget;
+        vec2 cursorSlotSize = vec2(10,10);
 
 
     virtual void draw(DrawContext context,Character& player) {
@@ -33,6 +35,9 @@ class PlayerWidget : public ActorWidget<Character> {
             inventoryWidget->draw(context,player);
         }
         toolbarWidget->draw(context,player);
+
+        Rect cursorStackRect = Rect(context.getMousePosition(),cursorSlotSize);
+        cursorSlotWidget->draw(context,cursorStackRect,player.cursorStack);
     }
 
     

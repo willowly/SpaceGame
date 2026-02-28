@@ -232,7 +232,7 @@ class TerrainChunk {
                             int terrainTypeID = terrainData[i].type;
                             
                             if(old > SURFACE_LVL && terrainData[i].amount < SURFACE_LVL) {
-                            results.addItem(ItemStack(terrainTypes[terrainTypeID].item,1));
+                                results.addItem(ItemStack(terrainTypes[terrainTypeID].item,1));
                             }
                             meshOutOfDate = true;
                         }
