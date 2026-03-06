@@ -1,0 +1,50 @@
+#version 450
+
+layout (binding = 0,rgba32f) uniform readonly image2D inputImage;
+layout (binding = 1,rgba32f) uniform writeonly image2D outputImage;
+layout (local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+
+
+void main() {
+
+    ivec2 texCoord = ivec2(gl_GlobalInvocationID.xy);
+
+    vec3 inColor = imageLoad(inputImage, texCoord).rgb;
+
+    vec3 bloomColor = vec3(0);
+    
+    int kernelSize = 50;
+
+    for(int x = -kernelSize;x < kernelSize;x++) {
+        for(int y = -kernelSize;y < kernelSize;y++) {
+
+            if(length(vec2(x,y)) > kernelSize) continue;
+
+
+            vec3 sampledColor = imageLoad(inputImage, texCoord + ivec2(x,y)).rgb;
+            float sampledColorIntensity = (sampledColor.r + sampledColor.g + sampledColor.b) / 3.0f;
+            if(sampledColorIntensity > 1.0f) {
+                float radiusFalloff = (kernelSize-length(vec2(x,y)))/kernelSize;
+                bloomColor += sampledColor * (radiusFalloff*radiusFalloff);
+            }
+        }
+    }
+    bloomColor /= kernelSize*kernelSize;
+
+    // int roundFactor = 8;
+
+    // float bias = 0.0f;
+    // if(int(texCoord.x*0.5f + texCoord.y*0.5f) % 2 == 0) {
+    //     bias += 0.5f;
+    // }
+
+
+    // vec3 outColor = round((sqrt(inColor) * roundFactor) + bias)/roundFactor;
+    // outColor *= outColor;
+
+
+    vec3 outColor = inColor + bloomColor*0.2f;
+
+
+    imageStore(outputImage, texCoord, vec4(outColor,1));
+}

@@ -48,6 +48,10 @@
 #define DESCRIPTOR_COUNT 128
 #define TRANSFER_COUNT 16
 
+#define POSTPROCESS_IMAGES 2
+#define POST_PROCESS_INPUT 0
+#define POST_PROCESS_OUTPUT 1
+
 using std::string,glm::vec3,glm::vec2,glm::ivec2,glm::mat4,glm::quat;
 
 struct SceneDataBufferObject {
@@ -206,11 +210,11 @@ class Vulkan {
             createFrameCommandBuffers();    
             createDepthResources();
             createShadowResources();
-            createFrameBuffers();
             createSyncObjects();
-
+            
+            
             createBufferTransfers();
-
+            
             setupDebugMessenger();
             
             createDescriptorSetLayout();
@@ -218,6 +222,9 @@ class Vulkan {
             createUniformBuffers();
             createDescriptorPool();
             createDescriptorSets(); // also includes the texture
+            
+            createPostProcessingResources();
+            createFrameBuffers(); //needs to be be after post processing
 
             //tracyCtx = TracyVkContext(physicalDevice, device, graphicsQueue, commandBuffers[0]);
             initImgui();
@@ -239,6 +246,12 @@ class Vulkan {
             for(auto texture : textures) {
                 destroyTextureResources(texture);
             }
+
+            //post processing
+            cleanupPostProcessingImage();
+            vkDestroyDescriptorSetLayout(device,postProcessDescriptorSetLayout,nullptr);
+            vkDestroyPipelineLayout(device,postProcessPipelineLayout,nullptr);
+            vkDestroyPipeline(device,postProcessPipeline,nullptr);
 
             // shadows
             destroyImage(shadowImage);
@@ -501,6 +514,42 @@ class Vulkan {
             vkCmdEndRenderPass(commandBuffer);
         }
 
+        void recordBlitToSwapchain(VkCommandBuffer commandBuffer,VkImage srcImage) {
+            recordImageBarrier(commandBuffer,srcImage,VK_IMAGE_LAYOUT_GENERAL,VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT,VK_PIPELINE_STAGE_TRANSFER_BIT,VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT,VK_ACCESS_2_TRANSFER_READ_BIT);
+            recordImageBarrier(commandBuffer,swapChainImages[imageIndex],VK_IMAGE_LAYOUT_UNDEFINED,VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,0,VK_PIPELINE_STAGE_2_TRANSFER_BIT,0,VK_ACCESS_TRANSFER_WRITE_BIT);
+
+            // copy result into swapchain image
+
+            VkImageSubresourceLayers subLayer{};
+
+            subLayer.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            subLayer.baseArrayLayer = 0;
+            subLayer.layerCount = 1;
+            subLayer.mipLevel = 0;
+
+            VkImageBlit blit{};
+            blit.srcOffsets[0] = {0,0};
+            blit.srcOffsets[1] = {static_cast<int32_t>(swapChainExtent.width),static_cast<int32_t>(swapChainExtent.height),1};
+            blit.dstOffsets[0] = {0,0};
+            blit.dstOffsets[1] = {static_cast<int32_t>(swapChainExtent.width),static_cast<int32_t>(swapChainExtent.height),1};
+            blit.srcSubresource = subLayer;
+            blit.dstSubresource = subLayer;
+            
+
+            vkCmdBlitImage(commandBuffer,srcImage,VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,swapChainImages[imageIndex],VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,1,&blit,VK_FILTER_NEAREST);
+        }
+
+        void recordPostProcessPass(VkCommandBuffer commandBuffer) {
+            // Do post processing compute
+            vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, postProcessPipeline);
+            vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, postProcessPipelineLayout, 0, 1, &postProcessDescriptorSet, 0, 0);
+
+            recordImageBarrier(commandBuffer,postProcessBufferImages[POST_PROCESS_INPUT].image,VK_IMAGE_LAYOUT_UNDEFINED,VK_IMAGE_LAYOUT_GENERAL,VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT,VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,VK_ACCESS_2_SHADER_STORAGE_READ_BIT);
+            recordImageBarrier(commandBuffer,postProcessBufferImages[POST_PROCESS_OUTPUT].image,VK_IMAGE_LAYOUT_UNDEFINED,VK_IMAGE_LAYOUT_GENERAL,0,VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT,0,VK_ACCESS_2_SHADER_STORAGE_READ_BIT);
+            
+            vkCmdDispatch(commandBuffer, swapChainExtent.width/16, swapChainExtent.height/16, 1);
+        }
+
         void render(const Camera& camera) {
 
             //ZoneScoped;
@@ -558,9 +607,17 @@ class Vulkan {
             vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
 
             recordShadowRenderPass(commandBuffer,camera);
+
+            recordBarrierAll(commandBuffer);
             
             recordMainRenderPass(commandBuffer,camera);
 
+            recordBarrierAll(commandBuffer);
+
+            recordBlitToSwapchain(commandBuffer,postProcessBufferImages[1].image);
+            
+            recordImageBarrier(commandBuffer,swapChainImages[imageIndex],VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,VK_PIPELINE_STAGE_2_TRANSFER_BIT,VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,VK_ACCESS_TRANSFER_WRITE_BIT,VK_ACCESS_2_COLOR_ATTACHMENT_READ_BIT);
+            
             vkEndCommandBuffer(commandBuffer);
 
             VkSubmitInfo submitInfo{};
@@ -593,6 +650,25 @@ class Vulkan {
 
             frameIndex = (frameIndex + 1) % FRAMES_IN_FLIGHT;
             testIndex = (testIndex + 1) % 5;
+        }
+
+        void recordBarrierAll(VkCommandBuffer commandBuffer) {
+            VkDependencyInfo dependencyInfo  {};
+            dependencyInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+                
+            VkMemoryBarrier2 memoryBarrier = {};
+            memoryBarrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER_2;
+            memoryBarrier.srcStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+            memoryBarrier.srcAccessMask = VK_ACCESS_2_MEMORY_READ_BIT | VK_ACCESS_2_MEMORY_WRITE_BIT;
+            memoryBarrier.dstStageMask = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+            memoryBarrier.dstAccessMask = VK_ACCESS_2_MEMORY_READ_BIT | VK_ACCESS_2_MEMORY_WRITE_BIT;
+
+            std::array<VkMemoryBarrier2,1> array = {memoryBarrier};
+
+            dependencyInfo.memoryBarrierCount = array.size();
+            dependencyInfo.pMemoryBarriers = array.data();
+
+            vkCmdPipelineBarrier2(commandBuffer,&dependencyInfo);
         }
 
         void clearObjects() {
@@ -949,8 +1025,9 @@ class Vulkan {
             std::optional<uint32_t> graphicsFamily;
             std::optional<uint32_t> presentFamily;
             std::optional<uint32_t> transferFamily;
+            std::optional<uint32_t> computeFamily;
             bool isComplete() {
-                return graphicsFamily.has_value() && presentFamily.has_value() && transferFamily.has_value();
+                return graphicsFamily.has_value() && presentFamily.has_value() && transferFamily.has_value() && computeFamily.has_value();
             }
         };
 
@@ -1052,6 +1129,13 @@ class Vulkan {
         VkImageView shadowImageView;
         VkSampler shadowSampler;
 
+        Image postProcessBufferImages[2];
+        VkImageView postProcessBufferImageViews[2];
+        VkDescriptorSetLayout postProcessDescriptorSetLayout;
+        VkDescriptorSet postProcessDescriptorSet;
+        VkPipelineLayout postProcessPipelineLayout;
+        VkPipeline postProcessPipeline;
+
         vec2 screenSize = {};
 
         std::vector<std::optional<Buffer>> managedBuffers;
@@ -1129,7 +1213,9 @@ class Vulkan {
                 requiredExtensions.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
             }
 
-            createInfo.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+            #ifdef __APPLE__
+                createInfo.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+            #endif
 
             createInfo.enabledExtensionCount = (uint32_t) requiredExtensions.size();
             createInfo.ppEnabledExtensionNames = requiredExtensions.data();
@@ -1246,12 +1332,16 @@ class Vulkan {
             QueueFamilies result;
             int i = 0;
             for (const auto& queueFamily : queueFamilies) {
-                if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+                if ((queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) && (queueFamily.queueFlags & VK_QUEUE_COMPUTE_BIT)) { // combined queue family for now
                     result.graphicsFamily = i;
                 }
 
                 if (queueFamily.queueFlags & VK_QUEUE_TRANSFER_BIT) {
                     result.transferFamily = i;
+                }
+
+                if (queueFamily.queueFlags & VK_QUEUE_COMPUTE_BIT) {
+                    result.computeFamily = i;
                 }
                 
 
@@ -1304,6 +1394,20 @@ class Vulkan {
             }
 
             return availableFormats[0];
+        }
+
+        VkFormat choosePostProcessImageFormat(const std::vector<VkFormat>& availableFormats) {
+
+            
+
+            for (const auto& availableFormat : availableFormats) {
+                VkFormatProperties props;
+                vkGetPhysicalDeviceFormatProperties ( physicalDevice, availableFormat, &props );
+                if (props.optimalTilingFeatures & VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT)
+                {
+                    return availableFormat;
+                }
+            }
         }
 
         VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) {
@@ -1360,7 +1464,7 @@ class Vulkan {
             createInfo.imageColorSpace = surfaceFormat.colorSpace;
             createInfo.imageExtent = extent;
             createInfo.imageArrayLayers = 1;
-            createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+            createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT; // for blitting to after post processing
             if(hasSwapChain) {
                 createInfo.oldSwapchain = swapChain;
             } else {
@@ -1395,7 +1499,6 @@ class Vulkan {
             vkGetSwapchainImagesKHR(device, swapChain, &imageCount, nullptr);
             swapChainImages.resize(imageCount);
             vkGetSwapchainImagesKHR(device, swapChain, &imageCount, swapChainImages.data());
-
 
             swapChainImageFormat = surfaceFormat.format;
             swapChainExtent = extent;
@@ -1461,7 +1564,7 @@ class Vulkan {
 
         }
 
-         void recreateSwapChain() {
+        void recreateSwapChain() {
             // handle minimization
             int width = 0, height = 0;
             do {
@@ -1475,10 +1578,16 @@ class Vulkan {
 
             cleanupSwapChain();
             
-            
             createSwapChain();
             createImageViews();
             createDepthResources();
+            
+            // redo pp images
+            cleanupPostProcessingImage();
+            createPostProcessingImages();
+            updatePostProcessDescriptorSet();
+
+            // needs to be after post
             createFrameBuffers();
         }
 
@@ -1486,8 +1595,11 @@ class Vulkan {
 
         bool isDeviceSuitable(VkPhysicalDevice device) {
 
-            // VkPhysicalDeviceProperties deviceProperties;
-            // vkGetPhysicalDeviceProperties(device, &deviceProperties);
+            VkPhysicalDeviceProperties deviceProperties;
+            vkGetPhysicalDeviceProperties(device, &deviceProperties);
+
+            auto workGroupSizes = deviceProperties.limits.maxComputeWorkGroupSize;
+            std::cout << std::format("work group max {},{},{}",workGroupSizes[0],workGroupSizes[1],workGroupSizes[2]) << std::endl;
 
             // VkPhysicalDeviceFeatures deviceFeatures;
             // vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
@@ -1506,6 +1618,7 @@ class Vulkan {
 
             VkPhysicalDeviceFeatures supportedFeatures;
             vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
+            
 
             std::cout << "device support families:" << families.isComplete() << " extensions: " << extensionsSupported << " swapchain: " << swapChainAdequate << " samplerAniso:" << supportedFeatures.samplerAnisotropy << std::endl;
 
@@ -1686,7 +1799,7 @@ class Vulkan {
 
         void createRenderPass() {
             VkAttachmentDescription colorAttachment{};
-            colorAttachment.format = swapChainImageFormat;
+            colorAttachment.format = VK_FORMAT_R32G32B32A32_SFLOAT;
             colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
             colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
             colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -1695,7 +1808,7 @@ class Vulkan {
             colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 
             colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-            colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+            colorAttachment.finalLayout = VK_IMAGE_LAYOUT_GENERAL;  
 
             VkAttachmentReference colorAttachmentRef{};
             colorAttachmentRef.attachment = 0;
@@ -1793,7 +1906,7 @@ class Vulkan {
 
             for (size_t i = 0; i < swapChainImageViews.size(); i++) {
                 VkImageView attachments[] = {
-                    swapChainImageViews[i],
+                    postProcessBufferImageViews[POST_PROCESS_INPUT], //first one
                     depthImageView
                 };
                 
@@ -2079,19 +2192,21 @@ class Vulkan {
 
         void createDescriptorPool() {
 
-            std::array<VkDescriptorPoolSize, 3> poolSizes{};
+            std::array<VkDescriptorPoolSize, 4> poolSizes{};
             poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
             poolSizes[0].descriptorCount = static_cast<uint32_t>(DESCRIPTOR_COUNT);
             poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
             poolSizes[1].descriptorCount = static_cast<uint32_t>(DESCRIPTOR_COUNT);
             poolSizes[2].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
             poolSizes[2].descriptorCount = static_cast<uint32_t>(SHADOW_IMAGE_COUNT);
+            poolSizes[3].type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+            poolSizes[3].descriptorCount = static_cast<uint32_t>(10);
 
             VkDescriptorPoolCreateInfo poolInfo{};
             poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
             poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
             poolInfo.pPoolSizes = poolSizes.data();
-            poolInfo.maxSets = static_cast<uint32_t>(1);
+            poolInfo.maxSets = static_cast<uint32_t>(2);
             poolInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT; //allows for having huge layouts for bindless
 
             if (vkCreateDescriptorPool(device, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
@@ -2262,11 +2377,11 @@ class Vulkan {
             Image image = createImage(texWidth, texHeight, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
             
             //copy the pixel data into the image
-            transitionImageLayout(image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+            transitionImageLayoutSingleTimeOld(image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
             copyBufferToImage(stagingBuffer.buffer, image, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
 
             //transition it back into a format(?) usage by the shader
-            transitionImageLayout(image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+            transitionImageLayoutSingleTimeOld(image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
             destroyBuffer(stagingBuffer);
 
@@ -2344,8 +2459,17 @@ class Vulkan {
             }
         }
 
-        void transitionImageLayout(Image image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout) {
+        void transitionImageLayoutSingleTimeOld(Image image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout) {
             VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+            transitionImageLayoutOld(commandBuffer,image,format,oldLayout,newLayout);
+            submitCommandsWaitAndFree(commandBuffer);
+        }
+
+        void transitionImageLayoutOld(VkCommandBuffer commandBuffer,Image image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout) {
+            transitionImageLayoutOld(commandBuffer,image.image,format,oldLayout,newLayout);
+        }
+
+        void transitionImageLayoutOld(VkCommandBuffer commandBuffer,VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout) {
 
             VkImageMemoryBarrier barrier{};
             barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -2355,7 +2479,7 @@ class Vulkan {
             barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
             barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 
-            barrier.image = image.image;
+            barrier.image = image;
             barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
             barrier.subresourceRange.baseMipLevel = 0;
             barrier.subresourceRange.levelCount = 1;
@@ -2405,8 +2529,36 @@ class Vulkan {
                 0, nullptr,
                 1, &barrier
             );
+        }
 
-            submitCommandsWaitAndFree(commandBuffer);
+        void recordImageBarrier(VkCommandBuffer commandBuffer,VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout,VkPipelineStageFlags2 srcStage,VkPipelineStageFlags2 dstStage,VkAccessFlags2 srcAccessMask,VkAccessFlags2 dstAccessMask) {
+            VkDependencyInfo dependencyInfo  {};
+            dependencyInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+                
+            VkImageMemoryBarrier2 memoryBarrier = {};
+            memoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
+            memoryBarrier.srcStageMask = srcStage;
+            memoryBarrier.srcAccessMask = srcAccessMask;
+            memoryBarrier.dstStageMask = dstStage;
+            memoryBarrier.dstAccessMask = dstAccessMask;
+            memoryBarrier.image = image;
+            memoryBarrier.oldLayout = oldLayout;
+            memoryBarrier.newLayout = newLayout;
+            memoryBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            memoryBarrier.subresourceRange.baseMipLevel = 0;
+            memoryBarrier.subresourceRange.levelCount = 1;
+            memoryBarrier.subresourceRange.baseArrayLayer = 0;
+            memoryBarrier.subresourceRange.layerCount = 1;
+            memoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            memoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+
+            std::array<VkImageMemoryBarrier2,1> array = {memoryBarrier};
+
+            dependencyInfo.imageMemoryBarrierCount = array.size();
+            dependencyInfo.pImageMemoryBarriers = array.data();
+            
+            vkCmdPipelineBarrier2(commandBuffer,&dependencyInfo);
+
         }
 
         void copyBufferToImage(VkBuffer buffer, Image image, uint32_t width, uint32_t height) {
@@ -2446,7 +2598,7 @@ class Vulkan {
             depthImage = createImage(swapChainExtent.width, swapChainExtent.height, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
             depthImageView = createImageView(depthImage, depthFormat,VK_IMAGE_ASPECT_DEPTH_BIT);
 
-            transitionImageLayout(depthImage, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+            transitionImageLayoutSingleTimeOld(depthImage, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
             
         }
 
@@ -2513,6 +2665,138 @@ class Vulkan {
             if (vkCreateFramebuffer(device, &framebufferInfo, nullptr, &shadowFramebuffer) != VK_SUCCESS) {
                 throw std::runtime_error("failed to create framebuffer!");
             }
+        }
+
+        void createPostProcessingImages() {
+
+
+            for (size_t i = 0; i < POSTPROCESS_IMAGES; i++)
+            {
+                postProcessBufferImages[i] = createImage(swapChainExtent.width,swapChainExtent.height,VK_FORMAT_R32G32B32A32_SFLOAT,VK_IMAGE_TILING_OPTIMAL,VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+                postProcessBufferImageViews[i] = createImageView(postProcessBufferImages[i].image,VK_FORMAT_R32G32B32A32_SFLOAT,VK_IMAGE_ASPECT_COLOR_BIT);
+            }
+
+            
+            
+            
+        }
+
+        void cleanupPostProcessingImage() {
+            for (size_t i = 0; i < POSTPROCESS_IMAGES; i++)
+            {
+                destroyImage(postProcessBufferImages[i]);
+                vkDestroyImageView(device,postProcessBufferImageViews[i],nullptr);
+            }
+        }
+
+        void createPostProcessingResources() {
+            
+            createPostProcessingImages();
+
+
+            auto computeShaderCode = FileHelper::readBinary("shaders/compiled/test_comp.spv");
+
+            VkShaderModule computeShaderModule = createShaderModule(computeShaderCode);
+
+            VkPipelineShaderStageCreateInfo computeShaderStageInfo{};
+            computeShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+            computeShaderStageInfo.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+            computeShaderStageInfo.module = computeShaderModule;
+            computeShaderStageInfo.pName = "main";
+
+            std::array<VkDescriptorSetLayoutBinding, 2> layoutBindings{};
+            layoutBindings[0].binding = 0;
+            layoutBindings[0].descriptorCount = 1;
+            layoutBindings[0].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+            layoutBindings[0].pImmutableSamplers = nullptr;
+            layoutBindings[0].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+
+            layoutBindings[1].binding = 1;
+            layoutBindings[1].descriptorCount = 1;
+            layoutBindings[1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+            layoutBindings[1].pImmutableSamplers = nullptr;
+            layoutBindings[1].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+
+            VkDescriptorSetLayoutCreateInfo layoutInfo{};
+            layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+            layoutInfo.bindingCount = layoutBindings.size();
+            layoutInfo.pBindings = layoutBindings.data();
+
+            if (vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &postProcessDescriptorSetLayout) != VK_SUCCESS) {
+                throw std::runtime_error("failed to create post processing descriptor set layout!");
+            }
+
+            VkDescriptorSetAllocateInfo allocInfo{};
+            allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+            allocInfo.descriptorPool = descriptorPool;
+            allocInfo.descriptorSetCount = 1;
+            allocInfo.pSetLayouts = &postProcessDescriptorSetLayout;
+
+            auto result = vkAllocateDescriptorSets(device, &allocInfo, &postProcessDescriptorSet);
+            if (result != VK_SUCCESS) {
+                
+                throw std::runtime_error("failed to allocate descriptor sets!" + result);
+            }
+
+            VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
+            pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+            pipelineLayoutInfo.setLayoutCount = 1;
+            pipelineLayoutInfo.pSetLayouts = &postProcessDescriptorSetLayout;
+
+            if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &postProcessPipelineLayout) != VK_SUCCESS) {
+                throw std::runtime_error("failed to create post-processing pipeline layout!");
+            }
+
+            VkComputePipelineCreateInfo pipelineInfo{};
+            pipelineInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+            pipelineInfo.layout = postProcessPipelineLayout;
+            pipelineInfo.stage = computeShaderStageInfo;
+
+            if (vkCreateComputePipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &postProcessPipeline) != VK_SUCCESS) {
+                throw std::runtime_error("failed to create post-processing pipeline!");
+            }
+
+            updatePostProcessDescriptorSet();
+
+            vkDestroyShaderModule(device,computeShaderModule,nullptr);
+
+        }
+
+        void updatePostProcessDescriptorSet() {
+            std::vector<VkWriteDescriptorSet> descriptorWrites{};
+            
+
+            VkDescriptorImageInfo inputImageInfo;
+            inputImageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+            inputImageInfo.imageView = postProcessBufferImageViews[POST_PROCESS_INPUT];
+
+            VkWriteDescriptorSet textureWriteInput{};
+            textureWriteInput.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            textureWriteInput.dstSet = postProcessDescriptorSet;
+            textureWriteInput.dstBinding = 0;
+            textureWriteInput.dstArrayElement = 0;
+            textureWriteInput.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+            textureWriteInput.descriptorCount = 1;
+            textureWriteInput.pImageInfo = &inputImageInfo;
+
+            descriptorWrites.push_back(textureWriteInput);
+
+            VkDescriptorImageInfo outputImageInfo;
+            outputImageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+            outputImageInfo.imageView = postProcessBufferImageViews[POST_PROCESS_OUTPUT];
+
+            VkWriteDescriptorSet textureWriteOutput{};
+            textureWriteOutput.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            textureWriteOutput.dstSet = postProcessDescriptorSet;
+            textureWriteOutput.dstBinding = 1;
+            textureWriteOutput.dstArrayElement = 0;
+            textureWriteOutput.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+            textureWriteOutput.descriptorCount = 1;
+            textureWriteOutput.pImageInfo = &outputImageInfo;
+
+            descriptorWrites.push_back(textureWriteOutput);
+            
+            vkUpdateDescriptorSets(device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
         }
 
         VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features) {

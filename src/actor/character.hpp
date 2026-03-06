@@ -55,7 +55,7 @@ class Character : public Actor {
         float lookPitch = 0;
         float lookSensitivity = 5;
         float height = 1.0f;
-        float radius = 0.4;
+        float radius = 0.4f;
         float acceleration = 5;
         float jumpForce = 10;
         float craftSpeed = 1;
@@ -504,9 +504,16 @@ class Character : public Actor {
 
         // returns the itemstack in cursor
         ItemStack replaceCursor(ItemStack stack) {
-            ItemStack returnStack = cursorStack;
-            cursorStack = stack;
-            return returnStack;
+            if(stack.tryInsert(cursorStack)) {
+                // insert
+                cursorStack.clear();
+                return stack;
+            } else {
+                //swap em
+                ItemStack returnStack = cursorStack;
+                cursorStack = stack;
+                return returnStack;
+            }
         }
 
         // when theres no item to replace

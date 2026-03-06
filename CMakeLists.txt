@@ -172,6 +172,16 @@ macro(compile_shader shader_path)
     list(APPEND SHADER_SOURCES "${CMAKE_CURRENT_LIST_DIR}/assets/shaders/${shader_path}.vert")
 endmacro()
 
+macro(compile_shader_compute shader_path)
+    add_custom_command(
+        OUTPUT "${OUTPUT_DIR}/shaders/compiled/${shader_path}_comp.spv"
+        COMMAND glslc "${CMAKE_CURRENT_LIST_DIR}/assets/shaders/${shader_path}.comp" -o "${OUTPUT_DIR}/shaders/compiled/${shader_path}_comp.spv"
+        DEPENDS "${CMAKE_CURRENT_LIST_DIR}/assets/shaders/${shader_path}.comp"
+    )
+    list(APPEND SHADER_OUTPUTS "${OUTPUT_DIR}/shaders/compiled/${shader_path}_comp.spv")
+    list(APPEND SHADER_SOURCES "${CMAKE_CURRENT_LIST_DIR}/assets/shaders/${shader_path}.comp")
+endmacro()
+
 
 message("output dir: ${OUTPUT_DIR}")
 
@@ -185,6 +195,8 @@ compile_shader("construction")
 compile_shader("particle")
 
 compile_shader("shadow_test")
+
+compile_shader_compute("test")
 
 add_custom_target(SpaceGame_Shaders DEPENDS ${SHADER_OUTPUTS} SOURCES ${SHADER_SOURCES})
 add_dependencies(SpaceGame_Shaders Assets)

@@ -83,14 +83,14 @@ class FurnaceBlock : public Block {
             storage->setStack(OUTPUTSTACK_VAR,outputStackOpt);
         }
 
-        void trySetMatchingRecipe(Recipe*& currentRecipe,ItemStack& inputStack) {
+        bool trySetMatchingRecipe(Recipe*& currentRecipe,ItemStack& inputStack) {
             for(auto recipe : recipes) {
                 if(inputStack.has(recipe->ingredients[0])) { //for just one ingredient
                     currentRecipe = recipe;
-                    return;
+                    return true;
                 }
             }
-            currentRecipe = nullptr;
+            return false;
         }
 
         void craftStep(float& craftTimer,Recipe*& currentRecipe,ItemStack& inputStack,ItemStack& outputStack,float dt) {
