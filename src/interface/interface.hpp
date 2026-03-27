@@ -60,7 +60,7 @@ class Interface {
         MeshBuffer quadMesh;
         Material defaultMaterial = Material::none;
         bool readyToRender = false;
-        float scale = 6;
+        float scale = 1;
 
         Interface() {
 
@@ -119,7 +119,7 @@ struct DrawContext {
     public:
         DrawContext(Interface& interface,Vulkan& vulkan,Input& input) : interface(interface), vulkan(vulkan), input(input) {}
 
-        void drawRect(Rect rect,Color color,Sprite sprite) {
+        void drawRect(Rect rect,Sprite sprite,Color color = Color::white) {
             interface.drawRect(vulkan,rect,color,sprite);
         }
 

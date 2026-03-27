@@ -84,6 +84,8 @@ class Debug {
 
         vector<string> trace;
 
+        vector<string> luaConsole;
+
 
         vector<Point> pointsToDraw;
         vector<Line> linesToDraw;
@@ -247,7 +249,9 @@ class Debug {
         //     return instance->_shader.get();
         // }
 
-        
+        static const std::vector<string>& getluaConsole() {
+            return getInstance().luaConsole;
+        }
         
         static void addTrace(string t) {
             vector<string>& trace = getInstance().trace;
@@ -274,18 +278,26 @@ class Debug {
             return fullTrace;
         }
 
-        static void warn(string string) {
+        static void addToLog(string string) {
             Debug& instance = getInstance();
-            std::cout << "[WARNING] " << string << traceString() << std::endl;
-            instance.logFile << "[WARNING] " << string << traceString() << std::endl;
+            std::cout << string << std::endl;
+            instance.logFile << string << std::endl;
+        }
+
+        static void warn(string string) {
+            addToLog("[WARNING] " + string + traceString());
         }
 
         static void info(string string,InfoPriority priority) {
             Debug& instance = getInstance();
             if(!instance.logInfo) return;
+            addToLog("[INFO] " + string + traceString());
+        }
 
-            std::cout << "[INFO] " << string << traceString() << std::endl;
-            instance.logFile << "[INFO] " << string << traceString() << std::endl;
+        static void lua(string string) {
+            Debug& instance = getInstance();
+            addToLog("[LUA]" + string + traceString());
+            instance.luaConsole.push_back(string + traceString());
         }
 
         //set the draw

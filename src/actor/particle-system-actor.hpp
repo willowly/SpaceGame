@@ -36,7 +36,6 @@ class ParticleEffectActor : public Actor {
             effect.step(getPosition(),getRotation(),dt);
             if(effect.getParticlesAlive() == 0 && destroyWhenZeroParticles) {
                 destroy(world);
-                std::cout << "destroying particle actor" << std::endl;
             }
         }
 

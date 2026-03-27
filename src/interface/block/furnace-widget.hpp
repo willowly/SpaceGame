@@ -30,13 +30,13 @@ class FurnaceWidget : public BlockWidget<FurnaceBlock> {
 
             Rect screen = context.getScreenSize();
 
-            auto background = Color(0.2,0.2,0.2);
+            auto backgroundColor = Color(0.2,0.2,0.2);
             auto slots = Color(0.1,0.1,0.1);
             auto slotsHover = Color(0.1,0.1,1);
             //interface.drawRect(vulkan,glm::vec2(0,-3),glm::vec2(101,12),glm::vec2(0.5,1),vec2(0.5,1),Color(0.5,0.5,0.5),solidTexture);
             
             Rect mainPanel = Rect::anchored(Rect::withPivot(vec2(0,-3),size,vec2(0.5,1)),screen,vec2(0.5,0.5));
-            context.drawRect(mainPanel,background,solid);
+            context.drawRect(mainPanel,solid,backgroundColor);
 
 
             
@@ -59,13 +59,13 @@ class FurnaceWidget : public BlockWidget<FurnaceBlock> {
 
             auto barRect = Rect::withPivot(slotRect.topRight()+vec2(15-slotRect.size.x*0.5f,slotRect.size.y*0.5f),vec2(15.0-slotRect.size.x*0.5f,3.0),vec2(0.5f));
 
-            context.drawRect(barRect,slots,solid);
+            context.drawRect(barRect,solid,slots);
 
             if(currentRecipe != nullptr) {
                 auto progress = timer/currentRecipe->time;
                 progress = fmin(fmax(progress,0),1);
                 barRect = Rect::anchored(Rect::withPivot(vec2(barRect.size.x*progress,barRect.size.y),vec2(0,0.5)),barRect,vec2(0,0.5));
-                context.drawRect(barRect,Color::red,solid);
+                context.drawRect(barRect,solid,Color::red);
             }
 
             slotRect.position += vec2(30,0);
@@ -119,7 +119,7 @@ class FurnaceWidget : public BlockWidget<FurnaceBlock> {
             
             Rect tooltip = Rect(context.getMousePosition()+vec2(3,3),vec2(40,7));
             tooltip.size.x = tooltipTextTitle->getSize(stack.item->name).x + 4.0f;
-            context.drawRect(tooltip,Color(0.05,0.05,0.05),solid);
+            context.drawRect(tooltip,solid,Color(0.05,0.05,0.05));
 
             tooltipTextTitle->draw(context,tooltip.position + vec2(2.0f,2.0f),stack.item->name);
         }
@@ -131,7 +131,7 @@ class FurnaceWidget : public BlockWidget<FurnaceBlock> {
             string text = "CRAFT " + recipe.result.item->name;
 
             tooltip.size.x = tooltipTextTitle->getSize(text).x + 4.0f;
-            context.drawRect(tooltip,Color(0.05,0.05,0.05),solid);
+            context.drawRect(tooltip,solid,Color(0.05,0.05,0.05));
 
             tooltipTextTitle->draw(context,tooltip.position + vec2(2.0f,2.0f),text);
         }

@@ -9,6 +9,11 @@
 #include "engine/debug.hpp"
 #include "helper/math-helper.hpp"
 
+#include <Jolt/Jolt.h>
+#include <Jolt/Physics/Body/Body.h>
+#include <Jolt/Physics/Collision/ContactListener.h>
+
+class Actor;
 
 using glm::vec3,std::optional,MathHelper::sign;
 
@@ -25,9 +30,10 @@ struct Ray {
     Ray(vec3 origin,vec3 direction) : origin(origin), direction(direction) { }
 };
 
-struct Contact {
-    vec3 point = {};
-    vec3 normal = {};
-    float penetration;
-    Contact(vec3 point,vec3 normal,float penetration) : point(point), normal(normal), penetration(penetration) { }
+struct Collision {
+    Actor* actor;
+    JPH::BodyID body;
+    Actor* otherActor;
+    JPH::BodyID otherBody;
+    const JPH::ContactManifold &inManifold;
 };

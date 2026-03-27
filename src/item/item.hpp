@@ -32,6 +32,9 @@ class Item {
 
         string name;
         Sprite defaultSprite;
+        Mesh<Vertex>* defaultModel = nullptr;
+        Material defaultMaterial = Material::none;
+        float defaultModelScale = 0.3f;
 
         virtual ~Item() {}
 
@@ -43,7 +46,11 @@ class Item {
             return ItemDisplayData();
         }
 
-
+        virtual void addRenderables(Vulkan* vulkan,ItemStack& stack,vec3 position,quat rotation) {
+            if(defaultModel != nullptr) {
+                defaultModel->addToRender(vulkan,defaultMaterial,position,rotation,vec3(defaultModelScale));
+            }
+        }
 
         virtual void equip(Character& user) {
 
@@ -61,7 +68,7 @@ class Item {
 
         }
 
-        virtual void addRenderables(Vulkan* vulkan,Character& user,float dt) {
+        virtual void addRenderablesHeld(Vulkan* vulkan,Character& user,float dt) {
             
         }
 };

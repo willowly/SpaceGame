@@ -9,7 +9,7 @@ class TextWidget : public Widget {
 
     public:
 
-        float height = 3;
+        float height = 12;
         float ratio = 1.5;
         float spacing = 0.25f;
         Color color = Color::white;
@@ -27,7 +27,7 @@ class TextWidget : public Widget {
         std::transform(text.begin(), text.end(), text.begin(), [](unsigned char c){ return std::toupper(c); }); // for now lol
         for(char c : text) {
             
-            context.drawRect(characterRect,Color::white,font->getSprite(c));
+            context.drawRect(characterRect,font->getSprite(c));
             characterRect.position.x += width + spacing;
             
         }

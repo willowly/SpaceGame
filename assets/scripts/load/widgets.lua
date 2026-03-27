@@ -8,9 +8,10 @@ widgets.item_slot = {
     color = color(0.2,0.2,0.2),
 }
 
-widgets.clear_item_slot = {
+widgets.toolbar_item_slot = {
     type = "item_slot",
     sprite = "item_slot",
+    padding = 11,
     color = color(0.0,0.0,0.0,0.0),
 }
 

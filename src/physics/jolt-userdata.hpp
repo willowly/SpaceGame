@@ -5,6 +5,7 @@
 struct ActorUserData {
     Actor* actor;
     unsigned int component = 0;
+    bool generateCollisionEvents = false;
 
     ActorUserData() {}
 

@@ -118,7 +118,7 @@ class FurnaceBlock : public Block {
         }
 
         virtual void tryStartCraft(Recipe& recipe,Character& character,BlockStorage& storage,BlockState& state) {
-            if(!character.inventory.hasIngredients(recipe)) {
+            if(!character.hasIngredients(recipe)) {
                 return;
             }
             if(recipe.ingredients.size() != 1) {
@@ -135,15 +135,15 @@ class FurnaceBlock : public Block {
 
             auto inputStack = storage.getStack(INPUTSTACK_VAR);
             if(inputStack.tryInsert(recipe.ingredients[0])) {
-                character.inventory.take(recipe.ingredients[0]);
+                character.take(recipe.ingredients[0]);
             } else {
                 // try to take the item out
                 if(!inputStack.isEmpty()) {
-                    character.inventory.give(inputStack);
+                    character.give(inputStack);
                     inputStack.clear();
                     // try again
                     if(inputStack.tryInsert(recipe.ingredients[0])) {
-                        character.inventory.take(recipe.ingredients[0]);
+                        character.take(recipe.ingredients[0]);
                     }
                 }
             }

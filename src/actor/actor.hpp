@@ -3,8 +3,8 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include "graphics/mesh.hpp"
-#include "physics/intersections.hpp"
 #include "graphics/vulkan.hpp"
+#include "physics/structs.hpp"
 
 
 using glm::vec3, glm::quat;
@@ -101,6 +101,10 @@ class Actor {
 
         virtual void step(World* world,float dt) {
             
+        }
+
+        virtual void collisionStart(World* world,const Collision& contact) {
+
         }
 
         // virtual void collideBasic(Actor* actor,float height,float radius) {

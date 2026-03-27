@@ -15,6 +15,10 @@ namespace API {
     void loadItemBaseType(ObjLoadType loadType,sol::table table,Item* item,Registry& registry) {
         get<string>(table,"name",item->name,true);
         getSprite(table,"icon",item->defaultSprite,registry,true);
+        item->defaultModel = registry.getModel("item_default");
+        item->defaultMaterial = registry.getMaterial("item_default");
+        getMesh(table,"model",item->defaultModel,registry,false);
+        getMaterial(table,"material",item->defaultMaterial,registry,false);
     }
 
     void loadItemToolType(ObjLoadType loadType,sol::table table,Tool* item,Registry& registry) {
@@ -22,6 +26,8 @@ namespace API {
         get<float>(table,"look_lerp",item->lookLerp,false);
         getMesh(table,"model",item->heldModel,registry,false);
         getMaterial(table,"material",item->heldModelMaterial,registry,false);
+        getMesh(table,"held_model",item->heldModel,registry,false);
+        getMaterial(table,"held_material",item->heldModelMaterial,registry,false);
         get<vec3>(table,"offset",item->modelOffset,false);
         get<quat>(table,"rotation",item->modelRotation,false);
         get<float>(table,"scale",item->modelScale,false);
@@ -48,6 +54,13 @@ namespace API {
         get<float>(table,"cooldown_time",    item->cooldownTime,false);
     }
 
+    void loadItemDrill(ObjLoadType loadType,sol::table table,DrillTool* item,Registry& registry) {
+        loadItemToolType(loadType,table,item,registry);
+        get<float>(table,"mine_amount",item->mineAmount,false);
+        get<float>(table,"mine_radius",item->mineRadius,false);
+        get<int>(table,"durability",item->durability,false);
+    }
+
     void addItemWithTypeAndLoad(string type,string name,ObjLoadType loadType,sol::table table,Registry& registry) {
         if(loadType == ObjLoadType::INVALID) {
             Debug::warn("trying to load with invalid object");
@@ -67,6 +80,12 @@ namespace API {
             PickaxeTool* item = registry.addItem<PickaxeTool>(name);
             loadItemPickaxe(loadType,table,item,registry);
             Debug::info("Loaded Pickaxe Tool \"" + name + "\"",InfoPriority::MEDIUM);
+            return;
+        }
+        if(type == "drill") {
+            DrillTool* item = registry.addItem<DrillTool>(name);
+            loadItemDrill(loadType,table,item,registry);
+            Debug::info("Loaded Drill Tool \"" + name + "\"",InfoPriority::MEDIUM);
             return;
         }
         Item* block = registry.addItem<ResourceItem>(name);

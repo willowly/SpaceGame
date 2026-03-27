@@ -14,6 +14,7 @@
 #include "construction.hpp"
 
 #include "item/item-stack.hpp"
+#include "actor/item-actor.hpp"
 #include "item/recipe.hpp"
 #include "components/inventory.hpp"
 
@@ -34,6 +35,8 @@
 #include "components/camera-shake.hpp"
 
 #include "interface/item-slot-interact-options.hpp"
+
+#include "actor/item-actor.hpp"
 
 class Character : public Actor {
 
@@ -61,10 +64,12 @@ class Character : public Actor {
         float craftSpeed = 1;
         float rotationSpeed = 90;
         float rotationAcceleration = 5;
+        float itemDropDistance = 4;
 
         // inputs
         bool clickInput = false;
         bool interactInput = false;
+        bool dropInput = false;
         float rotationInput = 0;
         bool brakeInput = false;
 
@@ -73,9 +78,6 @@ class Character : public Actor {
         bool noClip = false;
 
         vec3 moveInput = {};
-
-        vec3 velocity = {};
-        vec3 rotationVelocity = {};
         
         int selectedTool = 0;
 
@@ -101,6 +103,8 @@ class Character : public Actor {
 
         Inventory inventory;
 
+        ItemStack craftingStack;
+
         ItemStack cursorStack;
 
         std::unique_ptr<MenuObject> openMenuObject;
@@ -120,6 +124,7 @@ class Character : public Actor {
             radius = character.radius;
             acceleration = character.acceleration;
             jumpForce = character.jumpForce;
+            body.useAngularVelocity = false;
         }
 
         CameraShake shake;
@@ -129,7 +134,7 @@ class Character : public Actor {
         ActorWidget<Character>* widget;
 
 
-        JPH::Body* body;
+        Rigidbody body;
 
 
         void addRenderables(Vulkan* vulkan,float dt) {
@@ -137,7 +142,7 @@ class Character : public Actor {
             
             if(!toolbar[selectedTool].isEmpty()) {
                 heldItemData.animationTimer += dt;
-                toolbar[selectedTool].item->addRenderables(vulkan,*this,dt);
+                toolbar[selectedTool].item->addRenderablesHeld(vulkan,*this,dt);
             }
             RenderingSettings settings;
             settings.mainPass = thirdPerson;
@@ -150,48 +155,50 @@ class Character : public Actor {
 
             JPH::Shape::ShapeResult result;
             auto capsuleSettings = JPH::CapsuleShapeSettings(height/2,radius);
-            JPH::BodyCreationSettings bodySettings(new JPH::CapsuleShape(capsuleSettings,result), Physics::toJoltVec(position), Physics::toJoltQuat(position), JPH::EMotionType::Dynamic, Layers::MOVING);
-
-            bodySettings.mGravityFactor = 0.0f;
+            auto bodySettings = body.getDefaultBodySettings(this,new JPH::CapsuleShape(capsuleSettings,result),position,rotation);
 
             // bodySettings.mUserData = ActorUserData(this).asUInt();
             bodySettings.mObjectLayer = Layers::PLAYER;
             bodySettings.mAllowedDOFs = (JPH::EAllowedDOFs::TranslationX | JPH::EAllowedDOFs::TranslationY | JPH::EAllowedDOFs::TranslationZ);
 
-            
-            body = world->physics_system.GetBodyInterface().CreateBody(bodySettings);
-            
-            world->physics_system.GetBodyInterface().AddBody(body->GetID(),JPH::EActivation::Activate);
-
-            body->SetLinearVelocity(Physics::toJoltVec(velocity));
+            body.spawn(world,this,bodySettings);
 
 
         }
 
         virtual void prePhysics(World* world) {
-            world->physics_system.GetBodyInterface().SetPosition(body->GetID(),Physics::toJoltVec(position),JPH::EActivation::DontActivate);
-            world->physics_system.GetBodyInterface().SetRotation(body->GetID(),Physics::toJoltQuat(rotation).Normalized(),JPH::EActivation::DontActivate);
-            body->SetLinearVelocity(Physics::toJoltVec(velocity));
-            body->SetAngularVelocity(Physics::toJoltVec(vec3(0.0)));
+            auto velocity = body.getVelocity();
+            body.prePhysics(world,position,rotation);
             if(ridingConstruction == nullptr) {
-                world->physics_system.GetBodyInterface().SetObjectLayer(body->GetID(),Layers::PLAYER);
+                world->physics_system.GetBodyInterface().SetObjectLayer(body.getBodyID(),Layers::PLAYER);
             } else {
-                world->physics_system.GetBodyInterface().SetObjectLayer(body->GetID(),Layers::DISABLED);
+                world->physics_system.GetBodyInterface().SetObjectLayer(body.getBodyID(),Layers::DISABLED);
             }
-            auto bounds = body->GetWorldSpaceBounds();
+            auto bounds = body.getBody()->GetWorldSpaceBounds();
             // Debug::drawCube(Physics::toGlmVec(bounds.GetCenter()),Physics::toGlmVec(bounds.GetSize()),glm::identity<quat>(),Color::green,0.01f);
         }
 
         virtual void postPhysics(World* world) {
-            lastPosition = position;
-            position = Physics::toGlmVec(body->GetPosition());
-            rotation = Physics::toGlmQuat(body->GetRotation());
-            velocity = Physics::toGlmVec(body->GetLinearVelocity());
+            body.postPhysics(world,position,rotation);
+            auto velocity = body.getVelocity();
             //physicsCharacter->PostSimulation(0.01f); // small number to be on the floor
+        }
+
+        void collisionStart(World* world,const Collision& contact) {
+
+            if(contact.otherActor == nullptr) return;
+
+            auto itemActor = dynamic_cast<ItemActor*>(contact.otherActor);
+            if(itemActor != nullptr) {
+                give(itemActor->stack);
+                itemActor->destroy(world);
+            }
         }
 
         void step(World* world,float dt) {
 
+            auto velocity = body.getVelocity();
+            auto rotationVelocity = body.getAngularVelocity();
             if(ridingConstruction != nullptr) {
                 
                 
@@ -223,21 +230,46 @@ class Character : public Actor {
                     vec3 eyePos = getEyePosition();
                     rotation = glm::angleAxis(glm::radians(rotationVelocity.z) * dt,transformDirection(vec3(0,0,-1))) * rotation;
                     rotation = glm::angleAxis(glm::radians(rotationVelocity.x) * dt,transformDirection(vec3(-1,0,0))) * rotation;
-                    position = eyePos - transformDirection(vec3(0,height,0)); // to rotate around eye
+                    position = eyePos - transformDirection(vec3(0,height*0.5f,0)); // to rotate around eye
                 }
 
                 if(!inMenu) {
                     if(interactInput) {
                         interact(world);
                     }
-                    if(!toolbar[selectedTool].isEmpty()) {
-                        toolbar[selectedTool].item->step(world,*this,toolbar[selectedTool],dt);
+                    auto& selectedStack = toolbar[selectedTool];
+                    if(!selectedStack.isEmpty()) {
+                        selectedStack.item->step(world,*this,toolbar[selectedTool],dt);
                         heldItemData.actionTimer += dt;
+                        if(dropInput) {
+                            selectedStack.amount--;
+                            auto droppedItemStack = ItemStack(selectedStack.item,1,selectedStack.storage);
+                            world->spawn(ItemActor::makeInstance(droppedItemStack,getEyePosition() + getEyeDirection() * itemDropDistance,getEyeRotation()));
+                        }
                     }
+                    
                 }
 
                 clickInput = false;
                 interactInput = false;
+                dropInput = false;
+
+                body.setVelocity(velocity);
+                body.setAngularVelocity(rotationVelocity);
+
+                auto actors = world->overlapSphere(position,3);
+                for (auto actor : actors)
+                {
+                    auto itemActor = dynamic_cast<ItemActor*>(actor);
+                    if(itemActor != nullptr) {
+                        // should be an acceleration thingy idk
+                        auto velocity = itemActor->body.getVelocity();
+                        vec3 delta = (position - itemActor->getPosition());
+                        velocity = glm::normalize(delta) * 10.0f;
+                        itemActor->body.setVelocity(velocity);
+                    }
+                }
+                
 
                 // if(!noClip) {
                 //     world->collideBasic(this,height,radius);
@@ -245,10 +277,13 @@ class Character : public Actor {
             }
 
             if(currentRecipe != nullptr) {
-                recipeTimer += dt * craftSpeed;
-                if(recipeTimer > currentRecipe->time) {
-                    if(inventory.tryCraft(*currentRecipe)) {
-                        cancelCraft();
+                if(!craftingStackHasIngredients(*currentRecipe)) {
+                    cancelCraft();
+                } else {
+                    recipeTimer += dt * craftSpeed;
+                    if(recipeTimer > currentRecipe->time) {
+                        craftNoCheck(*currentRecipe);
+                        recipeTimer = 0;
                     }
                 }
             }
@@ -347,6 +382,10 @@ class Character : public Actor {
 
             if(input.getKeyPressed(GLFW_KEY_F)) {
                 interactInput = true;
+            }
+
+            if(input.getKeyPressed(GLFW_KEY_G)) {
+                dropInput = true;
             }
 
             brakeInput = input.getKey(GLFW_KEY_LEFT_SHIFT) || input.getKey(GLFW_KEY_RIGHT_SHIFT);
@@ -460,13 +499,35 @@ class Character : public Actor {
             
         }
 
+
+        // we should turn this into a crafter module. tho it needs to be able to handle variables in storage too idk
         void startCraft(Recipe& recipe) {
-            if(!inventory.hasIngredients(recipe)) {
-                // dont even start it
+            if(!hasIngredients(recipe)) {
+                return; // dont start the craft
+            }
+            if(recipe.ingredients.size() != 1) {
+                Debug::warn("player recipe has " + std::to_string(recipe.ingredients.size()) + " ingredients (must be 1)");
                 return;
             }
-            currentRecipe = &recipe;
-            recipeTimer = 0;
+             //should have them so we dont need to check
+
+            if(craftingStack.tryInsert(recipe.ingredients[0])) {
+                take(recipe.ingredients[0]);
+            } else {
+                // try to take the item out
+                if(!craftingStack.isEmpty()) {
+                    give(craftingStack);
+                    craftingStack.clear();
+                    // try again
+                    if(craftingStack.tryInsert(recipe.ingredients[0])) {
+                        take(recipe.ingredients[0]);
+                    }
+                }
+            }
+            if(currentRecipe != &recipe) {
+                currentRecipe = &recipe;
+                recipeTimer = 0;
+            }
         }
 
         void cancelCraft() {
@@ -523,8 +584,81 @@ class Character : public Actor {
             return returnStack;
         }
 
+        void give(ItemStack stack) {
+            for (auto& toolbarStack : toolbar)
+            {
+                if(toolbarStack.tryInsert(stack)) {
+                    return;
+                }
+            }
+            inventory.give(stack);
+            
+        }
+
+        int take(ItemStack stack) {
+            return take(stack.item,stack.amount);
+        }
+
+        int take(Item* item,int amount) {
+            int amountTaken = 0;
+            for (auto& toolbarStack : toolbar)
+            {
+                amountTaken += toolbarStack.take(ItemStack(item,amount));
+                if(amountTaken >= amount) {
+                    return amount;
+                }
+            }
+            return inventory.take(ItemStack(item,amount - amountTaken)) + amountTaken;
+            
+        }
+
+        // this is kinda janky :shrug:
+        bool hasIngredients(Recipe& recipe) {
+            for (auto& ingredient : recipe.ingredients)
+            {
+                // basically reduce the required by invenyory
+                int requiredByInventory = ingredient.amount;
+                for (auto toolbarStack : toolbar)
+                {
+                    if(toolbarStack.item == ingredient.item) {
+                        if(toolbarStack.amount > ingredient.amount) {
+                            requiredByInventory = 0;
+                            break; // dont even need to check inventory
+                        } else {
+                            requiredByInventory -= toolbarStack.amount;
+                        }
+                    }
+                }
+                if(requiredByInventory > 0 && !inventory.has(ItemStack(ingredient.item,requiredByInventory))) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        bool craftingStackHasIngredients(Recipe& recipe) {
+            if(recipe.ingredients.size() != 1) {
+                Debug::warn("player recipe has " + std::to_string(recipe.ingredients.size()) + " ingredients (must be 1)");
+                return false;
+            }
+            if(!craftingStack.has(recipe.ingredients[0])) return false;
+            return true;
+        }
+
+        bool tryCraft(Recipe& recipe) {
+            if(!craftingStackHasIngredients(recipe)) return false;
+            craftNoCheck(recipe);
+
+            return true;
+        }
+
+        void craftNoCheck(Recipe& recipe) {
+            craftingStack.take(recipe.ingredients[0]);
+            give(recipe.result);
+        }
+
         void returnCursor() {
-            inventory.give(cursorStack);
+            give(cursorStack);
             cursorStack.clear();
         }
 

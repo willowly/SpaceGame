@@ -196,7 +196,7 @@ compile_shader("particle")
 
 compile_shader("shadow_test")
 
-compile_shader_compute("test")
+compile_shader_compute("dither")
 
 add_custom_target(SpaceGame_Shaders DEPENDS ${SHADER_OUTPUTS} SOURCES ${SHADER_SOURCES})
 add_dependencies(SpaceGame_Shaders Assets)

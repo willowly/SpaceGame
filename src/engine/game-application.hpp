@@ -10,7 +10,7 @@
 #include "graphics/mesh.hpp"
 #include "engine/input.hpp"
 #include "helper/string-helper.hpp"
-#include "helper/random-helper.hpp"
+#include "helper/random.hpp"
 #include "graphics/camera.hpp"
 #include "graphics/skybox.hpp"
 #include "world.hpp"
@@ -78,9 +78,9 @@ class GameApplication {
             while (!glfwWindowShouldClose(window)) {
                 loop();
 
-                if(input.getKey(GLFW_KEY_ESCAPE)) {
-                    break;
-                }
+                // if(input.getKey(GLFW_KEY_ESCAPE)) {
+                //     break;
+                // }
             }
 
             
@@ -148,6 +148,7 @@ class GameApplication {
         int currentFrameTimeIndex = 0;
 
         bool debugUIOpen = false;
+        char consoleBuffer[1024] = ""; //temp
         
 
         float lastTime = 0; //tells how long its been since the last update
@@ -248,7 +249,7 @@ class GameApplication {
             Debug::loadRenderResources(*vulkan);
             interface.loadRenderResources(*vulkan);
 
-            Debug::setLogInfoEnabled(false);
+            Debug::setLogInfoEnabled(true);
 
             lastTime = (float)glfwGetTime();
 
@@ -315,13 +316,19 @@ class GameApplication {
             makeCockpit.time = 5;
             
             // spawn player
-            player = world.spawn(Character::makeInstance(playerPrototype.get(),vec3(-10,5,-5)));
+            player = world.spawn(Character::makeInstance(playerPrototype.get(),vec3(50,0,0)));
             player->model = registry.getModel("capsule_thin");
             player->material = registry.getMaterial("player");
 
             
             // UI
-            toolbarWidget.solidSprite = registry.getSprite("item_slot");
+            toolbarWidget.itemSlotSprite = registry.getSprite("item_slot");
+            toolbarWidget.sprite = registry.getSprite("tech_hotbar");
+            toolbarWidget.selectorSprite =  registry.getSprite("tech_hotbar_selector");
+            toolbarWidget.selectorSize = 95;
+            toolbarWidget.slotSize = 75;
+            toolbarWidget.slotHeight = 137;
+            toolbarWidget.slotGap = 3;
             
 
             inventoryWidget.backgroundSprite = registry.getSprite("solid");
@@ -342,11 +349,11 @@ class GameApplication {
             inventoryWidget.itemSlot = itemSlotWidget;
             inventoryWidget.recipeSlot = registry.getWidget<ItemSlotWidget>("recipe_slot");
             furnaceWidget.itemSlot = itemSlotWidget;
-            toolbarWidget.itemSlot = registry.getWidget<ItemSlotWidget>("clear_item_slot");
+            toolbarWidget.itemSlot = registry.getWidget<ItemSlotWidget>("toolbar_item_slot");
             
             playerWidget.inventoryWidget = &inventoryWidget;
             playerWidget.toolbarWidget = &toolbarWidget;
-            playerWidget.cursorSlotWidget = registry.getWidget<ItemSlotWidget>("clear_item_slot");
+            playerWidget.cursorSlotWidget = registry.getWidget<ItemSlotWidget>("toolbar_item_slot");
 
             PipelineOptions options;
             options.blend = VK_TRUE;
@@ -406,6 +413,8 @@ class GameApplication {
             if(input.getKeyPressed(GLFW_KEY_F1)) {
                 debugUIOpen = !debugUIOpen;
             }
+
+            
             
 
             ImGui_ImplVulkan_NewFrame();
@@ -415,10 +424,34 @@ class GameApplication {
 
             if(!debugUIOpen) return;
             //imgui commands
+
             ImGui::Begin("Info");
-            ImGui::Text("FPS: %8.1f",1.0f/dt);
-            auto playerPos = player->getPosition();
-            ImGui::Text("<%.1f,%.1f,%.1f>",playerPos.x,playerPos.y,playerPos.z);
+                ImGui::Text("FPS: %8.1f",1.0f/dt);
+                auto playerPos = player->getPosition();
+                ImGui::Text("position: <%.1f,%.1f,%.1f>",playerPos.x,playerPos.y,playerPos.z);
+                auto playerAngularVelocity = player->body.getAngularVelocity();
+                ImGui::Text("angular velocity: <%.5f,%.5f,%.5f>",playerAngularVelocity.x,playerAngularVelocity.y,playerAngularVelocity.z);
+            ImGui::End();
+
+            
+            ImGui::Begin("Console");
+                if(ImGui::InputText("##",consoleBuffer,IM_ARRAYSIZE(consoleBuffer),ImGuiInputTextFlags_EnterReturnsTrue)) {
+                    Debug::lua("> " + (string)consoleBuffer);
+                    try {
+                        auto result = lua.do_string("return " + (string)consoleBuffer);
+                        lua["print"](result);
+                    } catch(...) {
+                        lua.do_string(consoleBuffer);
+                    }
+
+                }
+                auto consoleLines = Debug::getluaConsole();
+                for(int i = 1;i < 50;i++) {
+                    int index = static_cast<int>(consoleLines.size())-i;
+                    if(index < 0) break;
+                    auto& line = consoleLines[index];
+                    ImGui::Text(line.c_str());
+                }
             ImGui::End();
         }
 
@@ -463,6 +496,7 @@ class GameApplication {
             // vulkan->mainLight.direction = vulkan->mainLight.direction * glm::quat(glm::radians(vec3(0,dt*90,0)));
             // std::cout << StringHelper::toString(vulkan->mainLight.direction) << std::endl;
             //std::cout << StringHelper::toString(player->getPosition()) << std::endl;
+
             
             world.frame(vulkan,dt);
             skybox.addRenderables(*vulkan,camera); // draw before UI
@@ -530,7 +564,7 @@ class GameApplication {
             }
             
 
-            
+            vulkan->mainLight.direction = glm::quat(glm::radians(vec3(0,1 * dt,0))) * vulkan->mainLight.direction;
 
             Debug::addRenderables(*vulkan);
 
@@ -554,7 +588,7 @@ class GameApplication {
         void chunkTask() {
             while(!closing) {
                 if(!chunkLoadPaused) {
-                    terrain->loadChunks(&world,player->getPosition(),1,vulkan);
+                    terrain->loadNextChunk(&world,player->getPosition(),5,vulkan);
                 }
                 //std::cout << "loading chunks" << std::endl;
                 //std::this_thread::sleep_for(std::chrono::milliseconds(100));

@@ -47,4 +47,18 @@ struct ItemStack {
         return false;
 
     }
+
+    int take(ItemStack stack) {
+        if(item == stack.item) {
+            if(amount > stack.amount) {
+                amount -= stack.amount;
+                return stack.amount;
+            } else {
+                amount = 0;
+                return amount;
+            }
+        }
+        return 0;
+
+    }
 };

@@ -16,6 +16,11 @@ namespace API {
         lua["quat"] = [&](float x,float y,float z) {
             return quat(glm::vec3(glm::radians(x),glm::radians(y),glm::radians(z)));
         };
+        
+
+        lua["print"] = [&](sol::object obj) {
+            Debug::lua(lua["tostring"](obj));
+        };
     }
 
 }

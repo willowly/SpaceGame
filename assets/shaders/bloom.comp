@@ -31,20 +31,6 @@ void main() {
     }
     bloomColor /= kernelSize*kernelSize;
 
-    // int roundFactor = 8;
-
-    // float bias = 0.0f;
-    // if(int(texCoord.x*0.5f + texCoord.y*0.5f) % 2 == 0) {
-    //     bias += 0.5f;
-    // }
-
-
-    // vec3 outColor = round((sqrt(inColor) * roundFactor) + bias)/roundFactor;
-    // outColor *= outColor;
-
-
-    vec3 outColor = inColor + bloomColor*0.2f;
-
 
     imageStore(outputImage, texCoord, vec4(outColor,1));
 }

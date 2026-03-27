@@ -12,8 +12,9 @@ class ItemSlotWidget : public Widget {
         Sprite sprite;
         Color color;
         Font* font;
+        TextWidget text;
 
-        float barWidth = 1.0; // the bottom bar to (normally) show durability
+        float barWidth = 6.0; // the bottom bar to (normally) show durability
         float padding = 2.0;
 
         bool draw(DrawContext context,Rect rect,std::optional<ItemStack>& stackOpt) {
@@ -25,7 +26,7 @@ class ItemSlotWidget : public Widget {
         }
 
         bool drawEmpty(DrawContext context,Rect rect) {
-            context.drawRect(rect,color,sprite);
+            context.drawRect(rect,sprite,color);
             if(context.mouseInside(rect)) {
                 return true;
             }
@@ -40,10 +41,10 @@ class ItemSlotWidget : public Widget {
                 return context.mouseInside(rect);
             }
             rect = Rect::anchored(Rect::centered(rect.size-padding),rect,vec2(0.5f,0.5f));
-            context.drawRect(rect,Color::white,stack.item->getIcon());
+            context.drawRect(rect,stack.item->getIcon());
 
-            if(stack.amount) {
-                float width = 2;
+            if(stack.amount > 1) {
+                float width = 12;
                 float ratio = 1.5;
                 float padding = 0.1f;
 
@@ -53,7 +54,7 @@ class ItemSlotWidget : public Widget {
                     vec2 position = vec2(0.0f);
                     std::reverse(str.begin(),str.end());
                     for(char c : str) {
-                        context.drawRect(Rect::anchored(Rect::withPivot(position,vec2(width,width*ratio),vec2(1,1)),rect,vec2(1,1)),Color::white,font->getSprite(c));
+                        context.drawRect(Rect::anchored(Rect::withPivot(position,vec2(width,width*ratio),vec2(1,1)),rect,vec2(1,1)),font->getSprite(c));
                         position.x -= width + padding;
                         
                     }
@@ -63,7 +64,7 @@ class ItemSlotWidget : public Widget {
             
             auto display = stack.item->getItemDisplay(stack);
             if(display.bar) {
-                context.drawRect(Rect(rect.position+vec2(0,rect.size.y-barWidth),vec2(rect.size.x*display.barPercent,barWidth)),Color::red,sprite);
+                context.drawRect(Rect(rect.position+vec2(0,rect.size.y-barWidth),vec2(rect.size.x*display.barPercent,barWidth)),sprite,Color::red);
             }
 
             return context.mouseInside(rect);

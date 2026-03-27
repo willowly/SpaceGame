@@ -156,6 +156,7 @@ class TerrainChunk {
                     {
                         vec3 samplePos = vec3(x,y,z);
                         samplePos += offset;
+                        samplePos *= cellSize;
                         vec3 noiseSamplePos = samplePos / settings.noiseScale;
                         float noise = simplex.fractal(5,noiseSamplePos.x,noiseSamplePos.y,noiseSamplePos.z);
                         noise *= 0.5f;
@@ -163,8 +164,7 @@ class TerrainChunk {
 
 
                         float distance = glm::length(samplePos);
-                        float radiusInfluence = (settings.radius-distance)/settings.radius;
-                        terrainData[i].amount = noise * (radiusInfluence+0.5f);
+                        terrainData[i].amount = (settings.radius-distance) + (noise * 0);
                         i++;
                     }
                 }
@@ -549,85 +549,6 @@ class TerrainChunk {
             vec3 c = meshData.vertices[face[2]].pos;
 
             return glm::length2(glm::cross((b - a),(c - a))) <= 1.0e-11f;
-        }
-
-        // need shape
-        virtual void collideBasic(vec3& localActorPosition,vec3 topOffset,float radius) {
-            if(!readyToRender) return;
-
-            if(!mtx.try_lock()) {
-                return;
-            }
-
-            auto posCellSpace = (localActorPosition/cellSize)-(vec3)offset;
-            auto radiusCellSpace = (radius+glm::length(topOffset))/cellSize;
-
-            vec3 localOffset = (vec3)offset*cellSize;
-            for (int z = std::max(0,(int)floor(posCellSpace.z-radiusCellSpace)); z <= std::min(size-1,(int)ceil(posCellSpace.z+radiusCellSpace)); z++)
-            {
-                for (int y = std::max(0,(int)floor(posCellSpace.y-radiusCellSpace)); y <= std::min(size-1,(int)ceil(posCellSpace.y+radiusCellSpace)); y++)
-                {
-                    for (int x = std::max(0,(int)floor(posCellSpace.x-radiusCellSpace)); x <= std::min(size-1,(int)ceil(posCellSpace.x+radiusCellSpace)); x++)
-                    {
-                        auto voxel = terrainData[getPointIndex(x,y,z)];
-                        for (int i = voxel.verticesStart;i < voxel.verticesEnd;i += 3)
-                        {
-                            
-                            vec3 a = meshData.vertices[meshData.indices[i]].pos + localOffset;
-                            vec3 b = meshData.vertices[meshData.indices[i+1]].pos + localOffset;
-                            vec3 c = meshData.vertices[meshData.indices[i+2]].pos + localOffset;
-                            // Debug::drawLine(transformPoint(a),transformPoint(b),Color::white);
-                            // Debug::drawLine(transformPoint(b),transformPoint(c),Color::white);
-                            // Debug::drawLine(transformPoint(c),transformPoint(a),Color::white);
-
-                            // this should probably be wrapped in some collision shape of the actor
-                            auto contact_opt = Physics::intersectCapsuleTri(localActorPosition,localActorPosition+topOffset,radius,a,b,c);
-                            if(contact_opt) {
-                                
-                                auto contact = contact_opt.value();
-
-                                Debug::drawRay(contact.point,contact.normal*contact.penetration);
-                                Physics::resolveBasic(localActorPosition,contact);
-                                
-                            }
-                                
-                        } 
-                    }
-                }
-            }
-            mtx.unlock();
-        }
-
-        virtual std::optional<RaycastHit> raycast(Ray ray, float dist) {
-
-            if(!mtx.try_lock()) { //if a chunk isn't ready to load we can just assume its being loaded far away :)
-                return std::nullopt;
-            }
-            std::optional<RaycastHit> result = std::nullopt;
-            Ray localRay = Ray(ray.origin-getTerrainLocalOffset(),ray.direction);
-
-
-            for(size_t i = 0;i+2 < meshData.indices.size();i += 3)
-            {
-                vec3 a = meshData.vertices[meshData.indices[i]].pos;
-                vec3 b = meshData.vertices[meshData.indices[i+1]].pos;
-                vec3 c = meshData.vertices[meshData.indices[i+2]].pos;
-
-                auto hitopt = Physics::intersectRayTriangle(a,b,c,localRay);
-                if(hitopt) {
-                    
-                    auto hit = hitopt.value();
-                    if(hit.distance <= dist) {
-                        hit.point = (hit.point) + getTerrainLocalOffset();
-                        result = hit;
-                        dist = hit.distance; //distance stays the same when transformed
-                    }
-                }
-                    
-            }
-            mtx.unlock();
-
-            return result;
         }
 
         void connectPosX(TerrainChunk* chunk) {

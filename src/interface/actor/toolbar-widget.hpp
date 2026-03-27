@@ -9,8 +9,14 @@
 class ToolbarWidget : public Widget {
     
     public:
-        Sprite solidSprite;
+        Sprite itemSlotSprite;
+        Sprite sprite;
+        Sprite selectorSprite;
         ItemSlotWidget* itemSlot;
+        float slotSize = 10;
+        float slotGap = 2;
+        float slotHeight = 100;
+        float selectorSize = 12;
 
         void draw(DrawContext context,Character& player) {
 
@@ -18,16 +24,21 @@ class ToolbarWidget : public Widget {
 
             auto unselected = Color(0.2,0.2,0.2);
             auto selected = Color(0.2,0.3,0.7);
-            //interface.drawRect(vulkan,glm::vec2(0,-3),glm::vec2(101,12),glm::vec2(0.5,1),vec2(0.5,1),Color(0.5,0.5,0.5),solidTexture);
+
+            context.drawRect(Rect::anchored(Rect::withPivot(vec2(0,-10),vec2(800,160),vec2(0.5f,1.0f)),screen,vec2(0.5,1.0f)),sprite);
             for (int i = 0; i < 9; i++)
             {
-                auto rect = Rect((i*12)-50,-11,12,12);
+                auto rect = Rect((i*(slotSize+slotGap))-((slotSize+slotGap)*4.5f)+slotGap/2,-slotHeight,slotSize,slotSize);
                 rect = Rect::anchored(rect,screen,vec2(0.5,1));
-                context.drawRect(rect,player.selectedTool == i ? selected : unselected,solidSprite);
+                context.drawRect(rect,itemSlotSprite);
                 if(context.mouseInside(rect)) {
                     if(context.mouseLeftClicked()) {
                         player.setToolbar(i,player.replaceCursor(player.toolbar[i]));
                     }
+                }
+                
+                if(player.selectedTool == i) {
+                    context.drawRect(Rect::centered(rect.center(),vec2(selectorSize)),selectorSprite);
                 }
 
                 auto& stack = player.toolbar[i];
@@ -38,6 +49,7 @@ class ToolbarWidget : public Widget {
                     }
                     itemSlot->draw(context,rect,stack);
                 }
+                
             }
             
         }

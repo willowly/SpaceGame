@@ -23,7 +23,7 @@ class Inventory {
         }
 
 
-        void give(Item* item,float amount) {
+        void give(Item* item,int amount) {
             give(ItemStack(item,amount));
             
         }
@@ -40,11 +40,11 @@ class Inventory {
 
 
 
-        float take(ItemStack stack) {
+        int take(ItemStack stack) {
             return take(stack.item,stack.amount);
         }
         //returns amount actually taken
-        float take(Item* item,float amount) {
+        int take(Item* item,float amount) {
             if(item == nullptr) return 0;
             auto stack = getStack(item);
             if(stack != nullptr) {
@@ -87,7 +87,7 @@ class Inventory {
             return has(stack.item,stack.amount);
         }
 
-        bool has(Item* item,float amount) {
+        bool has(Item* item,int amount) {
             auto stack = getStack(item);
             if(stack == nullptr) {
                 return false;

@@ -5,8 +5,7 @@
 #include <unordered_map>
 
 #include "engine/debug.hpp"
-#include "physics/resolution.hpp"
-#include "physics/intersections.hpp"
+#include "item-actor.hpp"
 
 #include <helper/string-helper.hpp>
 #include <algorithm>
@@ -474,63 +473,6 @@ class Construction : public Actor {
             std::cout << std::endl;
         }
 
-        virtual std::optional<RaycastHit> raycast(Ray ray, float dist) {
-            int i = 0;
-            std::optional<RaycastHit> result = std::nullopt;
-            Ray localRay = Ray(inverseTransformPoint(ray.origin),inverseTransformDirection(ray.direction));
-            for (int z = min.z; z <= max.z; z++)
-            {
-                for (int y = min.y; y <= max.y; y++)
-                {
-                    for (int x = min.x; x <= max.x; x++)
-                    {
-                        if(blockData[i].block != nullptr) {
-                            auto hitopt = Physics::intersectRayBox(vec3(x,y,z),vec3(0.5),localRay);
-                            if(hitopt) {
-                                
-                                auto hit = hitopt.value();
-                                if(hit.distance <= dist) {
-                                    hit.point = transformPoint(hit.point);
-                                    hit.normal = transformDirection(hit.normal);
-                                    result = hit;
-                                    dist = hit.distance; //distance stays the same when transformed
-                                }
-                            }
-                        }
-                        i++;
-                    }
-                }
-            }
-            return result;
-        }
-
-        virtual void collideBasic(Actor* actor,float height,float radius) {
-            vec3 localActorPosition = inverseTransformPoint(actor->getPosition());
-            vec3 localActorPositionTop = inverseTransformPoint(actor->transformPoint(vec3(0,height,0)));
-            float bounds = radius + height;
-            for (int z = floor(std::max((float)min.z,localActorPosition.z-bounds)); z <= ceil(std::min((float)max.z,localActorPosition.z+bounds)); z++)
-            {
-                for (int y = floor(std::max((float)min.y,localActorPosition.y-bounds)); y <= ceil(std::min((float)max.y,localActorPosition.y+bounds)); y++)
-                {
-                    for (int x = floor(std::max((float)min.x,localActorPosition.x-bounds)); x <= ceil(std::min((float)max.x,localActorPosition.x+bounds)); x++)
-                    {
-                        int i = getIndex(ivec3(x,y,z));
-                        if(blockData[i].block != nullptr) {
-                            auto contact_opt = Physics::intersectCapsuleBox(localActorPosition,localActorPositionTop,radius,vec3(x,y,z),vec3(0.5f));
-                            if(contact_opt) {
-                                
-                                auto contact = contact_opt.value();
-                                Physics::resolveBasic(localActorPosition,contact);
-                                Physics::resolveBasic(localActorPositionTop,contact);
-                                
-                            }
-                        }
-                    }
-                }
-            }
-            actor->setPosition(transformPoint(localActorPosition));
-        }
-
         vec3 getVelocity() {
             return velocity;
         }
@@ -540,6 +482,12 @@ class Construction : public Actor {
         // used when wanting to break a place, not replace
         void breakBlock(World* world,ivec3 location) {
 
+            auto block = getBlock(location).first;
+            assert(block != nullptr);
+            auto item = block->drop;
+
+            world->spawn(ItemActor::makeInstance(ItemStack(item,1),transformPoint(location)));
+
             removeBlockNoUpdate(location); //does the main removal, tracking, and storage/callback cleanup 
 
             recalculateBoundsFromBreak(location); //reduce bounds or break up construction. makes index invalid
@@ -548,6 +496,8 @@ class Construction : public Actor {
             generateMesh();
 
             calculateBreakup(world,location);
+
+            
 
             if(blockCount <= 0) {
                 destroy(world);

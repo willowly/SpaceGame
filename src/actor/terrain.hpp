@@ -12,6 +12,7 @@
 #include <math.h>
 #include <thread>
 #include <chrono>
+#include "helper/random.hpp"
 
 using std::unique_ptr, std::string;
 using glm::vec3, glm::ivec4,glm::vec4;
@@ -93,10 +94,13 @@ class Terrain : public Actor {
         return r;
     }
 
-    void loadChunks(World* world,vec3 position,int distance,Vulkan* vulkan) {
+    void loadNextChunk(World* world,vec3 position,int distance,Vulkan* vulkan) {
 
         position = inverseTransformPoint(position);
         ivec3 pos = glm::floor(position/((float)chunkSize*cellSize));
+        
+        float closestChunkDist = std::numeric_limits<float>::max();
+        ivec3 closestChunkPos = {};
         // generate one extra
         for (int z = -distance; z <= distance; z++)
         {
@@ -116,36 +120,19 @@ class Terrain : public Actor {
                         continue;
                     }
                     if(!chunks.contains(key)) {
-                        addChunk(world,chunkPos,vulkan);
-                        return;
+                        float dist = glm::length(vec3(x,y,z));
+                        if(dist < closestChunkDist) {
+                            closestChunkPos = chunkPos;
+                            closestChunkDist = dist;
+                        }
+                        
                     }
                    
                 }
             }
         }
-        // for (int z = -distance; z <= distance; z++)
-        // {
-        //     for (int y = -distance; y <= distance; y++)
-        //     {
-        //         for (int x = -distance; x <= distance; x++)
-        //         {
-        //             ivec3 chunkPos = pos + ivec3(x,y,z);
-        //             LocationKey key(chunkPos);
-        //             if(chunkPos.x < -size || chunkPos.x > size) {
-        //                 continue;
-        //             }
-        //             if(chunkPos.z < -size || chunkPos.z > size) {
-        //                 continue;
-        //             }
-        //             if(chunkPos.y < -size || chunkPos.y > size) {
-        //                 continue;
-        //             }
-        //             if(chunks.contains(key)) {
-        //                 chunks.at(key).updateMeshBuffers(vulkan);
-        //             }
-        //         }
-        //     }
-        // }
+        addChunk(world,closestChunkPos,vulkan);
+        return;
     }
 
     void prePhysics(World* world) override {
@@ -227,17 +214,8 @@ class Terrain : public Actor {
     }
 
     
-    virtual void collideBasic(Actor* actor,float height,float radius) {
-        vec3 localActorPosition = inverseTransformPoint(actor->getPosition());
-        vec3 offset = actor->transformDirection(vec3(0,height,0));
-        for(auto& pair : chunks) {
-            auto& chunk = pair.second;
-            chunk.collideBasic(localActorPosition,offset,radius);
-        }
-        actor->setPosition(transformPoint(localActorPosition));
-    }
 
-    TerraformResults terraformSphere(vec3 pos,float radius,float change) {
+    void terraformSphere(World* world,vec3 pos,float radius,float change) {
             
         chunksMtx.lock();
         TerraformResults results;
@@ -253,7 +231,11 @@ class Terrain : public Actor {
         }
         chunksMtx.unlock();
 
-        return results;
+        for (auto stack : results.items)
+        {
+            world->spawn(ItemActor::makeInstance(stack,pos,Random::rotation()));
+        }
+        
 
     }
 
@@ -308,49 +290,6 @@ class Terrain : public Actor {
     //     return glm::floor(inverseTransformPoint(pos)/cellSize);
     // }
 
-    virtual std::optional<RaycastHit> raycast(Ray ray, float dist) {
-
-
-
-        //ZoneScopedN("terrain raycast");
-
-        std::unique_lock lock(chunksMtx,std::defer_lock);
-
-
-        Ray localRay = Ray(inverseTransformPoint(ray.origin),inverseTransformDirection(ray.direction));
-
-        std::optional<RaycastHit> result = std::nullopt;
-
-        ivec3 pos = worldToChunkPosRounded(ray.origin);
-
-        for (int z = 0; z <= 1; z++)
-        {
-            for (int y = 0; y <= 1; y++)
-            {
-                for (int x = 0; x <= 1; x++)
-                {
-                    ivec3 chunkPos = pos - ivec3(x,y,z);
-                    LocationKey key(chunkPos);
-                    if(chunks.contains(key)) {
-                        auto hitOpt = chunks.at(key).raycast(localRay,dist);
-                        if(hitOpt) {
-                    
-                            auto hit = hitOpt.value();
-                            if(hit.distance <= dist) {
-                                hit.point = transformPoint(hit.point);
-                                hit.normal = transformDirection(hit.normal);
-                                result = hit;
-                                dist = hit.distance; //distance stays the same when transformed
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        
-        return result;
-    }
 
     
     

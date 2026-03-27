@@ -12,10 +12,16 @@ namespace API {
         
         character["give"] = sol::overload(
             [&](Character* character,Item* item,int amount) {
-                character->inventory.give(ItemStack(item,amount));
+                if(character == nullptr) {
+                    throw sol::error("character is null (give)");
+                }
+                character->give(ItemStack(item,amount));
             },
             [&](Character* character,ItemStack stack) {
-                character->inventory.give(stack);
+                if(character == nullptr) {
+                    throw sol::error("character is null (give)");
+                }
+                character->give(stack);
             }
         );
 

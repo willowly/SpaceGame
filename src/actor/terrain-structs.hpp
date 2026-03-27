@@ -75,7 +75,7 @@ struct TerraformResults {
         for (auto&& stack : items)
         {
             if(stack.item == giveStack.item) {
-                stack.amount = giveStack.amount;
+                stack.amount += giveStack.amount;
                 return;
             }
         }

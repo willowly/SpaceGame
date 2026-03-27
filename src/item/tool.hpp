@@ -61,7 +61,7 @@ class Tool : public Item {
             return std::pair<quat,vec3>(glm::identity<quat>(),vec3());
         }
 
-        virtual void addRenderables(Vulkan* vulkan,Character& user,float dt) {
+        virtual void addRenderablesHeld(Vulkan* vulkan,Character& user,float dt) {
             if(heldModel != nullptr) {
                 lookOrientation = glm::slerp(lookOrientation,user.getEyeRotation(),lookLerp * dt);
                 auto animation = animate(user,dt);

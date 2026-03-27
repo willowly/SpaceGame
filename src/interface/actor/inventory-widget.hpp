@@ -27,13 +27,13 @@ class InventoryWidget : public Widget{
 
             Rect screen = context.getScreenSize();
 
-            auto background = Color(0.2,0.2,0.2);
+            auto backgroundColor = Color(0.2,0.2,0.2);
             auto slots = Color(0.1,0.1,0.1);
             auto slotsHover = Color(0.1,0.1,1);
             //interface.drawRect(vulkan,glm::vec2(0,-3),glm::vec2(101,12),glm::vec2(0.5,1),vec2(0.5,1),Color(0.5,0.5,0.5),solidTexture);
             
             Rect mainPanel = Rect::anchored(Rect::withPivot(vec2(0,3),size,vec2(0.5f,0)),screen,vec2(0.5,0.5));
-            context.drawRect(mainPanel,background,backgroundSprite);
+            context.drawRect(mainPanel,backgroundSprite,backgroundColor);
 
 
             float width = 1.5;
@@ -90,7 +90,7 @@ class InventoryWidget : public Widget{
                     float progressPercent = player.recipeTimer/recipe->time;
                     //context.drawRect(item,slots,solid);
                     Rect fill(item.position + vec2(0,(1-progressPercent)*item.size.y),vec2(item.size.x,item.size.y * progressPercent));
-                    context.drawRect(fill,Color(1,1,1,0.2),backgroundSprite);
+                    context.drawRect(fill,backgroundSprite,Color(1,1,1,0.2));
                 }
                 
                 item.position.x -= slotSize.x + spacing;
@@ -122,7 +122,7 @@ class InventoryWidget : public Widget{
             
             Rect tooltip = Rect(context.getMousePosition()+vec2(3,3),vec2(40,7));
             tooltip.size.x = tooltipTextTitle->getSize(stack.item->name).x + 4.0f;
-            context.drawRect(tooltip,Color(0.05,0.05,0.05),backgroundSprite);
+            context.drawRect(tooltip,backgroundSprite,Color(0.05,0.05,0.05));
 
             tooltipTextTitle->draw(context,tooltip.position + vec2(2.0f,2.0f),stack.item->name);
         }
@@ -134,7 +134,7 @@ class InventoryWidget : public Widget{
             string text = "CRAFT " + recipe.result.item->name;
 
             tooltip.size.x = tooltipTextTitle->getSize(text).x + 4.0f;
-            context.drawRect(tooltip,Color(0.05,0.05,0.05),backgroundSprite);
+            context.drawRect(tooltip,backgroundSprite,Color(0.05,0.05,0.05));
 
             tooltipTextTitle->draw(context,tooltip.position + vec2(2.0f,2.0f),text);
         }

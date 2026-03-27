@@ -34,6 +34,9 @@ struct Rect {
     vec2 topLeft() {
         return position;
     }
+    vec2 center() {
+        return position + size * 0.5f;
+    }
 
     // static Rect corners(vec2 topLeft,vec2 bottomRight) {
 
@@ -49,6 +52,9 @@ struct Rect {
 
     static Rect centered(vec2 size) {
         return Rect(-size/2.0f,size);
+    }
+    static Rect centered(vec2 position,vec2 size) {
+        return Rect(-size/2.0f + position,size);
     }
 
     static Rect centered(float width,float height) {

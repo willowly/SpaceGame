@@ -37,14 +37,14 @@ class PickaxeTool : public Tool {
 
         const int DAMAGE_VAR = 0;
 
-        ParticleEffectActor* testEffect;
+        ParticleEffectActor* testEffect = nullptr;
 
         void pickaxe(World* world,Character& user,ItemStack& stack,Ray ray) {
             
             int damage = stack.storage.getInt(DAMAGE_VAR,0);
             auto worldHitOpt = world->raycast(ray,reach);
-            TerraformResults results; //terrain
-            std::optional<ItemStack> resultStack; //constructions :shrug:
+
+
             if(worldHitOpt) {
                 auto worldHit = worldHitOpt.value();
                 Construction* construction = dynamic_cast<Construction*>(worldHit.actor);
@@ -52,20 +52,17 @@ class PickaxeTool : public Tool {
                     vec3 placePointWorld = worldHit.hit.point - worldHit.hit.normal * 0.5f;
                     vec3 placePointLocal = construction->inverseTransformPoint(placePointWorld);
                     ivec3 placePointLocalInt = glm::round(placePointLocal);
-                    auto blockPair = construction->getBlock(placePointLocalInt);
-                    if(blockPair.first != nullptr) {
-                        resultStack = blockPair.first->getDrop(blockPair.second);
-                        // give at the end to avoid errors
-                    }
                     construction->breakBlock(world,placePointLocalInt);
                     user.shake.startShake();
                     damage++;
                 }
                 Terrain* terrain = dynamic_cast<Terrain*>(worldHit.actor);
                 if(terrain != nullptr) {
-                    results = terrain->terraformSphere(worldHit.hit.point,mineRadius,-mineAmount);
-                    // give at the end to avoid errors
-                    world->spawn(ParticleEffectActor::makeInstance(testEffect,worldHit.hit.point)); //hmm
+                    terrain->terraformSphere(world,worldHit.hit.point,mineRadius,-mineAmount);
+
+                    if(testEffect != nullptr) {
+                        world->spawn(ParticleEffectActor::makeInstance(testEffect,worldHit.hit.point)); //hmm
+                    }
 
                     user.shake.startShake();
     
@@ -76,16 +73,6 @@ class PickaxeTool : public Tool {
             stack.storage.setInt(DAMAGE_VAR,damage);
             if(damage >= durability) {
                 stack.clear();
-            }
-            
-            // good enough for now make sure these happen after, since they can invalidate stack references
-            if(resultStack) {
-                auto stack = resultStack.value();
-                user.inventory.give(stack);
-            }
-
-            for(auto& stack : results.items) {
-                user.inventory.give(stack);
             }
         }
 

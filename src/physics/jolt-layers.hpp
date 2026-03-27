@@ -18,8 +18,9 @@ namespace Layers
 	static constexpr JPH::ObjectLayer NON_MOVING = 0;
 	static constexpr JPH::ObjectLayer MOVING = 1;
 	static constexpr JPH::ObjectLayer PLAYER = 2;
-	static constexpr JPH::ObjectLayer DISABLED = 3;
-	static constexpr JPH::ObjectLayer NUM_LAYERS = 4;
+	static constexpr JPH::ObjectLayer ITEM = 3;
+	static constexpr JPH::ObjectLayer DISABLED = 4;
+	static constexpr JPH::ObjectLayer NUM_LAYERS = 5;
 };
 
 /// Class that determines if two object layers can collide
@@ -36,6 +37,8 @@ public:
 			return true; // Moving collides with everything
 		case Layers::PLAYER:
 			return true; // Moving collides with everything
+		case Layers::ITEM:
+			return true; // excluded in certain raycast testing. included in item detection in player
 		case Layers::DISABLED:
 			return false; // collides with nothing
 		default:
@@ -69,6 +72,7 @@ public:
 		mObjectToBroadPhase[Layers::NON_MOVING] = BroadPhaseLayers::NON_MOVING;
 		mObjectToBroadPhase[Layers::MOVING] = BroadPhaseLayers::MOVING;
 		mObjectToBroadPhase[Layers::PLAYER] = BroadPhaseLayers::MOVING;
+		mObjectToBroadPhase[Layers::ITEM] = BroadPhaseLayers::MOVING;
 		mObjectToBroadPhase[Layers::DISABLED] = BroadPhaseLayers::DISABLED;
 	}
 
@@ -113,6 +117,8 @@ public:
 		case Layers::PLAYER:
 			return true;
 		case Layers::MOVING:
+			return true;
+		case Layers::ITEM:
 			return true;
 		case Layers::DISABLED:
 			return false;

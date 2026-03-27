@@ -15,13 +15,25 @@ materials.furnace = {
 }
 
 materials.player = {
-    texture = "player_face"
+    texture = "solid"
 }
+
+materials.tin_ore = {
+    texture = "tin_ore"
+}
+
+materials.stone = {
+    texture = "rock"
+}
+
 -- materials.cobalt_block = {"lit","cobalt_block"}
 materials.cockpit = {"lit","cockpit"}
-materials.thruster = {"lit","solid",color(0.15,0.15,0.2)}
 
 
 materials.pickaxe = {
     texture="pickaxe_smooth"
+}
+
+materials.item_default = {
+    texture = "solid",
 }

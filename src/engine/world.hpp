@@ -32,11 +32,64 @@ using glm::vec3, glm::quat, std::unique_ptr;
 #define WORLD
 class World {
 
+    struct ContactListener : public JPH::ContactListener {
+
+        std::vector<Collision> collisions;
+        std::mutex collisionsMutex;
+
+        virtual void OnContactAdded([[maybe_unused]] const JPH::Body &inBody1, [[maybe_unused]] const JPH::Body &inBody2, [[maybe_unused]] const JPH::ContactManifold &inManifold, [[maybe_unused]] JPH::ContactSettings &ioSettings) {
+        
+            auto userDataRaw1 = inBody1.GetUserData();
+            auto userDataRaw2 = inBody2.GetUserData();
+
+            ActorUserData* userData1 = nullptr;
+            Actor* actor1 = nullptr;
+            if(userDataRaw1 != 0) {
+                userData1 = ActorUserData::decode(userDataRaw1);
+                actor1 = userData1->actor;
+            }
+
+            ActorUserData* userData2 = nullptr;
+            Actor* actor2 = nullptr;
+            if(userDataRaw2 != 0) {
+                userData2 = ActorUserData::decode(userDataRaw2);
+                actor2 = userData2->actor;
+            }
+
+            if(actor1 != nullptr && userData1->generateCollisionEvents) {
+                std::scoped_lock lock(collisionsMutex);
+                Collision collision{
+                    .actor = actor1,
+                    .body = inBody1.GetID(),
+                    .otherActor = actor2,
+                    .otherBody = inBody2.GetID(),
+                    .inManifold = inManifold,
+                };
+                collisions.push_back(collision);
+            }
+
+            if(actor2 != nullptr && userData2->generateCollisionEvents) {
+                std::scoped_lock lock(collisionsMutex);
+                Collision collision{
+                    .actor = actor2,
+                    .body = inBody2.GetID(),
+                    .otherActor = actor1,
+                    .otherBody = inBody1.GetID(),
+                    .inManifold = inManifold,
+                };
+                collisions.push_back(collision);
+            }
+        
+        }
+    };
+
     vector<unique_ptr<Actor>> actors;
     vector<unique_ptr<Actor>> spawnedActors; //for when we spawn in the step
     vec3 constantGravity = vec3(0,-15,0);
 
     Camera camera;
+
+    ContactListener contactListener;
 
     float sinceLastStep = 0;
 
@@ -85,6 +138,8 @@ class World {
             // Note: This value is low because this is a simple test. For a real project use something in the order of 10240.
             const JPH::uint cMaxContactConstraints = 10240;
 
+            physics_system.SetContactListener(&contactListener);
+
             physics_system.Init(cMaxBodies, cNumBodyMutexes, cMaxBodyPairs, cMaxContactConstraints, broad_phase_layer_interface, object_vs_broadphase_layer_filter, object_vs_object_layer_filter);
 
 
@@ -95,10 +150,10 @@ class World {
 
     public:
 
-        // for now
+        
         JPH::PhysicsSystem physics_system;
 
-        // not sure how to solve this one :)
+        // Global resources. Idk what to do about this tbh
         Material constructionMaterial = Material::none;
 
         float stepDt = 1.0f/60.0f;
@@ -196,6 +251,12 @@ class World {
                 }
                 iteratingActors--;
             }
+
+            for (auto& collision : contactListener.collisions)
+            {
+                collision.actor->collisionStart(this,collision);
+            }
+            contactListener.collisions.clear();
         }
 
         void step(float dt) {
@@ -229,6 +290,26 @@ class World {
 
         void applyGravityIfEnabled(Actor* actor,float dt) {
             //if(actor->useGravity) actor->velocity += getGravityVector(actor->position) * dt;
+        }
+
+        std::vector<Actor*> overlapSphere(vec3 pos,float radius) {
+            // JPH::ShapeCast shapecast();
+            // JPH::SphereShape shape(radius);
+            // physics_system.GetNarrowPhaseQuery().CollideShape(&shape,JPH::Vec3(1.0f,1.0f,1.0f),)
+
+            std::vector<Actor*> results;
+
+            iteratingActors++;
+            for (auto& actor : actors)
+            {
+                if(glm::length2(actor->getPosition() - pos) < radius*radius) {
+                    results.push_back(actor.get());
+                }
+            }
+            iteratingActors--;
+
+            return results;
+            
         }
 
         std::optional<WorldRaycastHit> raycast(Ray ray,float dist) {
