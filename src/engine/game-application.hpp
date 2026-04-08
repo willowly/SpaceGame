@@ -71,7 +71,7 @@ class GameApplication {
 
             setup();
 
-            terrainLoader.start();
+            //terrainLoader.start();
             //terrain->loadChunks(&world,player->getPosition(),2,vulkan);
             
 
@@ -84,7 +84,7 @@ class GameApplication {
             }
 
             
-            terrainLoader.stop();
+            //terrainLoader.stop();
             vulkan->waitIdle();
 
         }
