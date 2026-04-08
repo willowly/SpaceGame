@@ -23,4 +23,4 @@ widgets.recipe_slot = {
 
 
 
-widgets.text_default = {type = "text"}
+widgets.text_default = {type = "text",height = 20,spacing = 2}

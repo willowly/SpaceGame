@@ -20,6 +20,7 @@
 #include "sol/sol.hpp"
 #include "interface/interface.hpp"
 #include "helper/clock.hpp"
+#include "terrain-loader.hpp"
 #include <thread>
 #include <chrono>
 
@@ -40,6 +41,7 @@
 JPH_SUPPRESS_WARNINGS
 
 using std::string;
+using std::unique_ptr, std::shared_ptr;
 
 
 class GameApplication {
@@ -67,11 +69,9 @@ class GameApplication {
         uint32_t windowHeight = 720;
         void run() {
 
-            std::cout << "main thread id:" << std::this_thread::get_id() << std::endl;
-
             setup();
 
-            std::thread thread(&GameApplication::chunkTask,this);
+            terrainLoader.start();
             //terrain->loadChunks(&world,player->getPosition(),2,vulkan);
             
 
@@ -84,9 +84,7 @@ class GameApplication {
             }
 
             
-            
-            closing = true;
-            thread.join();
+            terrainLoader.stop();
             vulkan->waitIdle();
 
         }
@@ -97,6 +95,7 @@ class GameApplication {
 
         World world;
         
+        std::vector<std::thread> chunkWorkers;
 
         Registry registry;
 
@@ -109,13 +108,11 @@ class GameApplication {
         Vulkan* vulkan;
 
         Input input;
-        
-        Camera camera;
 
         std::vector<float> frameTimes;
 
-        Character* player;
-        Terrain* terrain;
+        std::shared_ptr<Character> player;
+        std::shared_ptr<Terrain> terrain;
 
         Interface interface;
 
@@ -129,6 +126,8 @@ class GameApplication {
 
         Font font;
 
+        TerrainLoader terrainLoader;
+
 
         Material terrainMaterial = Material::none;
         Material terrainMaterialDebug = Material::none;
@@ -138,11 +137,14 @@ class GameApplication {
         Recipe makeFurnace = Recipe(ItemStack(registry.getItem("furnace_item"),1));
         Recipe makeThruster = Recipe(ItemStack(registry.getItem("thruster"),1));
         Recipe makeCockpit = Recipe(ItemStack(registry.getItem("cockpit"),1));
+        Recipe makePickaxe = Recipe(ItemStack(registry.getItem("pickaxe"),1));
 
         Skybox skybox;
 
         std::atomic<bool> closing = false;
         std::atomic<bool> chunkLoadPaused = false;
+
+        GenerationSettings generationSettings;
 
         float frametimes[60];
         int currentFrameTimeIndex = 0;
@@ -273,15 +275,34 @@ class GameApplication {
 
             world.constructionMaterial = vulkan->createMaterial<LitMaterialData,ConstructionVertex>("construction",LitMaterialData(registry.getTexture("rock")));
             
-            GenerationSettings settings;
-            settings.noiseScale = 100;
-            settings.radius = 50;
-            settings.stoneType.item = registry.getItem("stone");
-            settings.stoneType.texture = registry.getTexture("rock");
-            settings.oreType.item = registry.getItem("tin_ore");
-            settings.oreType.texture = registry.getTexture("tin_ore");
+            generationSettings.noiseScale = 1;
+            generationSettings.radius = 40;
+            generationSettings.noiseFactor = 15;
+            generationSettings.noiseOctaves = 5;
+            generationSettings.noiseGain = 0.3f;
+            generationSettings.noiseLacunarity = 2.5f;
+            generationSettings.stoneType.item = registry.getItem("stone");
+            generationSettings.stoneType.texture = registry.getTexture("rock");
+            generationSettings.oreType.item = registry.getItem("tin_ore");
+            generationSettings.oreType.texture = registry.getTexture("tin_ore");
 
-            terrain = world.spawn(Terrain::makeInstance(terrainMaterial,settings,vec3(0,0,0)));
+
+            std::minstd_rand rnd;
+
+            rnd.seed(0);
+
+            for (size_t i = 0; i < 10; i++)
+            {
+                std::uniform_real_distribution<> dist(-3000, 3000);
+                vec3 postion = vec3(dist(rnd),dist(rnd),dist(rnd));
+                std::cout << "spawning terrain at position " << StringHelper::toString(postion) << std::endl;
+                auto terrain = world.spawn(Terrain::makeInstance(terrainMaterial,generationSettings,rnd(),postion));
+                terrainLoader.addTerrain(terrain);
+            }
+
+            auto terrain = world.spawn(Terrain::makeInstance(terrainMaterial,generationSettings,rnd(),vec3(0,0,0)));
+            terrainLoader.addTerrain(terrain);
+        
 
             // world.spawn(Actor::makeInstance(registry.getActor("cube"),vec3(0,3,0)));
 
@@ -303,7 +324,7 @@ class GameApplication {
             makeFurnace.result = ItemStack(registry.getItem("furnace"),1);
 
             makeFurnace.ingredients.push_back(ItemStack(registry.getItem("stone"),10));
-            makeFurnace.time = 3;
+            makeFurnace.time = 1;
 
             makeThruster.result = ItemStack(registry.getItem("thruster"),1);
 
@@ -313,7 +334,11 @@ class GameApplication {
             makeCockpit.result = ItemStack(registry.getItem("cockpit"),1);
 
             makeCockpit.ingredients.push_back(ItemStack(registry.getItem("tin_plate"),3));
-            makeCockpit.time = 5;
+            makeCockpit.time = 3;
+
+            makePickaxe.ingredients.push_back(ItemStack(registry.getItem("stone"),3));
+            makePickaxe.time = 2;
+            makePickaxe.result = ItemStack(registry.getItem("pickaxe"),1);
             
             // spawn player
             player = world.spawn(Character::makeInstance(playerPrototype.get(),vec3(50,0,0)));
@@ -369,6 +394,7 @@ class GameApplication {
             player->recipes.push_back(&makeFurnace);
             player->recipes.push_back(&makeCockpit);
             player->recipes.push_back(&makeThruster);
+            player->recipes.push_back(&makePickaxe);
             
             FurnaceBlock* furnace = static_cast<FurnaceBlock*>(registry.getBlock("furnace"));
             furnace->recipes.push_back(&makeAluminumPlate);
@@ -453,11 +479,28 @@ class GameApplication {
                     ImGui::Text(line.c_str());
                 }
             ImGui::End();
+
+            ImGui::Begin("Generation");
+
+                ImGui::InputFloat("Radius",&generationSettings.radius);
+                ImGui::InputFloat("Noise Scale",&generationSettings.noiseScale);
+                ImGui::InputFloat("Noise Factor",&generationSettings.noiseFactor);
+                ImGui::InputInt("Noise Octaves",&generationSettings.noiseOctaves);
+                ImGui::InputFloat("Noise Gain",&generationSettings.noiseGain);
+                ImGui::InputFloat("Noise Lacunarity",&generationSettings.noiseLacunarity);
+                if(ImGui::Button("Regenerate")) {
+                    // terrainLoader.stop();
+                    // terrain->destroy(&world);
+                    // terrain = world.spawn(Terrain::makeInstance(terrainMaterial,generationSettings,vec3(0,0,0)));
+                    // closing = false;
+                    // terrainLoader.start();
+                }
+            ImGui::End();
         }
 
         void loop() 
         {
-
+            auto& camera = world.getCamera();
             //ZoneScoped;
 
             // Get inputs, window resize, and more
@@ -476,6 +519,8 @@ class GameApplication {
             // test inputs
             //camera.rotate(vec3(mouseDelta.y * dt,mouseDelta.x * dt,0));
             camera.rotate(vec3(0,dt*-10,0));
+
+            terrainLoader.setCameraPosition(camera.position);
 
             player->setCamera(camera);
             player->processInput(input);
@@ -551,16 +596,16 @@ class GameApplication {
             if(input.getKeyPressed(GLFW_KEY_F2)) {
                 world.pausePhysics = !world.pausePhysics;
             }
-            if(input.getKeyPressed(GLFW_KEY_RIGHT)) {
-                world.stepPhysics = true;
-            }
 
             // auto hit = Physics::intersectCapsuleBox(player->position,player->getEyePosition(),player->radius,vec3(0),vec3(0.5f));
             // if(hit) {
             //     Physics::resolveBasic(player->position,hit.value());
             // }
             if(input.getKeyPressed(GLFW_KEY_RIGHT)) {
-                chunkLoadPaused = false;
+                terrain->changeLOD(1);
+            }
+            if(input.getKeyPressed(GLFW_KEY_LEFT)) {
+                terrain->changeLOD(-1);
             }
             
 
@@ -583,17 +628,6 @@ class GameApplication {
             //FrameMark;
             
 
-        }
-
-        void chunkTask() {
-            while(!closing) {
-                if(!chunkLoadPaused) {
-                    terrain->loadNextChunk(&world,player->getPosition(),5,vulkan);
-                }
-                //std::cout << "loading chunks" << std::endl;
-                //std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            }
-            
         }
 
         

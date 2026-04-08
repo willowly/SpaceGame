@@ -114,7 +114,7 @@ class Character : public Actor {
         Recipe* currentRecipe = nullptr;
         float recipeTimer; //
 
-        bool underGravity = true;
+        bool underGravity = false;
 
         Character(const Character& character) {
             moveSpeed = character.moveSpeed;
@@ -379,6 +379,15 @@ class Character : public Actor {
             if(input.getKey(GLFW_KEY_E)) {
                 rotationInput += 1;
             }
+
+            // if(input.getKeyPressed(GLFW_KEY_F2)) {
+            //     moveSpeed *= 0.2f;
+            //     std::cout << "Move speed set to: " << moveSpeed << std::endl;
+            // }
+            // if(input.getKeyPressed(GLFW_KEY_F3)) {
+            //     moveSpeed *= 5.0f;
+            //     std::cout << "Move speed set to: " << moveSpeed << std::endl;
+            // }
 
             if(input.getKeyPressed(GLFW_KEY_F)) {
                 interactInput = true;

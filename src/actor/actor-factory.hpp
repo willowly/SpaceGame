@@ -42,7 +42,7 @@ template<>
 std::unique_ptr<Construction> ActorFactory::make(vec3 position,quat rotation) {
 
     auto newActor = std::make_unique<Construction>();
-    newActor->position = position;
+    newActor->cameraPositionRelative = position;
     newActor->rotation = rotation;
     return newActor;
 }

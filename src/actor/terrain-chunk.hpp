@@ -16,6 +16,8 @@
 #include <physics/jolt-terrain-shape.hpp>
 #include <physics/jolt-userdata.hpp>
 
+#include "FastNoiseLite.h"
+
 
 #define SURFACE_LVL 0.5
 
@@ -38,6 +40,8 @@ class TerrainChunk {
     int size = 30;
     float cellSize = 0.5f;
 
+    unsigned int seed;
+
     std::mutex mtx;
     std::atomic<bool> readyToRender = false;
 
@@ -55,14 +59,14 @@ class TerrainChunk {
         return x + y * size + z * size * size;
     }
 
-    float getPoint(int x,int y,int z) {
+    float getPointUnsafe(int x,int y,int z) {
 
         if(x < 0) {
             x = 0;
         }
         if(x >= size) {
             if(posX != nullptr) {
-                return posX->getPoint(x - size,y,z);
+                return posX->getPointUnsafe(x - size,y,z);
             } else {
                 x = size-1;
             }
@@ -73,7 +77,7 @@ class TerrainChunk {
         }
         if(y >= size) {
             if(posY != nullptr) {
-                return posY->getPoint(x,y - size,z);
+                return posY->getPointUnsafe(x,y - size,z);
             } else {
                 y = size-1;
             }
@@ -84,7 +88,7 @@ class TerrainChunk {
         }
         if(z >= size) {
             if(posZ != nullptr) {
-                return posZ->getPoint(x,y,z - size);
+                return posZ->getPointUnsafe(x,y,z - size);
             } else {
                 z = size-1;
             }
@@ -95,9 +99,9 @@ class TerrainChunk {
         return terrainData[x + y * size + z * size * size].amount;
     }
 
-    bool getPointInside(int x,int y,int z) {
+    bool getPointInsideUnsafe(int x,int y,int z) {
         
-        return getPoint(x,y,z) > SURFACE_LVL;
+        return getPointUnsafe(x,y,z) > SURFACE_LVL;
     }
 
     vec3 getCellLocalPos(ivec3 cell) {
@@ -122,7 +126,7 @@ class TerrainChunk {
 
     public:
 
-        TerrainChunk(ivec3 offset,int chunkSize,float cellSize,unsigned int id) : offset(offset), size(chunkSize), cellSize(cellSize), id(id) {
+        TerrainChunk(ivec3 offset,int chunkSize,float cellSize,unsigned int id,unsigned int seed) : offset(offset), size(chunkSize), cellSize(cellSize), id(id) {
 
             for (auto& buffer : meshBuffer)
             {
@@ -135,14 +139,27 @@ class TerrainChunk {
             return id;
         }
 
-        void generateData(GenerationSettings settings) {
+        void generateData(GenerationSettings settings,int layer) {
 
             std::scoped_lock lock(mtx);
             terrainTypes[0] = settings.stoneType;
             terrainTypes[1] = settings.oreType;
             terrainData.resize(size*size*size);
 
-            const SimplexNoise simplex;
+
+            Clock clock;
+
+            FastNoiseLite noise;
+            noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+            noise.SetFractalType(FastNoiseLite::FractalType_FBm);
+            noise.SetFractalOctaves(settings.noiseOctaves);
+            noise.SetFractalGain(settings.noiseGain);
+            noise.SetFractalLacunarity(settings.noiseLacunarity);
+            noise.SetSeed(seed);
+
+            //const SimplexNoise noise;
+
+            // Gather noise data
 
             int i = 0;
             for (int z = 0; z < size; z++)
@@ -157,28 +174,31 @@ class TerrainChunk {
                         vec3 samplePos = vec3(x,y,z);
                         samplePos += offset;
                         samplePos *= cellSize;
-                        vec3 noiseSamplePos = samplePos / settings.noiseScale;
-                        float noise = simplex.fractal(5,noiseSamplePos.x,noiseSamplePos.y,noiseSamplePos.z);
-                        noise *= 0.5f;
-                        noise += 0.5f;
+                        vec3 noiseSamplePos = samplePos * settings.noiseScale;
+                        float noiseValue = noise.GetNoise(noiseSamplePos.x,noiseSamplePos.y,noiseSamplePos.z);
+                        //float noiseValue = noise.fractal(5,noiseSamplePos.x,noiseSamplePos.y,noiseSamplePos.z);
 
 
                         float distance = glm::length(samplePos);
-                        terrainData[i].amount = (settings.radius-distance) + (noise * 0);
+                        terrainData[i].amount = (settings.radius-distance) + (noiseValue * settings.noiseFactor);
                         i++;
                     }
                 }
             }
 
-            generateOre(1,30,0.5,offset);
+            
+            generateOre(1,5,0.7f,offset);
+            //std::cout << "generation time:" << clock.getTime() << std::endl;
             meshOutOfDate = true;
             // generateOre(2,60,0.4,offset,chunk);
         }
 
         void generateOre(int id,float scale,float surfaceLevel,vec3 offset) {
-            const SimplexNoise simplex;
-
-
+            FastNoiseLite noise;
+            noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+            noise.SetFractalType(FastNoiseLite::FractalType_FBm);
+            noise.SetFractalOctaves(2);
+            noise.SetSeed(seed);
             int i = 0;
             for (int z = 0; z < size; z++)
             {
@@ -190,9 +210,10 @@ class TerrainChunk {
                     {
                         vec3 samplePos = vec3(x,y,z);
                         samplePos += offset;
-                        samplePos /= scale;
+                        samplePos *= scale;
+                        samplePos *= cellSize;
                         samplePos += vec3(size*id);
-                        float oreNoise = simplex.fractal(5,samplePos.x,samplePos.y,samplePos.z);
+                        float oreNoise = noise.GetNoise(samplePos.x,samplePos.y,samplePos.z);
                         if(oreNoise > surfaceLevel) {
                             terrainData[i].type = id;
                         }
@@ -384,15 +405,15 @@ class TerrainChunk {
                     for (int x = 0; x < size; x++)
                     {
                         int config = 0;
-                        if(getPointInside(x,y,z)) config |= 1;
-                        if(getPointInside(x+1,y,z)) config |= 2;
-                        if(getPointInside(x+1,y,z+1)) config |= 4;
-                        if(getPointInside(x,y,z+1)) config |= 8;
-                        if(getPointInside(x,y+1,z)) config |= 16;
-                        if(getPointInside(x+1,y+1,z)) config |= 32;
-                        if(getPointInside(x+1,y+1,z+1)) config |= 64;
-                        if(getPointInside(x,y+1,z+1)) config |= 128;
-                        addCellNoLock(config,vec3(x,y,z));
+                        if(getPointInsideUnsafe(x,y,z)) config |= 1;
+                        if(getPointInsideUnsafe(x+1,y,z)) config |= 2;
+                        if(getPointInsideUnsafe(x+1,y,z+1)) config |= 4;
+                        if(getPointInsideUnsafe(x,y,z+1)) config |= 8;
+                        if(getPointInsideUnsafe(x,y+1,z)) config |= 16;
+                        if(getPointInsideUnsafe(x+1,y+1,z)) config |= 32;
+                        if(getPointInsideUnsafe(x+1,y+1,z+1)) config |= 64;
+                        if(getPointInsideUnsafe(x,y+1,z+1)) config |= 128;
+                        addCellUnsafe(config,vec3(x,y,z));
                         i++;
                     }
                 }
@@ -445,7 +466,7 @@ class TerrainChunk {
             }
         }
 
-        void addCellNoLock(int config,vec3 cellPos) {
+        void addCellUnsafe(int config,vec3 cellPos) {
             if(config < 0) {
                 std::cout << "out of range " << config << std::endl;
                 return;
@@ -468,8 +489,8 @@ class TerrainChunk {
                 if(edge == -1) break;
                 vec3 aPos = getEdgePos(edge,0)+cellPos;
                 vec3 bPos = getEdgePos(edge,1)+cellPos;
-                float a = getPoint((int)aPos.x,(int)aPos.y,(int)aPos.z);
-                float b = getPoint((int)bPos.x,(int)bPos.y,(int)bPos.z);
+                float a = getPointUnsafe((int)aPos.x,(int)aPos.y,(int)aPos.z);
+                float b = getPointUnsafe((int)bPos.x,(int)bPos.y,(int)bPos.z);
                 
                 
                 

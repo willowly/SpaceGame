@@ -5,12 +5,12 @@ set(OUTPUT_DIR ${OUTPUT_DIR}/bin)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
-if(WIN32)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /bigobj")
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /bigobj /fsanitize=thread")
 endif()
 
-if(APPLE)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -fsanitize=address -Wall -Wextra -Werror=return-type -pedantic -Wno-unused-parameter")
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -fsanitize=thread -Wall -Wextra -Werror=return-type -pedantic -Wno-unused-parameter")
 endif()
 
 
@@ -64,7 +64,6 @@ include_directories(${FREETYPE_INCLUDE_DIR})
 
 
 add_library(STB "include/stb_image.cpp")
-add_library(SIMPLEXNOISE "include/SimplexNoise.cpp")
 # fucking glob wont work kms
 add_library(Lua "include/lua/src/lapi.c" "include/lua/src/lauxlib.c" "include/lua/src/lbaselib.c" "include/lua/src/lcode.c" "include/lua/src/lcorolib.c" "include/lua/src/lctype.c" "include/lua/src/ldblib.c" "include/lua/src/ldebug.c" "include/lua/src/ldo.c" "include/lua/src/ldump.c" "include/lua/src/lfunc.c" "include/lua/src/lgc.c" "include/lua/src/linit.c" "include/lua/src/liolib.c" "include/lua/src/llex.c" "include/lua/src/lmathlib.c" "include/lua/src/lmem.c" "include/lua/src/loadlib.c" "include/lua/src/lobject.c" "include/lua/src/lopcodes.c" "include/lua/src/loslib.c" "include/lua/src/lparser.c" "include/lua/src/lstate.c" "include/lua/src/lstring.c" "include/lua/src/lstrlib.c" "include/lua/src/ltable.c" "include/lua/src/ltablib.c" "include/lua/src/ltm.c" "include/lua/src/lua.c" "include/lua/src/luac.c" "include/lua/src/lundump.c" "include/lua/src/lutf8lib.c" "include/lua/src/lvm.c" "include/lua/src/lzio.c")
 include_directories("include/lua/src")
@@ -124,7 +123,7 @@ include/imgui/backends/imgui_impl_glfw.cpp
 )
 
 
-list(APPEND LINKED_LIBRARIES Lua glfw STB SIMPLEXNOISE Vulkan::Headers Jolt)
+list(APPEND LINKED_LIBRARIES Lua glfw STB Vulkan::Headers Jolt)
 if(OSX)
     list(APPEND LINKED_LIBRARIES ${COCOA_LIBRARY} ${IOKIT_LIBRARY})
 endif(OSX)

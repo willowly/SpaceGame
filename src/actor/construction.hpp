@@ -636,7 +636,7 @@ class Construction : public Actor {
                                     constructions[blockGroup-1] = this;
                                     continue;
                                 } else {
-                                    constructions[blockGroup-1] = world->spawn(Construction::makeInstance(material,worldLocation,rotation,isStatic));
+                                    constructions[blockGroup-1] = world->spawn(Construction::makeInstance(material,worldLocation,rotation,isStatic)).get();
                                     constructions[blockGroup-1]->velocity = velocity; //match velocities
                                 }
                             }

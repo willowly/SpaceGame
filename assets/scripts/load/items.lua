@@ -65,6 +65,7 @@ items.pickaxe = {
     model = "pickaxe",
     material = "pickaxe",
     durability = 300,
+    mine_amount = 5,
     offset = vec3(0.2,-0.4,-0.5),
     rotation = quat(-5,90,-5)
 }

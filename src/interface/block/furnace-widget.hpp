@@ -16,9 +16,9 @@ class FurnaceWidget : public BlockWidget<FurnaceBlock> {
     public:
         Sprite solid;
         Font* font;
-        vec2 size = vec2(80,20);
+        vec2 size = vec2(380,80);
         float padding = 3;
-        vec2 slotSize = vec2(10,10);
+        vec2 slotSize = vec2(60,60);
         float spacing = 2;
 
         ItemSlotWidget* itemSlot;
@@ -57,7 +57,7 @@ class FurnaceWidget : public BlockWidget<FurnaceBlock> {
                 }
             }
 
-            auto barRect = Rect::withPivot(slotRect.topRight()+vec2(15-slotRect.size.x*0.5f,slotRect.size.y*0.5f),vec2(15.0-slotRect.size.x*0.5f,3.0),vec2(0.5f));
+            auto barRect = Rect::withPivot(slotRect.topRight()+vec2(60-slotRect.size.x*0.5f,slotRect.size.y*0.5f),vec2(80.0-slotRect.size.x*0.5f,20.0),vec2(0.5f));
 
             context.drawRect(barRect,solid,slots);
 
@@ -68,7 +68,7 @@ class FurnaceWidget : public BlockWidget<FurnaceBlock> {
                 context.drawRect(barRect,solid,Color::red);
             }
 
-            slotRect.position += vec2(30,0);
+            slotRect.position += vec2(120,0);
             if(itemSlot->draw(context,slotRect,outputStack)) {
                 selectedSlot = &outputStack;
                 ItemSlotInteractOptions options;

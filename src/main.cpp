@@ -7,6 +7,8 @@
 #include "shaderc/shaderc.h"
 
 int main() {
+
+    std::cout << "Current loader path is: " << std::filesystem::current_path() << '\n';
     
     GameApplication game("Super Space Miner 2000");
 

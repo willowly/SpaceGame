@@ -16,7 +16,7 @@ class PlayerWidget : public ActorWidget<Character> {
         InventoryWidget* inventoryWidget;
         ToolbarWidget* toolbarWidget;
         ItemSlotWidget* cursorSlotWidget;
-        vec2 cursorSlotSize = vec2(10,10);
+        vec2 cursorSlotSize = vec2(60,60);
 
 
     virtual void draw(DrawContext context,Character& player) {

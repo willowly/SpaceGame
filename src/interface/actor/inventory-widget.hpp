@@ -13,9 +13,9 @@ class InventoryWidget : public Widget{
     public:
         Sprite backgroundSprite;
         Font* font;
-        vec2 size = vec2(150,40);
+        vec2 size = vec2(550,200);
         float padding = 3;
-        vec2 slotSize = vec2(10,10);
+        vec2 slotSize = vec2(60,60);
         float spacing = 2;
 
         ItemSlotWidget* itemSlot;
@@ -120,7 +120,7 @@ class InventoryWidget : public Widget{
 
         void drawTooltip(DrawContext context,ItemStack& stack) {
             
-            Rect tooltip = Rect(context.getMousePosition()+vec2(3,3),vec2(40,7));
+            Rect tooltip = Rect(context.getMousePosition()+vec2(3,3),vec2(70,25));
             tooltip.size.x = tooltipTextTitle->getSize(stack.item->name).x + 4.0f;
             context.drawRect(tooltip,backgroundSprite,Color(0.05,0.05,0.05));
 
@@ -129,7 +129,7 @@ class InventoryWidget : public Widget{
 
         void drawTooltip(DrawContext context,Recipe& recipe) {
             
-            Rect tooltip = Rect(context.getMousePosition()+vec2(3,3),vec2(40,7));
+            Rect tooltip = Rect(context.getMousePosition()+vec2(3,3),vec2(70,25));
 
             string text = "CRAFT " + recipe.result.item->name;
 

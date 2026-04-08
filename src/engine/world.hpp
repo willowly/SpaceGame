@@ -27,7 +27,9 @@
 #include "physics/jolt-terrain-shape.hpp"
 #include "physics/jolt-userdata.hpp"
 
-using glm::vec3, glm::quat, std::unique_ptr;
+class TerrainLoader;
+
+using glm::vec3, glm::quat, std::unique_ptr, std::shared_ptr;
 
 #define WORLD
 class World {
@@ -83,11 +85,13 @@ class World {
         }
     };
 
-    vector<unique_ptr<Actor>> actors;
-    vector<unique_ptr<Actor>> spawnedActors; //for when we spawn in the step
+    vector<shared_ptr<Actor>> actors;
+    vector<shared_ptr<Actor>> spawnedActors; //for when we spawn in the step
     vec3 constantGravity = vec3(0,-15,0);
 
     Camera camera;
+
+    TerrainLoader* terrainLoader;
 
     ContactListener contactListener;
 
@@ -174,17 +178,18 @@ class World {
         }
 
         template<typename T>
-        T* spawn(unique_ptr<T> spawned) {
-            T* rawSpawned = spawned.get();
+        shared_ptr<T> spawn(unique_ptr<T> spawned) {
+
+            shared_ptr<T> shared = std::move(spawned);
             if(iteratingActors > 0) {
-                spawnedActors.push_back(std::move(spawned));
+                spawnedActors.push_back(shared);
             } else {
-                actors.push_back(std::move(spawned));
+                actors.push_back(shared);
             }
 
-            rawSpawned->spawn(this); // do actor specific spawning code
+            shared->spawn(this); // do actor specific spawning code
 
-            return rawSpawned;
+            return shared;
         }
 
         vec3 getGravityVector(vec3 position) {
