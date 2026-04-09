@@ -71,7 +71,7 @@ class GameApplication {
 
             setup();
 
-            //terrainLoader.start();
+            terrainLoader.start();
             //terrain->loadChunks(&world,player->getPosition(),2,vulkan);
             
 
@@ -84,7 +84,7 @@ class GameApplication {
             }
 
             
-            //terrainLoader.stop();
+            terrainLoader.stop();
             vulkan->waitIdle();
 
         }
@@ -191,7 +191,11 @@ class GameApplication {
         {
             auto app = reinterpret_cast<GameApplication*>(glfwGetWindowUserPointer(window));
             auto& input = app->input;
-            input.currentMousePosition = vec2(xposIn,yposIn);
+            #if __APPLE__
+                input.currentMousePosition = vec2(xposIn,yposIn)* 2.0f; //retina bs. Doesn't actually detect retina so itll probably not work on macs that have no retina
+            #else
+                input.currentMousePosition = vec2(xposIn,yposIn);
+            #endif
         }
 
         static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)

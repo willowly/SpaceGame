@@ -1603,7 +1603,11 @@ class Vulkan {
             
             ubo.screen = glm::ortho(0.0f,screenSize.x,0.0f,screenSize.y);
 
-            memcpy(uniformBuffers[currentFrame].allocationInfo.pMappedData, &ubo, sizeof(ubo)); //uniform buffer is always mapped
+            #if __APPLE__
+                vmaCopyMemoryToAllocation(allocator, &ubo, uniformBuffers[currentFrame].allocation,0,sizeof(ubo));
+            #else
+                memcpy(uniformBuffers[currentFrame].allocationInfo.pMappedData, &ubo, sizeof(ubo)); //uniform buffer is always mapped
+            #endif
 
             // the shadow pass has its own UBO
             SceneDataBufferObject shadowUBO{};
@@ -1628,7 +1632,11 @@ class Vulkan {
 
             shadowUBO.mainLightColor = vec3(7.0f,9.0f,3.0f);
 
-            memcpy(uniformBuffers[currentFrame+FRAMES_IN_FLIGHT].allocationInfo.pMappedData, &shadowUBO, sizeof(shadowUBO));
+            #if __APPLE__
+                vmaCopyMemoryToAllocation(allocator, &shadowUBO, uniformBuffers[currentFrame+FRAMES_IN_FLIGHT].allocation,0,sizeof(shadowUBO));
+            #else
+                memcpy(uniformBuffers[currentFrame+FRAMES_IN_FLIGHT].allocationInfo.pMappedData, &shadowUBO, sizeof(shadowUBO));
+            #endif
 
         }
 

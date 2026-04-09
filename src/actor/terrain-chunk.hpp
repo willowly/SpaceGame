@@ -1,5 +1,6 @@
 #include "helper/terrain-helper.hpp"
 #include "graphics/mesh.hpp"
+#include <shared_mutex>
 #include <vector>
 #include "glm/glm.hpp"
 #include "item/item.hpp"
@@ -42,7 +43,7 @@ class TerrainChunk {
 
     unsigned int seed;
 
-    std::mutex mtx;
+    std::shared_mutex mtx;
     std::atomic<bool> readyToRender = false;
 
     JPH::Body* body = nullptr;
@@ -59,6 +60,12 @@ class TerrainChunk {
         return x + y * size + z * size * size;
     }
 
+    float getPoint(int x,int y,int z) {
+
+        std::shared_lock lock(mtx);
+        return getPointUnsafe(x,y,z);
+    }
+
     float getPointUnsafe(int x,int y,int z) {
 
         if(x < 0) {
@@ -66,7 +73,7 @@ class TerrainChunk {
         }
         if(x >= size) {
             if(posX != nullptr) {
-                return posX->getPointUnsafe(x - size,y,z);
+                return posX->getPoint(x - size,y,z);
             } else {
                 x = size-1;
             }
@@ -77,7 +84,7 @@ class TerrainChunk {
         }
         if(y >= size) {
             if(posY != nullptr) {
-                return posY->getPointUnsafe(x,y - size,z);
+                return posY->getPoint(x,y - size,z);
             } else {
                 y = size-1;
             }
@@ -88,7 +95,7 @@ class TerrainChunk {
         }
         if(z >= size) {
             if(posZ != nullptr) {
-                return posZ->getPointUnsafe(x,y,z - size);
+                return posZ->getPoint(x,y,z - size);
             } else {
                 z = size-1;
             }
@@ -141,7 +148,7 @@ class TerrainChunk {
 
         void generateData(GenerationSettings settings,int layer) {
 
-            std::scoped_lock lock(mtx);
+            std::unique_lock lock(mtx);
             terrainTypes[0] = settings.stoneType;
             terrainTypes[1] = settings.oreType;
             terrainData.resize(size*size*size);
@@ -227,7 +234,7 @@ class TerrainChunk {
         void terraformSphere(vec3 pos,float radius,float change,TerraformResults& results) {
 
 
-            std::scoped_lock lock(mtx);
+            std::unique_lock lock(mtx);
             
             auto posCellSpace = localToCellPos(pos);
             auto radiusCellSpace = radius/cellSize;
@@ -328,7 +335,7 @@ class TerrainChunk {
 
         void addRenderables(Vulkan* vulkan,float dt,vec3 position,Material material) {
             if(!readyToRender) return;
-            std::unique_lock lock(mtx,std::defer_lock);
+            std::shared_lock lock(mtx,std::defer_lock);
             
             if(lock.try_lock()) {
                 if(meshState == -1) {
@@ -387,7 +394,7 @@ class TerrainChunk {
                 return;
             }
             
-            std::scoped_lock lock(mtx);
+            std::unique_lock lock(mtx);
             
             float clock = (float)glfwGetTime();
             meshData.vertices.clear();
@@ -574,7 +581,7 @@ class TerrainChunk {
 
         void connectPosX(TerrainChunk* chunk) {
 
-            std::scoped_lock lock(mtx);
+            std::unique_lock lock(mtx);
 
             if(posX != chunk) {
                 posX = chunk;
@@ -585,7 +592,7 @@ class TerrainChunk {
 
         void connectPosZ(TerrainChunk* chunk) {
 
-            std::scoped_lock lock(mtx);
+            std::unique_lock lock(mtx);
 
             if(posZ != chunk) {
                 posZ = chunk;
@@ -596,7 +603,7 @@ class TerrainChunk {
 
         void connectPosY(TerrainChunk* chunk) {
 
-            std::scoped_lock lock(mtx);
+            std::unique_lock lock(mtx);
             
             if(posY != chunk) {
                 posY = chunk;
