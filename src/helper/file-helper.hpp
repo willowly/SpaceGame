@@ -38,6 +38,31 @@ namespace FileHelper {
 
     }
 
+    void writeBinary(string path,std::vector<std::uint8_t> buffer) {
+        std::ofstream file(path, std::ios::binary); //ate is for starting at the end
+
+        if (!file.is_open()) {
+            std::cout << "[WARNING] failed to open file at path " << path << std::endl;
+            if (file.bad()) {
+                std::cout << "Fatal error: badbit is set." << std::endl;
+            }
+
+            if (file.fail()) {
+                // Print a more detailed error message using
+                // strerror
+                std::cout << "Error details: " << strerror(errno)
+                    << std::endl;
+            }
+            return;
+        }
+        
+        file.seekp(0); //go back to the start
+        file.write((char *)buffer.data(), buffer.size()); //read as normal
+
+        file.close();
+
+    }
+
     string readToString(string path) {
 
         string text;

@@ -10,6 +10,7 @@
 #include <api/api-registry-actor.hpp>
 #include <api/api-registry-block.hpp>
 #include <api/api-registry-item.hpp>
+#include <api/api-registry-recipe.hpp>
 #include <api/api-registry-particle-effect.hpp>
 #include <api/api-registry-widget.hpp>
 
@@ -48,6 +49,11 @@ namespace API {
 
         itemRegistry["__index"] = &ItemRegistry::index;
         itemRegistry["__newindex"] = &ItemRegistry::newindex;
+
+        sol::usertype<RecipeRegistry> recipeRegistry = lua.new_usertype<RecipeRegistry>("recipeRegistry",sol::no_constructor);
+
+        recipeRegistry["__index"] = &RecipeRegistry::index;
+        recipeRegistry["__newindex"] = &RecipeRegistry::newindex;
 
         sol::usertype<WidgetRegistry> widgetRegistry = lua.new_usertype<WidgetRegistry>("widgetRegistry",sol::no_constructor);
 

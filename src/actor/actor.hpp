@@ -6,6 +6,8 @@
 #include "graphics/vulkan.hpp"
 #include "physics/structs.hpp"
 
+#include "persistance/actor/data-actor.hpp"
+
 
 using glm::vec3, glm::quat;
 
@@ -21,6 +23,9 @@ class Actor {
 
 
     public:
+
+        // for tracking prototype names
+        string name;
         
         Mesh<Vertex>* model = nullptr;
         Material material = Material::none;
@@ -134,6 +139,38 @@ class Actor {
             return makeInstanceFromPrototype<Actor>(prototype,position,rotation);
         }
 
+        virtual data_ActorType getActorDataType() {
+            return data_ActorType::DONT_SAVE;
+        }
+
+        virtual std::vector<std::uint8_t> createSaveBuffer() {
+            auto data = save();
+            auto buf = cista::serialize(data);
+            return buf;
+        }
+
+        data_Actor save() {
+            data_Actor data;
+            data.position.set(position);
+            data.rotation.set(rotation);
+            return data;
+        }
+
+        void load(const data_Actor& data) {
+            position = data.position.toVec3();
+            rotation = data.rotation.toQuat();
+        }
+
+        template<typename T, typename data_T>
+        static std::unique_ptr<Actor> makeInstanceFromSavePrototype(data_T& data,T* prototype) {
+
+            if(prototype == nullptr) throw std::runtime_error("prototype is null");
+            auto actor = T::makeInstanceFromPrototype(prototype);
+            actor->load(data);
+
+            return actor;
+        }
+
     protected:
 
         Actor() {
@@ -148,6 +185,7 @@ class Actor {
             }
             auto newActor = new T(*prototype);
             std::unique_ptr<T> actor = std::unique_ptr<T>(newActor);
+            actor->name = prototype->name;
             actor->position = position;
             actor->rotation = rotation;
             return actor;

@@ -13,7 +13,7 @@ namespace API {
         
         
         item["defaultSprite"] = &Item::defaultSprite;
-        item["name"] = &Item::name;
+        item["display_name"] = &Item::displayName;
 
 
         sol::usertype<ItemStack> itemStack = lua.new_usertype<ItemStack>("item_stack",sol::constructors<ItemStack(Item*,int)>());

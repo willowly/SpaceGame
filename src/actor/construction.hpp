@@ -26,6 +26,9 @@
 #include <physics/jolt-layers.hpp>
 #include <physics/jolt-userdata.hpp>
 
+#include "persistance/actor/data-construction.hpp"
+#include "persistance/data-loader.hpp"
+
 using glm::ivec3,glm::vec3;
 using std::unordered_map;
 
@@ -83,7 +86,7 @@ struct ConstructionVertex {
 
 };
 
-#define CONSTRUCTION
+
 class Construction : public Actor {
 
     static const Color debugGroupColors[];
@@ -94,10 +97,26 @@ class Construction : public Actor {
         std::optional<JPH::Shape*> shapeOpt;
         BlockData(Block* block,BlockState state) : block(block), state(state) {}
         BlockData() {}
+
+        data_Block save() {
+            data_Block data;
+            if(block != nullptr) { //we can optimize this later with a palette
+                data.block = block->name;
+            }
+            std::cout << "saving block: " << (string)data.block << std::endl;
+            data.state = state.value;
+            return data;
+        }
+
+        void load(data_Block data,DataLoader& loader) {
+            std::cout << "loading block: " << (string)data.block << std::endl;
+            block = loader.getBlockPrototype((string)data.block);
+            state.value = data.state;
+        }
     };
 
-    ivec3 min = {};
-    ivec3 max = {};
+    ivec3 boundsMin = {};
+    ivec3 boundsMax = {};
     std::vector<BlockData> blockData;
     MeshData<ConstructionVertex> meshData;
 
@@ -253,11 +272,11 @@ class Construction : public Actor {
             meshData.clear();
 
             size_t i = 0;
-            for (int z = min.z; z <= max.z; z++)
+            for (int z = boundsMin.z; z <= boundsMax.z; z++)
             {
-                for (int y = min.y; y <= max.y; y++)
+                for (int y = boundsMin.y; y <= boundsMax.y; y++)
                 {
-                    for (int x = min.x; x <= max.x; x++)
+                    for (int x = boundsMin.x; x <= boundsMax.x; x++)
                     {
                         
                         if(blockData.size() > i && blockData[i].block != nullptr) {
@@ -333,8 +352,8 @@ class Construction : public Actor {
         }
 
         void moveBounds(ivec3 amount) {
-            min += amount;
-            max += amount;
+            boundsMin += amount;
+            boundsMax += amount;
         }
 
         void setBounds(ivec3 newMin,ivec3 newMax) {
@@ -346,8 +365,8 @@ class Construction : public Actor {
             //construct a map of existing blocks
             map<Location,BlockData> blockMap;
             createBlockMap(blockMap);
-            min = newMin;
-            max = newMax;
+            boundsMin = newMin;
+            boundsMax = newMax;
 
             //int i = 0;
             blockData.clear();
@@ -482,11 +501,14 @@ class Construction : public Actor {
         // used when wanting to break a place, not replace
         void breakBlock(World* world,ivec3 location) {
 
-            auto block = getBlock(location).first;
+            auto blockData = getBlock(location);
+            auto block = blockData.first;
             assert(block != nullptr);
-            auto item = block->drop;
+            auto items = block->getDrops(this,location,blockData.second);
 
-            world->spawn(ItemActor::makeInstance(ItemStack(item,1),transformPoint(location)));
+            for(auto stack : items) {
+                world->spawn(ItemActor::makeInstance(stack,transformPoint(location)));
+            }
 
             removeBlockNoUpdate(location); //does the main removal, tracking, and storage/callback cleanup 
 
@@ -513,9 +535,9 @@ class Construction : public Actor {
             if(blockData[index].block != nullptr) {
                 blockData[index].block->onBreak(this,location,blockData[index].state);
                 blockCount--;
-                blockCountX[location.x - min.x]--;
-                blockCountY[location.y - min.y]--;
-                blockCountZ[location.z - min.z]--;
+                blockCountX[location.x - boundsMin.x]--;
+                blockCountY[location.y - boundsMin.y]--;
+                blockCountZ[location.z - boundsMin.z]--;
                 
                 if(blockData[index].shapeOpt) {
                     
@@ -549,28 +571,32 @@ class Construction : public Actor {
         //assumes its not replacing a block. handles tracking, mass and bounds
         void addBlockNoUpdate(ivec3 location,Block& block,BlockFacing facing) {
             blockCount++;
-            blockCountX[location.x - min.x]++;
-            blockCountY[location.y - min.y]++;
-            blockCountZ[location.z - min.z]++;
-            int index = getIndex(location);
+            blockCountX[location.x - boundsMin.x]++;
+            blockCountY[location.y - boundsMin.y]++;
+            blockCountZ[location.z - boundsMin.z]++;
+            size_t index = getIndex(location);
             auto state = block.onPlace(this,location,facing);
             blockData[index] = BlockData(&block,state);
 
+            addBlockCollider(index,location);
+
+            
+        }
+
+        void addBlockCollider(size_t index,ivec3 location) {
             physicsOldCOM = physicsShape->GetCenterOfMass(); //temporary until custom shape (hopefully)
             auto shape = new JPH::BoxShape(JPH::Vec3(0.5f,0.5f,0.5f));
             physicsShape->AddShape(Physics::toJoltVec((vec3)location),JPH::Quat::sIdentity(),shape,0,UINT_MAX);
             blockData[index].shapeOpt = static_cast<JPH::Shape*>(shape);
             physicsShape->AdjustCenterOfMass();
             physicsShapeChanged = true;
-
-            
         }
 
         // make the bounds
         void boundsEncapsulate(ivec3 location) {
             if(!isInsideBounds(location)) {
-                vec3 newMin = glm::min(min,location);
-                vec3 newMax = glm::max(max,location);
+                vec3 newMin = glm::min(boundsMin,location);
+                vec3 newMax = glm::max(boundsMax,location);
                 setBounds(newMin,newMax);
             }
         }
@@ -617,11 +643,11 @@ class Construction : public Actor {
 
             int originalConstructionGroup = 0;
             int i = -1; //increments at the start
-            for (int z = min.z; z <= max.z; z++)
+            for (int z = boundsMin.z; z <= boundsMax.z; z++)
             {
-                for (int y = min.y; y <= max.y; y++)
+                for (int y = boundsMin.y; y <= boundsMax.y; y++)
                 {
-                    for (int x = min.x; x <= max.x; x++)
+                    for (int x = boundsMin.x; x <= boundsMax.x; x++)
                     {
                         i++; // so continues work
                         int blockGroup = blockGroups[i];
@@ -646,6 +672,11 @@ class Construction : public Actor {
                             if(blockGroup != originalConstructionGroup) {
                                 newConstruction.boundsEncapsulate(newLocalLocation);
                                 newConstruction.addBlockNoUpdate(newLocalLocation,*blockData[i].block,BlockFacing::FORWARD); //a block location should not have a group unless its a real block
+                                auto oldStorage = getStorage(ivec3(x,y,z));
+                                if(oldStorage != nullptr) {
+                                    auto newStorage = newConstruction.addStorage(newLocalLocation);
+                                    *newStorage = *oldStorage;
+                                }
                                 newConstruction.blockData[newIndex].state = blockData[i].state; // copy state
                                 // TODO: transfer storage
                                 removeBlockNoUpdate(vec3(x,y,z));
@@ -699,10 +730,10 @@ class Construction : public Actor {
             for (size_t i = 0; i < blockCountX.size(); i++)
             {
                 if(blockCountX[i] != 0) {
-                    newMax.x = i + min.x;
+                    newMax.x = i + boundsMin.x;
                     if(!minSet) {
                         minSet = true;
-                        newMin.x = i + min.x;
+                        newMin.x = i + boundsMin.x;
                     }
                 }
             }
@@ -710,10 +741,10 @@ class Construction : public Actor {
             for (size_t i = 0; i < blockCountY.size(); i++)
             {
                 if(blockCountY[i] != 0) {
-                    newMax.y = i + min.y;
+                    newMax.y = i + boundsMin.y;
                     if(!minSet) {
                         minSet = true;
-                        newMin.y = i + min.y;
+                        newMin.y = i + boundsMin.y;
                     }
                 }
             }
@@ -721,14 +752,14 @@ class Construction : public Actor {
             for (size_t i = 0; i < blockCountZ.size(); i++)
             {
                 if(blockCountZ[i] != 0) {
-                    newMax.z = i + min.z;
+                    newMax.z = i + boundsMin.z;
                     if(!minSet) {
                         minSet = true;
-                        newMin.z = i + min.z;
+                        newMin.z = i + boundsMin.z;
                     }
                 }
             }
-            if(newMin != min || newMax != max) {
+            if(newMin != boundsMin || newMax != boundsMax) {
                 setBounds(newMin,newMax);
             }
             
@@ -738,9 +769,9 @@ class Construction : public Actor {
         void recalculateBoundsFromBreak(ivec3 location) {
 
             // TODO should probably accumulate bounds change but its probably literally not an issue at all. It would have to be detached anyway
-            ivec3 newMin = min;
-            ivec3 newMax = max;
-            ivec3 indices = location - min;
+            ivec3 newMin = boundsMin;
+            ivec3 newMax = boundsMax;
+            ivec3 indices = location - boundsMin;
             if(blockCountX[indices.x] == 0) {
                 if(indices.x == 0) {
                     newMin.x += 1;
@@ -765,7 +796,7 @@ class Construction : public Actor {
                     newMax.z -= 1;
                 }
             }
-            if(newMin != min || newMax != max) {
+            if(newMin != boundsMin || newMax != boundsMax) {
                 setBounds(newMin,newMax);
             }
         }
@@ -786,8 +817,8 @@ class Construction : public Actor {
         }
 
         size_t getIndex(ivec3 location) {
-            ivec3 fromMin = location - min;
-            ivec3 size = max - min;
+            ivec3 fromMin = location - boundsMin;
+            ivec3 size = boundsMax - boundsMin;
             size.x += 1;
             size.y += 1;
             size.z += 1;
@@ -808,13 +839,13 @@ class Construction : public Actor {
         }
 
         bool isInsideBounds(ivec3 location) {
-            if(location.x > max.x) return false;
-            if(location.y > max.y) return false;
-            if(location.z > max.z) return false;
+            if(location.x > boundsMax.x) return false;
+            if(location.y > boundsMax.y) return false;
+            if(location.z > boundsMax.z) return false;
 
-            if(location.x < min.x) return false;
-            if(location.y < min.y) return false;
-            if(location.z < min.z) return false;
+            if(location.x < boundsMin.x) return false;
+            if(location.y < boundsMin.y) return false;
+            if(location.z < boundsMin.z) return false;
             return true;
         }
 
@@ -837,11 +868,11 @@ class Construction : public Actor {
 
         void createBlockMap(map<Location,BlockData>& blockMap) {
             int i = 0;
-            for (int z = min.z; z <= max.z; z++)
+            for (int z = boundsMin.z; z <= boundsMax.z; z++)
             {
-                for (int y = min.y; y <= max.y; y++)
+                for (int y = boundsMin.y; y <= boundsMax.y; y++)
                 {
-                    for (int x = min.x; x <= max.x; x++)
+                    for (int x = boundsMin.x; x <= boundsMax.x; x++)
                     {
                         if(blockData[i].block != nullptr) {
                             blockMap[Location(x,y,z)] = blockData[i];
@@ -866,6 +897,92 @@ class Construction : public Actor {
             auto ptr = makeInstance(material,position,rotation,isStatic);
             ptr->placeBlock(ivec3(0),block,BlockFacing::FORWARD);
             return ptr;
+        }
+
+        data_ActorType getActorDataType() {
+            return data_ActorType::CONSTRUCTION;
+        }
+
+        virtual std::vector<std::uint8_t> createSaveBuffer() {
+            auto data = save();
+            auto buf = cista::serialize(data);
+            return buf;
+        }
+
+        data_Construction save() {
+            data_Construction data;
+            data.actor = Actor::save();
+            data.body.velocity.set(velocity);
+            data.isStatic = isStatic;
+            data.boundsMin.set(boundsMin);
+            data.boundsMax.set(boundsMax);
+            data.blocks.reserve(blockData.size());
+            for(auto& block : blockData) {
+                data.blocks.push_back(block.save());
+            }
+            //data.body.angularVelocity = body->GetAngularVelocity();
+            return data;
+        }
+
+        void load(const data_Construction& data,DataLoader& loader) {
+            Actor::load(data.actor);
+            velocity = data.body.velocity.toVec3();
+            isStatic = data.isStatic;
+            boundsMin = data.boundsMin.toVec3();
+            boundsMax = data.boundsMax.toVec3();
+            blockData.clear();
+            blockData.reserve(blockData.size());
+
+            blockCount = 0;
+            // similar to resizing the bounds :shrug: maybe make a function?
+            blockCountX.clear(); // this kinda repeated code could probably be written in a more elegant way but Idk how so :shrug:
+            blockCountX.resize((boundsMax.x - boundsMin.x) + 1);
+            blockCountY.clear();
+            blockCountY.resize((boundsMax.y - boundsMin.y) + 1);
+            blockCountZ.clear();
+            blockCountZ.resize((boundsMax.z - boundsMin.z) + 1);
+            size_t i = 0;
+            for (int z = boundsMin.z; z <= boundsMax.z; z++)
+            {
+                for (int y = boundsMin.y; y <= boundsMax.y; y++)
+                {
+                    for (int x = boundsMin.x; x <= boundsMax.x; x++)
+                    {
+                        if(i >= data.blocks.size()) {
+                            Debug::warn("tried to load invalid construction data (blockdata too large for bounds)");
+                            return;
+                        }
+                        auto data_block = data.blocks[static_cast<unsigned int>(i)];
+                        if(data_block.block != "") {
+
+                            BlockData block;
+                            block.load(data_block,loader);
+                            //std::cout << "<" << x << "," << y << "," << z <<  ">:" << blockMap.at(Location(x,y,z)) << std::endl;
+                            blockData.push_back(block);
+                            blockCountX[x - boundsMin.x]++;
+                            blockCountY[y - boundsMin.y]++;
+                            blockCountZ[z - boundsMin.z]++;
+                            addBlockCollider(i,ivec3(x,y,z));
+                            block.block->onLoad(this,ivec3(x,y,z),block.state);
+                            blockCount++;
+                        } else {
+                            std::cout << "empty block " << std::endl;
+                            blockData.push_back(BlockData());
+                        }
+                        
+                        i++;
+                    }
+                }
+            }
+            generateMesh();
+        }
+
+        static std::unique_ptr<Actor> makeInstanceFromSave(data_Construction& data,Material material,DataLoader& loader) {
+            auto actor = makeInstance(material,vec3(0.0f));
+            actor->load(data,loader);
+            std::cout << "LOADING CONSTRUCTION ACTOR" << std::endl;
+
+            return actor;
         }
 };
 

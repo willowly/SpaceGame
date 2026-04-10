@@ -112,6 +112,61 @@ namespace API {
         get<Mesh<Vertex>*>(table,key,ref,required);
     }
 
+    void getItem(sol::table table,std::variant<string,int> key,Item*& ref,Registry& registry,bool required = false) {
+        Debug::addTrace(keyAsString(key));
+        sol::object obj = table[key];
+        if(obj.is<string>()) {
+            string str = obj.as<string>();
+            ref = registry.getItem(str);
+            Debug::subtractTrace();
+            return;
+            
+        }
+        Debug::subtractTrace();
+        get<Item*>(table,key,ref,required);
+    }
+
+    std::optional<ItemStack> createItemStack(sol::object obj,Registry& registry) {
+        ItemStack stack;
+        stack.amount = 1;
+        if(obj.is<string>()) {
+            string str = obj.as<string>();
+            stack.item = registry.getItem(str);
+            return stack;
+            
+        }
+        sol::table table = obj;
+        switch (getObjectLoadType(obj)) {
+        case ObjLoadType::ARRAY:
+            getItem(table,1,stack.item,registry,true);
+            get<int>(table,2,stack.amount,false);
+            return stack;
+        case ObjLoadType::TABLE:
+            getItem(table,"item",stack.item,registry,true);
+            get<int>(table,"amount",stack.amount,false);
+            return stack;
+        case ObjLoadType::INVALID:
+            break;
+        }
+        return std::nullopt;
+    }
+
+    void getItemStack(sol::table table,std::variant<string,int> key,ItemStack& ref,Registry& registry,bool required = false) {
+        Debug::addTrace(keyAsString(key));
+        sol::object obj = table[key]; // be careful with this, its only
+        if(obj != sol::lua_nil) {
+            auto stackOpt = createItemStack(obj,registry);
+            if(stackOpt) {
+                ref = stackOpt.value();
+                Debug::subtractTrace();
+                return;
+            }
+        }
+       
+        Debug::subtractTrace();
+        get<ItemStack>(table,key,ref,required);
+    }
+
     //i actually think these should go in here, otherwise theres a dependancy nightmare
 
     Material createLitMaterial(sol::object obj,Registry& registry,Vulkan* vulkan) {

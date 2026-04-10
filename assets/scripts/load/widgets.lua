@@ -11,6 +11,7 @@ widgets.item_slot = {
 widgets.toolbar_item_slot = {
     type = "item_slot",
     sprite = "item_slot",
+    bar_sprite = "solid",
     padding = 11,
     color = color(0.0,0.0,0.0,0.0),
 }

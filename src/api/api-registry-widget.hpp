@@ -25,6 +25,7 @@ namespace API {
     void addItemSlotWidget(string name,sol::table table,Registry& registry) {
         ItemSlotWidget* widget = registry.addWidget<ItemSlotWidget>(name);
         getSprite(table,"sprite",widget->sprite,registry);
+        getSprite(table,"bar_sprite",widget->barSprite,registry);
         get<Color>(table,"color",widget->color);
         get<float>(table,"bar_width",widget->barWidth);
         get<float>(table,"padding",widget->padding);

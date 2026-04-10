@@ -83,6 +83,19 @@ class FurnaceBlock : public Block {
             storage->setStack(OUTPUTSTACK_VAR,outputStackOpt);
         }
 
+        virtual std::vector<ItemStack> getDrops(Construction* construction,ivec3 position,BlockState& state) {
+            auto storage = construction->getStorage(position);
+            if(storage == nullptr) {
+                throw std::runtime_error("Storage was null for furnace!");
+            }
+            std::vector<ItemStack> drops = Block::getDrops(construction,position,state);
+            ItemStack inputStack = storage->getStack(INPUTSTACK_VAR);
+            if(!inputStack.isEmpty()) drops.push_back(inputStack);
+            ItemStack outputStack = storage->getStack(OUTPUTSTACK_VAR);
+            if(!outputStack.isEmpty()) drops.push_back(outputStack);
+            return drops;
+        }
+
         bool trySetMatchingRecipe(Recipe*& currentRecipe,ItemStack& inputStack) {
             for(auto recipe : recipes) {
                 if(inputStack.has(recipe->ingredients[0])) { //for just one ingredient

@@ -20,14 +20,22 @@ class ThrusterBlock : public Block {
         float sideForce; //for now this is always the 4 directions parrellel to the back
 
         virtual BlockState onPlace(Construction* construction,ivec3 position,BlockFacing facing) {
-
             
+            addThrustForces(construction,facing);
+            return BlockState::encode(facing);
+        }
+
+        void onLoad(Construction* construction,ivec3 position,BlockState& state) {
+            auto facing = state.asFacing();
+            addThrustForces(construction,facing);
+        }
+
+        void addThrustForces(Construction* construction,BlockFacing facing) {
             construction->thrustForces[BlockHelper::rotateFacingByFacing(BlockFacing::UP,facing)] += sideForce;
             construction->thrustForces[BlockHelper::rotateFacingByFacing(BlockFacing::DOWN,facing)] += sideForce;
             construction->thrustForces[BlockHelper::rotateFacingByFacing(BlockFacing::RIGHT,facing)] += sideForce;
             construction->thrustForces[BlockHelper::rotateFacingByFacing(BlockFacing::LEFT,facing)] += sideForce;
             construction->thrustForces[facing] += force;
-            return BlockState::encode(facing);
         }
 
         virtual void addToMesh(Construction* construction,MeshData<ConstructionVertex>& meshData,ivec3 position,BlockState& state) {

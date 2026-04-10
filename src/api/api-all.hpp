@@ -12,6 +12,7 @@
 #include "api-registry.hpp"
 #include "api-block.hpp"
 #include "api-item.hpp"
+#include "api/api-registry-recipe.hpp"
 
 namespace API {
 

@@ -3,8 +3,10 @@
 #include "glm/glm.hpp"
 #include <vector>
 #include <string>
+#include "persistance/data-generic-storage.hpp"
 
 using std::string;
+
 
 
 class GenericStorage {
@@ -61,5 +63,34 @@ class GenericStorage {
             floats.clear();
             strings.clear();
             
+        }
+
+        data_GenericStorage save() {
+            data_GenericStorage data;
+            for(auto element : ints) {
+                data.ints.push_back(element);
+            }
+            for(auto element : floats) {
+                data.floats.push_back(element);
+            }
+            for(auto element : strings) {
+                data.strings.push_back(element);
+            }
+            return data;
+        }
+
+        void load(const data_GenericStorage data) {
+            ints.clear();
+            for(auto element : data.ints) {
+                ints.push_back(element);
+            }
+            floats.clear();
+            for(auto element : data.floats) {
+                floats.push_back(element);
+            }
+            strings.clear();
+            for(auto element : data.strings) {
+                strings.push_back((string)element);
+            }
         }
 };

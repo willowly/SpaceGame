@@ -13,7 +13,7 @@ using std::string,std::variant;
 namespace API {
 
     void loadItemBaseType(ObjLoadType loadType,sol::table table,Item* item,Registry& registry) {
-        get<string>(table,"name",item->name,true);
+        get<string>(table,"display_name",item->displayName,true);
         getSprite(table,"icon",item->defaultSprite,registry,true);
         item->defaultModel = registry.getModel("item_default");
         item->defaultMaterial = registry.getMaterial("item_default");

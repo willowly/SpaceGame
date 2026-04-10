@@ -69,10 +69,6 @@ class DrillTool : public Tool {
                     vec3 placePointLocal = construction->inverseTransformPoint(placePointWorld);
                     ivec3 placePointLocalInt = glm::round(placePointLocal);
                     auto blockPair = construction->getBlock(placePointLocalInt);
-                    if(blockPair.first != nullptr) {
-                        resultStack = blockPair.first->getDrop(blockPair.second);
-                        // give at the end to avoid errors
-                    }
                     construction->breakBlock(world,placePointLocalInt);
                     //user.shake.startShake();
                     damage += dt;

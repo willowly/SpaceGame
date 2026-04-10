@@ -3,6 +3,9 @@
 #include "item.hpp"
 #include "helper/generic-storage.hpp"
 
+#include "persistance/item/data-item-stack.hpp"
+#include "persistance/data-loader.hpp"
+
 struct ItemStack {
     Item* item = nullptr; 
     int amount = 0;
@@ -60,5 +63,21 @@ struct ItemStack {
         }
         return 0;
 
+    }
+
+    data_ItemStack save() {
+        data_ItemStack data;
+        if(item != nullptr) {
+            data.item = item->name;
+        }
+        data.amount = amount;
+        data.storage = storage.save();
+        return data;
+    }
+
+    void load(const data_ItemStack data,DataLoader& loader) {
+        item = loader.getItemPrototype((string)data.item);
+        amount = data.amount;
+        storage.load(data.storage);
     }
 };
