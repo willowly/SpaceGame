@@ -24,11 +24,11 @@ struct data_ivec3 {
     int y;
     int z;
 
-    glm::vec3 toVec3() const {
-        return glm::vec3(x,y,z);
+    glm::ivec3 toVec3() const {
+        return glm::ivec3(x,y,z);
     }
 
-    void set(glm::vec3 v) {
+    void set(glm::ivec3 v) {
         x = v.x;
         y = v.y;
         z = v.z;

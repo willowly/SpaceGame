@@ -5,6 +5,7 @@
 #include "item/recipe.hpp"
 #include "item/item-stack.hpp"
 #include "block/block.hpp"
+#include "persistance/block/data-block-storage.hpp"
 
 #include <variant>
 
@@ -57,6 +58,59 @@ class BlockStorage : public GenericStorage {
             GenericStorage::clear();
             stacks.clear();
             pointers.clear();
+        }
+
+        data_BlockStorage save() {
+            data_BlockStorage data;
+            data.genericStorage = GenericStorage::save();
+            for(auto stack : stacks) {
+                data.stacks.push_back(stack.save());
+            }
+            for(auto pointer : pointers) {
+                data_ResourcePointer data_pointer;
+                if (auto* p = std::get_if<Item*>(&pointer)) {
+                    data_pointer.type = data_ResourcePointerType::ITEM;
+                    data_pointer.name = (*p)->name;
+                } else if (auto* p = std::get_if<Recipe*>(&pointer)) {
+                    data_pointer.type = data_ResourcePointerType::RECIPE;
+                    data_pointer.name = (*p)->name;
+                } else if (auto* p = std::get_if<Block*>(&pointer)) {
+                    data_pointer.type = data_ResourcePointerType::BLOCK;
+                    data_pointer.name = (*p)->name;
+                } else { // std::monostate
+                    data_pointer.type = data_ResourcePointerType::NONE;
+                }
+                data.pointers.push_back(data_pointer);
+            }
+            return data;
+        }
+
+        void load(const data_BlockStorage data,DataLoader& loader) {
+            GenericStorage::load(data.genericStorage);
+            stacks.clear();
+            for(auto data_stack : data.stacks) {
+                ItemStack stack;
+                stack.load(data_stack,loader);
+                stacks.push_back(stack);
+            }
+            for(auto data_pointer : data.pointers) {
+                ResourcePointer pointer;
+                switch (data_pointer.type) {
+                    case NONE:
+                        break;
+                    case ITEM:
+                        pointer = loader.getItemPrototype((string)data_pointer.name);
+                        break;
+                    case BLOCK:
+                        pointer = loader.getBlockPrototype((string)data_pointer.name);
+                        break;
+                    case RECIPE:
+                        pointer = loader.getRecipePrototype((string)data_pointer.name);
+                        break;
+
+                }
+                pointers.push_back(pointer);
+            }
         }
 
 

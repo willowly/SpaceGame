@@ -9,6 +9,7 @@
 class Actor;
 class Item;
 class Block;
+class Recipe;
 
 using std::string;
 
@@ -20,6 +21,8 @@ class DataLoader {
         virtual Item* getItemPrototype(string name) = 0;
 
         virtual Block* getBlockPrototype(string name) = 0;
+
+        virtual Recipe* getRecipePrototype(string name) = 0;
 
         virtual Actor* getActorPrototype(string name) = 0;
 

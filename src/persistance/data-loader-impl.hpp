@@ -5,6 +5,7 @@
 #include "engine/registry.hpp"
 #include "graphics/vulkan.hpp"
 #include "data-loader.hpp"
+#include "item/recipe.hpp"
 
 class DataLoaderImpl : public DataLoader {
 
@@ -69,6 +70,10 @@ class DataLoaderImpl : public DataLoader {
 
         Block* getBlockPrototype(string name) {
             return registry.getBlock(name);
+        }
+
+        Recipe* getRecipePrototype(string name) {
+            return registry.getRecipe(name);
         }
 
 };

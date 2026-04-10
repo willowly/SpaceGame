@@ -103,13 +103,11 @@ class Construction : public Actor {
             if(block != nullptr) { //we can optimize this later with a palette
                 data.block = block->name;
             }
-            std::cout << "saving block: " << (string)data.block << std::endl;
             data.state = state.value;
             return data;
         }
 
         void load(data_Block data,DataLoader& loader) {
-            std::cout << "loading block: " << (string)data.block << std::endl;
             block = loader.getBlockPrototype((string)data.block);
             state.value = data.state;
         }
@@ -920,6 +918,19 @@ class Construction : public Actor {
             for(auto& block : blockData) {
                 data.blocks.push_back(block.save());
             }
+            for(auto& pair : blockStorage) {
+                data_BlockStoragePair data_pair;
+                data_pair.position.set(pair.first.asVec3());
+                data_pair.storage = pair.second.save();
+                data.storages.push_back(data_pair); //copies the block storage shrug could be sped up
+            }
+            for(auto& pair : stepCallbacks) {
+                if(pair.second) {
+                    data_ivec3 data_pos;
+                    data_pos.set(pair.first.asVec3());
+                    data.stepCallbacks.push_back(data_pos); 
+                }
+            }
             //data.body.angularVelocity = body->GetAngularVelocity();
             return data;
         }
@@ -973,6 +984,15 @@ class Construction : public Actor {
                         i++;
                     }
                 }
+            }
+            blockStorage.clear();
+            for(auto& data_pair : data.storages) {
+                auto* storage = addStorage(data_pair.position.toVec3());
+                storage->load(data_pair.storage,loader);
+            }
+            stepCallbacks.clear();
+            for(auto& pos : data.stepCallbacks) {
+                addStepCallback(pos.toVec3());
             }
             generateMesh();
         }
