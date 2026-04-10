@@ -215,6 +215,7 @@ class Registry {
             sprites.emplace(name,sprite);
         }
         void addRecipe(string name,Recipe recipe) {
+            recipe.name = name;
             recipes.emplace(name,recipe);
         }
         void addMaterial(string name,Material material) {
