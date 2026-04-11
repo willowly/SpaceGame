@@ -57,7 +57,7 @@ class Terrain : public Actor {
 
     unsigned int seed = 0;
 
-    unsigned int nextChunkId;
+    std::atomic<unsigned int> nextChunkId;
     
     public:
     
@@ -105,10 +105,11 @@ class Terrain : public Actor {
             lockType = 101;
             auto& chunks = chunkLayers[layer];
             if(chunks.contains(key)) {
-                std::cout << "chunk already exists" << std::endl;
+                //std::cout << "chunk already exists" << std::endl;
                 return;
             }
-            chunks.emplace(std::piecewise_construct,std::make_tuple(key),std::make_tuple(offset,chunkSize,newCellSize,nextChunkId,seed));
+            int chunkId = nextChunkId;
+            chunks.emplace(std::piecewise_construct,std::make_tuple(key),std::make_tuple(offset,chunkSize,newCellSize,chunkId,seed));
             chunk = &chunks.at(key);
         }
 
@@ -308,13 +309,13 @@ class Terrain : public Actor {
         
     }
 
-    void spawn(World* world) {
+    void spawn(World* world) override {
 
         updateLOD(world);
 
     }
 
-    void step(World* world,float dt) {
+    void step(World* world,float dt) override {
 
         updateLOD(world);
 

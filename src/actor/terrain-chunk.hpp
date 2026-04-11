@@ -32,9 +32,9 @@ class TerrainChunk {
     bool gpuMeshOutOfDate = false;
     bool physicsMeshOutOfDate = false;
     TerrainType terrainTypes[8];
-    bool meshOutOfDate;
+    std::atomic<bool> meshOutOfDate;
 
-    TerrainShape* physicsShape = nullptr;;
+    TerrainShape* physicsShape = nullptr;
 
     unsigned int id = 0;
     int size = 30;
@@ -126,7 +126,7 @@ class TerrainChunk {
 
     public:
 
-        TerrainChunk(ivec3 offset,int chunkSize,float cellSize,unsigned int id,unsigned int seed) : offset(offset), size(chunkSize), cellSize(cellSize), id(id) {
+        TerrainChunk(ivec3 offset,int chunkSize,float cellSize,unsigned int id,unsigned int seed) : offset(offset), size(chunkSize), id(id),cellSize(cellSize) {
 
             for (auto& buffer : meshBuffer)
             {
@@ -293,7 +293,7 @@ class TerrainChunk {
                 bodySettings.mUserData = ActorUserData::encode(&physicsUserData);
 
                 if(result.HasError()) {
-                    std::cout << result.GetError() << std::endl;
+                    throw std::runtime_error((string)result.GetError());
                 }
 
                 
@@ -468,11 +468,11 @@ class TerrainChunk {
 
         void addCellUnsafe(int config,vec3 cellPos) {
             if(config < 0) {
-                std::cout << "out of range " << config << std::endl;
+                //std::cout << "out of range " << config << std::endl;
                 return;
             }
             if(config > 255) {
-                std::cout << "out of range " << config << std::endl;
+                //std::cout << "out of range " << config << std::endl;
                 return;
             }
 

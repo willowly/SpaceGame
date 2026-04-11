@@ -1,10 +1,11 @@
 #define TRACY_ENABLE 1
+#define SOL_ALL_SAFETIES_ON 1
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include "engine/game-application.hpp"
 //#include <tracy/Tracy.hpp>
-#include <windows.h> 
 
-#include "shaderc/shaderc.h"
+#include <iostream>
+
 
 int main() {
 

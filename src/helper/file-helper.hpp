@@ -20,8 +20,7 @@ namespace FileHelper {
             if (file.fail()) {
                 // Print a more detailed error message using
                 // strerror
-                std::cout << "Error details: " << strerror(errno)
-                    << std::endl;
+                std::cout << "File failed to load" << std::endl;
             }
             return std::vector<char>(0);
         }

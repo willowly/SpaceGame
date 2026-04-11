@@ -10,7 +10,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /bigobj /fsanitize=thread")
 endif()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -fsanitize=thread -Wall -Wextra -Werror=return-type -pedantic -Wno-unused-parameter")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -Wall -Wextra -Werror=return-type -pedantic -Wno-unused-parameter")
 endif()
 
 
@@ -93,8 +93,7 @@ FetchContent_MakeAvailable(JoltPhysics)
 set_property(TARGET Jolt PROPERTY
   MSVC_RUNTIME_LIBRARY "MultiThreadedDebugDLL")
 
-set_property(TARGET Jolt PROPERTY
-  MSVC_RUNTIME_LIBRARY "MultiThreadedDebugDLL")
+target_compile_options(Jolt PRIVATE "-frtti")
 
 
 include_directories(src)
@@ -148,6 +147,10 @@ endif(WIN32)
 if(OSX)
     set(OUTPUT_DIR "${CMAKE_BINARY_DIR}/bin")
 endif(OSX)
+if(LINUX)
+    set(OUTPUT_DIR "${CMAKE_BINARY_DIR}")
+endif()
+
 
 add_custom_target(Assets
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/assets ${OUTPUT_DIR}

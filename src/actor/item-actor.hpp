@@ -55,15 +55,15 @@ class ItemActor : public Actor {
 
         
 
-        virtual void prePhysics(World* world) {
+        virtual void prePhysics(World* world) override {
             body.prePhysics(world,position,rotation);
         }
 
-        virtual void postPhysics(World* world) {
+        virtual void postPhysics(World* world) override {
             body.postPhysics(world,position,rotation);
         }
 
-        void destroy(World* world) {
+        void destroy(World* world) override {
             body.destroy(world);
             Actor::destroy(world);
         }
