@@ -1,5 +1,6 @@
 #include "helper/terrain-helper.hpp"
 #include "graphics/mesh.hpp"
+#include <shared_mutex>
 #include <vector>
 #include "glm/glm.hpp"
 #include "item/item.hpp"
@@ -40,9 +41,9 @@ class TerrainChunk {
     int size = 30;
     float cellSize = 0.5f;
 
-    unsigned int seed;
+    unsigned int seed = 0;
 
-    std::mutex mtx;
+    std::shared_timed_mutex mtx;
     std::atomic<bool> readyToRender = false;
 
     JPH::Body* body = nullptr;
@@ -59,14 +60,23 @@ class TerrainChunk {
         return x + y * size + z * size * size;
     }
 
+    float getPoint(int x,int y,int z) {
+
+        std::shared_lock lock(mtx);
+        return getPointUnsafe(x,y,z);
+    }
+
     float getPointUnsafe(int x,int y,int z) {
 
+        if(isPlaceHolder) {
+            return 0;
+        }
         if(x < 0) {
             x = 0;
         }
         if(x >= size) {
             if(posX != nullptr) {
-                return posX->getPointUnsafe(x - size,y,z);
+                return posX->getPoint(x - size,y,z);
             } else {
                 x = size-1;
             }
@@ -77,7 +87,7 @@ class TerrainChunk {
         }
         if(y >= size) {
             if(posY != nullptr) {
-                return posY->getPointUnsafe(x,y - size,z);
+                return posY->getPoint(x,y - size,z);
             } else {
                 y = size-1;
             }
@@ -88,7 +98,7 @@ class TerrainChunk {
         }
         if(z >= size) {
             if(posZ != nullptr) {
-                return posZ->getPointUnsafe(x,y,z - size);
+                return posZ->getPoint(x,y,z - size);
             } else {
                 z = size-1;
             }
@@ -96,7 +106,7 @@ class TerrainChunk {
         // if(x < 0 || x >= chunkSize) return 0;
         // if(y < 0 || y >= chunkSize) return 0;
         // if(z < 0 || z >= chunkSize) return 0;
-        return terrainData[x + y * size + z * size * size].amount;
+        return terrainData.at(x + y * size + z * size * size).amount;
     }
 
     bool getPointInsideUnsafe(int x,int y,int z) {
@@ -124,9 +134,36 @@ class TerrainChunk {
     TerrainChunk* posZ = nullptr;
     TerrainChunk* posY = nullptr;
 
+
+
     public:
 
-        TerrainChunk(ivec3 offset,int chunkSize,float cellSize,unsigned int id,unsigned int seed) : offset(offset), size(chunkSize), id(id),cellSize(cellSize) {
+        std::atomic<bool> isPlaceHolder = false;
+
+        static TerrainChunk makePlaceHolder() {
+            return TerrainChunk();
+        }
+
+        bool isReadyToRender() {
+            return readyToRender;
+        }
+
+        // 
+        bool isAvailable() {
+            std::shared_lock lock(mtx,std::defer_lock);
+            if(!lock.try_lock()) {
+                return false;
+            }
+            if(cellSize == 0) {
+                return true;
+            }
+            return false;
+        }
+
+        TerrainChunk() : isPlaceHolder(true) {
+        }
+
+        TerrainChunk(ivec3 offset,int chunkSize,float cellSize,unsigned int id,unsigned int seed) : offset(offset), size(chunkSize), cellSize(cellSize), id(id), seed(seed) {
 
             for (auto& buffer : meshBuffer)
             {
@@ -135,13 +172,29 @@ class TerrainChunk {
             
         }
 
+        // turns a placeholder into a chunk that can be generated and stuff
+        void create(ivec3 offset,int chunkSize,float cellSize,unsigned int id,unsigned int seed) {
+            std::unique_lock lock(mtx,std::defer_lock);
+            
+            if(!lock.try_lock_for(std::chrono::seconds(3))) {
+                throw std::runtime_error("timeout");
+            }
+
+            isPlaceHolder = false;
+            this->offset = offset;
+            this->size = chunkSize;
+            this->cellSize = cellSize;
+            this->id = id;
+            this->seed = seed;
+        }
+
         unsigned int getID() {
             return id;
         }
 
         void generateData(GenerationSettings settings,int layer) {
 
-            std::scoped_lock lock(mtx);
+            std::unique_lock lock(mtx);
             terrainTypes[0] = settings.stoneType;
             terrainTypes[1] = settings.oreType;
             terrainData.resize(size*size*size);
@@ -227,9 +280,10 @@ class TerrainChunk {
         void terraformSphere(vec3 pos,float radius,float change,TerraformResults& results) {
 
 
-            std::scoped_lock lock(mtx);
+            std::unique_lock lock(mtx);
             
             auto posCellSpace = localToCellPos(pos);
+            assert(cellSize > 0);
             auto radiusCellSpace = radius/cellSize;
             // std::cout << radiusCellSpace << std::endl;
             // std::cout << posCellSpace.z-radiusCellSpace << std::endl;
@@ -328,7 +382,7 @@ class TerrainChunk {
 
         void addRenderables(Vulkan* vulkan,float dt,vec3 position,Material material) {
             if(!readyToRender) return;
-            std::unique_lock lock(mtx,std::defer_lock);
+            std::shared_lock lock(mtx,std::defer_lock);
             
             if(lock.try_lock()) {
                 if(meshState == -1) {
@@ -387,7 +441,7 @@ class TerrainChunk {
                 return;
             }
             
-            std::scoped_lock lock(mtx);
+            std::unique_lock lock(mtx);
             
             float clock = (float)glfwGetTime();
             meshData.vertices.clear();
@@ -423,7 +477,7 @@ class TerrainChunk {
 
             smoothNormals();
             
-            
+            std::cout << "chunk ready to render " << std::endl;
             readyToRender = true;
             meshOutOfDate = false;
             gpuMeshOutOfDate = true;
@@ -574,7 +628,7 @@ class TerrainChunk {
 
         void connectPosX(TerrainChunk* chunk) {
 
-            std::scoped_lock lock(mtx);
+            std::unique_lock lock(mtx);
 
             if(posX != chunk) {
                 posX = chunk;
@@ -585,7 +639,7 @@ class TerrainChunk {
 
         void connectPosZ(TerrainChunk* chunk) {
 
-            std::scoped_lock lock(mtx);
+            std::unique_lock lock(mtx);
 
             if(posZ != chunk) {
                 posZ = chunk;
@@ -596,7 +650,7 @@ class TerrainChunk {
 
         void connectPosY(TerrainChunk* chunk) {
 
-            std::scoped_lock lock(mtx);
+            std::unique_lock lock(mtx);
             
             if(posY != chunk) {
                 posY = chunk;

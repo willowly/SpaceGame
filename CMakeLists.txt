@@ -6,7 +6,7 @@ set(OUTPUT_DIR ${OUTPUT_DIR}/bin)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /bigobj /fsanitize=thread")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /bigobj /fsanitize=address")
 endif()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
@@ -89,6 +89,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(JoltPhysics)
 
+target_compile_options(Jolt PRIVATE "-frtti" )
 
 set_property(TARGET Jolt PROPERTY
   MSVC_RUNTIME_LIBRARY "MultiThreadedDebugDLL")
@@ -144,13 +145,12 @@ add_custom_target(SHADERS)
 if(WIN32)
     set(OUTPUT_DIR "${CMAKE_BINARY_DIR}")
 endif(WIN32)
-if(OSX)
-    set(OUTPUT_DIR "${CMAKE_BINARY_DIR}/bin")
-endif(OSX)
 if(LINUX)
     set(OUTPUT_DIR "${CMAKE_BINARY_DIR}")
 endif()
-
+if(APPLE)
+    set(OUTPUT_DIR "${CMAKE_BINARY_DIR}")
+endif(APPLE)
 
 add_custom_target(Assets
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/assets ${OUTPUT_DIR}

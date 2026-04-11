@@ -24,6 +24,11 @@ using glm::vec3, glm::ivec4,glm::vec4;
 
 #include "physics/jolt-conversions.hpp"
 
+struct ChunkAddress {
+    int layer = 0;
+    ivec3 pos;
+};
+
 
 class Terrain : public Actor {
 
@@ -48,7 +53,7 @@ class Terrain : public Actor {
     static const int LODlayers = 3;
     static const int LODscaleFactor = 4;
 
-    std::mutex loadedLayersMtx;
+    std::shared_mutex loadedLayersMtx;
     std::array<bool,LODlayers> loadedLayers{};
     int nextLODlayer = 0; // the one that should be loaded next
 
@@ -72,7 +77,7 @@ class Terrain : public Actor {
 
         if(currentLODlayer == -1) currentLODlayer = layer; //if we dont have a current layer, dont even check
         
-        std::unique_lock lock(loadedLayersMtx,std::defer_lock);
+        std::shared_lock lock(loadedLayersMtx,std::defer_lock);
 
         if(!lock.try_lock()) return;
         if(!loadedLayers[layer]) return;
@@ -89,7 +94,10 @@ class Terrain : public Actor {
     }
 
     // adds a chunk to the terrain. Able to be called on loader thread
-    void addChunk(ivec3 pos,int layer) {
+    void addChunk(ChunkAddress address) {
+
+        int layer = address.layer;
+        ivec3 pos = address.pos;
 
         assert(layer >= 0 && layer < LODlayers);
         
@@ -103,13 +111,13 @@ class Terrain : public Actor {
         {
             std::unique_lock lock(chunksMtx);
             lockType = 101;
-            auto& chunks = chunkLayers[layer];
-            if(chunks.contains(key)) {
-                //std::cout << "chunk already exists" << std::endl;
-                return;
+            auto& chunks = chunkLayers.at(address.layer);
+            bool contains = chunks.contains(key);
+            if(contains && !chunks.at(key).isPlaceHolder) {
+                std::cout << std::this_thread::get_id() << "chunk not available" << std::endl;
             }
-            int chunkId = nextChunkId;
-            chunks.emplace(std::piecewise_construct,std::make_tuple(key),std::make_tuple(offset,chunkSize,newCellSize,chunkId,seed));
+            chunks.at(key).create(offset,chunkSize,newCellSize,nextChunkId,seed);
+            std::cout << std::this_thread::get_id() << "adding chunk " << std::endl;
             chunk = &chunks.at(key);
         }
 
@@ -117,11 +125,14 @@ class Terrain : public Actor {
 
         nextChunkId++;
 
-        chunk->generateData(settings,layer);
+        chunk->generateData(settings,address.layer);
         //chunk.generateMesh();
         
-        connect(*chunk,pos,layer); // this will end up generating the mesh for us :)
+        connect(*chunk,address); // this will end up generating the mesh for us :)
 
+        if(!chunk->isReadyToRender()) {
+            throw std::runtime_error("should be ready to render");
+        }
         
     }
 
@@ -146,22 +157,22 @@ class Terrain : public Actor {
         return r;
     }
 
-    void loadNextChunk(vec3 cameraPosition) {
-        
+    std::optional<ChunkAddress> getNextChunkToload(vec3 cameraPosition) {
         assert(currentLODlayer >= 0 && currentLODlayer < LODlayers);
-        
-        int layerToLoad = currentLODlayer;
-        {
-            std::lock_guard lock(loadedLayersMtx);
-            if(loadedLayers[layerToLoad]) {
-                layerToLoad = nextLODlayer;
-            }
-        
-        }
 
         //std::cout << "terrain at " << StringHelper::toString(position) << std::endl;
         vec3 cameraPositionRelative = inverseTransformPoint(cameraPosition);
         vec3 cameraPositionChunk = glm::floor(cameraPositionRelative/((float)chunkSize*cellSize));
+
+
+        int layerToLoad = currentLODlayer;
+        {
+            std::shared_lock lock(loadedLayersMtx);
+            if(loadedLayers.at(layerToLoad)) {
+                layerToLoad = nextLODlayer;
+            }
+        
+        }
         
         int size = getChunkGridSize(layerToLoad);
         bool chunkFound = false;
@@ -177,7 +188,7 @@ class Terrain : public Actor {
                 {
                     ivec3 chunkPos = ivec3(x,y,z);
                     LocationKey key(chunkPos);
-                    std::lock_guard lock(chunksMtx);
+                    std::shared_lock lock(chunksMtx);
                     lockType = 1;
                     if(!chunks.contains(key)) {
                         float dist = glm::length(vec3(x,y,z) - cameraPositionChunk);
@@ -192,15 +203,20 @@ class Terrain : public Actor {
                 }
             }
         }
+
         if(!chunkFound) {
             std::lock_guard lock(loadedLayersMtx);
-            loadedLayers[layerToLoad] = true;
-            return;
+            loadedLayers.at(layerToLoad) = true;
+            return std::nullopt;
         }
-        addChunk(closestChunkPos,layerToLoad);
-        return;
-    }
 
+        std::unique_lock lock(chunksMtx);
+        lockType = 505;
+        chunks.emplace(std::piecewise_construct,std::make_tuple(closestChunkPos),std::make_tuple());
+
+        return ChunkAddress{layerToLoad,closestChunkPos};
+        
+    }
     // how big the overall grid of chunks is
     // range of valid coordinates is (-size,size). 0 means 1 single chunk
     int getChunkGridSize(int layer) {
@@ -248,9 +264,12 @@ class Terrain : public Actor {
     }
 
     
-    void connect(TerrainChunk& chunk,ivec3 pos,int layer) {
+    void connect(TerrainChunk& chunk,ChunkAddress address) {
 
         std::vector<TerrainChunk*> chunksSurrounding; 
+
+        int layer = address.layer;
+        ivec3 pos = address.pos;
 
         chunksSurrounding.reserve(8);
 
@@ -259,29 +278,29 @@ class Terrain : public Actor {
             lockType = 301;
             auto& chunks = chunkLayers[layer];
             LocationKey keyPosX(pos+ivec3(1,0,0));
-            if(chunks.contains(keyPosX)) {
+            if(chunks.contains(keyPosX) && !chunks.at(keyPosX).isPlaceHolder) {
                 chunk.connectPosX(&chunks.at(keyPosX));
             }
             LocationKey keyNegX(pos+ivec3(-1,0,0));
-            if(chunks.contains(keyNegX)) {
+            if(chunks.contains(keyNegX) && !chunks.at(keyNegX).isPlaceHolder) {
                 chunks.at(keyNegX).connectPosX(&chunk);
             }
 
             LocationKey keyPosY(pos+ivec3(0,1,0));
-            if(chunks.contains(keyPosY)) {
+            if(chunks.contains(keyPosY) && !chunks.at(keyPosY).isPlaceHolder) {
                 chunk.connectPosY(&chunks.at(keyPosY));
             }
             LocationKey keyNegY(pos+ivec3(0,-1,0));
-            if(chunks.contains(keyNegY)) {
+            if(chunks.contains(keyNegY) && !chunks.at(keyNegY).isPlaceHolder) {
                 chunks.at(keyNegY).connectPosY(&chunk);
             }
 
             LocationKey keyPosZ(pos+ivec3(0,0,1));
-            if(chunks.contains(keyPosZ)) {
+            if(chunks.contains(keyPosZ) && !chunks.at(keyPosZ).isPlaceHolder) {
                 chunk.connectPosZ(&chunks.at(keyPosZ));
             }
             LocationKey keyNegZ(pos+ivec3(0,0,-1));
-            if(chunks.contains(keyNegZ)) {
+            if(chunks.contains(keyNegZ) && !chunks.at(keyNegZ).isPlaceHolder) {
                 chunks.at(keyNegZ).connectPosZ(&chunk);
             }
             lockType = 302;
@@ -293,7 +312,7 @@ class Terrain : public Actor {
                     {
                         ivec3 chunkPos = pos - ivec3(x,y,z);
                         LocationKey key(chunkPos);
-                        if(chunks.contains(key)) {
+                        if(chunks.contains(key) && !chunks.at(key).isPlaceHolder) {
                             chunksSurrounding.push_back(&chunks.at(key));
                         }
                     }
@@ -407,7 +426,7 @@ class Terrain : public Actor {
     //     }
     // }
 
-    virtual void addRenderables(Vulkan* vulkan,float dt) override {
+    void addRenderables(Vulkan* vulkan,float dt) override {
 
         Clock clock;
         std::shared_lock lock(chunksMtx);

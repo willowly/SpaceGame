@@ -28,7 +28,7 @@ namespace API {
         );
 
         character["setToolbar"] = [&](Character* character,ItemStack stack,int index) {
-            if(index < 0 || index > 9) {
+            if(index < 0 || index > Character::toolbarSize) {
                 throw sol::error("toolbar index out of range");
             }
             character->toolbar[index] = stack;

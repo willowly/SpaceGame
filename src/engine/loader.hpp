@@ -6,6 +6,7 @@
 
 #include "api/api-all.hpp"
 
+
 #include "debug.hpp"
 
 using std::string,std::vector;
@@ -120,6 +121,7 @@ class Loader {
             lua["actors"] = API::ActorRegistry(registry);
             lua["blocks"] = API::BlockRegistry(registry);
             lua["items"] = API::ItemRegistry(registry);
+            lua["recipes"] = API::RecipeRegistry(registry);
             lua["widgets"] = API::WidgetRegistry(registry);
             lua["particle_effects"] = API::ParticleEffectRegistry(registry);
             lua.do_file("scripts/load.lua");

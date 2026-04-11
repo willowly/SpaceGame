@@ -10,6 +10,7 @@ class ItemSlotWidget : public Widget {
 
     public:
         Sprite sprite;
+        Sprite barSprite;
         Color color;
         Font* font;
         TextWidget text;
@@ -64,7 +65,7 @@ class ItemSlotWidget : public Widget {
             
             auto display = stack.item->getItemDisplay(stack);
             if(display.bar) {
-                context.drawRect(Rect(rect.position+vec2(0,rect.size.y-barWidth),vec2(rect.size.x*display.barPercent,barWidth)),sprite,Color::red);
+                context.drawRect(Rect(rect.position+vec2(0,rect.size.y-barWidth),vec2(rect.size.x*display.barPercent,barWidth)),barSprite,Color::red);
             }
 
             return context.mouseInside(rect);

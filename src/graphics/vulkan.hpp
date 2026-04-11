@@ -90,7 +90,6 @@ struct Image {
 };
 
 typedef unsigned int TextureID;
-typedef VkDeviceAddress MaterialHandle;
 
 
 struct LitMaterialData {
@@ -109,20 +108,7 @@ struct LitMaterialData {
     
 };
 
-class Material {
-    friend Vulkan;
-    VkPipeline pipeline = VK_NULL_HANDLE;
-    VkPipeline shadowPipeline = VK_NULL_HANDLE;
-    MaterialHandle data = 0;
-    Material(VkPipeline pipeline, MaterialHandle data) : pipeline(pipeline), data(data) {}
-    Material(VkPipeline pipeline,VkPipeline shadowPipeline, MaterialHandle data) : pipeline(pipeline), shadowPipeline(shadowPipeline), data(data) {}
-    Material() {}
-    public:
-        static const Material none;
-        bool isValid() {
-            return data != 0;
-        }
-};
+#include "material.hpp"
 
 const Material Material::none = Material();
 
@@ -1604,7 +1590,11 @@ class Vulkan {
             
             ubo.screen = glm::ortho(0.0f,screenSize.x,0.0f,screenSize.y);
 
-            memcpy(uniformBuffers[currentFrame].allocationInfo.pMappedData, &ubo, sizeof(ubo)); //uniform buffer is always mapped
+            #if __APPLE__
+                vmaCopyMemoryToAllocation(allocator, &ubo, uniformBuffers[currentFrame].allocation,0,sizeof(ubo));
+            #else
+                memcpy(uniformBuffers[currentFrame].allocationInfo.pMappedData, &ubo, sizeof(ubo)); //uniform buffer is always mapped
+            #endif
 
             // the shadow pass has its own UBO
             SceneDataBufferObject shadowUBO{};
@@ -1629,7 +1619,11 @@ class Vulkan {
 
             shadowUBO.mainLightColor = vec3(7.0f,9.0f,3.0f);
 
-            memcpy(uniformBuffers[currentFrame+FRAMES_IN_FLIGHT].allocationInfo.pMappedData, &shadowUBO, sizeof(shadowUBO));
+            #if __APPLE__
+                vmaCopyMemoryToAllocation(allocator, &shadowUBO, uniformBuffers[currentFrame+FRAMES_IN_FLIGHT].allocation,0,sizeof(shadowUBO));
+            #else
+                memcpy(uniformBuffers[currentFrame+FRAMES_IN_FLIGHT].allocationInfo.pMappedData, &shadowUBO, sizeof(shadowUBO));
+            #endif
 
         }
 

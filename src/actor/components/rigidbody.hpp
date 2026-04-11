@@ -27,9 +27,14 @@
 
 #include "physics/jolt-conversions.hpp"
 
+
+#include "persistance/data-generic.hpp"
+#include "persistance/actor/component/data-rigidbody.hpp"
+
 using glm::vec3,glm::mat3,glm::quat;
 
 class Actor;
+
 
 class Rigidbody {
     
@@ -96,6 +101,7 @@ class Rigidbody {
             body->SetAngularVelocity(Physics::toJoltVec(angularVelocity));
             body->SetRestitution(0.1f);
             body->SetFriction(2.0f);
+            
         }
 
         virtual void prePhysics(World* world,vec3 position,quat rotation) {
@@ -117,6 +123,18 @@ class Rigidbody {
 
             world->physics_system.GetBodyInterface().RemoveBody(body->GetID());
             world->physics_system.GetBodyInterface().DestroyBody(body->GetID());
+        }
+
+        data_Rigidbody save() {
+            data_Rigidbody data{};
+            data.velocity.set(velocity);
+            data.angularVelocity.set(angularVelocity);
+            return data;
+        }
+
+        void load(data_Rigidbody data) {
+            velocity = data.velocity.toVec3();
+            angularVelocity = data.angularVelocity.toVec3();
         }
 
        

@@ -4,9 +4,12 @@
 
 
 struct Recipe {
+
+    string name;
+    string category;
     ItemStack result;
     std::vector<ItemStack> ingredients;
-    float time;
+    float time = 0.5f;
 
     Recipe() {
         
@@ -15,4 +18,6 @@ struct Recipe {
     Recipe(ItemStack result) : result(result) {
         
     }
+
+    Recipe() { }
 };

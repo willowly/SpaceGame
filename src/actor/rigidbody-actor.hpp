@@ -30,6 +30,12 @@
 
 using std::optional,glm::vec3,glm::mat3,MathHelper::lerp;
 
+struct data_RigidbodyActor {
+    data_Actor actor;
+    data_vec3 velocity;
+    data_vec3 angularVelocity;
+};
+
 class RigidbodyActor : public Actor {
 
     protected:
@@ -71,6 +77,7 @@ class RigidbodyActor : public Actor {
 
             JPH::BodyCreationSettings bodySettings(new JPH::BoxShape(JPH::Vec3(1.0f, 1.0f, 1.0f)), Physics::toJoltVec(position), Physics::toJoltQuat(position), JPH::EMotionType::Dynamic, Layers::MOVING);
 
+            bodySettings.mGravityFactor = 0.0f;
             body = world->physics_system.GetBodyInterface().CreateBody(bodySettings);
             world->physics_system.GetBodyInterface().AddBody(body->GetID(),JPH::EActivation::Activate);
 
@@ -106,7 +113,8 @@ class RigidbodyActor : public Actor {
         
 
         void destroy(World* world) {
-            //world->removePhysicsBody(&body);
+            world->physics_system.GetBodyInterface().RemoveBody(body->GetID());
+            world->physics_system.GetBodyInterface().DestroyBody(body->GetID());
             Actor::destroy(world);
         }
 
@@ -117,6 +125,41 @@ class RigidbodyActor : public Actor {
             matrix = matrix * glm::toMat4(rotation);
             matrix = glm::scale(matrix,vec3(modelScale));
             model->addToRender(vulkan,material,matrix);
+        }
+
+        data_ActorType getActorDataType() {
+            return data_ActorType::PHYSICS;
+        }
+
+        virtual std::vector<std::uint8_t> createSaveBuffer() {
+            auto data = save();
+            auto buf = cista::serialize(data);
+            return buf;
+        }
+
+        data_RigidbodyActor save() {
+            data_RigidbodyActor data;
+            data.actor = Actor::save();
+            data.velocity.set(velocity);
+            data.angularVelocity.set(angularVelocity);
+            return data;
+        }
+
+        void load(const data_RigidbodyActor& data) {
+           Actor::load(data.actor);
+           velocity = data.velocity.toVec3();
+           angularVelocity = data.angularVelocity.toVec3();
+        }
+
+        static std::unique_ptr<Actor> makeInstanceFromSave(data_RigidbodyActor& data,RigidbodyActor* prototype) {
+
+            if(prototype == nullptr) throw std::runtime_error("prototype is null");
+            auto actor = makeInstanceFromPrototype(prototype);
+            actor->load(data);
+
+            std::cout << "LOADING PHYSICS ACTOR" << std::endl;
+
+            return actor;
         }
 
         // virtual optional<RaycastHit> raycast(Ray ray,float distance) {

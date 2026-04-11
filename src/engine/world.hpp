@@ -27,7 +27,8 @@
 #include "physics/jolt-terrain-shape.hpp"
 #include "physics/jolt-userdata.hpp"
 
-class TerrainLoader;
+#include "persistance/data-world.hpp"
+#include "persistance/data-loader.hpp"
 
 using glm::vec3, glm::quat, std::unique_ptr, std::shared_ptr;
 
@@ -90,8 +91,6 @@ class World {
     vec3 constantGravity = vec3(0,-15,0);
 
     Camera camera;
-
-    TerrainLoader* terrainLoader;
 
     ContactListener contactListener;
 
@@ -194,6 +193,26 @@ class World {
 
         vec3 getGravityVector(vec3 position) {
             return constantGravity;
+        }
+
+        //probably should remove this, but its for getting the player. Ill think of a better way to handle this I guess
+        template <typename T>
+        std::shared_ptr<T> getActorOfType() {
+            
+            iteratingActors++;
+            for (auto& actor : actors)
+            {
+                std::shared_ptr<T> typed_actor = std::dynamic_pointer_cast<T>(actor);
+                if(typed_actor != nullptr) {
+                    iteratingActors--;
+                    return typed_actor;
+                }
+                
+            }
+            iteratingActors--;
+
+            return nullptr;
+
         }
         
         // do rendering, step and everything else
@@ -361,41 +380,74 @@ class World {
             }
 
             return std::nullopt;
-
-            // just disable raycasting for now :shrug:
-            // iteratingActors++;
-            // for (auto& actor : actors)
-            // {
-            //     auto hitopt = actor->raycast(ray,dist);
-            //     if(hitopt) {
-            //         auto hit = hitopt.value();
-            //         if(hit.distance <= dist) {
-            //             if(result) {
-            //                 result.value().hit = hit;
-            //                 result.value().actor = actor.get();
-            //             } else {
-            //                 result = WorldRaycastHit(actor.get(),hit);
-            //             }
-            //             dist = hit.distance;
-            //         }
-            //     }
-            // }
-            // iteratingActors--;
-            //return result;
         }
 
-        // void collideBasic(Actor* actor,float height,float radius) {
-        //     //ZoneScoped;
-        //     iteratingActors++;
-        //     for (auto& colliderActor : actors)
-        //     {
-        //         if(actor != colliderActor.get()) {
-        //             colliderActor->collideBasic(actor,height,radius);
-        //         }
+        data_World save() {
+            data_World data;
+            iteratingActors++;
+            for (auto& actor : actors)
+            {
+                data_ActorType type = actor->getActorDataType();
+                if(type == data_ActorType::DONT_SAVE) {
+                    continue;
+                }
+                data_ActorEntry data_entry;
+
+                data_entry.type = type;
+                auto buf = actor->createSaveBuffer();
+                data_entry.name = actor->name;
+                data_entry.data.reserve(buf.size());
+                for (size_t i = 0; i < buf.size(); i++)
+                {
+                    data_entry.data.push_back(buf[i]);
+                }
                 
-        //     }
-        //     iteratingActors--;
-        // }
+                data.actors.push_back(data_entry);
+            }
+            iteratingActors--;
+            return data;
+        }
+
+        void clear() {
+
+            iteratingActors++;
+            for (auto& actor : actors)
+            {
+                if(!actor->destroyed) {
+                    actor->destroy(this);
+
+                }
+            }
+            iteratingActors--;
+
+            actors.clear();
+            spawnedActors.clear();
+            contactListener.collisions.clear();
+            camera = Camera();
+            sinceLastStep = 0;
+
+            
+        }
+
+        // this should be combined :shrug: to have like 1 param
+        void load(data_World data,DataLoader& dataLoader) {
+
+            clear();
+
+            for (auto& data_actor : data.actors)
+            {
+                auto newActor = dataLoader.loadActor(data_actor);
+                if(newActor == nullptr) {
+                    Debug::warn("actor to load is null");
+                    continue;
+                }
+                auto spawned_shared = spawn(std::move(newActor));
+                // if(data_actor.type == data_ActorType::PLAYER) {
+                //     auto possible_player = dynamic_cast<std::shared_ptr<Character>>()>(spawned_shared);
+                // }
+            }
+        }
+
 
         Camera& getCamera() {
             return camera;

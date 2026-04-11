@@ -2,7 +2,7 @@ print("Loading Items")
 
 items.stone = {
     type = "resource",
-    name = "Stone",
+    display_name = "Stone",
     icon = "stone_item",
     model = "item_ore",
     material = "stone",
@@ -14,7 +14,7 @@ materials.tin_plate = {
 }
 items.tin_plate = {
     type = "placetool",
-    name = "Tin Plate",
+    display_name = "Tin Plate",
     icon = "tin_plate",
     model = "item_plate",
     material = "tin_plate",
@@ -23,7 +23,7 @@ items.tin_plate = {
 
 items.tin_ore = {
     type = "resource",
-    name = "Tin Ore",
+    display_name = "Tin Ore",
     icon = "tin_ore_item",
     model = "item_ore",
     material = "tin_ore",
@@ -31,7 +31,7 @@ items.tin_ore = {
 
 items.furnace = {
     type = "placetool",
-    name = "Furnace",
+    display_name = "Furnace",
     icon = "furnace_item",
     model = "furnace",
     material = "furnace",
@@ -42,7 +42,7 @@ items.furnace = {
 materials.thruster = {"lit","thruster"}
 items.thruster = {
     type = "placetool",
-    name = "Thruster",
+    display_name = "Thruster",
     icon = "thruster_item",
     model = "thruster",
     material = "thruster",
@@ -51,7 +51,7 @@ items.thruster = {
 
 items.cockpit = {
     type = "placetool",
-    name = "Cockpit",
+    display_name = "Cockpit",
     icon = "cockpit_item",
     model = "cockpit",
     material = "cockpit",
@@ -60,7 +60,7 @@ items.cockpit = {
 
 items.pickaxe = {
     type = "pickaxe",
-    name = "Pickaxe",
+    display_name = "Pickaxe",
     icon = "pickaxe_item",
     model = "pickaxe",
     material = "pickaxe",
@@ -76,7 +76,7 @@ materials.pickaxe2 = {
 }
 items.drill = {
     type = "drill",
-    name = "Drill",
+    display_name = "Drill",
     icon = "drill_item",
     model = "pickaxe",
     material = "pickaxe2",

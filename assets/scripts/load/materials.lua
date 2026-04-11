@@ -6,6 +6,10 @@ materials.grid = {
     texture=textures.grid_dark,
 }
 
+materials.cow = {
+    texture=textures.cow,
+}
+
 materials.tin_block = {
     texture=textures.tin_block,
 }

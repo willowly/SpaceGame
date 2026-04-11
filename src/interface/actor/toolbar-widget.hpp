@@ -26,7 +26,7 @@ class ToolbarWidget : public Widget {
             auto selected = Color(0.2,0.3,0.7);
 
             context.drawRect(Rect::anchored(Rect::withPivot(vec2(0,-10),vec2(800,160),vec2(0.5f,1.0f)),screen,vec2(0.5,1.0f)),sprite);
-            for (int i = 0; i < 9; i++)
+            for (int i = 0; i < Character::toolbarSize; i++)
             {
                 auto rect = Rect((i*(slotSize+slotGap))-((slotSize+slotGap)*4.5f)+slotGap/2,-slotHeight,slotSize,slotSize);
                 rect = Rect::anchored(rect,screen,vec2(0.5,1));

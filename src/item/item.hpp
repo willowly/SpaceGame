@@ -26,11 +26,12 @@ class Item {
 
         }
 
-        Item(string name) : name(name) {
+        Item(string displayName) : displayName(displayName) {
 
         }
 
         string name;
+        string displayName;
         Sprite defaultSprite;
         Mesh<Vertex>* defaultModel = nullptr;
         Material defaultMaterial = Material::none;

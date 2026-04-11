@@ -38,6 +38,8 @@
 
 #include "actor/item-actor.hpp"
 
+#include "persistance/actor/data-character.hpp"
+
 class Character : public Actor {
 
 
@@ -55,7 +57,6 @@ class Character : public Actor {
 
         // prototype
         float moveSpeed = 5.0f;
-        float lookPitch = 0;
         float lookSensitivity = 5;
         float height = 1.0f;
         float radius = 0.4f;
@@ -65,23 +66,28 @@ class Character : public Actor {
         float rotationSpeed = 90;
         float rotationAcceleration = 5;
         float itemDropDistance = 4;
-
+        vec3 thirdPersonCameraOffset = vec3(1,0.5f,10);
+        vec3 thirdPersonCameraRot = {};
+        
         // inputs
         bool clickInput = false;
         bool interactInput = false;
         bool dropInput = false;
         float rotationInput = 0;
         bool brakeInput = false;
-
+        
+        float lookPitch = 0;
         bool thirdPerson = false;
-
+        
         bool noClip = false;
-
+        
         vec3 moveInput = {};
         
         int selectedTool = 0;
 
-        ItemStack toolbar[9] = {};
+        static const int toolbarSize = 9;
+        
+        std::array<ItemStack,toolbarSize> toolbar = {};
 
         struct HeldItemData {
             float actionTimer;
@@ -98,8 +104,8 @@ class Character : public Actor {
         ivec3 ridingConstructionPoint = {};
         quat ridingConstructionRotation = {};
 
-        vec3 thirdPersonCameraOffset = vec3(1,0.5,10);
-        vec3 thirdPersonCameraRot = {};
+        ~Character() = default;
+
 
         Inventory inventory;
 
@@ -107,37 +113,40 @@ class Character : public Actor {
 
         ItemStack cursorStack;
 
-        std::unique_ptr<MenuObject> openMenuObject;
+        std::unique_ptr<MenuObject> openMenuObject = nullptr;
 
         std::vector<Recipe*> recipes;
 
         Recipe* currentRecipe = nullptr;
-        float recipeTimer; //
+        float recipeTimer = 0; //
 
         bool underGravity = false;
 
-        Character(const Character& character) {
-            moveSpeed = character.moveSpeed;
-            lookPitch = character.lookPitch;
-            lookSensitivity = character.lookSensitivity;
-            height = character.height;
-            radius = character.radius;
-            acceleration = character.acceleration;
-            jumpForce = character.jumpForce;
+        Character(const Character& character) :
+            moveSpeed(character.moveSpeed),
+            lookPitch(character.lookPitch),
+            lookSensitivity(character.lookSensitivity),
+            height(character.height),
+            radius(character.radius),
+            acceleration(character.acceleration),
+            jumpForce(character.jumpForce),
+            recipes(character.recipes),
+            heldItemData(HeldItemData{})
+        {
             body.useAngularVelocity = false;
         }
 
         CameraShake shake;
 
-        bool inMenu;
+        bool inMenu = false;
 
-        ActorWidget<Character>* widget;
+        ActorWidget<Character>* widget = nullptr;
 
 
         Rigidbody body;
 
 
-        void addRenderables(Vulkan* vulkan,float dt) {
+        void addRenderables(Vulkan* vulkan,float dt) override {
             if(ridingConstruction != nullptr) return;
             
             if(!toolbar[selectedTool].isEmpty()) {
@@ -237,9 +246,9 @@ class Character : public Actor {
                     if(interactInput) {
                         interact(world);
                     }
-                    auto& selectedStack = toolbar[selectedTool];
+                    auto& selectedStack = toolbar.at(selectedTool);
                     if(!selectedStack.isEmpty()) {
-                        selectedStack.item->step(world,*this,toolbar[selectedTool],dt);
+                        selectedStack.item->step(world,*this,toolbar.at(selectedTool),dt);
                         heldItemData.actionTimer += dt;
                         if(dropInput) {
                             selectedStack.amount--;
@@ -287,11 +296,10 @@ class Character : public Actor {
                     }
                 }
             }
+        }
 
-            
-
-            
-
+        void destroy(World* world) {
+            body.destroy(world);
         }
 
         void ride(Construction* construction,ivec3 point,quat rotation) {
@@ -723,6 +731,55 @@ class Character : public Actor {
 
         bool playerStep() {
             return true;
+        }
+
+        data_ActorType getActorDataType() {
+            return data_ActorType::PLAYER;
+        }
+
+        virtual std::vector<std::uint8_t> createSaveBuffer() {
+            auto data = save();
+            auto buf = cista::serialize(data);
+            return buf;
+        }
+
+        data_Character save() {
+            data_Character data;
+            data.actor = Actor::save();
+            data.body = body.save();
+            data.lookPitch = lookPitch;
+            data.selectedTool = selectedTool;
+            data.thirdPerson = thirdPerson;
+            for (size_t i = 0; i < toolbarSize; i++)
+            {
+                data.toolbar.push_back(toolbar[i].save());
+            }
+            data.inventory = inventory.save();
+            return data;
+        }
+
+        void load(const data_Character& data,DataLoader& loader) {
+            Actor::load(data.actor);
+            body.load(data.body);
+            lookPitch = data.lookPitch;
+            selectedTool = data.selectedTool;
+            refreshTool();
+            for (size_t i = 0; i < data.toolbar.size() && i < toolbarSize; i++)
+            {
+                toolbar[i].load(data.toolbar[i],loader);
+            }
+            inventory.load(data.inventory,loader);
+            thirdPerson = data.thirdPerson;
+        }
+
+        static std::unique_ptr<Actor> makeInstanceFromSave(data_Character& data,Character* prototype,DataLoader& loader) {
+            if(prototype == nullptr) throw std::runtime_error("prototype is null");
+            auto actor = makeInstanceFromPrototype(prototype);
+            actor->load(data,loader);
+
+            std::cout << "LOADING PLAYER ACTOR" << std::endl;
+
+            return actor;
         }
 
     protected:

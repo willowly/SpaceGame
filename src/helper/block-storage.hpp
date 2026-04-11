@@ -5,10 +5,11 @@
 #include "item/recipe.hpp"
 #include "item/item-stack.hpp"
 #include "block/block.hpp"
+#include "persistance/block/data-block-storage.hpp"
 
 #include <variant>
 
-typedef std::variant<Item*,Recipe*,Block*> ResourcePointer;
+typedef std::variant<std::monostate,Item*,Recipe*,Block*> ResourcePointer; //monostate to hold nullptr 
 
 
 class BlockStorage : public GenericStorage {
@@ -45,8 +46,12 @@ class BlockStorage : public GenericStorage {
             if(pointers.size() <= index) {
                 return nullptr;
             }
-            if(std::holds_alternative<T*>(pointers[index])) {
-                return std::get<T*>(pointers[index]);
+            auto pointer = pointers[index];
+            if(std::holds_alternative<std::monostate>(pointer)) {
+                return nullptr;
+            }
+            if(std::holds_alternative<T*>(pointer)) {
+                return std::get<T*>(pointer);
             } else {
                 Debug::warn("generic storage pointer type is wrong.");
                 return nullptr;
@@ -57,6 +62,67 @@ class BlockStorage : public GenericStorage {
             GenericStorage::clear();
             stacks.clear();
             pointers.clear();
+        }
+
+        data_BlockStorage save() {
+            data_BlockStorage data;
+            data.genericStorage = GenericStorage::save();
+            for(auto stack : stacks) {
+                data.stacks.push_back(stack.save());
+            }
+            for(auto pointer : pointers) {
+                data_ResourcePointer data_pointer;
+                if (auto* p = std::get_if<Item*>(&pointer)) {
+                    data_pointer.type = data_ResourcePointerType::ITEM;
+                    if((*p) != nullptr) {
+                        data_pointer.name = (*p)->name;
+                    }
+                } else if (auto* p = std::get_if<Recipe*>(&pointer)) {
+                    data_pointer.type = data_ResourcePointerType::RECIPE;
+                    if((*p) != nullptr) {
+                        data_pointer.name = (*p)->name;
+                    }
+                } else if (auto* p = std::get_if<Block*>(&pointer)) {
+                    data_pointer.type = data_ResourcePointerType::BLOCK;
+                    if((*p) != nullptr) {
+                        data_pointer.name = (*p)->name;
+                    }
+                } else { // std::monostate
+                    data_pointer.type = data_ResourcePointerType::NONE;
+                }
+                data.pointers.push_back(data_pointer);
+            }
+            return data;
+        }
+
+        void load(const data_BlockStorage data,DataLoader& loader) {
+            GenericStorage::load(data.genericStorage);
+            stacks.clear();
+            for(auto data_stack : data.stacks) {
+                ItemStack stack;
+                stack.load(data_stack,loader);
+                stacks.push_back(stack);
+            }
+            for(auto data_pointer : data.pointers) {
+                ResourcePointer pointer;
+                if(data_pointer.name != "") {
+                    switch (data_pointer.type) {
+                        case NONE:
+                            break;
+                        case ITEM:
+                            pointer = loader.getItemPrototype((string)data_pointer.name);
+                            break;
+                        case BLOCK:
+                            pointer = loader.getBlockPrototype((string)data_pointer.name);
+                            break;
+                        case RECIPE:
+                            pointer = loader.getRecipePrototype((string)data_pointer.name);
+                            break;
+
+                    }
+                }
+                pointers.push_back(pointer);
+            }
         }
 
 

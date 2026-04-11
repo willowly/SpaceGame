@@ -2,7 +2,8 @@
 
 #include "item/item-stack.hpp"
 #include "item/recipe.hpp"
-
+#include "persistance/actor/component/data-inventory.hpp"
+#include "persistance/data-loader.hpp"
 
 class Inventory {
 
@@ -117,5 +118,24 @@ class Inventory {
             give(recipe.result);
 
             return true;
+        }
+
+        data_Inventory save() {
+            data_Inventory data;
+            for (auto stack : getItems())
+            {
+                data.itemStacks.push_back(stack->save());
+            }
+            return data;
+        }
+
+        void load(data_Inventory data,DataLoader& loader) {
+            items.clear();
+            for (auto data_stack : data.itemStacks)
+            {
+                ItemStack stack;
+                stack.load(data_stack,loader);
+                items.push_back(stack);
+            }
         }
 };

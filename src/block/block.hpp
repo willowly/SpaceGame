@@ -25,6 +25,7 @@ class Block {
             Mesh
         };
 
+        string name; // for prototypes
         Item* drop; // everthing gets turned into functions...
 
         struct PlacementData {
@@ -46,6 +47,11 @@ class Block {
 
         }
 
+        // when this block is loaded
+        virtual void onLoad(Construction* construction,ivec3 position,BlockState& state) {
+
+        }
+
         // needs to use construction.addStepCallback() to make work
         virtual void onStep(World* world,Construction* construction,ivec3 position,BlockState& state,float dt) {
 
@@ -55,11 +61,11 @@ class Block {
 
         }
 
-        virtual optional<ItemStack> getDrop(BlockState& state) {
+        virtual std::vector<ItemStack> getDrops(Construction* construction,ivec3 position,BlockState& state) {
             if(drop == nullptr) {
-                return std::nullopt;
+                return std::vector<ItemStack>();
             } else {
-                return ItemStack(drop,1);
+                return std::vector<ItemStack> {ItemStack(drop,1)};
             }
         }
 

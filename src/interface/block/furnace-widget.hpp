@@ -118,17 +118,17 @@ class FurnaceWidget : public BlockWidget<FurnaceBlock> {
         void drawTooltip(DrawContext context,ItemStack& stack) {
             
             Rect tooltip = Rect(context.getMousePosition()+vec2(3,3),vec2(40,7));
-            tooltip.size.x = tooltipTextTitle->getSize(stack.item->name).x + 4.0f;
+            tooltip.size.x = tooltipTextTitle->getSize(stack.item->displayName).x + 4.0f;
             context.drawRect(tooltip,solid,Color(0.05,0.05,0.05));
 
-            tooltipTextTitle->draw(context,tooltip.position + vec2(2.0f,2.0f),stack.item->name);
+            tooltipTextTitle->draw(context,tooltip.position + vec2(2.0f,2.0f),stack.item->displayName);
         }
 
         void drawTooltip(DrawContext context,Recipe& recipe) {
             
             Rect tooltip = Rect(context.getMousePosition()+vec2(3,3),vec2(40,7));
 
-            string text = "CRAFT " + recipe.result.item->name;
+            string text = "CRAFT " + recipe.result.item->displayName;
 
             tooltip.size.x = tooltipTextTitle->getSize(text).x + 4.0f;
             context.drawRect(tooltip,solid,Color(0.05,0.05,0.05));

@@ -22,6 +22,7 @@ class Registry {
     map<string,TextureID> textures;
     map<string,Sprite> sprites;
     map<string,Material> materials;
+    map<string,Recipe> recipes;
 
     map<string,unique_ptr<Item>> item;
     
@@ -62,6 +63,10 @@ class Registry {
 
         bool hasItem(string name) {
             return items.contains(name);
+        }
+
+        bool hasRecipe(string name) {
+            return recipes.contains(name);
         }
 
         bool hasWidget(string name) {
@@ -116,6 +121,37 @@ class Registry {
             return nullptr;
         }
 
+        Recipe* getRecipe(string name) {
+            if(recipes.contains(name)) {
+                return &recipes.at(name);
+            } else {
+                Debug::warn("no recipe called \"" + name + "\"");
+            }
+            return nullptr;
+        }
+
+        void addRecipesToVector(std::vector<Recipe*>& recipeList,string category,int maxIngredients) {
+            for(auto& pair : recipes) {
+                Recipe* recipe = &pair.second;
+                if(recipe->category == category && recipe->ingredients.size() <= maxIngredients) {
+                    recipeList.push_back(recipe);
+                }
+            }
+        }
+
+        template<typename T>
+        T* getActor(string name) {
+            Actor* actor = getActor(name);
+            if(actor == nullptr) {
+                return nullptr;
+            }
+            T* typedActor = dynamic_cast<T*>(actor);
+            if(typedActor == nullptr) {
+                return nullptr;
+            }
+            return typedActor;
+        }
+
         Block* getBlock(string name) {
             if(blocks.contains(name)) {
                 return blocks.at(name).get();
@@ -132,6 +168,18 @@ class Registry {
                 Debug::warn("no item prototype called \"" + name + "\"");
             }
             return nullptr;
+        }
+
+        const map<string,unique_ptr<Item>>& getItems() {
+            return items;
+        }
+
+        const map<string,unique_ptr<Block>>& getBlocks() {
+            return blocks;
+        }
+
+        const map<string,Recipe>& getRecipes() {
+            return recipes;
         }
 
         Widget* getWidget(string name) {
@@ -178,25 +226,35 @@ class Registry {
         void addSprite(string name,Sprite sprite) {
             sprites.emplace(name,sprite);
         }
+        void addRecipe(string name,Recipe recipe) {
+            recipe.name = name;
+            recipes.emplace(name,recipe);
+        }
         void addMaterial(string name,Material material) {
             materials.emplace(name,material);
         }
 
         template <typename T>
         T* addActor(string name) {
-            actors.emplace(name,T::makeDefaultPrototype());
+            auto actor = T::makeDefaultPrototype();
+            actor->name = name;
+            actors.emplace(name,std::move(actor));
             return dynamic_cast<T*>(actors.at(name).get());
         }
 
         template <typename T>
         T* addBlock(string name) {
-            blocks.emplace(name,std::make_unique<T>());
+            auto block = std::make_unique<T>();
+            block->name = name;
+            blocks.emplace(name,std::move(block));
             return dynamic_cast<T*>(blocks.at(name).get());
         }
 
         template <typename T>
         T* addItem(string name) {
-            items.emplace(name,std::make_unique<T>());
+            auto item = std::make_unique<T>();
+            item->name = name;
+            items.emplace(name,std::move(item));
             return dynamic_cast<T*>(items.at(name).get());
         }
 

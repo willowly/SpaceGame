@@ -106,7 +106,7 @@ class InventoryWidget : public Widget{
             } else {
                 if(selectedItem != nullptr) {
                     drawTooltip(context,*selectedItem);
-                    for(int i = 0; i <= 9; i++) {
+                    for(int i = 0; i <= Character::toolbarSize; i++) {
                         if(context.getInput().getKeyPressed(GLFW_KEY_1 + i)) {
                             player.setToolbar(i,*selectedItem);
                             player.inventory.take(*selectedItem);
@@ -121,17 +121,17 @@ class InventoryWidget : public Widget{
         void drawTooltip(DrawContext context,ItemStack& stack) {
             
             Rect tooltip = Rect(context.getMousePosition()+vec2(3,3),vec2(70,25));
-            tooltip.size.x = tooltipTextTitle->getSize(stack.item->name).x + 4.0f;
+            tooltip.size.x = tooltipTextTitle->getSize(stack.item->displayName).x + 4.0f;
             context.drawRect(tooltip,backgroundSprite,Color(0.05,0.05,0.05));
 
-            tooltipTextTitle->draw(context,tooltip.position + vec2(2.0f,2.0f),stack.item->name);
+            tooltipTextTitle->draw(context,tooltip.position + vec2(2.0f,2.0f),stack.item->displayName);
         }
 
         void drawTooltip(DrawContext context,Recipe& recipe) {
             
             Rect tooltip = Rect(context.getMousePosition()+vec2(3,3),vec2(70,25));
 
-            string text = "CRAFT " + recipe.result.item->name;
+            string text = "CRAFT " + recipe.result.item->displayName;
 
             tooltip.size.x = tooltipTextTitle->getSize(text).x + 4.0f;
             context.drawRect(tooltip,backgroundSprite,Color(0.05,0.05,0.05));
