@@ -33,7 +33,8 @@ class Actor {
 
         bool destroyed = false;
 
-        virtual ~Actor() {}
+        virtual ~Actor() = default;
+        Actor(const Actor& actor) = default;
 
         void setPosition(vec3 position) {
             this->position = position;
@@ -150,7 +151,7 @@ class Actor {
         }
 
         data_Actor save() {
-            data_Actor data;
+            data_Actor data{};
             data.position.set(position);
             data.rotation.set(rotation);
             return data;

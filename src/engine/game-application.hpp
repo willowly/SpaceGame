@@ -41,6 +41,8 @@
 #include "persistance/save-helper.hpp"
 #include "persistance/data-loader-impl.hpp"
 
+#include "interface/debug/cheats-menu.hpp"
+
 JPH_SUPPRESS_WARNINGS
 
 using std::string;
@@ -273,6 +275,16 @@ class GameApplication {
             terrainLoader.addTerrain(terrain);
         }
 
+        void spawnLargeAsteroidScene() {
+
+            spawnPlayer();
+
+            auto largeGenerationSettings = generationSettings;
+            largeGenerationSettings.radius = 100;
+            auto terrain = world->spawn(Terrain::makeInstance(terrainMaterial,largeGenerationSettings,0,vec3(0,-110,0)));
+            terrainLoader.addTerrain(terrain);
+        }
+
         void spawnPhysicsScene() {
             spawnPlayer();
 
@@ -436,7 +448,7 @@ class GameApplication {
 
             world->constructionMaterial = vulkan->createMaterial<LitMaterialData,ConstructionVertex>("construction",LitMaterialData(registry.getTexture("rock")));
 
-            spawnPhysicsScene();
+            spawnLargeAsteroidScene();
 
             lua["world"] = world.get();
 
@@ -494,22 +506,37 @@ class GameApplication {
                 }
             ImGui::End();
 
-            ImGui::Begin("Generation");
+            ImGui::Begin("TerrainLoader");
 
-                ImGui::InputFloat("Radius",&generationSettings.radius);
-                ImGui::InputFloat("Noise Scale",&generationSettings.noiseScale);
-                ImGui::InputFloat("Noise Factor",&generationSettings.noiseFactor);
-                ImGui::InputInt("Noise Octaves",&generationSettings.noiseOctaves);
-                ImGui::InputFloat("Noise Gain",&generationSettings.noiseGain);
-                ImGui::InputFloat("Noise Lacunarity",&generationSettings.noiseLacunarity);
-                if(ImGui::Button("Regenerate")) {
-                    // terrainLoader.stop();
-                    // terrain->destroy(&world);
-                    // terrain = world.spawn(Terrain::makeInstance(terrainMaterial,generationSettings,vec3(0,0,0)));
-                    // closing = false;
-                    // terrainLoader.start();
+                for (int i = 0; i < TerrainLoader::terrainJobCount; i++)
+                {
+                    ImGui::PushID(i);
+                    std::ostringstream stream;
+                    switch(terrainLoader.getJobState(i)) {
+                        case TerrainJobState::FINISHED:
+                            ImGui::Text("FINISHED");
+                            break;
+                        case TerrainJobState::IN_PROGRESS:
+                            stream << "IN PROGRESS:" << terrainLoader.getJobWorker(i);
+                            ImGui::Text(stream.str().c_str());
+                            break;
+                        case TerrainJobState::WAITING:
+                            ImGui::Text("FINISHED");
+                            break;
+                    }
+                    ImGui::PopID();
                 }
+                
+
             ImGui::End();
+
+            if(player != nullptr && world != nullptr) {
+                DebugMenu::cheatsMenu(*player,*world,registry);
+            }
+
+            ImGui::ShowDemoWindow();
+
+
         }
 
         void loop() 

@@ -126,7 +126,7 @@ class Rigidbody {
         }
 
         data_Rigidbody save() {
-            data_Rigidbody data;
+            data_Rigidbody data{};
             data.velocity.set(velocity);
             data.angularVelocity.set(angularVelocity);
             return data;

@@ -32,8 +32,8 @@ class TerrainChunk {
     MeshBuffer meshBuffer[FRAMES_IN_FLIGHT];
     bool gpuMeshOutOfDate = false;
     bool physicsMeshOutOfDate = false;
-    TerrainType terrainTypes[8];
-    bool meshOutOfDate;
+    TerrainType terrainTypes[8] = {};
+    bool meshOutOfDate = false;
 
     TerrainShape* physicsShape = nullptr;;
 
@@ -41,9 +41,9 @@ class TerrainChunk {
     int size = 30;
     float cellSize = 0.5f;
 
-    unsigned int seed;
+    unsigned int seed = 0;
 
-    std::shared_mutex mtx;
+    std::shared_timed_mutex mtx;
     std::atomic<bool> readyToRender = false;
 
     JPH::Body* body = nullptr;
@@ -68,6 +68,9 @@ class TerrainChunk {
 
     float getPointUnsafe(int x,int y,int z) {
 
+        if(isPlaceHolder) {
+            return 0;
+        }
         if(x < 0) {
             x = 0;
         }
@@ -103,7 +106,7 @@ class TerrainChunk {
         // if(x < 0 || x >= chunkSize) return 0;
         // if(y < 0 || y >= chunkSize) return 0;
         // if(z < 0 || z >= chunkSize) return 0;
-        return terrainData[x + y * size + z * size * size].amount;
+        return terrainData.at(x + y * size + z * size * size).amount;
     }
 
     bool getPointInsideUnsafe(int x,int y,int z) {
@@ -131,15 +134,58 @@ class TerrainChunk {
     TerrainChunk* posZ = nullptr;
     TerrainChunk* posY = nullptr;
 
+
+
     public:
 
-        TerrainChunk(ivec3 offset,int chunkSize,float cellSize,unsigned int id,unsigned int seed) : offset(offset), size(chunkSize), cellSize(cellSize), id(id) {
+        std::atomic<bool> isPlaceHolder = false;
+
+        static TerrainChunk makePlaceHolder() {
+            return TerrainChunk();
+        }
+
+        bool isReadyToRender() {
+            return readyToRender;
+        }
+
+        // 
+        bool isAvailable() {
+            std::shared_lock lock(mtx,std::defer_lock);
+            if(!lock.try_lock()) {
+                return false;
+            }
+            if(cellSize == 0) {
+                return true;
+            }
+            return false;
+        }
+
+        TerrainChunk() : isPlaceHolder(true) {
+        }
+
+        TerrainChunk(ivec3 offset,int chunkSize,float cellSize,unsigned int id,unsigned int seed) : offset(offset), size(chunkSize), cellSize(cellSize), id(id), seed(seed) {
 
             for (auto& buffer : meshBuffer)
             {
                 buffer.buffer = VK_NULL_HANDLE;
             }
             
+        }
+
+        // turns a placeholder into a chunk that can be generated and stuff
+        void create(ivec3 offset,int chunkSize,float cellSize,unsigned int id,unsigned int seed) {
+            std::unique_lock lock(mtx,std::defer_lock);
+            
+            if(!lock.try_lock_for(std::chrono::seconds(3))) {
+                throw std::runtime_error("timeout");
+            }
+
+            isPlaceHolder = false;
+            this->offset = offset;
+            this->size = chunkSize;
+            this->cellSize = cellSize;
+            this->id = id;
+            this->seed = seed;
         }
 
         unsigned int getID() {
@@ -237,6 +283,7 @@ class TerrainChunk {
             std::unique_lock lock(mtx);
             
             auto posCellSpace = localToCellPos(pos);
+            assert(cellSize > 0);
             auto radiusCellSpace = radius/cellSize;
             // std::cout << radiusCellSpace << std::endl;
             // std::cout << posCellSpace.z-radiusCellSpace << std::endl;
@@ -430,7 +477,7 @@ class TerrainChunk {
 
             smoothNormals();
             
-            
+            std::cout << "chunk ready to render " << std::endl;
             readyToRender = true;
             meshOutOfDate = false;
             gpuMeshOutOfDate = true;

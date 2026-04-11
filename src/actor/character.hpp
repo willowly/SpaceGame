@@ -66,7 +66,7 @@ class Character : public Actor {
         float rotationSpeed = 90;
         float rotationAcceleration = 5;
         float itemDropDistance = 4;
-        vec3 thirdPersonCameraOffset = vec3(1,0.5,10);
+        vec3 thirdPersonCameraOffset = vec3(1,0.5f,10);
         vec3 thirdPersonCameraRot = {};
         
         // inputs
@@ -87,7 +87,7 @@ class Character : public Actor {
 
         static const int toolbarSize = 9;
         
-        ItemStack toolbar[toolbarSize] = {};
+        std::array<ItemStack,toolbarSize> toolbar = {};
 
         struct HeldItemData {
             float actionTimer;
@@ -103,6 +103,8 @@ class Character : public Actor {
         Construction* ridingConstruction = nullptr;
         ivec3 ridingConstructionPoint = {};
         quat ridingConstructionRotation = {};
+
+        ~Character() = default;
 
 
         Inventory inventory;
@@ -120,17 +122,18 @@ class Character : public Actor {
 
         bool underGravity = false;
 
-        Character(const Character& character) {
-            moveSpeed = character.moveSpeed;
-            lookPitch = character.lookPitch;
-            lookSensitivity = character.lookSensitivity;
-            height = character.height;
-            radius = character.radius;
-            acceleration = character.acceleration;
-            jumpForce = character.jumpForce;
+        Character(const Character& character) :
+            moveSpeed(character.moveSpeed),
+            lookPitch(character.lookPitch),
+            lookSensitivity(character.lookSensitivity),
+            height(character.height),
+            radius(character.radius),
+            acceleration(character.acceleration),
+            jumpForce(character.jumpForce),
+            recipes(character.recipes),
+            heldItemData(HeldItemData{})
+        {
             body.useAngularVelocity = false;
-            name = character.name;
-            recipes = character.recipes;
         }
 
         CameraShake shake;
@@ -143,7 +146,7 @@ class Character : public Actor {
         Rigidbody body;
 
 
-        void addRenderables(Vulkan* vulkan,float dt) {
+        void addRenderables(Vulkan* vulkan,float dt) override {
             if(ridingConstruction != nullptr) return;
             
             if(!toolbar[selectedTool].isEmpty()) {
@@ -243,9 +246,9 @@ class Character : public Actor {
                     if(interactInput) {
                         interact(world);
                     }
-                    auto& selectedStack = toolbar[selectedTool];
+                    auto& selectedStack = toolbar.at(selectedTool);
                     if(!selectedStack.isEmpty()) {
-                        selectedStack.item->step(world,*this,toolbar[selectedTool],dt);
+                        selectedStack.item->step(world,*this,toolbar.at(selectedTool),dt);
                         heldItemData.actionTimer += dt;
                         if(dropInput) {
                             selectedStack.amount--;

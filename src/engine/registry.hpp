@@ -170,6 +170,18 @@ class Registry {
             return nullptr;
         }
 
+        const map<string,unique_ptr<Item>>& getItems() {
+            return items;
+        }
+
+        const map<string,unique_ptr<Block>>& getBlocks() {
+            return blocks;
+        }
+
+        const map<string,Recipe>& getRecipes() {
+            return recipes;
+        }
+
         Widget* getWidget(string name) {
             if(widgets.contains(name)) {
                 return widgets.at(name).get();
