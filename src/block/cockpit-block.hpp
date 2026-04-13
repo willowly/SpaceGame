@@ -13,14 +13,14 @@ class CockpitBlock : public Block {
         }
 
         // ints
-        const int FACING_VAR = 0;
+        static const int FACING_VAR = 0;
 
         Mesh<Vertex>* mesh;
         TextureID texture;
 
-        virtual BlockStorage onPlace(Construction* construction,ivec3 position,BlockFacing facing) {
+        virtual BlockStorage onPlace(Construction* construction,ivec3 position,BlockPlaceInfo placeInfo) {
             BlockStorage storage;
-            storage.setFacing(FACING_VAR,facing);
+            storage.setFacing(FACING_VAR,BlockHelper::getFacingFromVector(placeInfo.normal));
             return storage;
         }
 

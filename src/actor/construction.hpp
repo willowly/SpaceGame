@@ -172,6 +172,8 @@ class Construction : public Actor {
         {
             thrustForces[i] = 0;
         }
+
+        blockPalette.push_back(BlockPaletteEntry());
         
 
         JPH::MutableCompoundShapeSettings shapeSettings{};
@@ -216,8 +218,6 @@ class Construction : public Actor {
             constexpr auto operator<=>(const Location&) const = default;
 
         };
-
-        std::map<Location,BlockStorage> blockStorage;
         std::map<Location,bool> stepCallbacks;
 
         void step(World* world,float dt) {
@@ -227,7 +227,7 @@ class Construction : public Actor {
                 ivec3 location = pair.first.asVec3();
                 bool enabled = pair.second;
                 if(enabled) {
-                    auto entry = getBlock(location);
+                    auto& entry = getBlock(location);
                     auto& block = entry.block;
 
                     if(entry.block != nullptr) {
@@ -529,7 +529,7 @@ class Construction : public Actor {
 
             calculateBreakup(world,location);
 
-            
+            printIDList();
 
             if(blockCount <= 0) {
                 destroy(world);
@@ -542,8 +542,8 @@ class Construction : public Actor {
 
             int index = getIndex(location);
 
-            auto blockData = blockDataArray.at(index);
-            auto blockEntry = blockPalette.at(blockData.id);
+            auto& blockData = blockDataArray.at(index);
+            auto& blockEntry = blockPalette.at(blockData.id);
 
             if(blockEntry.block != nullptr) {
                 blockEntry.block->onBreak(this,location,blockEntry.storage);
@@ -570,11 +570,6 @@ class Construction : public Actor {
                 blockData = BlockData(0);
 
                 
-
-
-                if(blockStorage.contains(Location(location))) {
-                    blockStorage.erase(Location(location));
-                }
                 if(stepCallbacks.contains(Location(location))) {
                     stepCallbacks[Location(location)] = false;
                 }
@@ -589,28 +584,52 @@ class Construction : public Actor {
                 }
             }
             
-            newPaletteEntry(std::move(entry));
+            return newPaletteEntry(std::move(entry));
         }
 
         BlockID newPaletteEntry(BlockPaletteEntry entry) {
             blockPalette.push_back(std::move(entry));
             return blockPalette.size() - 1;
         }
+        
+        void printIDList() {
 
-        //assumes its not replacing a block. handles tracking, mass and bounds
-        void addBlockNoUpdate(ivec3 location,Block& block,BlockFacing facing) {
+            int i = 0;
+            for (int z = boundsMin.z; z <= boundsMax.z; z++)
+            {
+                for (int y = boundsMin.y; y <= boundsMax.y; y++)
+                {
+                    for (int x = boundsMin.x; x <= boundsMax.x; x++)
+                    {
+                        std::cout << blockDataArray.at(i).id << " ";
+                        i++;
+                    }
+                    std::cout << " | ";
+                }
+                std::cout << " \n ";
+            }
+            std::cout << std::endl;
+            
+        }
+
+        //assumes its not replacing a block. handles tracking and collider
+        void addBlockNoUpdate(ivec3 location,Block& block,BlockPlaceInfo info = BlockPlaceInfo()) {
             blockCount++;
             blockCountX.at(location.x - boundsMin.x)++;
             blockCountY.at(location.y - boundsMin.y)++;
             blockCountZ.at(location.z - boundsMin.z)++;
             size_t index = getIndex(location);
-            auto state = block.onPlace(this,location,facing);
+            auto state = block.onPlace(this,location,info);
             BlockPaletteEntry entry{&block,state};
-            blockDataArray.at(index) = BlockData(paletteEntryToID(entry));
+            if(block.getStorageType() == Block::StorageType::Constant) {
+                blockDataArray.at(index) = BlockData(paletteEntryToID(entry));
+            } else {
+                blockDataArray.at(index) = BlockData(newPaletteEntry(entry));
+            }
 
             addBlockCollider(index,location);
 
-            
+            printIDList();
         }
 
         void addBlockCollider(size_t index,ivec3 location) {
@@ -632,7 +651,7 @@ class Construction : public Actor {
         }
 
         // places a block, must be valid. can't be used for destruction. replaces existing block. Handles updating mesh and stuff
-        void placeBlock(ivec3 location,Block* block,BlockFacing facing) {
+        void placeBlock(ivec3 location,Block* block,BlockPlaceInfo placeInfo = BlockPlaceInfo()) {
             if(block == nullptr) {
                 Debug::warn("tried to place null block");
                 return;
@@ -641,9 +660,11 @@ class Construction : public Actor {
             boundsEncapsulate(location);
             
             removeBlockNoUpdate(location);
+
             
             
-            addBlockNoUpdate(location,*block,facing);
+            addBlockNoUpdate(location,*block,placeInfo);
+            printIDList();
 
             //recalculatePivot();
             generateMesh();
@@ -705,7 +726,7 @@ class Construction : public Actor {
 
                                 auto& blockEntry = blockPalette.at(blockData.id);
                                 newConstruction.boundsEncapsulate(newLocalLocation);
-                                newConstruction.addBlockNoUpdate(newLocalLocation,*blockEntry.block,BlockFacing::FORWARD); //a block location should not have a group unless its a real block
+                                newConstruction.addBlockNoUpdate(newLocalLocation,*blockEntry.block); //a block location should not have a group unless its a real block
                                 // auto oldStorage = getStorage(ivec3(x,y,z));
                                 // if(oldStorage != nullptr) {
                                 //     auto newStorage = newConstruction.addStorage(newLocalLocation);
@@ -925,7 +946,7 @@ class Construction : public Actor {
 
         static std::unique_ptr<Construction> makeInstance(Material material,Block* block,vec3 position,quat rotation = glm::identity<quat>(),bool isStatic = false) {
             auto ptr = makeInstance(material,position,rotation,isStatic);
-            ptr->placeBlock(ivec3(0),block,BlockFacing::FORWARD);
+            ptr->placeBlock(ivec3(0),block);
             return ptr;
         }
 
@@ -949,12 +970,6 @@ class Construction : public Actor {
             data.blocks.reserve(blockDataArray.size());
             for(auto& block : blockDataArray) {
                 data.blocks.push_back(block.save());
-            }
-            for(auto& pair : blockStorage) {
-                data_BlockStoragePair data_pair;
-                data_pair.position.set(pair.first.asVec3());
-                data_pair.storage = pair.second.save();
-                data.storages.push_back(data_pair); //copies the block storage shrug could be sped up
             }
             for(auto& pair : stepCallbacks) {
                 if(pair.second) {
@@ -1016,11 +1031,6 @@ class Construction : public Actor {
                         i++;
                     }
                 }
-            }
-            blockStorage.clear();
-            for(auto& data_pair : data.storages) {
-                auto* storage = addStorage(data_pair.position.toVec3());
-                storage->load(data_pair.storage,loader);
             }
             stepCallbacks.clear();
             for(auto& pos : data.stepCallbacks) {

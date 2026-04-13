@@ -18,18 +18,18 @@ class FurnaceBlock : public Block {
         float craftSpeed = 1;
 
         //ints
-        const int FACING_VAR = 0;
+        static const int FACING_VAR = 0;
 
         //floats
-        const int FUEL_VAR = 0;
-        const int TIMER_VAR = 1;
+        static const int FUEL_VAR = 0;
+        static const int TIMER_VAR = 1;
 
         //stacks
-        const int INPUTSTACK_VAR = 0;
-        const int OUTPUTSTACK_VAR = 1;
+        static const int INPUTSTACK_VAR = 0;
+        static const int OUTPUTSTACK_VAR = 1;
 
         //pointers
-        const int CURRENTRECIPE_VAR = 0;
+        static const int CURRENTRECIPE_VAR = 0;
 
         BlockWidget<FurnaceBlock>* widget;
         std::vector<Recipe*> recipes;
@@ -40,8 +40,13 @@ class FurnaceBlock : public Block {
         FurnaceBlock() : Block() {
         }
 
-        virtual BlockStorage onPlace(Construction* construction,ivec3 position,BlockFacing facing) {
+        StorageType getStorageType() override {
+            return StorageType::Unique;
+        }
+
+        virtual BlockStorage onPlace(Construction* construction,ivec3 position,BlockPlaceInfo placeInfo) {
             BlockStorage storage;
+            auto facing = BlockHelper::getFacingFromVector(placeInfo.normal);
             construction->addStepCallback(position);
             storage.setFacing(FACING_VAR,facing);
             storage.setFloat(FUEL_VAR,fuelMax);
@@ -61,7 +66,8 @@ class FurnaceBlock : public Block {
         }
 
         virtual void addToMesh(Construction* construction,MeshData<ConstructionVertex>& meshData,ivec3 position,BlockStorage& storage) {
-            BlockHelper::addMesh(meshData,position,storage.getFacing(FACING_VAR),mesh,texture);
+            quat rotation = BlockHelper::getRotationFromFacing(storage.getFacing(FACING_VAR)) * glm::quat(glm::radians(vec3(90.0f,0.0f,0.0f)));
+            BlockHelper::addMesh(meshData,position,rotation,mesh->meshData,texture);
         }
 
         virtual void onStep(World* world,Construction* construction,ivec3 position,BlockStorage& storage,float dt) {

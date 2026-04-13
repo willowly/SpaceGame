@@ -36,10 +36,6 @@ namespace API {
     void loadItemPlaceTool(ObjLoadType loadType,sol::table table,PlaceBlockTool* item,Registry& registry) {
         loadItemToolType(loadType,table,item,registry);
         getBlock(table,"block",item->block,registry,false);
-
-        int placeDirection = (int)item->placeDirection;
-        get<int>(table,"place_direction",placeDirection,false); //put this in a get function at some point
-        item->placeDirection = (BlockFacing)placeDirection;
     }
 
     void loadItemPickaxe(ObjLoadType loadType,sol::table table,PickaxeTool* item,Registry& registry) {

@@ -175,21 +175,21 @@ class Terrain : public Actor {
 
 
         {
-            std::cout << "inside chunk " << StringHelper::toString(cameraPositionChunk);
+            //std::cout << "inside chunk " << StringHelper::toString(cameraPositionChunk);
             std::shared_lock lock(chunksMtx);
             auto& chunks = chunkLayers[0];
             lockType = 5000;
             auto key = LocationKey(cameraPositionChunk);
-            if(!chunks.contains(key)) {
-                std::cout << " chunk doesn't exist" << std::endl;
-            } else {
-                if(chunks.at(key).isPlaceHolder) {
-                    std::cout << " chunk is a placeholder" << std::endl;
-                } else {
-                    std::cout << chunks.at(key).vertexCount() << "verts" << std::endl;
-                }
+            // if(!chunks.contains(key)) {
+            //     //std::cout << " chunk doesn't exist" << std::endl;
+            // } else {
+            //     if(chunks.at(key).isPlaceHolder) {
+            //         //std::cout << " chunk is a placeholder" << std::endl;
+            //     } else {
+            //         std::cout << chunks.at(key).vertexCount() << "verts" << std::endl;
+            //     }
 
-            }
+            // }
         }
 
         int layerToLoad = currentLODlayer;

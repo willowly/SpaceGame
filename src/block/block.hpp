@@ -12,7 +12,10 @@ struct ConstructionVertex;
 class Character;
 
 
-
+struct BlockPlaceInfo {
+    vec3 normal = {}; //local to the construction
+    vec3 lookDir = {};
+};
 
 class Block {
 
@@ -26,6 +29,11 @@ class Block {
             Mesh
         };
 
+        enum class StorageType {
+            Constant,
+            Unique
+        };
+
         string name; // for prototypes
         Item* drop; // everthing gets turned into functions...
 
@@ -35,12 +43,17 @@ class Block {
 
         bool solid = false; // should probably also be a function just unsure rn
 
+
     
         Block() {}
         
         virtual ~Block() = default;
 
-        virtual BlockStorage onPlace(Construction* construction,ivec3 position,BlockFacing facing) { //im unsure how to handle placement of different block states
+        virtual StorageType getStorageType() {
+            return StorageType::Constant;
+        }
+
+        virtual BlockStorage onPlace(Construction* construction,ivec3 position,BlockPlaceInfo placeInfo) { //im unsure how to handle placement of different block states
             return BlockStorage();
         }
 

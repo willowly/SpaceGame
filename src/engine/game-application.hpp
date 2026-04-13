@@ -431,7 +431,9 @@ class GameApplication {
 
             world->constructionMaterial = vulkan->createMaterial<LitMaterialData,ConstructionVertex>("construction",LitMaterialData(registry.getTexture("rock")));
 
-            spawnAsteroidScene();
+            //spawnAsteroidScene();
+
+            spawnPlayer();
 
             lua["world"] = world.get();
 
@@ -608,7 +610,6 @@ class GameApplication {
             interface.drawRect(*vulkan,Rect::anchored(Rect::centered(vec2(0.5,4)),screenRect,vec2(0.5,0.5)),Color::white,solidSprite);
 
             if(player != nullptr) {
-                playerWidget.draw(drawContext,*player);
                 if(player->inMenu) 
                 {
                     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -616,7 +617,9 @@ class GameApplication {
                 else 
                 {
                     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                    drawContext.disableClicks();
                 }
+                playerWidget.draw(drawContext,*player);
             }
             
 

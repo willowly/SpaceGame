@@ -67,7 +67,7 @@ class BlockStorage : public GenericStorage {
             pointers.clear();
         }
 
-        BlockFacing setFacing(size_t index,BlockFacing facing) {
+        void setFacing(size_t index,BlockFacing facing) {
             setInt(index,static_cast<int>(facing));
         }
 

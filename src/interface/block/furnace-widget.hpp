@@ -26,7 +26,7 @@ class FurnaceWidget : public BlockWidget<FurnaceBlock> {
 
         TextWidget* tooltipTextTitle;
 
-        void draw(DrawContext context,Character& user,FurnaceBlock& furnace,BlockStorage& storage,BlockState& state) {
+        void draw(DrawContext context,Character& user,FurnaceBlock& furnace,BlockStorage& storage) {
 
             Rect screen = context.getScreenSize();
 
@@ -97,7 +97,7 @@ class FurnaceWidget : public BlockWidget<FurnaceBlock> {
             if(selectedRecipe != nullptr) {
                 drawTooltip(context,*selectedRecipe);
                 if(context.mouseLeftClicked()) {
-                    furnace.tryStartCraft(*selectedRecipe,user,storage,state);
+                    furnace.tryStartCraft(*selectedRecipe,user,storage);
                 }
                 return; //need to fix this,see comment below
                 

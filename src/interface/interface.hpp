@@ -116,11 +116,20 @@ struct DrawContext {
         Interface& interface;
         Vulkan& vulkan;
         Input& input;
+        bool clicksDisabled = false;
     public:
         DrawContext(Interface& interface,Vulkan& vulkan,Input& input) : interface(interface), vulkan(vulkan), input(input) {}
 
         void drawRect(Rect rect,Sprite sprite,Color color = Color::white) {
             interface.drawRect(vulkan,rect,color,sprite);
+        }
+
+        void disableClicks() {
+            clicksDisabled = true;
+        }
+
+        bool isClicksDisabled() {
+            return clicksDisabled;
         }
 
         vec2 getScreenSize() {
@@ -145,9 +154,11 @@ struct DrawContext {
         }
 
         bool mouseLeftClicked() {
+            if(clicksDisabled) return false;
             return input.getMouseButtonPressed(GLFW_MOUSE_BUTTON_1);
         }
         bool mouseRightClicked() {
+            if(clicksDisabled) return false;
             return input.getMouseButtonPressed(GLFW_MOUSE_BUTTON_2);
         }
 };

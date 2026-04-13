@@ -15,15 +15,16 @@ class ThrusterBlock : public Block {
         }
 
         // ints
-        const int FACING_VAR = 0;
+        static const int FACING_VAR = 0;
 
         Mesh<Vertex>* mesh;
         TextureID texture;
         float force; //for now this is always backwards
         float sideForce; //for now this is always the 4 directions parrellel to the back
 
-        virtual BlockStorage onPlace(Construction* construction,ivec3 position,BlockFacing facing) {
+        virtual BlockStorage onPlace(Construction* construction,ivec3 position,BlockPlaceInfo placeInfo) {
             BlockStorage storage;
+            auto facing = BlockHelper::getFacingFromVector(placeInfo.normal);
             storage.setFacing(FACING_VAR,facing);
             addThrustForces(construction,facing);
             return storage;

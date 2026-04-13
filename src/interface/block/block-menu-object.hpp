@@ -27,15 +27,15 @@ class BlockMenuObject : public MenuObject {
             }
             
             
-            auto entry = construction->getBlock(location).storage;
+            auto& entry = construction->getBlock(location);
             BlockType* block = dynamic_cast<BlockType*>(entry.block);
             if(block == nullptr) {
                 Debug::warn("block is null");
                 Debug::subtractTrace();
                 return;
             }
-            auto storage = entry.storage;
-            widget.draw(context,user,*block,storage,state);
+            auto& storage = entry.storage;
+            widget.draw(context,user,*block,storage);
             Debug::subtractTrace();
         }
 
