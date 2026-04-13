@@ -18,6 +18,4 @@ struct Recipe {
     Recipe(ItemStack result) : result(result) {
         
     }
-
-    Recipe() { }
 };
