@@ -12,10 +12,10 @@ class CameraShake {
 
     private:
         float timer = -1;
-        vec3 rotation;
+        vec3 rotation = {};
 
-        vec3 altRotation;
-        float altOffset;
+        vec3 altRotation = {};
+        float altOffset = 0;
 
 
     public:

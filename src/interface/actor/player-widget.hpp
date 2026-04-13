@@ -43,7 +43,7 @@ class PlayerWidget : public ActorWidget<Character> {
         Rect cursorStackRect = Rect(context.getMousePosition(),cursorSlotSize);
         cursorSlotWidget->draw(context,cursorStackRect,player.cursorStack);
 
-         Rect screen = context.getScreenSize();
+        Rect screen = context.getScreenSize();
 
         context.drawRect(Rect::anchored(Rect::centered(vec2(cursorRectLength,cursorRectWidth)),screen,vec2(0.5,0.5)),cursorRectSprite);
         context.drawRect(Rect::anchored(Rect::centered(vec2(cursorRectWidth,cursorRectLength)),screen,vec2(0.5,0.5)),cursorRectSprite);

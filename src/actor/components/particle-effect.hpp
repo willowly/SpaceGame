@@ -21,7 +21,7 @@ class ParticleEffect {
             quat rotation = {};
             vec3 angularVelocity = {};
             float age = -1; // -1 means they aren't spawned
-            float lifeTime;
+            float lifeTime = 1;
         };
 
         std::vector<Particle> particles;
@@ -62,7 +62,7 @@ class ParticleEffect {
         struct SphereShape {
 
             // sphere
-            float radius;
+            float radius = 1.0f;
 
             void setPositionAndDirection(Particle& particle,vec3 position,quat rotation) {
 

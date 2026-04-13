@@ -15,14 +15,21 @@ class TerrainJob {
     std::shared_mutex mutex;
     std::shared_ptr<Terrain> terrain = nullptr;
     ChunkAddress address;
+    TerrainJobState state = TerrainJobState::FINISHED;
     public:
         std::atomic<std::thread::id> worker;
-        std::atomic<TerrainJobState> state = TerrainJobState::FINISHED;
 
+        TerrainJobState getJobState() const {
+            return state;
+        }
+        
         bool trySetJob(std::shared_ptr<Terrain> terrain,ChunkAddress address) {
+
+            
             std::unique_lock lock(mutex,std::defer_lock);
             
             if(lock.try_lock()) {
+                if(state != TerrainJobState::FINISHED) return false;
                 this->address = address;
                 this->terrain = terrain;
                 state = TerrainJobState::WAITING;
@@ -33,9 +40,14 @@ class TerrainJob {
 
         //shared_ptr is null if it failed
         std::pair<std::shared_ptr<Terrain>,ChunkAddress> tryGetJob() {
+
+            
+            
             std::unique_lock lock(mutex,std::defer_lock);
+
             
             if(lock.try_lock()) {
+                if(state != TerrainJobState::WAITING) return std::pair<std::shared_ptr<Terrain>,ChunkAddress>(nullptr,ChunkAddress());;
                 state = TerrainJobState::IN_PROGRESS;
                 worker = std::this_thread::get_id();
                 return std::pair<std::shared_ptr<Terrain>,ChunkAddress>(terrain,address);
@@ -44,6 +56,8 @@ class TerrainJob {
         }
 
         void finishJob() {
+            std::unique_lock lock(mutex);
+            
             state = TerrainJobState::FINISHED;
         }
 };
@@ -54,7 +68,7 @@ class TerrainLoader {
         static const int terrainJobCount = 64;
 
         TerrainJobState getJobState(int index) {
-            return terrainJobs.at(index).state;
+            return TerrainJobState::WAITING;//terrainJobs.at(index).getJobState();
         } 
         std::thread::id getJobWorker(int index) {
             return terrainJobs.at(index).worker;
@@ -95,11 +109,11 @@ class TerrainLoader {
                     for (size_t i = 0; i < terrainJobCount; i++)
                     {
                         static_assert(terrainJobCount > 0);
-                        std::cout << "MAIN: checking job" << jobIndex << std::endl;
+                        //std::cout << "MAIN: checking job" << jobIndex << std::endl;
                         jobIndex = getNextJob(jobIndex);
-                        if(terrainJobs.at(jobIndex).state != TerrainJobState::FINISHED) break;
                         if(terrainJobs.at(jobIndex).trySetJob(terrain,address)) {
-                            std::cout << "MAIN: setting job" << jobIndex << std::endl;
+                            terrain->addPlaceholder(address);
+                            //std::cout << "MAIN: setting job" << jobIndex << std::endl;
                             break;
                         };
                     }
@@ -118,18 +132,19 @@ class TerrainLoader {
     }
 
     void workerTask() {
+        ZoneScoped
         int jobIndex = 0;
         while(!stopSignal) {
             for (size_t i = 0; i < terrainJobCount; i++)
             {
+                
                 static_assert(terrainJobCount > 0);
                 jobIndex = getNextJob(jobIndex);
-                if(terrainJobs.at(jobIndex).state != TerrainJobState::WAITING) continue;
                 auto pair = (terrainJobs.at(jobIndex).tryGetJob());
                 if(pair.first != nullptr) {
                     pair.first->addChunk(pair.second);
                     terrainJobs.at(jobIndex).finishJob();
-                    std::cout << std::this_thread::get_id() << "WORKER: done job" << jobIndex << std::endl;
+                    //std::cout << std::this_thread::get_id() << "WORKER: done job" << jobIndex << std::endl;
                 }
             }
         }
@@ -141,6 +156,7 @@ class TerrainLoader {
     }
 
     std::shared_ptr<Terrain> getTerrain(int index) {
+        ZoneScoped
         std::scoped_lock lock(terrainMutex);
         assert(index >= 0);
         if(static_cast<int>(terrains.size()) <= index) {
@@ -150,12 +166,14 @@ class TerrainLoader {
     }
 
     int getTerrainVectorSize() {
+        ZoneScoped
         std::scoped_lock lock(terrainMutex);
         return static_cast<int>(terrains.size());
     }
 
     public:
         void addTerrain(std::shared_ptr<Terrain> terrain) {
+            ZoneScoped
             std::scoped_lock lock(terrainMutex);
             terrains.push_back(terrain);
         }

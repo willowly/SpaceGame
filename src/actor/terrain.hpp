@@ -95,7 +95,7 @@ class Terrain : public Actor {
 
     // adds a chunk to the terrain. Able to be called on loader thread
     void addChunk(ChunkAddress address) {
-
+        ZoneScoped
         int layer = address.layer;
         ivec3 pos = address.pos;
 
@@ -115,9 +115,10 @@ class Terrain : public Actor {
             bool contains = chunks.contains(key);
             if(contains && !chunks.at(key).isPlaceHolder) {
                 std::cout << std::this_thread::get_id() << "chunk not available" << std::endl;
+                return;
             }
             chunks.at(key).create(offset,chunkSize,newCellSize,nextChunkId,seed);
-            std::cout << std::this_thread::get_id() << "adding chunk " << std::endl;
+            //std::cout << std::this_thread::get_id() << "adding chunk " << std::endl;
             chunk = &chunks.at(key);
         }
 
@@ -157,13 +158,39 @@ class Terrain : public Actor {
         return r;
     }
 
+    void addPlaceholder(ChunkAddress address) {
+        std::unique_lock lock(chunksMtx);
+        auto& chunks = chunkLayers.at(address.layer);
+        lockType = 505;
+        chunks.emplace(std::piecewise_construct,std::make_tuple(address.pos),std::make_tuple());
+    }
+
     std::optional<ChunkAddress> getNextChunkToload(vec3 cameraPosition) {
+        ZoneScoped
         assert(currentLODlayer >= 0 && currentLODlayer < LODlayers);
 
         //std::cout << "terrain at " << StringHelper::toString(position) << std::endl;
         vec3 cameraPositionRelative = inverseTransformPoint(cameraPosition);
         vec3 cameraPositionChunk = glm::floor(cameraPositionRelative/((float)chunkSize*cellSize));
 
+
+        {
+            std::cout << "inside chunk " << StringHelper::toString(cameraPositionChunk);
+            std::shared_lock lock(chunksMtx);
+            auto& chunks = chunkLayers[0];
+            lockType = 5000;
+            auto key = LocationKey(cameraPositionChunk);
+            if(!chunks.contains(key)) {
+                std::cout << " chunk doesn't exist" << std::endl;
+            } else {
+                if(chunks.at(key).isPlaceHolder) {
+                    std::cout << " chunk is a placeholder" << std::endl;
+                } else {
+                    std::cout << chunks.at(key).vertexCount() << "verts" << std::endl;
+                }
+
+            }
+        }
 
         int layerToLoad = currentLODlayer;
         {
@@ -209,10 +236,6 @@ class Terrain : public Actor {
             loadedLayers.at(layerToLoad) = true;
             return std::nullopt;
         }
-
-        std::unique_lock lock(chunksMtx);
-        lockType = 505;
-        chunks.emplace(std::piecewise_construct,std::make_tuple(closestChunkPos),std::make_tuple());
 
         return ChunkAddress{layerToLoad,closestChunkPos};
         
@@ -428,6 +451,7 @@ class Terrain : public Actor {
 
     void addRenderables(Vulkan* vulkan,float dt) override {
 
+        ZoneScopedN("Terrain::addRenderables");
         Clock clock;
         std::shared_lock lock(chunksMtx);
         auto time = clock.getTime();
@@ -439,9 +463,6 @@ class Terrain : public Actor {
         for(auto& pair : chunks) {
             auto& chunk = pair.second;
             chunk.addRenderables(vulkan,dt,position,material);
-            if(chunk.getID() == selectedChunk) {
-                chunk.drawDebug(position);
-            }
         }
         //std::cout << "render time: " << (float)glfwGetTime() - clock << std::endl;
     }

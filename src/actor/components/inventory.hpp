@@ -45,12 +45,12 @@ class Inventory {
             return take(stack.item,stack.amount);
         }
         //returns amount actually taken
-        int take(Item* item,float amount) {
+        int take(Item* item,int amount) {
             if(item == nullptr) return 0;
             auto stack = getStack(item);
             if(stack != nullptr) {
                 if(stack->amount <= amount) {
-                    float oldAmount = stack->amount;
+                    int oldAmount = stack->amount;
                     stack->amount = 0;
                     return oldAmount;
                 } else {

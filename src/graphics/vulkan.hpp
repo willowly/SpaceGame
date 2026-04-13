@@ -9,6 +9,8 @@
 #define VMA_IMPLEMENTATION
 #include "vma/vk_mem_alloc.h"
 
+#include "tracy/TracyVulkan.hpp"
+
 #include "helper/clock.hpp"
 
 #include <iostream>
@@ -550,7 +552,7 @@ class Vulkan {
  
         void render(const Camera& camera) {
 
-            //ZoneScoped;
+            ZoneScoped;
 
             ImGui::Render();
            
@@ -818,7 +820,7 @@ class Vulkan {
         template<typename Vertex>
         MeshBuffer createMeshBuffers(std::vector<Vertex>& vertices,std::vector<uint16_t>& indices) {
 
-            //ZoneScoped;
+            ZoneScoped;
             
             VkDeviceSize vertexBufferSize = sizeof(vertices[0]) * vertices.size();
             VkDeviceSize indexBufferSize = sizeof(indices[0]) * indices.size();

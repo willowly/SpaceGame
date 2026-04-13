@@ -218,7 +218,7 @@ class World {
         // do rendering, step and everything else
         void frame(Vulkan* vulkan,float dt) {
             
-            //ZoneScoped;
+            ZoneScoped;
             
             float clock = glfwGetTime();
             addRenderables(vulkan,dt);
@@ -240,7 +240,7 @@ class World {
         }
 
         void addRenderables(Vulkan* vulkan,float dt) {
-            //ZoneScoped;
+            ZoneScoped;
             for (auto& actor : actors)
             {
                 actor->addRenderables(vulkan,dt);
@@ -250,7 +250,7 @@ class World {
 
         void physicsStep(float dt) {
             
-            //ZoneScoped;
+            ZoneScoped;
 
             {
                 //ZoneScopedN("prePhysics")
@@ -284,7 +284,7 @@ class World {
         }
 
         void step(float dt) {
-            //ZoneScoped;
+            ZoneScoped;
             
             iteratingActors++;
             for (auto& actor : actors)

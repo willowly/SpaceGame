@@ -148,6 +148,10 @@ class TerrainChunk {
             return readyToRender;
         }
 
+        int vertexCount() {
+            return meshData.vertices.size();
+        }
+
         // 
         bool isAvailable() {
             std::shared_lock lock(mtx,std::defer_lock);
@@ -477,7 +481,7 @@ class TerrainChunk {
 
             smoothNormals();
             
-            std::cout << "chunk ready to render " << std::endl;
+            //std::cout << "chunk ready to render " << std::endl;
             readyToRender = true;
             meshOutOfDate = false;
             gpuMeshOutOfDate = true;

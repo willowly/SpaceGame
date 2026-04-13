@@ -24,9 +24,6 @@
 #include <thread>
 #include <chrono>
 
-// #include <tracy/Tracy.hpp>
-// #include <tracy/TracyVulkan.hpp>
-
 #include "interface/actor/player-widget.hpp"
 #include "interface/block/furnace-widget.hpp"
 
@@ -275,16 +272,6 @@ class GameApplication {
             terrainLoader.addTerrain(terrain);
         }
 
-        void spawnLargeAsteroidScene() {
-
-            spawnPlayer();
-
-            auto largeGenerationSettings = generationSettings;
-            largeGenerationSettings.radius = 100;
-            auto terrain = world->spawn(Terrain::makeInstance(terrainMaterial,largeGenerationSettings,0,vec3(0,-110,0)));
-            terrainLoader.addTerrain(terrain);
-        }
-
         void spawnPhysicsScene() {
             spawnPlayer();
 
@@ -448,7 +435,7 @@ class GameApplication {
 
             world->constructionMaterial = vulkan->createMaterial<LitMaterialData,ConstructionVertex>("construction",LitMaterialData(registry.getTexture("rock")));
 
-            spawnLargeAsteroidScene();
+            spawnAsteroidScene();
 
             lua["world"] = world.get();
 
@@ -554,7 +541,7 @@ class GameApplication {
             averageTime /= 60.0f;
 
 
-            //ZoneScoped;
+            ZoneScoped;
             
             // Get inputs, window resize, and more
             glfwPollEvents();
