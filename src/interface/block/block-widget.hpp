@@ -13,7 +13,7 @@ class BlockWidget : public Widget {
         
 
 
-    virtual void draw(DrawContext context,Character& user,BlockType& block,BlockStorage& storage,BlockState& state) = 0;
+    virtual void draw(DrawContext context,Character& user,BlockType& block,BlockStorage& storage) = 0;
 
     
 };

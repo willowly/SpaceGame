@@ -17,6 +17,9 @@ class FurnaceBlock : public Block {
         float fuelMax = 10;
         float craftSpeed = 1;
 
+        //ints
+        const int FACING_VAR = 0;
+
         //floats
         const int FUEL_VAR = 0;
         const int TIMER_VAR = 1;
@@ -37,20 +40,18 @@ class FurnaceBlock : public Block {
         FurnaceBlock() : Block() {
         }
 
-        virtual BlockState onPlace(Construction* construction,ivec3 position,BlockFacing facing) {
-            auto storage = construction->addStorage(position);
+        virtual BlockStorage onPlace(Construction* construction,ivec3 position,BlockFacing facing) {
+            BlockStorage storage;
             construction->addStepCallback(position);
-            if(storage == nullptr) {
-                throw std::runtime_error("Storage was null for furnace!");
-            } 
-            storage->setFloat(FUEL_VAR,fuelMax);
-            storage->setStack(INPUTSTACK_VAR,ItemStack(nullptr,0));
-            storage->clearStack(INPUTSTACK_VAR);
-            storage->setPointer<Recipe>(CURRENTRECIPE_VAR,nullptr);
-            return BlockState::encode(facing);
+            storage.setFacing(FACING_VAR,facing);
+            storage.setFloat(FUEL_VAR,fuelMax);
+            storage.setStack(INPUTSTACK_VAR,ItemStack(nullptr,0));
+            storage.clearStack(INPUTSTACK_VAR);
+            storage.setPointer<Recipe>(CURRENTRECIPE_VAR,nullptr);
+            return storage;
         }
 
-        virtual void onInteract(Construction* construction,ivec3 position,BlockState& state,Character& character) {
+        virtual void onInteract(Construction* construction,ivec3 position,BlockStorage& storage,Character& character) {
             if(widget == nullptr) {
                 Debug::warn("furnace menu null");
                 return;
@@ -59,39 +60,31 @@ class FurnaceBlock : public Block {
             character.openMenu(std::move(menuObj));
         }
 
-        virtual void addToMesh(Construction* construction,MeshData<ConstructionVertex>& meshData,ivec3 position,BlockState& state) {
-            BlockHelper::addMesh(meshData,position,state.asFacing(),mesh,texture);
+        virtual void addToMesh(Construction* construction,MeshData<ConstructionVertex>& meshData,ivec3 position,BlockStorage& storage) {
+            BlockHelper::addMesh(meshData,position,storage.getFacing(FACING_VAR),mesh,texture);
         }
 
-        virtual void onStep(World* world,Construction* construction,ivec3 position,BlockState& state,float dt) {
-            auto storage = construction->getStorage(position);
-            if(storage == nullptr) {
-                throw std::runtime_error("Storage was null for furnace!");
-            }
+        virtual void onStep(World* world,Construction* construction,ivec3 position,BlockStorage& storage,float dt) {
 
-            float fuel = storage->getFloat(FUEL_VAR);
-            float craftTimer = storage->getFloat(TIMER_VAR);
-            Recipe* currentRecipe = storage->getPointer<Recipe>(CURRENTRECIPE_VAR);
-            ItemStack inputStackOpt = storage->getStack(INPUTSTACK_VAR);
-            ItemStack outputStackOpt = storage->getStack(OUTPUTSTACK_VAR);
+            float fuel = storage.getFloat(FUEL_VAR);
+            float craftTimer = storage.getFloat(TIMER_VAR);
+            Recipe* currentRecipe = storage.getPointer<Recipe>(CURRENTRECIPE_VAR);
+            ItemStack inputStackOpt = storage.getStack(INPUTSTACK_VAR);
+            ItemStack outputStackOpt = storage.getStack(OUTPUTSTACK_VAR);
             if(currentRecipe != nullptr) {
                 craftStep(craftTimer,currentRecipe,inputStackOpt,outputStackOpt,dt);
             }
-            storage->setFloat(FUEL_VAR,fuel);
-            storage->setFloat(TIMER_VAR,craftTimer);
-            storage->setStack(INPUTSTACK_VAR,inputStackOpt);
-            storage->setStack(OUTPUTSTACK_VAR,outputStackOpt);
+            storage.setFloat(FUEL_VAR,fuel);
+            storage.setFloat(TIMER_VAR,craftTimer);
+            storage.setStack(INPUTSTACK_VAR,inputStackOpt);
+            storage.setStack(OUTPUTSTACK_VAR,outputStackOpt);
         }
 
-        virtual std::vector<ItemStack> getDrops(Construction* construction,ivec3 position,BlockState& state) {
-            auto storage = construction->getStorage(position);
-            if(storage == nullptr) {
-                throw std::runtime_error("Storage was null for furnace!");
-            }
-            std::vector<ItemStack> drops = Block::getDrops(construction,position,state);
-            ItemStack inputStack = storage->getStack(INPUTSTACK_VAR);
+        virtual std::vector<ItemStack> getDrops(Construction* construction,ivec3 position,BlockStorage& storage) {
+            std::vector<ItemStack> drops = Block::getDrops(construction,position,storage);
+            ItemStack inputStack = storage.getStack(INPUTSTACK_VAR);
             if(!inputStack.isEmpty()) drops.push_back(inputStack);
-            ItemStack outputStack = storage->getStack(OUTPUTSTACK_VAR);
+            ItemStack outputStack = storage.getStack(OUTPUTSTACK_VAR);
             if(!outputStack.isEmpty()) drops.push_back(outputStack);
             return drops;
         }
@@ -130,7 +123,7 @@ class FurnaceBlock : public Block {
             }
         }
 
-        virtual void tryStartCraft(Recipe& recipe,Character& character,BlockStorage& storage,BlockState& state) {
+        virtual void tryStartCraft(Recipe& recipe,Character& character,BlockStorage& storage) {
             if(!character.hasIngredients(recipe)) {
                 return;
             }

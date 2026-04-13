@@ -4,10 +4,13 @@
 
 #include "item/recipe.hpp"
 #include "item/item-stack.hpp"
-#include "block/block.hpp"
+#include "block/block-facing.hpp"
+// #include "block/block.hpp"
 #include "persistance/block/data-block-storage.hpp"
 
 #include <variant>
+
+class Block;
 
 typedef std::variant<std::monostate,Item*,Recipe*,Block*> ResourcePointer; //monostate to hold nullptr 
 
@@ -64,34 +67,57 @@ class BlockStorage : public GenericStorage {
             pointers.clear();
         }
 
+        BlockFacing setFacing(size_t index,BlockFacing facing) {
+            setInt(index,static_cast<int>(facing));
+        }
+
+        BlockFacing getFacing(size_t index) {
+            int i = getInt(index,(int)BlockFacing::FORWARD);
+            if(i > static_cast<int>(BlockFacing::LEFT)) {
+                return BlockFacing::LEFT;
+            }
+            return static_cast<BlockFacing>(i);
+        }
+
+        bool operator==(const BlockStorage& entry) {
+            if(!GenericStorage::operator==(entry)) return false;
+            if(pointers.size() != entry.pointers.size()) return false;
+            for (size_t i = 0; i < pointers.size(); i++)
+            {
+                if(pointers.at(i) != entry.pointers.at(i)) return false; 
+            }
+            // if ur worried about itemstacks... you shouldn't be comparing these
+            return true;
+        }
+
         data_BlockStorage save() {
             data_BlockStorage data;
-            data.genericStorage = GenericStorage::save();
-            for(auto stack : stacks) {
-                data.stacks.push_back(stack.save());
-            }
-            for(auto pointer : pointers) {
-                data_ResourcePointer data_pointer;
-                if (auto* p = std::get_if<Item*>(&pointer)) {
-                    data_pointer.type = data_ResourcePointerType::ITEM;
-                    if((*p) != nullptr) {
-                        data_pointer.name = (*p)->name;
-                    }
-                } else if (auto* p = std::get_if<Recipe*>(&pointer)) {
-                    data_pointer.type = data_ResourcePointerType::RECIPE;
-                    if((*p) != nullptr) {
-                        data_pointer.name = (*p)->name;
-                    }
-                } else if (auto* p = std::get_if<Block*>(&pointer)) {
-                    data_pointer.type = data_ResourcePointerType::BLOCK;
-                    if((*p) != nullptr) {
-                        data_pointer.name = (*p)->name;
-                    }
-                } else { // std::monostate
-                    data_pointer.type = data_ResourcePointerType::NONE;
-                }
-                data.pointers.push_back(data_pointer);
-            }
+            // data.genericStorage = GenericStorage::save();
+            // for(auto stack : stacks) {
+            //     data.stacks.push_back(stack.save());
+            // }
+            // for(auto pointer : pointers) {
+            //     data_ResourcePointer data_pointer;
+            //     if (auto* p = std::get_if<Item*>(&pointer)) {
+            //         data_pointer.type = data_ResourcePointerType::ITEM;
+            //         if((*p) != nullptr) {
+            //             data_pointer.name = (*p)->name;
+            //         }
+            //     } else if (auto* p = std::get_if<Recipe*>(&pointer)) {
+            //         data_pointer.type = data_ResourcePointerType::RECIPE;
+            //         if((*p) != nullptr) {
+            //             data_pointer.name = (*p)->name;
+            //         }
+            //     } else if (auto* p = std::get_if<Block*>(&pointer)) {
+            //         data_pointer.type = data_ResourcePointerType::BLOCK;
+            //         if((*p) != nullptr) {
+            //             data_pointer.name = (*p)->name;
+            //         }
+            //     } else { // std::monostate
+            //         data_pointer.type = data_ResourcePointerType::NONE;
+            //     }
+            //     data.pointers.push_back(data_pointer);
+            // }
             return data;
         }
 

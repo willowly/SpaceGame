@@ -14,41 +14,45 @@ class ThrusterBlock : public Block {
             
         }
 
+        // ints
+        const int FACING_VAR = 0;
+
         Mesh<Vertex>* mesh;
         TextureID texture;
         float force; //for now this is always backwards
         float sideForce; //for now this is always the 4 directions parrellel to the back
 
-        virtual BlockState onPlace(Construction* construction,ivec3 position,BlockFacing facing) {
-            
+        virtual BlockStorage onPlace(Construction* construction,ivec3 position,BlockFacing facing) {
+            BlockStorage storage;
+            storage.setFacing(FACING_VAR,facing);
             addThrustForces(construction,facing);
-            return BlockState::encode(facing);
+            return storage;
         }
 
-        void onLoad(Construction* construction,ivec3 position,BlockState& state) {
-            auto facing = state.asFacing();
+        void onLoad(Construction* construction,ivec3 position,BlockStorage& storage) {
+            auto facing = storage.getFacing(FACING_VAR);
             addThrustForces(construction,facing);
         }
 
         void addThrustForces(Construction* construction,BlockFacing facing) {
-            construction->thrustForces[BlockHelper::rotateFacingByFacing(BlockFacing::UP,facing)] += sideForce;
-            construction->thrustForces[BlockHelper::rotateFacingByFacing(BlockFacing::DOWN,facing)] += sideForce;
-            construction->thrustForces[BlockHelper::rotateFacingByFacing(BlockFacing::RIGHT,facing)] += sideForce;
-            construction->thrustForces[BlockHelper::rotateFacingByFacing(BlockFacing::LEFT,facing)] += sideForce;
-            construction->thrustForces[facing] += force;
+            construction->thrustForces[static_cast<int>(BlockHelper::rotateFacingByFacing(BlockFacing::UP,facing))] += sideForce;
+            construction->thrustForces[static_cast<int>(BlockHelper::rotateFacingByFacing(BlockFacing::DOWN,facing))] += sideForce;
+            construction->thrustForces[static_cast<int>(BlockHelper::rotateFacingByFacing(BlockFacing::RIGHT,facing))] += sideForce;
+            construction->thrustForces[static_cast<int>(BlockHelper::rotateFacingByFacing(BlockFacing::LEFT,facing))] += sideForce;
+            construction->thrustForces[static_cast<int>(facing)] += force;
         }
 
-        virtual void addToMesh(Construction* construction,MeshData<ConstructionVertex>& meshData,ivec3 position,BlockState& state) {
-            BlockHelper::addMesh(meshData,position,state.asFacing(),mesh,texture);
+        virtual void addToMesh(Construction* construction,MeshData<ConstructionVertex>& meshData,ivec3 position,BlockStorage& storage) {
+            BlockHelper::addMesh(meshData,position,storage.getFacing(FACING_VAR),mesh,texture);
         }
 
-        virtual void onBreak(Construction* construction,ivec3 position,BlockState& state) {
+        virtual void onBreak(Construction* construction,ivec3 position,BlockStorage& storage) {
 
-            auto facing = state.asFacing();
-            construction->thrustForces[BlockHelper::rotateFacingByFacing(BlockFacing::UP,facing)] -= sideForce;
-            construction->thrustForces[BlockHelper::rotateFacingByFacing(BlockFacing::DOWN,facing)] -= sideForce;
-            construction->thrustForces[BlockHelper::rotateFacingByFacing(BlockFacing::RIGHT,facing)] -= sideForce;
-            construction->thrustForces[BlockHelper::rotateFacingByFacing(BlockFacing::LEFT,facing)] -= sideForce;
-            construction->thrustForces[facing] -= force;
+            auto facing = storage.getFacing(FACING_VAR);
+            construction->thrustForces[static_cast<int>(BlockHelper::rotateFacingByFacing(BlockFacing::UP,facing))] -= sideForce;
+            construction->thrustForces[static_cast<int>(BlockHelper::rotateFacingByFacing(BlockFacing::DOWN,facing))] -= sideForce;
+            construction->thrustForces[static_cast<int>(BlockHelper::rotateFacingByFacing(BlockFacing::RIGHT,facing))] -= sideForce;
+            construction->thrustForces[static_cast<int>(BlockHelper::rotateFacingByFacing(BlockFacing::LEFT,facing))] -= sideForce;
+            construction->thrustForces[static_cast<int>(facing)] -= force;
         }
 };

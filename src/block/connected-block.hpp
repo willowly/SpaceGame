@@ -17,7 +17,7 @@ class ConnectedBlock : public Block {
 
         int connectionType = 0; // :shrug: idk
 
-        virtual void addToMesh(Construction* construction,MeshData<ConstructionVertex>& meshData,ivec3 position,BlockState& state) {
+        virtual void addToMesh(Construction* construction,MeshData<ConstructionVertex>& meshData,ivec3 position,BlockStorage& storage) {
             BlockHelper::addConnectedBlock(construction,meshData,position,texture);
         }
 };

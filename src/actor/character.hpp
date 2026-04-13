@@ -338,10 +338,10 @@ class Character : public Actor {
                     vec3 interactPointLocal = construction->inverseTransformPoint(interactPointWorld);
                     ivec3 interactPointInt = glm::round(interactPointLocal);
                     auto data = construction->getBlock(interactPointInt);
-                    auto block = data.first;
-                    auto state = data.second;
-                    if(data.first != nullptr) {
-                        block->onInteract(construction,interactPointInt,state,*this);
+                    auto block = data.block;
+                    auto storage = data.storage;
+                    if(data.block != nullptr) {
+                        block->onInteract(construction,interactPointInt,storage,*this);
                     }
                 }
             }

@@ -58,11 +58,32 @@ class GenericStorage {
             return strings[index];
         }
 
-        virtual void clear() {
+        void clear() {
             ints.clear();
             floats.clear();
             strings.clear();
             
+        }
+
+        bool operator==(const GenericStorage& entry) {
+            if(ints.size() != entry.ints.size()) return false;
+            for (size_t i = 0; i < ints.size(); i++)
+            {
+                if(ints.at(i) != entry.ints.at(i)) return false; 
+            }
+            if(floats.size() != entry.floats.size()) return false;
+            for (size_t i = 0; i < floats.size(); i++)
+            {
+                if(floats.at(i) != entry.floats.at(i)) return false; 
+            }
+            if(strings.size() != entry.strings.size()) return false;
+            for (size_t i = 0; i < strings.size(); i++)
+            {
+                if(strings.at(i) != entry.strings.at(i)) return false; 
+            }
+            
+            
+            return true;
         }
 
         data_GenericStorage save() {

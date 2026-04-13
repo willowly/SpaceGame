@@ -2,7 +2,7 @@
 
 #include "cista.h"
 #include "persistance/data-generic-storage.hpp"
-#include "block/block-state.hpp"
+#include "block/block-facing.hpp"
 #include "persistance/block/data-block-storage.hpp"
 
 struct data_Block {

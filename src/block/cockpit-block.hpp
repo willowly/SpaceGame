@@ -12,20 +12,26 @@ class CockpitBlock : public Block {
 
         }
 
+        // ints
+        const int FACING_VAR = 0;
+
         Mesh<Vertex>* mesh;
         TextureID texture;
 
-        virtual BlockState onPlace(Construction* construction,ivec3 position,BlockFacing facing) {
-            std::cout << "facing " << facing << std::endl;
-            return BlockState::encode(facing);
+        virtual BlockStorage onPlace(Construction* construction,ivec3 position,BlockFacing facing) {
+            BlockStorage storage;
+            storage.setFacing(FACING_VAR,facing);
+            return storage;
         }
 
-        virtual void addToMesh(Construction* construction,MeshData<ConstructionVertex>& meshData,ivec3 position,BlockState& state) {
-            BlockHelper::addMesh(meshData,position,state.asFacing(),mesh,texture);
+        virtual void addToMesh(Construction* construction,MeshData<ConstructionVertex>& meshData,ivec3 position,BlockStorage& storage) {
+            BlockFacing facing = storage.getFacing(FACING_VAR);
+            BlockHelper::addMesh(meshData,position,facing,mesh,texture);
         }
 
 
-        virtual void onInteract(Construction* construction,ivec3 position,BlockState& state,Character& character) {
-            character.ride(construction,position,BlockHelper::getRotationFromFacing(state.asFacing()));
+        virtual void onInteract(Construction* construction,ivec3 position,BlockStorage& storage,Character& character) {
+            BlockFacing facing = storage.getFacing(FACING_VAR);
+            character.ride(construction,position,BlockHelper::getRotationFromFacing(facing));
         }
 };

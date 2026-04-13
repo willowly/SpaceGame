@@ -3,7 +3,8 @@
 
 #include <graphics/mesh.hpp>
 #include <item/item-stack.hpp>
-#include "block-state.hpp"
+#include "block-facing.hpp"
+#include "helper/block-storage.hpp"
 
 
 class Construction;
@@ -39,29 +40,29 @@ class Block {
         
         virtual ~Block() = default;
 
-        virtual BlockState onPlace(Construction* construction,ivec3 position,BlockFacing facing) { //im unsure how to handle placement of different block states
-            return BlockState::none;
+        virtual BlockStorage onPlace(Construction* construction,ivec3 position,BlockFacing facing) { //im unsure how to handle placement of different block states
+            return BlockStorage();
         }
 
-        virtual void onBreak(Construction* construction,ivec3 position,BlockState& state) {
+        virtual void onBreak(Construction* construction,ivec3 position,BlockStorage& storage) {
 
         }
 
         // when this block is loaded
-        virtual void onLoad(Construction* construction,ivec3 position,BlockState& state) {
+        virtual void onLoad(Construction* construction,ivec3 position,BlockStorage& storage) {
 
         }
 
         // needs to use construction.addStepCallback() to make work
-        virtual void onStep(World* world,Construction* construction,ivec3 position,BlockState& state,float dt) {
+        virtual void onStep(World* world,Construction* construction,ivec3 position,BlockStorage& storage,float dt) {
 
         }
 
-        virtual void addToMesh(Construction* construction,MeshData<ConstructionVertex>& meshData,ivec3 position,BlockState& state) {
+        virtual void addToMesh(Construction* construction,MeshData<ConstructionVertex>& meshData,ivec3 position,BlockStorage& storage) {
 
         }
 
-        virtual std::vector<ItemStack> getDrops(Construction* construction,ivec3 position,BlockState& state) {
+        virtual std::vector<ItemStack> getDrops(Construction* construction,ivec3 position,BlockStorage& storage) {
             if(drop == nullptr) {
                 return std::vector<ItemStack>();
             } else {
@@ -69,6 +70,6 @@ class Block {
             }
         }
 
-        virtual void onInteract(Construction* construction,ivec3 position,BlockState& state,Character& character) {}
+        virtual void onInteract(Construction* construction,ivec3 position,BlockStorage& storage,Character& character) {}
 
 };

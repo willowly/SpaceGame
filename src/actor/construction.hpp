@@ -11,7 +11,6 @@
 #include <algorithm>
 
 #include <block/block.hpp>
-#include <block/block-state.hpp>
 
 #include "helper/block-storage.hpp"
 
@@ -86,36 +85,48 @@ struct ConstructionVertex {
 
 };
 
+using BlockID = uint32_t;
 
 class Construction : public Actor {
 
     static const Color debugGroupColors[];
 
+    struct BlockPaletteEntry {
+        Block* block = nullptr;
+        BlockStorage storage;
+
+        bool operator==(const BlockPaletteEntry& entry) {
+            if(block != entry.block) return false;
+            if(storage != entry.storage) return false;
+            return true;
+        }
+    };
+
+    // we can convert this to just block ID if we use a custom physics shape :shrug:
     struct BlockData {
-        Block* block = nullptr; //eventually this will be a list of blocks in the construction
-        BlockState state = BlockState::none;
+        BlockID id = 0;
         std::optional<JPH::Shape*> shapeOpt;
-        BlockData(Block* block,BlockState state) : block(block), state(state) {}
+        BlockData(BlockID id) : id(id) {}
         BlockData() {}
 
         data_Block save() {
             data_Block data;
-            if(block != nullptr) { //we can optimize this later with a palette
-                data.block = block->name;
-            }
-            data.state = state.value;
+            // if(block != nullptr) { //we can optimize this later with a palette
+            //     data.block = block->name;
+            // }
+            // data.state = state.value;
             return data;
         }
 
         void load(data_Block data,DataLoader& loader) {
-            block = loader.getBlockPrototype((string)data.block);
-            state.value = data.state;
+            
         }
     };
 
     ivec3 boundsMin = {};
     ivec3 boundsMax = {};
-    std::vector<BlockData> blockData;
+    std::vector<BlockPaletteEntry> blockPalette; 
+    std::vector<BlockData> blockDataArray;
     MeshData<ConstructionVertex> meshData;
 
     Material material = Material::none;
@@ -152,7 +163,7 @@ class Construction : public Actor {
     ActorUserData physicsUserData;
 
     Construction() : Actor() {
-        blockData.push_back(BlockData()); //starting block
+        blockDataArray.push_back(BlockData()); //starting block
         blockCountX.push_back(0);
         blockCountY.push_back(0);
         blockCountZ.push_back(0);
@@ -216,13 +227,11 @@ class Construction : public Actor {
                 ivec3 location = pair.first.asVec3();
                 bool enabled = pair.second;
                 if(enabled) {
+                    auto entry = getBlock(location);
+                    auto& block = entry.block;
 
-                    Block* block;
-                    BlockState blockState = BlockState::none;
-                    std::tie(block,blockState) = getBlock(location);
-
-                    if(block != nullptr) {
-                        block->onStep(world,this,location,blockState,dt);
+                    if(entry.block != nullptr) {
+                        entry.block->onStep(world,this,location,entry.storage,dt);
                     }
                 }
             }
@@ -232,22 +241,22 @@ class Construction : public Actor {
             accumulatedThrustForce = vec3(0.0f);
             //i have no idea why z and x are inverted :shrug:
             if(moveControl.z > 0.01) {
-                applyForce(vec3(0,0,1) * thrustForces[BlockFacing::BACKWARD] * moveControl.z); //too move forward we must thrust backwards
+                applyForce(vec3(0,0,1) * thrustForces[static_cast<int>(BlockFacing::BACKWARD)] * moveControl.z); //too move forward we must thrust backwards
             }
             if(moveControl.z < 0.01) {
-                applyForce(vec3(0,0,1) * thrustForces[BlockFacing::FORWARD] * moveControl.z);
+                applyForce(vec3(0,0,1) * thrustForces[static_cast<int>(BlockFacing::FORWARD)] * moveControl.z);
             }
             if(moveControl.x < 0.01) {
-                applyForce(vec3(1,0,0) * thrustForces[BlockFacing::RIGHT] * moveControl.x);
+                applyForce(vec3(1,0,0) * thrustForces[static_cast<int>(BlockFacing::RIGHT)] * moveControl.x);
             }
             if(moveControl.x > 0.01) {
-                applyForce(vec3(1,0,0) * thrustForces[BlockFacing::LEFT] * moveControl.x);
+                applyForce(vec3(1,0,0) * thrustForces[static_cast<int>(BlockFacing::LEFT)] * moveControl.x);
             }
             if(moveControl.y < 0.01) {
-                applyForce(vec3(0,1,0) * thrustForces[BlockFacing::UP] * moveControl.y);
+                applyForce(vec3(0,1,0) * thrustForces[static_cast<int>(BlockFacing::UP)] * moveControl.y);
             }
             if(moveControl.y > 0.01) {
-                applyForce(vec3(0,1,0) * thrustForces[BlockFacing::DOWN] * moveControl.y);
+                applyForce(vec3(0,1,0) * thrustForces[static_cast<int>(BlockFacing::DOWN)] * moveControl.y);
             }
             
             if(targetRotationEnabled && !isStatic) {
@@ -277,13 +286,16 @@ class Construction : public Actor {
                     for (int x = boundsMin.x; x <= boundsMax.x; x++)
                     {
                         
-                        if(blockData.size() > i && blockData[i].block != nullptr) {
-                            
-                            auto block = blockData[i].block;
-                            auto state = blockData[i].state;
-                            block->addToMesh(this,meshData,ivec3(x,y,z),state);
-                            
+                        if(blockDataArray.size() <= i) break;
+
+                        auto data = blockDataArray[i];
+                        
+                        if(data.id != 0) { //optimization i guess
+                            auto entry = blockPalette[data.id];
+                            auto block = entry.block;
+                            block->addToMesh(this,meshData,ivec3(x,y,z),entry.storage);
                         }
+                        
                         i++;
                     }
                 }
@@ -295,7 +307,7 @@ class Construction : public Actor {
         }
 
         bool solidInDirection(ivec3 position,ivec3 direction) {
-            Block* block = getBlock(position+direction).first;
+            Block* block = getBlock(position+direction).block;
             if(block == nullptr) {
                 return false;
             }
@@ -367,7 +379,7 @@ class Construction : public Actor {
             boundsMax = newMax;
 
             //int i = 0;
-            blockData.clear();
+            blockDataArray.clear();
             blockCountX.clear(); // this kinda repeated code could probably be written in a more elegant way but Idk how so :shrug:
             blockCountX.resize((newMax.x - newMin.x) + 1);
             blockCountY.clear();
@@ -384,13 +396,13 @@ class Construction : public Actor {
                         auto it = blockMap.find(location);
                         if(it != blockMap.end()) {
                             //std::cout << "<" << x << "," << y << "," << z <<  ">:" << blockMap.at(Location(x,y,z)) << std::endl;
-                            blockData.push_back(it->second);
+                            blockDataArray.push_back(it->second);
                             blockCountX[x - newMin.x]++;
                             blockCountY[y - newMin.y]++;
                             blockCountZ[z - newMin.z]++;
                         } else {
                             //std::cout << "e,";
-                            blockData.push_back(BlockData());
+                            blockDataArray.push_back(BlockData());
                         }
                         //i++;
                     }
@@ -499,10 +511,10 @@ class Construction : public Actor {
         // used when wanting to break a place, not replace
         void breakBlock(World* world,ivec3 location) {
 
-            auto blockData = getBlock(location);
-            auto block = blockData.first;
+            auto& blockEntry = getBlock(location);
+            auto block = blockEntry.block;
             assert(block != nullptr);
-            auto items = block->getDrops(this,location,blockData.second);
+            auto items = block->getDrops(this,location,blockEntry.storage);
 
             for(auto stack : items) {
                 world->spawn(ItemActor::makeInstance(stack,transformPoint(location)));
@@ -530,21 +542,24 @@ class Construction : public Actor {
 
             int index = getIndex(location);
 
-            if(blockData[index].block != nullptr) {
-                blockData[index].block->onBreak(this,location,blockData[index].state);
+            auto blockData = blockDataArray.at(index);
+            auto blockEntry = blockPalette.at(blockData.id);
+
+            if(blockEntry.block != nullptr) {
+                blockEntry.block->onBreak(this,location,blockEntry.storage);
                 blockCount--;
                 blockCountX[location.x - boundsMin.x]--;
                 blockCountY[location.y - boundsMin.y]--;
                 blockCountZ[location.z - boundsMin.z]--;
                 
-                if(blockData[index].shapeOpt) {
+                if(blockData.shapeOpt) {
                     
                     //JPH::SubShapeID remainder;
                     //JPH::uint shapeIndex = physicsShape->GetSubShapeIndexFromID(blockData[index].shapeOpt.value().GetID(),remainder);
 
                     for (size_t i = 0; i < physicsShape->GetSubShapes().size(); i++)
                     {
-                        if(blockData[index].shapeOpt.value() == physicsShape->GetSubShape(i).mShape.GetPtr()) {
+                        if(blockData.shapeOpt.value() == physicsShape->GetSubShape(i).mShape.GetPtr()) {
                             physicsShape->RemoveShape(i);
                             physicsShape->AdjustCenterOfMass();
                             physicsShapeChanged = true;
@@ -552,7 +567,7 @@ class Construction : public Actor {
                     }
                 }
 
-                blockData[index] = BlockData();
+                blockData = BlockData(0);
 
                 
 
@@ -566,15 +581,32 @@ class Construction : public Actor {
             }
         }
 
+        BlockID paletteEntryToID(BlockPaletteEntry entry) {
+            for (size_t i = 0; i < blockPalette.size(); i++)
+            {
+                if(blockPalette.at(i).operator==(entry)) {
+                    return i;
+                }
+            }
+            
+            newPaletteEntry(std::move(entry));
+        }
+
+        BlockID newPaletteEntry(BlockPaletteEntry entry) {
+            blockPalette.push_back(std::move(entry));
+            return blockPalette.size() - 1;
+        }
+
         //assumes its not replacing a block. handles tracking, mass and bounds
         void addBlockNoUpdate(ivec3 location,Block& block,BlockFacing facing) {
             blockCount++;
-            blockCountX[location.x - boundsMin.x]++;
-            blockCountY[location.y - boundsMin.y]++;
-            blockCountZ[location.z - boundsMin.z]++;
+            blockCountX.at(location.x - boundsMin.x)++;
+            blockCountY.at(location.y - boundsMin.y)++;
+            blockCountZ.at(location.z - boundsMin.z)++;
             size_t index = getIndex(location);
             auto state = block.onPlace(this,location,facing);
-            blockData[index] = BlockData(&block,state);
+            BlockPaletteEntry entry{&block,state};
+            blockDataArray.at(index) = BlockData(paletteEntryToID(entry));
 
             addBlockCollider(index,location);
 
@@ -585,7 +617,7 @@ class Construction : public Actor {
             physicsOldCOM = physicsShape->GetCenterOfMass(); //temporary until custom shape (hopefully)
             auto shape = new JPH::BoxShape(JPH::Vec3(0.5f,0.5f,0.5f));
             physicsShape->AddShape(Physics::toJoltVec((vec3)location),JPH::Quat::sIdentity(),shape,0,UINT_MAX);
-            blockData[index].shapeOpt = static_cast<JPH::Shape*>(shape);
+            blockDataArray[index].shapeOpt = static_cast<JPH::Shape*>(shape);
             physicsShape->AdjustCenterOfMass();
             physicsShapeChanged = true;
         }
@@ -618,7 +650,7 @@ class Construction : public Actor {
         }
 
         void calculateBreakup(World* world,ivec3 location) {
-            std::vector<int> blockGroups(blockData.size(),0);
+            std::vector<int> blockGroups(blockDataArray.size(),0);
             std::vector<ivec3> locations;
             std::cout << "STARTING BREAKUP CALCULATION" << std::endl;
             tryAddToGroup(1,location+ivec3(1,0,0),blockGroups,locations);
@@ -668,14 +700,21 @@ class Construction : public Actor {
                             ivec3 newLocalLocation = glm::round(newConstruction.inverseTransformPoint(worldLocation));
                             int newIndex = newConstruction.getIndex(newLocalLocation);
                             if(blockGroup != originalConstructionGroup) {
+
+                                auto blockData = blockDataArray.at(i);
+
+                                auto& blockEntry = blockPalette.at(blockData.id);
                                 newConstruction.boundsEncapsulate(newLocalLocation);
-                                newConstruction.addBlockNoUpdate(newLocalLocation,*blockData[i].block,BlockFacing::FORWARD); //a block location should not have a group unless its a real block
-                                auto oldStorage = getStorage(ivec3(x,y,z));
-                                if(oldStorage != nullptr) {
-                                    auto newStorage = newConstruction.addStorage(newLocalLocation);
-                                    *newStorage = *oldStorage;
-                                }
-                                newConstruction.blockData[newIndex].state = blockData[i].state; // copy state
+                                newConstruction.addBlockNoUpdate(newLocalLocation,*blockEntry.block,BlockFacing::FORWARD); //a block location should not have a group unless its a real block
+                                // auto oldStorage = getStorage(ivec3(x,y,z));
+                                // if(oldStorage != nullptr) {
+                                //     auto newStorage = newConstruction.addStorage(newLocalLocation);
+                                //     *newStorage = *oldStorage;
+                                // }
+
+                                auto& newConstructionBlockEntry = blockPalette.at(newConstruction.blockDataArray.at(newIndex).id);
+
+                                newConstructionBlockEntry.storage = blockEntry.storage; // copy state
                                 // TODO: transfer storage
                                 removeBlockNoUpdate(vec3(x,y,z));
                             }
@@ -697,7 +736,7 @@ class Construction : public Actor {
         }
 
         void tryAddToGroup(int group,ivec3 location,std::vector<int>& blockGroups,std::vector<ivec3>& locations) {
-            if(getBlock(location).first == nullptr) {
+            if(getBlock(location).block == nullptr) {
                 //std::cout << "block is null" << std::endl;
                 return;
             }
@@ -821,15 +860,21 @@ class Construction : public Actor {
             size.y += 1;
             size.z += 1;
             int i = std::max(fromMin.x + fromMin.y * size.x + fromMin.z * size.y * size.x,0);
-            return std::min((size_t)i,blockData.size()-1); //I think this wont cause issues with out of bounds stuff
+            return std::min((size_t)i,blockDataArray.size()-1); //I think this wont cause issues with out of bounds stuff
         }
 
-        std::pair<Block*,BlockState> getBlock(ivec3 location) {
+        BlockData getBlockData(ivec3 location) {
             if(!isInsideBounds(location)) {
-                return std::pair(nullptr,BlockState::none);
+                return BlockData(0);
             }
-            auto data = blockData[getIndex(location)];
-            return std::pair(data.block,data.state);
+            auto data = blockDataArray.at(getIndex(location));
+            return data;
+        }
+
+        BlockPaletteEntry& getBlock(ivec3 location) {
+            
+            auto data = getBlockData(location);
+            return blockPalette.at(data.id);
         }
 
         vec3 blockCenterLocal(ivec3 location) {
@@ -847,21 +892,8 @@ class Construction : public Actor {
             return true;
         }
 
-        
-        BlockStorage* addStorage(ivec3 location) {
-            blockStorage[Location(location)] = BlockStorage();
-            return &blockStorage[Location(location)];
-        }
-
         void addStepCallback(ivec3 location) {
             stepCallbacks[Location(location)] = true;
-        }
-
-        BlockStorage* getStorage(ivec3 location) {
-            if(blockStorage.contains(Location(location))) {
-                return &blockStorage[Location(location)];
-            }
-            return nullptr;
         }
 
         void createBlockMap(map<Location,BlockData>& blockMap) {
@@ -872,8 +904,8 @@ class Construction : public Actor {
                 {
                     for (int x = boundsMin.x; x <= boundsMax.x; x++)
                     {
-                        if(blockData[i].block != nullptr) {
-                            blockMap[Location(x,y,z)] = blockData[i];
+                        if(blockDataArray[i].id != 0) {
+                            blockMap[Location(x,y,z)] = blockDataArray[i];
                         }
                         i++;
                     }
@@ -914,8 +946,8 @@ class Construction : public Actor {
             data.isStatic = isStatic;
             data.boundsMin.set(boundsMin);
             data.boundsMax.set(boundsMax);
-            data.blocks.reserve(blockData.size());
-            for(auto& block : blockData) {
+            data.blocks.reserve(blockDataArray.size());
+            for(auto& block : blockDataArray) {
                 data.blocks.push_back(block.save());
             }
             for(auto& pair : blockStorage) {
@@ -941,8 +973,8 @@ class Construction : public Actor {
             isStatic = data.isStatic;
             boundsMin = data.boundsMin.toVec3();
             boundsMax = data.boundsMax.toVec3();
-            blockData.clear();
-            blockData.reserve(blockData.size());
+            blockDataArray.clear();
+            blockDataArray.reserve(blockDataArray.size());
 
             blockCount = 0;
             // similar to resizing the bounds :shrug: maybe make a function?
@@ -969,16 +1001,16 @@ class Construction : public Actor {
                             BlockData block;
                             block.load(data_block,loader);
                             //std::cout << "<" << x << "," << y << "," << z <<  ">:" << blockMap.at(Location(x,y,z)) << std::endl;
-                            blockData.push_back(block);
+                            blockDataArray.push_back(block);
                             blockCountX[x - boundsMin.x]++;
                             blockCountY[y - boundsMin.y]++;
                             blockCountZ[z - boundsMin.z]++;
                             addBlockCollider(i,ivec3(x,y,z));
-                            block.block->onLoad(this,ivec3(x,y,z),block.state);
+                            //block.block->onLoad(this,ivec3(x,y,z),block.state);
                             blockCount++;
                         } else {
                             std::cout << "empty block " << std::endl;
-                            blockData.push_back(BlockData());
+                            blockDataArray.push_back(BlockData());
                         }
                         
                         i++;
