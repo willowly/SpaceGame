@@ -10,7 +10,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /bigobj")
 endif()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -fsanitize=thread -Wall -Wextra -Werror=return-type -pedantic -Wno-unused-parameter")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -Wall -Wextra -Werror=return-type -pedantic -Wno-unused-parameter")
 endif()
 
 
@@ -95,8 +95,7 @@ target_compile_options(Jolt PRIVATE "-frtti" )
 set_property(TARGET Jolt PROPERTY
   MSVC_RUNTIME_LIBRARY "MultiThreadedDebugDLL")
 
-set_property(TARGET Jolt PROPERTY
-  MSVC_RUNTIME_LIBRARY "MultiThreadedDebugDLL")
+target_compile_options(Jolt PRIVATE "-frtti")
 
 
 include_directories(src)
@@ -147,6 +146,9 @@ add_custom_target(SHADERS)
 if(WIN32)
     set(OUTPUT_DIR "${CMAKE_BINARY_DIR}")
 endif(WIN32)
+if(LINUX)
+    set(OUTPUT_DIR "${CMAKE_BINARY_DIR}")
+endif()
 if(APPLE)
     set(OUTPUT_DIR "${CMAKE_BINARY_DIR}")
 endif(APPLE)

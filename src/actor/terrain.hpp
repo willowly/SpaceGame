@@ -62,7 +62,7 @@ class Terrain : public Actor {
 
     unsigned int seed = 0;
 
-    unsigned int nextChunkId = 0;
+    std::atomic<unsigned int> nextChunkId;
     
     public:
     
@@ -351,13 +351,13 @@ class Terrain : public Actor {
         
     }
 
-    void spawn(World* world) {
+    void spawn(World* world) override {
 
         updateLOD(world);
 
     }
 
-    void step(World* world,float dt) {
+    void step(World* world,float dt) override {
 
         updateLOD(world);
 

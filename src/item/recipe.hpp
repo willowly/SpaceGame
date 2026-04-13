@@ -11,6 +11,10 @@ struct Recipe {
     std::vector<ItemStack> ingredients;
     float time = 0.5f;
 
+    Recipe() {
+        
+    }
+
     Recipe(ItemStack result) : result(result) {
         
     }

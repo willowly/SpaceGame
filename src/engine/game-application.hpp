@@ -73,7 +73,7 @@ class GameApplication {
 
             setup();
 
-            terrainLoader.start();
+            //terrainLoader.start();
             //terrain->loadChunks(&world,player->getPosition(),2,vulkan);
             
 
@@ -86,7 +86,7 @@ class GameApplication {
             }
 
             
-            terrainLoader.stop();
+            //terrainLoader.stop();
             vulkan->waitIdle();
 
         }
@@ -134,11 +134,11 @@ class GameApplication {
         Material terrainMaterialDebug = Material::none;
 
 
-        Recipe makeAluminumPlate = Recipe(ItemStack(registry.getItem("tin_plate"),1));
-        Recipe makeFurnace = Recipe(ItemStack(registry.getItem("furnace_item"),1));
-        Recipe makeThruster = Recipe(ItemStack(registry.getItem("thruster"),1));
-        Recipe makeCockpit = Recipe(ItemStack(registry.getItem("cockpit"),1));
-        Recipe makePickaxe = Recipe(ItemStack(registry.getItem("pickaxe"),1));
+        Recipe makeAluminumPlate;
+        Recipe makeFurnace;
+        Recipe makeThruster;
+        Recipe makeCockpit;
+        Recipe makePickaxe;
 
         Skybox skybox;
 
@@ -350,9 +350,6 @@ class GameApplication {
             playerPrototype->model = registry.getModel("capsule_thin");
             playerPrototype->material = registry.getMaterial("player");
             registry.addRecipesToVector(playerPrototype->recipes,"crafting",1);
-            // spawn player
-            //player = world.spawn(Character::makeInstance(playerPrototype.get(),vec3(50,0,0)));
-
             
             // UI
             toolbarWidget.itemSlotSprite = registry.getSprite("item_slot");

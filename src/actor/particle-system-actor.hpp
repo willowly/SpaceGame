@@ -32,7 +32,7 @@ class ParticleEffectActor : public Actor {
             effect.addRenderables(vulkan,dt);
         }
 
-        void step(World* world,float dt) {
+        void step(World* world,float dt) override {
             effect.step(getPosition(),getRotation(),dt);
             if(effect.getParticlesAlive() == 0 && destroyWhenZeroParticles) {
                 destroy(world);

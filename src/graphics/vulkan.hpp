@@ -1458,6 +1458,7 @@ class Vulkan {
                     return availableFormat;
                 }
             }
+            throw std::runtime_error("No Post Processing format found!");
         }
 
         VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) {
