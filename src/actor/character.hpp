@@ -18,8 +18,6 @@
 #include "item/recipe.hpp"
 #include "components/inventory.hpp"
 
-#include <GLFW/glfw3.h>
-
 #include "physics/jolt-conversions.hpp"
 
 #include "interface/actor/actor-widget.hpp"
@@ -160,7 +158,9 @@ class Character : public Actor {
             shake.step(dt);
         }
 
-        virtual void spawn(World* world) {
+        void spawn(World* world) override {
+
+            body.generateCollisionEvents = true;
 
             JPH::Shape::ShapeResult result;
             auto capsuleSettings = JPH::CapsuleShapeSettings(height/2,radius);
@@ -169,13 +169,13 @@ class Character : public Actor {
             // bodySettings.mUserData = ActorUserData(this).asUInt();
             bodySettings.mObjectLayer = Layers::PLAYER;
             bodySettings.mAllowedDOFs = (JPH::EAllowedDOFs::TranslationX | JPH::EAllowedDOFs::TranslationY | JPH::EAllowedDOFs::TranslationZ);
-
+            
             body.spawn(world,this,bodySettings);
 
 
         }
 
-        virtual void prePhysics(World* world) {
+        void prePhysics(World* world) override {
             auto velocity = body.getVelocity();
             body.prePhysics(world,position,rotation);
             if(ridingConstruction == nullptr) {
@@ -187,13 +187,13 @@ class Character : public Actor {
             // Debug::drawCube(Physics::toGlmVec(bounds.GetCenter()),Physics::toGlmVec(bounds.GetSize()),glm::identity<quat>(),Color::green,0.01f);
         }
 
-        virtual void postPhysics(World* world) {
+        void postPhysics(World* world) override {
             body.postPhysics(world,position,rotation);
             auto velocity = body.getVelocity();
             //physicsCharacter->PostSimulation(0.01f); // small number to be on the floor
         }
 
-        void collisionStart(World* world,const Collision& contact) {
+        void collisionStart(World* world,const Collision& contact) override {
 
             if(contact.otherActor == nullptr) return;
 
@@ -204,7 +204,7 @@ class Character : public Actor {
             }
         }
 
-        void step(World* world,float dt) {
+        void step(World* world,float dt) override {
 
             auto velocity = body.getVelocity();
             auto rotationVelocity = body.getAngularVelocity();

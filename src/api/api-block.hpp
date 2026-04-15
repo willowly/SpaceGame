@@ -6,7 +6,7 @@
 
 namespace API {
 
-    void loadAPIBlock(sol::state& lua) {
+    inline void loadAPIBlock(sol::state& lua) {
         
         sol::usertype<Block> block = lua.new_usertype<Block>("block",sol::no_constructor);
         

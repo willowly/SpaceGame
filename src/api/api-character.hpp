@@ -6,7 +6,7 @@
 
 namespace API {
 
-    void loadAPICharacter(sol::state& lua) {
+    inline void loadAPICharacter(sol::state& lua) {
         
         sol::usertype<Character> character = lua.new_usertype<Character>("character",sol::no_constructor);
 

@@ -3,6 +3,7 @@
 #include "item/item-stack.hpp"
 #include "actor/components/rigidbody.hpp"
 #include "actor/character.hpp"
+#include "helper/random.hpp"
 
 #include "Jolt/Physics/Collision/Shape/SphereShape.h"
 
@@ -20,7 +21,7 @@ class ItemActor : public Actor {
             body.generateCollisionEvents = true;
         }
 
-        virtual ~ItemActor() noexcept = default;
+        ~ItemActor() noexcept = default;
 
         static std::unique_ptr<ItemActor> makeInstance(ItemStack stack,vec3 position = vec3(0),quat rotation = Random::rotation()) {
             if(stack.isEmpty()) {

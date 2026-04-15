@@ -1,7 +1,5 @@
 #pragma once
 
-#include "GLFW/glfw3.h"
-
 #include "actor/actor.hpp"
 #include <memory>
 //#include <tracy/Tracy.hpp>

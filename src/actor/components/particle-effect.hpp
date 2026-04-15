@@ -76,7 +76,7 @@ class ParticleEffect {
 
         void spawn(vec3 position,quat rotation) {
 
-            int amount = ceil(spawnRate * lifeTime.end) + 1 + initialSpawnCount;
+            int amount = static_cast<int>(ceil(spawnRate * lifeTime.end)) + 1 + initialSpawnCount;
 
             particles.clear();
 

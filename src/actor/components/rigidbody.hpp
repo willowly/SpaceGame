@@ -45,7 +45,7 @@ class Rigidbody {
     ActorUserData userData;
     
     public:
-        bool generateCollisionEvents;
+        bool generateCollisionEvents = false;
         bool useAngularVelocity = true; //rn just for overriding for the player
 
         JPH::Body* getBody() {
@@ -104,7 +104,7 @@ class Rigidbody {
             
         }
 
-        virtual void prePhysics(World* world,vec3 position,quat rotation) {
+        void prePhysics(World* world,vec3 position,quat rotation) {
             userData.generateCollisionEvents = generateCollisionEvents;
             world->physics_system.GetBodyInterface().SetPosition(body->GetID(),Physics::toJoltVec(position),JPH::EActivation::DontActivate);
             world->physics_system.GetBodyInterface().SetRotation(body->GetID(),Physics::toJoltQuat(rotation).Normalized(),JPH::EActivation::DontActivate);
@@ -112,7 +112,7 @@ class Rigidbody {
             if(useAngularVelocity) world->physics_system.GetBodyInterface().SetAngularVelocity(body->GetID(),Physics::toJoltVec(angularVelocity));
         }
 
-        virtual void postPhysics(World* world,vec3& position,quat& rotation) {
+        void postPhysics(World* world,vec3& position,quat& rotation) {
             position = Physics::toGlmVec(body->GetPosition());
             rotation = Physics::toGlmQuat(body->GetRotation().Normalized());
             velocity = Physics::toGlmVec(body->GetLinearVelocity());

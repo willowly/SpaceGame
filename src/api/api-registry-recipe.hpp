@@ -17,7 +17,7 @@ namespace API {
 
     
 
-    void loadRecipe(sol::table table,Recipe& recipe,Registry& registry) {
+    inline void loadRecipe(sol::table table,Recipe& recipe,Registry& registry) {
         getItemStack(table,"result",recipe.result,registry,true);
         get<float>(table,"time",recipe.time,true);
         get<string>(table,"category",recipe.category,true);

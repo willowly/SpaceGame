@@ -4,7 +4,7 @@
 
 namespace API {
 
-    void loadAPIActor(sol::state& lua) {
+    inline void loadAPIActor(sol::state& lua) {
         
     }
 }

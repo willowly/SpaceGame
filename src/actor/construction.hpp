@@ -157,7 +157,7 @@ class Construction : public Actor {
     vec3 accumulatedThrustForce = {}; // acculated on step, applied on prePhysics
 
     // Rigidbody Class
-    JPH::Body *body;
+    Rigidbody body;
     JPH::MutableCompoundShape* physicsShape;
     JPH::Vec3 physicsOldCOM;
     ActorUserData physicsUserData;
@@ -262,7 +262,7 @@ class Construction : public Actor {
             if(targetRotationEnabled && !isStatic) {
                 
                 rotation = glm::slerp(rotation,targetRotation,turnForce * dt);
-                body->SetAngularVelocity(JPH::Vec3(0,0,0)); //maybe we have an actual variable for this instead of just relying
+                body.setAngularVelocity(vec3(0,0,0)); //maybe we have an actual variable for this instead of just relying
             }
             
         }
@@ -380,6 +380,7 @@ class Construction : public Actor {
 
             //int i = 0;
             blockDataArray.clear();
+            blockCount = 0; //because addBlockCount adds the count
             blockCountX.clear(); // this kinda repeated code could probably be written in a more elegant way but Idk how so :shrug:
             blockCountX.resize((newMax.x - newMin.x) + 1);
             blockCountY.clear();
@@ -397,9 +398,7 @@ class Construction : public Actor {
                         if(it != blockMap.end()) {
                             //std::cout << "<" << x << "," << y << "," << z <<  ">:" << blockMap.at(Location(x,y,z)) << std::endl;
                             blockDataArray.push_back(it->second);
-                            blockCountX[x - newMin.x]++;
-                            blockCountY[y - newMin.y]++;
-                            blockCountZ[z - newMin.z]++;
+                            addBlockCount(ivec3(x,y,z));
                         } else {
                             //std::cout << "e,";
                             blockDataArray.push_back(BlockData());
@@ -414,70 +413,57 @@ class Construction : public Actor {
             
         }
 
-        virtual void spawn(World* world) {
+        void spawn(World* world) override {
             
-            addBody(world);
-
-
-        }
-
-        void addBody(World* world) {
-            JPH::BodyCreationSettings bodySettings;
+            auto bodySettings = body.getDefaultBodySettings(this,physicsShape,position,rotation);
 
             if(isStatic) {
-                bodySettings = JPH::BodyCreationSettings(physicsShape, Physics::toJoltVec(position), Physics::toJoltQuat(position), JPH::EMotionType::Static, Layers::NON_MOVING);
-            } else {
-                bodySettings = JPH::BodyCreationSettings(physicsShape, Physics::toJoltVec(position), Physics::toJoltQuat(position), JPH::EMotionType::Dynamic, Layers::MOVING);
+                bodySettings.mMotionType = JPH::EMotionType::Static;
+                bodySettings.mObjectLayer = Layers::NON_MOVING;
             }
-
-            bodySettings.mGravityFactor = 0.0f;
 
             bodySettings.mOverrideMassProperties = JPH::EOverrideMassProperties::MassAndInertiaProvided;
             bodySettings.mMassPropertiesOverride.mMass = 1.0f;
-            physicsUserData.actor = this;
-            bodySettings.mUserData = ActorUserData::encode(&physicsUserData);
-            body = world->physics_system.GetBodyInterface().CreateBody(bodySettings);
-            world->physics_system.GetBodyInterface().AddBody(body->GetID(),JPH::EActivation::Activate);
-            std::cout << "new construction created with ID " << body->GetID().GetIndexAndSequenceNumber() << std::endl;
-            
 
-            // otherwise will error :3
-            if(!isStatic) body->SetLinearVelocity(Physics::toJoltVec(velocity));
-            body->SetRestitution(0.1f);
-            body->SetFriction(2.0);
+            body.spawn(world,this,bodySettings);
+            body.getBody()->SetRestitution(0.1f);
+            body.getBody()->SetFriction(2.0);
 
-            
+
         }
         
 
         virtual void prePhysics(World* world) {
             if(physicsShapeChanged) {
                 physicsShapeChanged = false;
-                world->physics_system.GetBodyInterface().NotifyShapeChanged(body->GetID(),physicsOldCOM,false,JPH::EActivation::Activate);
+                world->physics_system.GetBodyInterface().NotifyShapeChanged(body.getBodyID(),physicsOldCOM,false,JPH::EActivation::Activate);
             }
             if(!isStatic) {
                 if(physicsShape->GetMassProperties().mMass > 0.0f) {
-                    body->GetMotionProperties()->SetMassProperties(JPH::EAllowedDOFs::All,physicsShape->GetMassProperties());
+                    body.getBody()->GetMotionProperties()->SetMassProperties(JPH::EAllowedDOFs::All,physicsShape->GetMassProperties());
                 }
             }
+
+            auto bodyID = body.getBodyID();
+            if(!isStatic) {
+                body.prePhysics(world,position,rotation);
+                world->physics_system.GetBodyInterface().AddForce(bodyID,Physics::toJoltVec(accumulatedThrustForce));
+            } else {
+                world->physics_system.GetBodyInterface().SetPosition(bodyID,Physics::toJoltVec(position),JPH::EActivation::DontActivate);
+                world->physics_system.GetBodyInterface().SetRotation(bodyID,Physics::toJoltQuat(rotation),JPH::EActivation::DontActivate);
+            }
             
-            world->physics_system.GetBodyInterface().SetPosition(body->GetID(),Physics::toJoltVec(position),JPH::EActivation::DontActivate);
-            world->physics_system.GetBodyInterface().SetRotation(body->GetID(),Physics::toJoltQuat(rotation),JPH::EActivation::DontActivate);
-            if(!isStatic) world->physics_system.GetBodyInterface().SetLinearVelocity(body->GetID(),Physics::toJoltVec(velocity)); //if static it errors :3
-            world->physics_system.GetBodyInterface().AddForce(body->GetID(),Physics::toJoltVec(accumulatedThrustForce));
+            
         }
 
         virtual void postPhysics(World* world) {
-            position = Physics::toGlmVec(body->GetPosition());
-            rotation = Physics::toGlmQuat(body->GetRotation().Normalized());
-            velocity = Physics::toGlmVec(body->GetLinearVelocity());
+            body.postPhysics(world,position,rotation);
         }
 
         void destroy(World* world) {
             Actor::destroy(world);
 
-            world->physics_system.GetBodyInterface().RemoveBody(body->GetID());
-            world->physics_system.GetBodyInterface().DestroyBody(body->GetID());
+            body.destroy(world);
         }
 
         void printBlockCounts() {
@@ -547,10 +533,7 @@ class Construction : public Actor {
 
             if(blockEntry.block != nullptr) {
                 blockEntry.block->onBreak(this,location,blockEntry.storage);
-                blockCount--;
-                blockCountX[location.x - boundsMin.x]--;
-                blockCountY[location.y - boundsMin.y]--;
-                blockCountZ[location.z - boundsMin.z]--;
+                removeBlockCount(location);
                 
                 if(blockData.shapeOpt) {
                     
@@ -576,11 +559,14 @@ class Construction : public Actor {
             }
         }
 
+
         BlockID paletteEntryToID(BlockPaletteEntry entry) {
-            for (size_t i = 0; i < blockPalette.size(); i++)
-            {
-                if(blockPalette.at(i).operator==(entry)) {
-                    return i;
+            if(entry.block != nullptr && entry.block->getStorageType() == Block::StorageType::Constant) {
+                for (size_t i = 0; i < blockPalette.size(); i++)
+                {
+                    if(blockPalette.at(i).operator==(entry)) {
+                        return i;
+                    }
                 }
             }
             
@@ -612,20 +598,27 @@ class Construction : public Actor {
             
         }
 
-        //assumes its not replacing a block. handles tracking and collider
-        void addBlockNoUpdate(ivec3 location,Block& block,BlockPlaceInfo info = BlockPlaceInfo()) {
+        void addBlockCount(ivec3 location) {
             blockCount++;
             blockCountX.at(location.x - boundsMin.x)++;
             blockCountY.at(location.y - boundsMin.y)++;
             blockCountZ.at(location.z - boundsMin.z)++;
+        }
+
+        void removeBlockCount(ivec3 location) {
+            blockCount--;
+            blockCountX.at(location.x - boundsMin.x)--;
+            blockCountY.at(location.y - boundsMin.y)--;
+            blockCountZ.at(location.z - boundsMin.z)--;
+        }
+
+        //assumes its not replacing a block. handles tracking and collider
+        void placeBlockNoUpdate(ivec3 location,Block& block,BlockPlaceInfo info = BlockPlaceInfo()) {
+            addBlockCount(location);
             size_t index = getIndex(location);
             auto state = block.onPlace(this,location,info);
             BlockPaletteEntry entry{&block,state};
-            if(block.getStorageType() == Block::StorageType::Constant) {
-                blockDataArray.at(index) = BlockData(paletteEntryToID(entry));
-            } else {
-                blockDataArray.at(index) = BlockData(newPaletteEntry(entry));
-            }
+            blockDataArray.at(index) = paletteEntryToID(entry);
 
             addBlockCollider(index,location);
 
@@ -663,7 +656,7 @@ class Construction : public Actor {
 
             
             
-            addBlockNoUpdate(location,*block,placeInfo);
+            placeBlockNoUpdate(location,*block,placeInfo);
             printIDList();
 
             //recalculatePivot();
@@ -724,20 +717,17 @@ class Construction : public Actor {
 
                                 auto blockData = blockDataArray.at(i);
 
-                                auto& blockEntry = blockPalette.at(blockData.id);
+                                auto blockEntry = blockPalette.at(blockData.id); // we actually do want to copy it here
                                 newConstruction.boundsEncapsulate(newLocalLocation);
-                                newConstruction.addBlockNoUpdate(newLocalLocation,*blockEntry.block); //a block location should not have a group unless its a real block
-                                // auto oldStorage = getStorage(ivec3(x,y,z));
-                                // if(oldStorage != nullptr) {
-                                //     auto newStorage = newConstruction.addStorage(newLocalLocation);
-                                //     *newStorage = *oldStorage;
-                                // }
 
-                                auto& newConstructionBlockEntry = blockPalette.at(newConstruction.blockDataArray.at(newIndex).id);
+                                newConstruction.addBlockCount(newLocalLocation);
+                                
+                                blockData.id = newConstruction.paletteEntryToID(blockEntry); // the IDs will need to change for this. Maybe just copying the entire palette is better and then removing the blocks?
+                                newConstruction.blockDataArray.at(newIndex) = blockData;
+                                
+                                newConstruction.addBlockCollider(newIndex,newLocalLocation);
 
-                                newConstructionBlockEntry.storage = blockEntry.storage; // copy state
-                                // TODO: transfer storage
-                                removeBlockNoUpdate(vec3(x,y,z));
+                                removeBlockNoUpdate(vec3(x,y,z)); // remove the original
                             }
 
                         }
@@ -963,7 +953,7 @@ class Construction : public Actor {
         data_Construction save() {
             data_Construction data;
             data.actor = Actor::save();
-            data.body.velocity.set(velocity);
+            data.body = body.save();
             data.isStatic = isStatic;
             data.boundsMin.set(boundsMin);
             data.boundsMax.set(boundsMax);
@@ -984,7 +974,7 @@ class Construction : public Actor {
 
         void load(const data_Construction& data,DataLoader& loader) {
             Actor::load(data.actor);
-            velocity = data.body.velocity.toVec3();
+            body.load(data.body);
             isStatic = data.isStatic;
             boundsMin = data.boundsMin.toVec3();
             boundsMax = data.boundsMax.toVec3();
@@ -1046,23 +1036,4 @@ class Construction : public Actor {
 
             return actor;
         }
-};
-
-bool operator< (const Construction::Location& a,const Construction::Location& b) {
-    if(a.x == b.x) {
-        if(a.y == b.y) {
-            return a.z < b.z;
-        }
-        return a.y < b.y;
-    }
-    return a.x < b.x;
-}
-
-const Color Construction::debugGroupColors[] = {
-    Color::green,
-    Color::blue,
-    Color::red,
-    Color::magenta,
-    Color::cyan,
-    Color::yellow
 };

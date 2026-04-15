@@ -7,7 +7,7 @@ using std::variant, std::string,glm::vec3;
 
 namespace API {
 
-    void loadAPIGeneral(sol::state& lua) {
+    inline void loadAPIGeneral(sol::state& lua) {
         // to not be the same as the type name
         lua["vec3"] = [&](float x,float y,float z) {
             return vec3(x,y,z);

@@ -12,7 +12,7 @@ using std::string,std::variant;
 
 namespace API {
 
-    void loadItemBaseType(ObjLoadType loadType,sol::table table,Item* item,Registry& registry) {
+    inline void loadItemBaseType(ObjLoadType loadType,sol::table table,Item* item,Registry& registry) {
         get<string>(table,"display_name",item->displayName,true);
         getSprite(table,"icon",item->defaultSprite,registry,true);
         item->defaultModel = registry.getModel("item_default");
@@ -21,7 +21,7 @@ namespace API {
         getMaterial(table,"material",item->defaultMaterial,registry,false);
     }
 
-    void loadItemToolType(ObjLoadType loadType,sol::table table,Tool* item,Registry& registry) {
+    inline void loadItemToolType(ObjLoadType loadType,sol::table table,Tool* item,Registry& registry) {
         loadItemBaseType(loadType,table,item,registry);
         get<float>(table,"look_lerp",item->lookLerp,false);
         getMesh(table,"model",item->heldModel,registry,false);
@@ -33,12 +33,12 @@ namespace API {
         get<float>(table,"scale",item->modelScale,false);
     }
 
-    void loadItemPlaceTool(ObjLoadType loadType,sol::table table,PlaceBlockTool* item,Registry& registry) {
+    inline void loadItemPlaceTool(ObjLoadType loadType,sol::table table,PlaceBlockTool* item,Registry& registry) {
         loadItemToolType(loadType,table,item,registry);
         getBlock(table,"block",item->block,registry,false);
     }
 
-    void loadItemPickaxe(ObjLoadType loadType,sol::table table,PickaxeTool* item,Registry& registry) {
+    inline void loadItemPickaxe(ObjLoadType loadType,sol::table table,PickaxeTool* item,Registry& registry) {
         loadItemToolType(loadType,table,item,registry);
         get<float>(table,"mine_amount",item->mineAmount,false);
         get<float>(table,"mine_radius",item->mineRadius,false);
@@ -50,14 +50,14 @@ namespace API {
         get<float>(table,"cooldown_time",    item->cooldownTime,false);
     }
 
-    void loadItemDrill(ObjLoadType loadType,sol::table table,DrillTool* item,Registry& registry) {
+    inline void loadItemDrill(ObjLoadType loadType,sol::table table,DrillTool* item,Registry& registry) {
         loadItemToolType(loadType,table,item,registry);
         get<float>(table,"mine_amount",item->mineAmount,false);
         get<float>(table,"mine_radius",item->mineRadius,false);
         get<int>(table,"durability",item->durability,false);
     }
 
-    void addItemWithTypeAndLoad(string type,string name,ObjLoadType loadType,sol::table table,Registry& registry) {
+    inline void addItemWithTypeAndLoad(string type,string name,ObjLoadType loadType,sol::table table,Registry& registry) {
         if(loadType == ObjLoadType::INVALID) {
             Debug::warn("trying to load with invalid object");
             return;

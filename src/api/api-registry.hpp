@@ -18,7 +18,7 @@ using std::string,std::variant;
 
 namespace API {
 
-    void loadAPIRegistry(sol::state& lua) {
+    inline void loadAPIRegistry(sol::state& lua) {
 
         sol::usertype<TextureRegistry> textureRegistry = lua.new_usertype<TextureRegistry>("textureRegistry",sol::no_constructor);
 

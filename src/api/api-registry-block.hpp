@@ -34,23 +34,23 @@ namespace API {
     //     }
     // }
 
-    void loadBlockThruster(sol::table table,ThrusterBlock* block,Registry& registry) {
+    inline void loadBlockThruster(sol::table table,ThrusterBlock* block,Registry& registry) {
         getMesh(table,"mesh",block->mesh,registry,true);
         getTexture(table,"texture",block->texture,registry,true);
         get<float>(table,"force",block->force,false);
         get<float>(table,"side_force",block->sideForce,false);
     }
 
-    void loadBlockConnected(sol::table table,ConnectedBlock* block,Registry& registry) {
+    inline void loadBlockConnected(sol::table table,ConnectedBlock* block,Registry& registry) {
         getTexture(table,"texture",block->texture,registry,true);
         get<bool>(table,"solid",block->solid,false);
     }
     
-    void loadBlockCockpit(sol::table table,CockpitBlock* block,Registry& registry) {
+    inline void loadBlockCockpit(sol::table table,CockpitBlock* block,Registry& registry) {
         getMesh(table,"mesh",block->mesh,registry,true);
         getTexture(table,"texture",block->texture,registry,true);
     }
-    void loadBlockFurnace(sol::table table,FurnaceBlock* block,Registry& registry) {
+    inline void loadBlockFurnace(sol::table table,FurnaceBlock* block,Registry& registry) {
         getMesh(table,"mesh",block->mesh,registry,true);
         getTexture(table,"texture",block->texture,registry,true);
         get<float>(table,"fuel_max",block->fuelMax,false);
@@ -58,7 +58,7 @@ namespace API {
         // should be other stuff like speed etc
     }
 
-    void addBlockWithTypeAndLoad(string type,string name,sol::table table,Registry& registry) {
+    inline void addBlockWithTypeAndLoad(string type,string name,sol::table table,Registry& registry) {
         if(type == "cockpit") {
             CockpitBlock* block = registry.addBlock<CockpitBlock>(name);
             loadBlockCockpit(table,block,registry);

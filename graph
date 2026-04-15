@@ -1,0 +1,647 @@
+digraph {
+	"actor-factory-fwd"
+	"actor-factory-fwd" -> actor [color=red]
+	"actor-factory-fwd" -> debug [color=red]
+	"actor-factory"
+	"actor-factory" -> "actors-all" [color=red]
+	"actor-factory" -> "actor-factory-fwd" [color=red]
+	actor
+	actor -> mesh [color=red]
+	actor -> vulkan [color=red]
+	actor -> structs [color=red]
+	actor -> "data-actor" [color=red]
+	"actors-all"
+	"actors-all" -> actor [color=red]
+	"actors-all" -> character [color=red]
+	"actors-all" -> construction [color=red]
+	"actors-all" -> "rigidbody-actor" [color=red]
+	"actors-all" -> terrain [color=red]
+	"actors-all" -> "particle-system-actor" [color=red]
+	"actors-all" -> "item-actor" [color=red]
+	character
+	character -> actor [color=red]
+	character -> "math-helper" [color=red]
+	character -> "string-helper" [color=red]
+	character -> "rigidbody-actor" [color=red]
+	character -> input [color=red]
+	character -> world [color=red]
+	character -> construction [color=red]
+	character -> "item-stack" [color=red]
+	character -> "item-actor" [color=red]
+	character -> recipe [color=red]
+	character -> inventory [color=red]
+	character -> "jolt-conversions" [color=red]
+	character -> "actor-widget" [color=red]
+	character -> "menu-object" [color=red]
+	character -> "jolt-userdata" [color=red]
+	character -> "camera-shake" [color=red]
+	character -> "item-slot-interact-options" [color=red]
+	character -> "item-actor" [color=red]
+	character -> "data-character" [color=red]
+	construction
+	construction
+	construction -> actor [color=red]
+	construction -> debug [color=red]
+	construction -> "item-actor" [color=red]
+	construction -> "string-helper" [color=red]
+	construction -> block [color=red]
+	construction -> "block-storage" [color=red]
+	construction -> rect [color=red]
+	construction -> "jolt-conversions" [color=red]
+	construction -> "jolt-layers" [color=red]
+	construction -> "jolt-userdata" [color=red]
+	construction -> "data-construction" [color=red]
+	construction -> "data-loader" [color=red]
+	"item-actor"
+	"item-actor" -> actor [color=red]
+	"item-actor" -> "item-stack" [color=red]
+	"item-actor" -> rigidbody [color=red]
+	"item-actor" -> character [color=red]
+	"particle-system-actor"
+	"particle-system-actor" -> actor [color=red]
+	"particle-system-actor" -> "particle-effect" [color=red]
+	"rigidbody-actor"
+	"rigidbody-actor" -> actor [color=red]
+	"rigidbody-actor" -> "math-helper" [color=red]
+	"rigidbody-actor" -> "string-helper" [color=red]
+	"rigidbody-actor" -> world [color=red]
+	"rigidbody-actor" -> "jolt-physics-body" [color=red]
+	"rigidbody-actor" -> "jolt-conversions" [color=red]
+	"terrain-chunk"
+	"terrain-chunk" -> "terrain-helper" [color=red]
+	"terrain-chunk" -> mesh [color=red]
+	"terrain-chunk" -> item [color=red]
+	"terrain-chunk" -> "terrain-structs" [color=red]
+	"terrain-chunk" -> clock [color=red]
+	"terrain-chunk" -> "jolt-terrain-shape" [color=red]
+	"terrain-chunk" -> "jolt-userdata" [color=red]
+	"terrain-structs"
+	"terrain-structs" -> mesh [color=red]
+	"terrain-structs" -> item [color=red]
+	"terrain-structs" -> "item-stack" [color=red]
+	terrain
+	terrain -> mesh [color=red]
+	terrain -> actor [color=red]
+	terrain -> "terrain-helper" [color=red]
+	terrain -> debug [color=red]
+	terrain -> item [color=red]
+	terrain -> "location-key" [color=red]
+	terrain -> "terrain-chunk" [color=red]
+	terrain -> "terrain-structs" [color=red]
+	terrain -> random [color=red]
+	terrain -> "jolt-conversions" [color=red]
+	subgraph "cluster_src\actor" {
+	}
+	"camera-shake"
+	"camera-shake" -> random [color=red]
+	inventory
+	inventory -> "item-stack" [color=red]
+	inventory -> recipe [color=red]
+	inventory -> "data-inventory" [color=red]
+	inventory -> "data-loader" [color=red]
+	"particle-effect"
+	"particle-effect" -> vulkan [color=red]
+	"particle-effect" -> debug [color=red]
+	"particle-effect" -> random [color=red]
+	rigidbody
+	rigidbody -> "math-helper" [color=red]
+	rigidbody -> "string-helper" [color=red]
+	rigidbody -> world [color=red]
+	rigidbody -> "jolt-physics-body" [color=red]
+	rigidbody -> "jolt-conversions" [color=red]
+	rigidbody -> "data-generic" [color=red]
+	rigidbody -> "data-rigidbody" [color=red]
+	subgraph "cluster_src\actor\components" {
+	}
+	"api-actor"
+	"api-actor" -> sol [color=red]
+	"api-all"
+	"api-all" -> sol [color=red]
+	"api-all" -> "api-general" [color=red]
+	"api-all" -> "api-texture" [color=red]
+	"api-all" -> "api-material" [color=red]
+	"api-all" -> "api-actor" [color=red]
+	"api-all" -> "api-character" [color=red]
+	"api-all" -> "api-construction" [color=red]
+	"api-all" -> "api-world" [color=red]
+	"api-all" -> "api-registry" [color=red]
+	"api-all" -> "api-block" [color=red]
+	"api-all" -> "api-item" [color=red]
+	"api-all" -> "api-registry-recipe" [color=red]
+	"api-block"
+	"api-block" -> sol [color=red]
+	"api-block" -> "api-general" [color=red]
+	"api-block" -> block [color=red]
+	"api-character"
+	"api-character" -> sol [color=red]
+	"api-character" -> "api-general" [color=red]
+	"api-character" -> character [color=red]
+	"api-construction"
+	"api-construction" -> sol [color=red]
+	"api-construction" -> "api-general" [color=red]
+	"api-construction" -> construction [color=red]
+	"api-construction" -> "math-helper" [color=red]
+	"api-general"
+	"api-general" -> sol [color=red]
+	"api-item"
+	"api-item" -> sol [color=red]
+	"api-item" -> "api-general" [color=red]
+	"api-item" -> item [color=red]
+	"api-item" -> "item-stack" [color=red]
+	"api-material"
+	"api-material" -> sol [color=red]
+	"api-material" -> "api-general" [color=red]
+	"api-material" -> vulkan [color=red]
+	"api-material" -> color [color=red]
+	"api-registry-actor"
+	"api-registry-actor" -> sol [color=red]
+	"api-registry-actor" -> registry [color=red]
+	"api-registry-actor" -> debug [color=red]
+	"api-registry-actor" -> color [color=red]
+	"api-registry-actor" -> "api-registry" [color=red]
+	"api-registry-block"
+	"api-registry-block" -> sol [color=red]
+	"api-registry-block" -> registry [color=red]
+	"api-registry-block" -> debug [color=red]
+	"api-registry-block" -> color [color=red]
+	"api-registry-block" -> "api-registry" [color=red]
+	"api-registry-block" -> "cockpit-block" [color=red]
+	"api-registry-block" -> "thruster-block" [color=red]
+	"api-registry-block" -> "furnace-block" [color=red]
+	"api-registry-block" -> "connected-block" [color=red]
+	"api-registry-general"
+	"api-registry-general" -> sol [color=red]
+	"api-registry-general" -> registry [color=red]
+	"api-registry-general" -> debug [color=red]
+	"api-registry-general" -> color [color=red]
+	"api-registry-item"
+	"api-registry-item" -> sol [color=red]
+	"api-registry-item" -> registry [color=red]
+	"api-registry-item" -> debug [color=red]
+	"api-registry-item" -> color [color=red]
+	"api-registry-item" -> "api-registry" [color=red]
+	"api-registry-item" -> "items-all" [color=red]
+	"api-registry-material"
+	"api-registry-material" -> sol [color=red]
+	"api-registry-material" -> registry [color=red]
+	"api-registry-material" -> debug [color=red]
+	"api-registry-material" -> color [color=red]
+	"api-registry-material" -> "api-registry-general" [color=red]
+	"api-registry-particle-effect"
+	"api-registry-particle-effect" -> sol [color=red]
+	"api-registry-particle-effect" -> registry [color=red]
+	"api-registry-particle-effect" -> "particle-effect" [color=red]
+	"api-registry-particle-effect" -> debug [color=red]
+	"api-registry-particle-effect" -> color [color=red]
+	"api-registry-particle-effect" -> "api-registry-general" [color=red]
+	"api-registry-recipe"
+	"api-registry-recipe" -> sol [color=red]
+	"api-registry-recipe" -> registry [color=red]
+	"api-registry-recipe" -> "particle-effect" [color=red]
+	"api-registry-recipe" -> debug [color=red]
+	"api-registry-recipe" -> color [color=red]
+	"api-registry-recipe" -> "api-registry-general" [color=red]
+	"api-registry-recipe" -> "api-registry-item" [color=red]
+	"api-registry-recipe" -> recipe [color=red]
+	"api-registry-widget"
+	"api-registry-widget" -> sol [color=red]
+	"api-registry-widget" -> registry [color=red]
+	"api-registry-widget" -> debug [color=red]
+	"api-registry-widget" -> color [color=red]
+	"api-registry-widget" -> "api-registry" [color=red]
+	"api-registry-widget" -> "widgets-all" [color=red]
+	"api-registry"
+	"api-registry" -> sol [color=red]
+	"api-registry" -> registry [color=red]
+	"api-registry" -> debug [color=red]
+	"api-registry" -> color [color=red]
+	"api-registry" -> "api-registry-general" [color=red]
+	"api-registry" -> "api-registry-material" [color=red]
+	"api-registry" -> "api-registry-actor" [color=red]
+	"api-registry" -> "api-registry-block" [color=red]
+	"api-registry" -> "api-registry-item" [color=red]
+	"api-registry" -> "api-registry-recipe" [color=red]
+	"api-registry" -> "api-registry-particle-effect" [color=red]
+	"api-registry" -> "api-registry-widget" [color=red]
+	"api-texture"
+	"api-texture" -> sol [color=red]
+	"api-texture" -> "api-general" [color=red]
+	"api-world"
+	"api-world" -> sol [color=red]
+	"api-world" -> world [color=red]
+	subgraph "cluster_src\api" {
+	}
+	"block-facing"
+	"block-state"
+	block
+	block -> mesh [color=red]
+	block -> "item-stack" [color=red]
+	block -> "block-facing" [color=red]
+	block -> "block-storage" [color=red]
+	"cockpit-block"
+	"cockpit-block" -> block [color=red]
+	"cockpit-block" -> construction [color=red]
+	"cockpit-block" -> character [color=red]
+	"cockpit-block" -> "block-helper" [color=red]
+	"connected-block"
+	"connected-block" -> block [color=red]
+	"connected-block" -> construction [color=red]
+	"connected-block" -> "block-helper" [color=red]
+	"furnace-block"
+	"furnace-block" -> block [color=red]
+	"furnace-block" -> construction [color=red]
+	"furnace-block" -> character [color=red]
+	"furnace-block" -> "block-menu-object" [color=red]
+	"furnace-block" -> "block-widget" [color=red]
+	"furnace-block" -> recipe [color=red]
+	"thruster-block"
+	"thruster-block" -> block [color=red]
+	"thruster-block" -> construction [color=red]
+	"thruster-block" -> "block-helper" [color=red]
+	subgraph "cluster_src\block" {
+	}
+	"debug-ui"
+	debug
+	debug -> camera [color=red]
+	debug -> "mesh-data" [color=red]
+	debug -> color [color=red]
+	"game-application"
+	"game-application"
+	"game-application" -> "file-helper" [color=red]
+	"game-application" -> vulkan [color=red]
+	"game-application" -> mesh [color=red]
+	"game-application" -> input [color=red]
+	"game-application" -> "string-helper" [color=red]
+	"game-application" -> random [color=red]
+	"game-application" -> camera [color=red]
+	"game-application" -> skybox [color=red]
+	"game-application" -> world [color=red]
+	"game-application" -> "actors-all" [color=red]
+	"game-application" -> registry [color=red]
+	"game-application" -> loader [color=red]
+	"game-application" -> sol [color=red]
+	"game-application" -> interface [color=red]
+	"game-application" -> clock [color=red]
+	"game-application" -> "terrain-loader" [color=red]
+	"game-application" -> "player-widget" [color=red]
+	"game-application" -> "furnace-widget" [color=red]
+	"game-application" -> "items-all" [color=red]
+	"game-application" -> recipe [color=red]
+	"game-application" -> "jolt-layers" [color=red]
+	"game-application" -> "data-world" [color=red]
+	"game-application" -> "save-helper" [color=red]
+	"game-application" -> "data-loader-impl" [color=red]
+	"game-application" -> "cheats-menu" [color=red]
+	input
+	loader
+	loader -> registry [color=red]
+	loader -> mesh [color=red]
+	loader -> vulkan [color=red]
+	loader -> "api-all" [color=red]
+	loader -> debug [color=red]
+	registry
+	registry -> mesh [color=red]
+	registry -> vulkan [color=red]
+	registry -> actor [color=red]
+	registry -> block [color=red]
+	registry -> item [color=red]
+	registry -> sprite [color=red]
+	registry -> widget [color=red]
+	registry -> "particle-effect" [color=red]
+	registry -> font [color=red]
+	registry -> debug [color=red]
+	"terrain-loader"
+	"terrain-loader" -> terrain [color=red]
+	world
+	world
+	world -> actor [color=red]
+	world -> "jolt-physics-body" [color=red]
+	world -> "jolt-layers" [color=red]
+	world -> "jolt-trace" [color=red]
+	world -> "jolt-terrain-shape" [color=red]
+	world -> "jolt-userdata" [color=red]
+	world -> "data-world" [color=red]
+	world -> "data-loader" [color=red]
+	subgraph "cluster_src\engine" {
+	}
+	camera
+	color
+	"compute-shader"
+	"compute-shader" -> "file-helper" [color=red]
+	"compute-shader" -> color [color=red]
+	"compute-shader" -> glad [color=red]
+	material
+	"mesh-data"
+	mesh
+	mesh -> "file-helper" [color=red]
+	mesh -> "string-helper" [color=red]
+	mesh -> vulkan [color=red]
+	mesh -> debug [color=red]
+	mesh -> "math-helper" [color=red]
+	shader
+	shader -> "file-helper" [color=red]
+	shader -> color [color=red]
+	skybox
+	skybox -> vulkan [color=red]
+	skybox -> debug [color=red]
+	text
+	text -> glad [color=red]
+	text -> texture [color=red]
+	text -> shader [color=red]
+	text -> color [color=red]
+	texture
+	vulkan
+	vulkan
+	vulkan -> "string-helper" [color=red]
+	vulkan -> clock [color=red]
+	vulkan -> "file-helper" [color=red]
+	vulkan -> color [color=red]
+	vulkan -> camera [color=red]
+	vulkan -> material [color=red]
+	subgraph "cluster_src\graphics" {
+	}
+	anim
+	"block-helper"
+	"block-helper"
+	"block-helper" -> construction [color=red]
+	"block-helper" -> block [color=red]
+	"block-storage"
+	"block-storage" -> "generic-storage" [color=red]
+	"block-storage" -> recipe [color=red]
+	"block-storage" -> "item-stack" [color=red]
+	"block-storage" -> "block-facing" [color=red]
+	"block-storage" -> block [color=red]
+	"block-storage" -> "data-block-storage" [color=red]
+	clock
+	"file-helper"
+	"file-helper"
+	"generic-storage"
+	"generic-storage" -> "data-generic-storage" [color=red]
+	"location-key"
+	"math-helper"
+	random
+	rect
+	sprite
+	sprite -> vulkan [color=red]
+	sprite -> rect [color=red]
+	"string-helper"
+	"terrain-helper"
+	subgraph "cluster_src\helper" {
+	}
+	"actor-widget"
+	"actor-widget" -> interface [color=red]
+	"actor-widget" -> widget [color=red]
+	"inventory-widget"
+	"inventory-widget" -> interface [color=red]
+	"inventory-widget" -> character [color=red]
+	"inventory-widget" -> rect [color=red]
+	"inventory-widget" -> font [color=red]
+	"inventory-widget" -> sprite [color=red]
+	"inventory-widget" -> "text-widget" [color=red]
+	"inventory-widget" -> "item-slot-widget" [color=red]
+	"player-widget"
+	"player-widget" -> debug [color=red]
+	"player-widget" -> "actor-widget" [color=red]
+	"player-widget" -> character [color=red]
+	"player-widget" -> "inventory-widget" [color=red]
+	"player-widget" -> "toolbar-widget" [color=red]
+	"toolbar-widget"
+	"toolbar-widget" -> interface [color=red]
+	"toolbar-widget" -> character [color=red]
+	"toolbar-widget" -> rect [color=red]
+	"toolbar-widget" -> "item-slot-widget" [color=red]
+	"toolbar-widget" -> widget [color=red]
+	subgraph "cluster_src\interface\actor" {
+	}
+	"block-menu-object"
+	"block-menu-object" -> "menu-object" [color=red]
+	"block-menu-object" -> construction [color=red]
+	"block-menu-object" -> "block-widget" [color=red]
+	"block-widget"
+	"block-widget" -> interface [color=red]
+	"block-widget" -> "generic-storage" [color=red]
+	"block-widget" -> widget [color=red]
+	"furnace-widget"
+	"furnace-widget" -> interface [color=red]
+	"furnace-widget" -> character [color=red]
+	"furnace-widget" -> rect [color=red]
+	"furnace-widget" -> font [color=red]
+	"furnace-widget" -> sprite [color=red]
+	"furnace-widget" -> "text-widget" [color=red]
+	"furnace-widget" -> "item-slot-widget" [color=red]
+	"furnace-widget" -> "furnace-block" [color=red]
+	"furnace-widget" -> "block-widget" [color=red]
+	"furnace-widget" -> "item-slot-interact-options" [color=red]
+	subgraph "cluster_src\interface\block" {
+	}
+	console
+	console -> text [color=red]
+	console -> input [color=red]
+	console -> debug [color=red]
+	console -> sol [color=red]
+	font
+	font -> vulkan [color=red]
+	font -> sprite [color=red]
+	interface
+	interface -> "mesh-data" [color=red]
+	interface -> "math-helper" [color=red]
+	interface -> debug [color=red]
+	interface -> rect [color=red]
+	interface -> sprite [color=red]
+	"item-slot-interact-options"
+	"item-slot-widget"
+	"item-slot-widget" -> interface [color=red]
+	"item-slot-widget" -> "item-stack" [color=red]
+	"item-slot-widget" -> "text-widget" [color=red]
+	"item-slot-widget" -> widget [color=red]
+	"menu-object"
+	"menu-object" -> interface [color=red]
+	"menu-object" -> widget [color=red]
+	"text-widget"
+	"text-widget" -> interface [color=red]
+	"text-widget" -> font [color=red]
+	"text-widget" -> widget [color=red]
+	widget
+	"widgets-all"
+	"widgets-all" -> "text-widget" [color=red]
+	"widgets-all" -> "item-slot-widget" [color=red]
+	"widgets-all" -> "inventory-widget" [color=red]
+	"widgets-all" -> "toolbar-widget" [color=red]
+	"widgets-all" -> "furnace-widget" [color=red]
+	subgraph "cluster_src\interface" {
+	}
+	"cheats-menu"
+	"cheats-menu" -> character [color=red]
+	"cheats-menu" -> world [color=red]
+	"cheats-menu" -> registry [color=red]
+	"generation-menu"
+	"generation-menu" -> terrain [color=red]
+	subgraph "cluster_src\interface\debug" {
+	}
+	"generic-item-model"
+	subgraph "cluster_src\item\components" {
+	}
+	"drill-tool"
+	"drill-tool" -> tool [color=red]
+	"drill-tool" -> terrain [color=red]
+	"drill-tool" -> anim [color=red]
+	"item-stack"
+	"item-stack" -> item [color=red]
+	"item-stack" -> "generic-storage" [color=red]
+	"item-stack" -> "data-item-stack" [color=red]
+	"item-stack" -> "data-loader" [color=red]
+	item
+	item -> world [color=red]
+	item -> input [color=red]
+	item -> vulkan [color=red]
+	item -> sprite [color=red]
+	"items-all"
+	"items-all" -> "place-block-tool" [color=red]
+	"items-all" -> "pickaxe-tool" [color=red]
+	"items-all" -> "drill-tool" [color=red]
+	"items-all" -> "resource-item" [color=red]
+	"pickaxe-tool"
+	"pickaxe-tool" -> tool [color=red]
+	"pickaxe-tool" -> terrain [color=red]
+	"pickaxe-tool" -> anim [color=red]
+	"place-block-tool"
+	"place-block-tool" -> tool [color=red]
+	"place-block-tool" -> terrain [color=red]
+	"place-block-tool" -> "block-helper" [color=red]
+	recipe
+	recipe -> "item-stack" [color=red]
+	"resource-item"
+	"resource-item" -> item [color=red]
+	"resource-item" -> vulkan [color=red]
+	"resource-item" -> sprite [color=red]
+	tool
+	tool -> world [color=red]
+	tool -> input [color=red]
+	tool -> character [color=red]
+	tool -> item [color=red]
+	subgraph "cluster_src\item" {
+	}
+	main
+	main -> "game-application" [color=blue]
+	test
+	test -> world [color=blue]
+	test -> construction [color=blue]
+	subgraph cluster_src {
+	}
+	"data-inventory"
+	"data-inventory" -> "data-generic" [color=red]
+	"data-inventory" -> "data-item-stack" [color=red]
+	"data-rigidbody"
+	"data-rigidbody" -> "data-generic" [color=red]
+	subgraph "cluster_src\persistance\actor\component" {
+	}
+	"data-actor"
+	"data-actor" -> "data-generic" [color=red]
+	"data-character"
+	"data-character" -> "data-item-stack" [color=red]
+	"data-character" -> "data-actor" [color=red]
+	"data-character" -> "data-rigidbody" [color=red]
+	"data-character" -> "data-inventory" [color=red]
+	"data-construction"
+	"data-construction" -> "data-block-storage" [color=red]
+	"data-construction" -> "data-item-stack" [color=red]
+	"data-construction" -> "data-actor" [color=red]
+	"data-construction" -> "data-rigidbody" [color=red]
+	"data-construction" -> "data-inventory" [color=red]
+	"data-construction" -> "data-block" [color=red]
+	subgraph "cluster_src\persistance\actor" {
+	}
+	"data-block-storage"
+	"data-block-storage" -> "data-generic" [color=red]
+	"data-block-storage" -> "data-generic-storage" [color=red]
+	"data-block-storage" -> "data-item-stack" [color=red]
+	"data-block"
+	"data-block" -> "data-generic-storage" [color=red]
+	"data-block" -> "block-facing" [color=red]
+	"data-block" -> "data-block-storage" [color=red]
+	subgraph "cluster_src\persistance\block" {
+	}
+	"data-generic-storage"
+	"data-generic-storage" -> "data-generic" [color=red]
+	"data-generic"
+	"data-loader-impl"
+	"data-loader-impl" -> "actors-all" [color=red]
+	"data-loader-impl" -> "data-actor" [color=red]
+	"data-loader-impl" -> "string-helper" [color=red]
+	"data-loader-impl" -> registry [color=red]
+	"data-loader-impl" -> vulkan [color=red]
+	"data-loader-impl" -> "data-loader" [color=red]
+	"data-loader-impl" -> recipe [color=red]
+	"data-loader"
+	"data-loader" -> "data-generic" [color=red]
+	"data-loader" -> "data-actor" [color=red]
+	"data-loader" -> "data-item-stack" [color=red]
+	"data-loader" -> material [color=red]
+	"data-world"
+	"data-world" -> "data-actor" [color=red]
+	"save-helper"
+	subgraph "cluster_src\persistance" {
+	}
+	"data-item-stack"
+	"data-item-stack" -> "data-generic" [color=red]
+	"data-item-stack" -> "data-generic-storage" [color=red]
+	subgraph "cluster_src\persistance\item" {
+	}
+	intersections
+	intersections -> debug [color=red]
+	intersections -> "math-helper" [color=red]
+	intersections -> structs [color=red]
+	"jolt-conversions"
+	"jolt-layers"
+	"jolt-physics-body"
+	"jolt-terrain-shape"
+	"jolt-terrain-shape" -> "terrain-structs" [color=red]
+	"jolt-terrain-shape" -> "jolt-conversions" [color=red]
+	"jolt-trace"
+	"jolt-userdata"
+	"jolt-userdata" -> actor [color=red]
+	resolution
+	resolution -> debug [color=red]
+	resolution -> "math-helper" [color=red]
+	resolution -> structs [color=red]
+	structs
+	structs -> debug [color=red]
+	structs -> "math-helper" [color=red]
+	subgraph "cluster_src\physics" {
+	}
+	glad
+	main_opengl
+	main_opengl -> glad [color=blue]
+	main_opengl -> loader [color=blue]
+	main_opengl -> world [color=blue]
+	main_opengl -> input [color=blue]
+	main_opengl -> block [color=blue]
+	main_opengl -> "thruster-block" [color=blue]
+	main_opengl -> "cockpit-block" [color=blue]
+	main_opengl -> console [color=blue]
+	main_opengl -> interface [color=blue]
+	main_opengl -> "toolbar-widget" [color=blue]
+	main_opengl -> character [color=blue]
+	main_opengl -> terrain [color=blue]
+	main_opengl -> construction [color=blue]
+	main_opengl -> text [color=blue]
+	main_opengl -> "api-all" [color=blue]
+	main_opengl -> "actor-factory" [color=blue]
+	"physics-body_old"
+	"physics-body_old" -> debug [color=red]
+	"physics-body_old" -> "math-helper" [color=red]
+	"physics-body_old" -> structs [color=red]
+	structs_old
+	structs_old -> debug [color=red]
+	structs_old -> "math-helper" [color=red]
+	test
+	subgraph "cluster_src\safekeeping" {
+	}
+	config
+	forward
+	forward -> config [color=red]
+	sol
+	sol -> config [color=red]
+	subgraph "cluster_src\sol" {
+	}
+}

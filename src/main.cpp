@@ -17,10 +17,5 @@ int main() {
 
     game.run();
 
-   
-
-
-
-    
 
 }

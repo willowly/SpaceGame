@@ -11,7 +11,7 @@ using std::string,std::variant;
 
 namespace API {
 
-    void loadActorDummyType(ObjLoadType loadType,sol::table table,Actor* actor,Registry& registry) {
+    inline void loadActorDummyType(ObjLoadType loadType,sol::table table,Actor* actor,Registry& registry) {
         switch (loadType) {
             case ObjLoadType::ARRAY:
                 // type is in slot 1 (hopefully)
@@ -29,7 +29,7 @@ namespace API {
         }
     }
 
-    void addActorWithTypeAndLoad(string type,string name,ObjLoadType loadType,sol::table table,Registry& registry) {
+    inline void addActorWithTypeAndLoad(string type,string name,ObjLoadType loadType,sol::table table,Registry& registry) {
         if(type == "character") {
 
         }

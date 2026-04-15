@@ -10,7 +10,7 @@ using std::unique_ptr;
 namespace API {
 
 
-    void loadAPIMaterial(sol::state& lua) {
+    inline void loadAPIMaterial(sol::state& lua) {
 
         sol::usertype<Color> color = lua.new_usertype<Color>("color",sol::call_constructor,sol::constructors<Color(float,float,float),Color(float,float,float,float)>());
         

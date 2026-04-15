@@ -21,7 +21,7 @@ class TerrainShapeSettings : public JPH::ShapeSettings {
         
     }
 
-    JPH::Shape::ShapeResult Create() const;
+    inline JPH::Shape::ShapeResult Create() const;
 
     
 
@@ -43,8 +43,8 @@ class TerrainShape : public JPH::Shape {
     MeshData<TerrainVertex> meshData;
     std::vector<VoxelData> voxelData;
     JPH::AABox localBounds;
-    int sizeInCells;
-    float cellSize;
+    int sizeInCells = 1;
+    float cellSize = 0.5f;
     
     JPH::AABox GetLocalBounds() const override {
 
@@ -69,7 +69,7 @@ class TerrainShape : public JPH::Shape {
 
     Triangle getTriangle(size_t index) const {
 
-        Triangle tri;
+        Triangle tri = {};
         size_t indexA = meshData.indices[index];
         size_t indexB = meshData.indices[index+1];
         size_t indexC = meshData.indices[index+2];
@@ -112,7 +112,7 @@ class TerrainShape : public JPH::Shape {
 
     }
 
-    inline virtual bool CastRay(const JPH::RayCast &inRay, const JPH::SubShapeIDCreator &inSubShapeIDCreator, JPH::RayCastResult &ioHit) const override {
+    inline bool CastRay(const JPH::RayCast &inRay, const JPH::SubShapeIDCreator &inSubShapeIDCreator, JPH::RayCastResult &ioHit) const override {
         
         bool foundHit = false;
         // i know this isn't the best way of doing this, maybe a visitor would be good?

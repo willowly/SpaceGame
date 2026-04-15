@@ -1,5 +1,4 @@
 #pragma once
-#include "graphics/mesh.hpp"
 #include <vector>
 #include "glm/glm.hpp"
 #include "item/item.hpp"

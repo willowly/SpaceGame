@@ -17,7 +17,7 @@ namespace API {
     };
 
 
-    ObjLoadType getObjectLoadType(sol::object solObject) {
+    inline ObjLoadType getObjectLoadType(sol::object solObject) {
 
         sol::table table = solObject;
         if(table == sol::lua_nil) {
@@ -31,7 +31,7 @@ namespace API {
         return ObjLoadType::TABLE;
     };
 
-    string keyAsString(std::variant<string,int> key) {
+    inline string keyAsString(std::variant<string,int> key) {
         if(key.index() == 0) {
             return get<string>(key);
         } else {
@@ -40,7 +40,7 @@ namespace API {
     }
 
     template<typename T> 
-    void get(sol::table table,variant<string,int> key,T& ref,bool required = false) {
+    inline void get(sol::table table,variant<string,int> key,T& ref,bool required = false) {
         Debug::addTrace(keyAsString(key));
         sol::object obj = table[key];
         if(obj == sol::lua_nil) {
@@ -58,18 +58,18 @@ namespace API {
         Debug::subtractTrace();
     }
 
-    void getColorAsVec3(sol::table table,variant<string,int> key,vec3& ref,bool required = false) {
+    inline void getColorAsVec3(sol::table table,variant<string,int> key,vec3& ref,bool required = false) {
         Color color(ref);
         get<Color>(table,key,color,false);
         ref = color.asVec3();
     }
-    void getColorAsVec4(sol::table table,variant<string,int> key,vec4& ref,bool required = false) {
+    inline void getColorAsVec4(sol::table table,variant<string,int> key,vec4& ref,bool required = false) {
         Color color(ref);
         get<Color>(table,key,color,false);
         ref = color.asVec4();
     }
 
-    void getTexture(sol::table table,std::variant<string,int> key,TextureID& ref,Registry& registry,bool required = false) {
+    inline void getTexture(sol::table table,std::variant<string,int> key,TextureID& ref,Registry& registry,bool required = false) {
         Debug::addTrace(keyAsString(key));
         sol::object obj = table[key];
         if(obj.is<string>()) {
@@ -83,7 +83,7 @@ namespace API {
         get<TextureID>(table,key,ref,required);
     }
 
-    void getSprite(sol::table table,std::variant<string,int> key,Sprite& ref,Registry& registry,bool required = false) {
+    inline void getSprite(sol::table table,std::variant<string,int> key,Sprite& ref,Registry& registry,bool required = false) {
         Debug::addTrace(keyAsString(key));
         sol::object obj = table[key];
         if(obj.is<string>()) {
@@ -98,7 +98,7 @@ namespace API {
         get<Sprite>(table,key,ref,required);
     }
 
-    void getMesh(sol::table table,std::variant<string,int> key,Mesh<Vertex>*& ref,Registry& registry,bool required = false) {
+    inline void getMesh(sol::table table,std::variant<string,int> key,Mesh<Vertex>*& ref,Registry& registry,bool required = false) {
         Debug::addTrace(keyAsString(key));
         sol::object obj = table[key];
         if(obj.is<string>()) {
@@ -112,7 +112,7 @@ namespace API {
         get<Mesh<Vertex>*>(table,key,ref,required);
     }
 
-    void getItem(sol::table table,std::variant<string,int> key,Item*& ref,Registry& registry,bool required = false) {
+    inline void getItem(sol::table table,std::variant<string,int> key,Item*& ref,Registry& registry,bool required = false) {
         Debug::addTrace(keyAsString(key));
         sol::object obj = table[key];
         if(obj.is<string>()) {
@@ -126,7 +126,7 @@ namespace API {
         get<Item*>(table,key,ref,required);
     }
 
-    std::optional<ItemStack> createItemStack(sol::object obj,Registry& registry) {
+    inline std::optional<ItemStack> createItemStack(sol::object obj,Registry& registry) {
         ItemStack stack;
         stack.amount = 1;
         if(obj.is<string>()) {
@@ -151,7 +151,7 @@ namespace API {
         return std::nullopt;
     }
 
-    void getItemStack(sol::table table,std::variant<string,int> key,ItemStack& ref,Registry& registry,bool required = false) {
+    inline void getItemStack(sol::table table,std::variant<string,int> key,ItemStack& ref,Registry& registry,bool required = false) {
         Debug::addTrace(keyAsString(key));
         sol::object obj = table[key]; // be careful with this, its only
         if(obj != sol::lua_nil) {
@@ -169,7 +169,7 @@ namespace API {
 
     //i actually think these should go in here, otherwise theres a dependancy nightmare
 
-    Material createLitMaterial(sol::object obj,Registry& registry,Vulkan* vulkan) {
+    inline Material createLitMaterial(sol::object obj,Registry& registry,Vulkan* vulkan) {
         LitMaterialData materialData;
         VkPipeline pipeline = registry.litShader;
         sol::table table = obj;
@@ -191,7 +191,7 @@ namespace API {
         return vulkan->createMaterial<LitMaterialData,Vertex>(shader,materialData);
     }
 
-    void getMaterial(sol::table table,std::variant<string,int> key,Material& ref,Registry& registry,bool required = false) {
+    inline void getMaterial(sol::table table,std::variant<string,int> key,Material& ref,Registry& registry,bool required = false) {
         Debug::addTrace(keyAsString(key)); 
         sol::object obj = table[key];
         if(obj.is<string>()) {
@@ -206,7 +206,7 @@ namespace API {
         get<Material>(table,key,ref,required);
     }
 
-    void getBlock(sol::table table,std::variant<string,int> key,Block*& ref,Registry& registry,bool required = false) {
+    inline void getBlock(sol::table table,std::variant<string,int> key,Block*& ref,Registry& registry,bool required = false) {
         Debug::addTrace(keyAsString(key)); 
         sol::object obj = table[key];
         if(obj.is<string>()) {
@@ -221,7 +221,7 @@ namespace API {
     }
 
     template<typename T> 
-    void getWidget(sol::table table,std::variant<string,int> key,T*& ref,Registry& registry,bool required = false) {
+    inline void getWidget(sol::table table,std::variant<string,int> key,T*& ref,Registry& registry,bool required = false) {
         Debug::addTrace(keyAsString(key)); 
         bool propertySet = false;
         sol::object obj = table[key];
@@ -262,7 +262,7 @@ namespace API {
 
 
 
-    string getType(sol::object obj) {
+    inline string getType(sol::object obj) {
         string type;
         ObjLoadType loadType = getObjectLoadType(obj);
         sol::table table = obj;

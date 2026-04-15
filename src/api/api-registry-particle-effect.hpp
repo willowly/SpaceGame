@@ -13,7 +13,7 @@ using std::string,std::variant;
 namespace API {
 
 
-    void getParticleFloatRange(sol::table table,std::variant<string,int> key,ParticleEffect::FloatRange& range,bool required = false) {
+    inline void getParticleFloatRange(sol::table table,std::variant<string,int> key,ParticleEffect::FloatRange& range,bool required = false) {
         Debug::addTrace(keyAsString(key)); 
         sol::object obj = table[key];
         if(obj == sol::lua_nil) {
@@ -47,7 +47,7 @@ namespace API {
         // we dont have an way to represent these in lua yet (and may never will) so we dont need to get
     }
 
-    void loadParticleEffect(sol::table table,ParticleEffect& effect,Registry& registry) {
+    inline void loadParticleEffect(sol::table table,ParticleEffect& effect,Registry& registry) {
         getMesh(table,"mesh",effect.mesh,registry);
         getMaterial(table,"material",effect.material,registry);
         get<float>(table,"spawnRate",effect.spawnRate);

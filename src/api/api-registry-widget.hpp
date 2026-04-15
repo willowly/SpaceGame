@@ -12,7 +12,7 @@ using std::string,std::variant;
 
 namespace API {
     
-    void addTextWidget(string name,sol::table table,Registry& registry) {
+    inline void addTextWidget(string name,sol::table table,Registry& registry) {
         TextWidget* widget = registry.addWidget<TextWidget>(name);
         get<float>(table,"height",widget->height);
         get<float>(table,"ratio",widget->ratio);
@@ -22,7 +22,7 @@ namespace API {
         Debug::info("Loaded Text Widget \"" + name + "\"",InfoPriority::MEDIUM);
     }
 
-    void addItemSlotWidget(string name,sol::table table,Registry& registry) {
+    inline void addItemSlotWidget(string name,sol::table table,Registry& registry) {
         ItemSlotWidget* widget = registry.addWidget<ItemSlotWidget>(name);
         getSprite(table,"sprite",widget->sprite,registry);
         getSprite(table,"bar_sprite",widget->barSprite,registry);
@@ -46,7 +46,7 @@ namespace API {
     //     Debug::info("Loaded Inventory Widget \"" + name + "\"",InfoPriority::MEDIUM);
     // }
 
-    void addWidgetWithTypeAndLoad(string type,string name,ObjLoadType loadType,sol::table table,Registry& registry) {
+    inline void addWidgetWithTypeAndLoad(string type,string name,ObjLoadType loadType,sol::table table,Registry& registry) {
         if(loadType == ObjLoadType::INVALID) {
             Debug::warn("trying to load with invalid object");
             return;

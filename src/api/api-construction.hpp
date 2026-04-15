@@ -5,7 +5,7 @@
 #include <actor/construction.hpp>
 #include <helper/math-helper.hpp> //for ivec3 idk lol
 
-bool compareIVec3(const ivec3& a, const ivec3& b)
+inline bool compareIVec3(const ivec3& a, const ivec3& b)
 {
     if(a.x == b.x) {
         if(a.y == b.y) {
@@ -18,7 +18,7 @@ bool compareIVec3(const ivec3& a, const ivec3& b)
 
 namespace API {
 
-    void loadAPIConstruction(sol::state& lua) {
+    inline void loadAPIConstruction(sol::state& lua) {
 
         sol::automagic_enrollments enrollments;
         enrollments.less_than_operator = false;

@@ -6,12 +6,14 @@ set(OUTPUT_DIR ${OUTPUT_DIR}/bin)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /bigobj")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /bigobj /showIncludes")
 endif()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -Wall -Wextra -Werror=return-type -pedantic -Wno-unused-parameter")
 endif()
+
+set(CMAKE_VERBOSE_MAKEFILE ON) 
 
 
 if(APPLE)
@@ -90,6 +92,15 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(JoltPhysics)
 
+# for testing
+FetchContent_Declare(
+  Catch2
+  GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+  GIT_TAG        v3.14.0
+)
+
+FetchContent_MakeAvailable(Catch2)
+
 target_compile_options(Jolt PRIVATE "-frtti" )
 
 set_property(TARGET Jolt PROPERTY
@@ -107,9 +118,17 @@ include_directories(include/imgui)
 
 # include(tracy/public/tracy/tracy.hpp)
 
-add_executable(SpaceGame 
+
+add_executable(SpaceGame
 src/main.cpp
-include/volk.c
+
+src/engine/game-application.cpp
+
+src/graphics/vulkan.cpp
+
+src/helper/file-helper.cpp
+
+src/actor/construction.cpp
 
 include/imgui/imgui.h
 include/imgui/imgui.cpp
@@ -124,21 +143,24 @@ include/imgui/backends/imgui_impl_glfw.cpp
 )
 
 
+
 list(APPEND LINKED_LIBRARIES Lua glfw STB Vulkan::Headers Jolt TracyClient)
 if(OSX)
-    list(APPEND LINKED_LIBRARIES ${COCOA_LIBRARY} ${IOKIT_LIBRARY})
+list(APPEND LINKED_LIBRARIES ${COCOA_LIBRARY} ${IOKIT_LIBRARY})
 endif(OSX)
 
-
-
+# include(CTest)
+# add_executable(SpaceGameTest src/test.cpp)
 
 target_include_directories(SpaceGame PUBLIC ${JoltPhysics_SOURCE_DIR})
-
-# important for windows
-
 target_compile_features(SpaceGame PRIVATE cxx_std_20 )
 target_link_libraries(SpaceGame PRIVATE ${LINKED_LIBRARIES})
+# important for windows
 
+# target_compile_features(SpaceGameTest PRIVATE cxx_std_20 )
+# target_link_libraries(SpaceGameTest PUBLIC ${LINKED_LIBRARIES} Catch2::Catch2WithMain)
+# add_test(NAME SpaceGameTest
+# COMMAND SpaceGameTest)
 
 add_custom_target(SHADERS)
 

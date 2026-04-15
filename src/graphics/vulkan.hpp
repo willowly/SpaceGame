@@ -1,12 +1,11 @@
 #pragma once
-
+#define VK_NO_PROTOTYPES
 #include "volk.h"
 
 #include <GLFW/glfw3.h>
 
 #include "helper/string-helper.hpp"
 
-#define VMA_IMPLEMENTATION
 #include "vma/vk_mem_alloc.h"
 
 #include "tracy/TracyVulkan.hpp"

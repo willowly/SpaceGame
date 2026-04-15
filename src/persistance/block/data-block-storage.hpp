@@ -5,11 +5,10 @@
 #include "persistance/item/data-item-stack.hpp"
 #include "cista.h"
 
-enum data_ResourcePointerType {
+enum class data_ResourcePointerType {
     NONE,
     ITEM,
     RECIPE,
-    BLOCK
 };
 
 struct data_ResourcePointer {

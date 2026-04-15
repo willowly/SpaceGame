@@ -5,7 +5,7 @@
 
 namespace API {
 
-    void loadAPIWorld(sol::state& lua) {
+    inline void loadAPIWorld(sol::state& lua) {
         sol::usertype<World> world = lua.new_usertype<World>("world",sol::no_constructor);
 
 

@@ -7,7 +7,7 @@
 
 namespace API {
 
-    void loadAPIItem(sol::state& lua) {
+    inline void loadAPIItem(sol::state& lua) {
         
         sol::usertype<Item> item = lua.new_usertype<Item>("item",sol::no_constructor);
         
