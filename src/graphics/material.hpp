@@ -19,3 +19,5 @@ class Material {
             return data != 0;
         }
 };
+
+inline const Material Material::none = Material();

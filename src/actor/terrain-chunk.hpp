@@ -5,7 +5,7 @@
 #include "glm/glm.hpp"
 #include "item/item.hpp"
 #include "SimplexNoise.h"
-#include "terrain-structs.hpp"
+#include "terrain/terrain-structs.hpp"
 #include <mutex>
 #include "helper/clock.hpp"
 

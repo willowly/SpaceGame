@@ -37,8 +37,10 @@
 #include <mutex>
 #include <array>
 #include <algorithm>
+#include <cstring>
 
 #include "camera.hpp"
+
 
 
 #include "imgui/imgui.h"
@@ -110,8 +112,6 @@ struct LitMaterialData {
 };
 
 #include "material.hpp"
-
-const Material Material::none = Material();
 
 struct MeshBuffer : Buffer {
     VkDeviceSize indexOffset = 0;

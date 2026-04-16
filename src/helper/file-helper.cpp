@@ -41,7 +41,7 @@ void FileHelper::writeBinary(string path,std::vector<std::uint8_t> buffer) {
         if (file.fail()) {
             // Print a more detailed error message using
             // strerror
-            std::cout << "Error details: " << strerror(errno)
+            std::cout << "File open failure "
                 << std::endl;
         }
         return;

@@ -407,4 +407,4 @@ class Debug {
 
 };
 
-std::unique_ptr<Debug> Debug::_instance = nullptr;
+inline std::unique_ptr<Debug> Debug::_instance = nullptr;

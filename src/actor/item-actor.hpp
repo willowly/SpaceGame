@@ -2,7 +2,6 @@
 #include "actor.hpp"
 #include "item/item-stack.hpp"
 #include "actor/components/rigidbody.hpp"
-#include "actor/character.hpp"
 #include "helper/random.hpp"
 
 #include "Jolt/Physics/Collision/Shape/SphereShape.h"

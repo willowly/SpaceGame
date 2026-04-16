@@ -82,4 +82,4 @@ struct Rect {
     static const Rect unitSquare;
 };
 
-const Rect Rect::unitSquare = Rect(0,0,1,1);
+inline const Rect Rect::unitSquare = Rect(0,0,1,1);

@@ -5,7 +5,7 @@
 
 namespace DebugMenu {
 
-    void cheatsMenu(Character& player,World& world,Registry& registry) {
+    inline void cheatsMenu(Character& player,World& world,Registry& registry) {
         ImGui::Begin("Cheats");
 
         // Give Items

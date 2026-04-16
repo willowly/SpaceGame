@@ -7,23 +7,23 @@
 namespace Anim {
 
 
-    float easeInSine(float t) {
+    inline float easeInSine(float t) {
         return 1 - cos((t * PI) / 2);
     }
 
-    float easeOutSine(float t) {
+    inline float easeOutSine(float t) {
         return sin((t * PI) / 2);
     }
 
-    float easeOutCubic(float t) {
+    inline float easeOutCubic(float t) {
         return 1 - pow(1 - t, 3);
     }
 
-    float easeInCube(float t) {
+    inline float easeInCube(float t) {
         return t * t * t;
     }
 
-    float easeInOutCubic(float t) {
+    inline float easeInOutCubic(float t) {
         return t < 0.5 ? 4 * t * t * t : 1 - pow(-2 * t + 2, 3) / 2;
     }
 }

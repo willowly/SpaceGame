@@ -39,17 +39,17 @@ class Color {
         float b;
         float a;
 
-        static Color red;
-        static Color green;
-        static Color blue;
+        static const Color red;
+        static const Color green;
+        static const Color blue;
 
-        static Color magenta;
-        static Color cyan;
-        static Color yellow;
+        static const Color magenta;
+        static const Color cyan;
+        static const Color yellow;
 
-        static Color white;
-        static Color black;
-        static Color clear;
+        static const Color white;
+        static const Color black;
+        static const Color clear;
 
         vec3 asVec3() {
             return vec3(r,g,b);
@@ -61,14 +61,14 @@ class Color {
     
 };
 
-Color Color::red = Color(1,0,0);
-Color Color::green = Color(0,1,0);
-Color Color::blue = Color(0,0,1);
+inline const Color Color::red = Color(1,0,0);
+inline const Color Color::green = Color(0,1,0);
+inline const Color Color::blue = Color(0,0,1);
 
-Color Color::magenta = Color(1,0,1);
-Color Color::cyan = Color(0,1,1);
-Color Color::yellow = Color(1,1,0);
+inline const Color Color::magenta = Color(1,0,1);
+inline const Color Color::cyan = Color(0,1,1);
+inline const Color Color::yellow = Color(1,1,0);
 
-Color Color::white = Color(1,1,1);
-Color Color::black = Color(0,0,0);
-Color Color::clear = Color(0,0,0,0);
+inline const Color Color::white = Color(1,1,1);
+inline const Color Color::black = Color(0,0,0);
+inline const Color Color::clear = Color(0,0,0,0);

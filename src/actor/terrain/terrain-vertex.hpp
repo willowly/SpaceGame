@@ -1,11 +1,11 @@
 #pragma once
 #include <vector>
 #include "glm/glm.hpp"
-#include "item/item.hpp"
-#include "item/item-stack.hpp"
-#include "SimplexNoise.h"
+#include "graphics/vulkan.hpp"
 
-using glm::vec3,glm::ivec4;
+using glm::vec3,glm::ivec4,glm::vec4;
+
+class Item;
 
 struct TerrainVertex {
     vec3 pos = {};
@@ -48,53 +48,4 @@ struct TerrainVertex {
 
         return attributeDescriptions;
     }
-};
-
-struct TerrainMaterial {
-    LitMaterialData terrainTypes[8];
-};
-
-struct TerrainType {
-    Item* item;
-    TextureID texture;
-};
-
-struct GenerationSettings {
-    float noiseScale = 100;
-    float radius = 50;
-    float noiseFactor = 30;
-    int noiseOctaves = 1;
-    float noiseGain = 0.5f;
-    float noiseLacunarity = 2.0;
-    TerrainType stoneType;
-    TerrainType oreType;
-
-    struct OreSettings {
-        TerrainType type;
-        
-    };
-
-};
-
-struct TerraformResults {
-
-    std::vector<ItemStack> items;
-
-    void addItem(ItemStack giveStack) {
-        for (auto&& stack : items)
-        {
-            if(stack.item == giveStack.item) {
-                stack.amount += giveStack.amount;
-                return;
-            }
-        }
-        items.push_back(giveStack);
-    }
-};
-
-struct VoxelData {
-    float amount = 0;
-    int type;
-    int verticesStart = 0;
-    int verticesEnd = 0;
 };

@@ -51,7 +51,7 @@ BlockFacing BlockHelper::rotateFacingByFacing(BlockFacing a, BlockFacing b) {
     return getFacingFromVector(vec3(0,0,1) * getRotationFromFacing(a) * getRotationFromFacing(b));
 }
 
-void BlockHelper::addBlockFace(Construction* construction,MeshData<ConstructionVertex>& meshData,vec3 position,quat rotation,TextureID textureID,Rect texRect = Rect::unitSquare) {
+void BlockHelper::addBlockFace(Construction* construction,MeshData<ConstructionVertex>& meshData,vec3 position,quat rotation,TextureID textureID,Rect texRect) {
 
 
     if(construction == nullptr) {

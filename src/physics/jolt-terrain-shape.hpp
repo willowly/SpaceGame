@@ -2,7 +2,8 @@
 #include <Jolt/Jolt.h>
 
 #include <Jolt/Physics/Collision/Shape/Shape.h>
-#include "actor/terrain-structs.hpp"
+#include "actor/terrain/voxel-data.hpp"
+#include "actor/terrain/terrain-vertex.hpp"
 #include "physics/jolt-conversions.hpp"
 
 #include "Jolt/Physics/Collision/CastConvexVsTriangles.h"

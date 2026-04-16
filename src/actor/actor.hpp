@@ -1,7 +1,6 @@
 #pragma once
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/quaternion.hpp>
 #include "graphics/mesh.hpp"
 #include "graphics/vulkan.hpp"
 #include "physics/structs.hpp"

@@ -8,7 +8,7 @@
 #include "item/item.hpp"
 #include "helper/location-key.hpp"
 #include "terrain-chunk.hpp"
-#include "terrain-structs.hpp"
+#include "terrain/terrain-structs.hpp"
 #include <math.h>
 #include <thread>
 #include <chrono>

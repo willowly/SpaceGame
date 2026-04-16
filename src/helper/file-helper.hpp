@@ -3,6 +3,7 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <cstdint>
 
 using std::string, std::ifstream, std::ofstream, std::getline, std::vector;
 

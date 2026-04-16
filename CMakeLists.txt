@@ -10,7 +10,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /bigobj /showIncludes")
 endif()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -Wall -Wextra -Werror=return-type -pedantic -Wno-unused-parameter")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -Wall -Wextra -Werror=return-type -pedantic -Wno-unused-parameter -H")
 endif()
 
 set(CMAKE_VERBOSE_MAKEFILE ON) 
@@ -125,8 +125,10 @@ src/main.cpp
 src/engine/game-application.cpp
 
 src/graphics/vulkan.cpp
+src/graphics/color.cpp
 
 src/helper/file-helper.cpp
+src/helper/block-helper.cpp
 
 src/actor/construction.cpp
 
