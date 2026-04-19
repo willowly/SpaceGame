@@ -16,6 +16,8 @@
 
 #include "helper/rect.hpp"
 
+#include "physics/jolt-layers.hpp"
+
 #include <Jolt/Jolt.h>
 
 #include <Jolt/Physics/Collision/Shape/MutableCompoundShape.h>
@@ -27,6 +29,8 @@
 
 #include "persistance/actor/data-construction.hpp"
 #include "persistance/data-loader.hpp"
+
+#include "block/block-id.hpp"
 
 using glm::ivec3,glm::vec3;
 using std::unordered_map;
@@ -85,7 +89,6 @@ struct ConstructionVertex {
 
 };
 
-using BlockID = uint32_t;
 
 class Construction : public Actor {
 
@@ -100,6 +103,20 @@ class Construction : public Actor {
             if(storage != entry.storage) return false;
             return true;
         }
+
+        data_BlockPaletteEntry save() {
+            data_BlockPaletteEntry data;
+            if(block != nullptr) {
+                data.block = block->name;
+            }
+            data.storage = storage.save();
+            return data;
+        }
+
+        void load(data_BlockPaletteEntry data,DataLoader& loader) {
+            block = loader.getBlockPrototype((string)data.block);
+            storage.load(data.storage,loader);
+        }
     };
 
     // we can convert this to just block ID if we use a custom physics shape :shrug:
@@ -109,17 +126,14 @@ class Construction : public Actor {
         BlockData(BlockID id) : id(id) {}
         BlockData() {}
 
-        data_Block save() {
-            data_Block data;
-            // if(block != nullptr) { //we can optimize this later with a palette
-            //     data.block = block->name;
-            // }
-            // data.state = state.value;
+        data_BlockData save() {
+            data_BlockData data;
+            data.id = id;
             return data;
         }
 
-        void load(data_Block data,DataLoader& loader) {
-            
+        void load(data_BlockData data) {
+            id = data.id;
         }
     };
 
@@ -158,7 +172,7 @@ class Construction : public Actor {
 
     // Rigidbody Class
     Rigidbody body;
-    JPH::MutableCompoundShape* physicsShape;
+    JPH::MutableCompoundShape* physicsShape = nullptr;
     JPH::Vec3 physicsOldCOM;
     ActorUserData physicsUserData;
 
@@ -175,9 +189,11 @@ class Construction : public Actor {
 
         blockPalette.push_back(BlockPaletteEntry());
         
+        Physics::initalizePhysicsGlobal();
 
         JPH::MutableCompoundShapeSettings shapeSettings{};
         JPH::Shape::ShapeResult result;
+        
 
         physicsShape = new JPH::MutableCompoundShape(shapeSettings,result);
         physicsShape->SetEmbedded();
@@ -361,6 +377,11 @@ class Construction : public Actor {
             
         }
 
+        // <min,max>
+        std::pair<ivec3,ivec3> getBounds() {
+            return std::pair(boundsMin,boundsMax);
+        }
+
         void moveBounds(ivec3 amount) {
             boundsMin += amount;
             boundsMax += amount;
@@ -515,7 +536,7 @@ class Construction : public Actor {
 
             calculateBreakup(world,location);
 
-            printIDList();
+            //printIDList();
 
             if(blockCount <= 0) {
                 destroy(world);
@@ -622,7 +643,7 @@ class Construction : public Actor {
 
             addBlockCollider(index,location);
 
-            printIDList();
+            //printIDList();
         }
 
         void addBlockCollider(size_t index,ivec3 location) {
@@ -657,7 +678,7 @@ class Construction : public Actor {
             
             
             placeBlockNoUpdate(location,*block,placeInfo);
-            printIDList();
+            //printIDList();
 
             //recalculatePivot();
             generateMesh();
@@ -712,13 +733,13 @@ class Construction : public Actor {
                             }
                             auto& newConstruction = *constructions[blockGroup-1];
                             ivec3 newLocalLocation = glm::round(newConstruction.inverseTransformPoint(worldLocation));
-                            int newIndex = newConstruction.getIndex(newLocalLocation);
                             if(blockGroup != originalConstructionGroup) {
-
+                                
+                                newConstruction.boundsEncapsulate(newLocalLocation);
+                                int newIndex = newConstruction.getIndex(newLocalLocation);
                                 auto blockData = blockDataArray.at(i);
 
                                 auto blockEntry = blockPalette.at(blockData.id); // we actually do want to copy it here
-                                newConstruction.boundsEncapsulate(newLocalLocation);
 
                                 newConstruction.addBlockCount(newLocalLocation);
                                 
@@ -957,6 +978,10 @@ class Construction : public Actor {
             data.isStatic = isStatic;
             data.boundsMin.set(boundsMin);
             data.boundsMax.set(boundsMax);
+            data.palette.reserve(blockPalette.size());
+            for(auto& entry : blockPalette) {
+                data.palette.push_back(entry.save());
+            }
             data.blocks.reserve(blockDataArray.size());
             for(auto& block : blockDataArray) {
                 data.blocks.push_back(block.save());
@@ -978,9 +1003,17 @@ class Construction : public Actor {
             isStatic = data.isStatic;
             boundsMin = data.boundsMin.toVec3();
             boundsMax = data.boundsMax.toVec3();
+            
+            blockPalette.clear();
+            blockPalette.reserve(data.palette.size());
+            for(auto& data_entry : data.palette) {
+                BlockPaletteEntry entry;
+                entry.load(data_entry,loader);
+                blockPalette.push_back(entry);
+            }
+            
             blockDataArray.clear();
-            blockDataArray.reserve(blockDataArray.size());
-
+            blockDataArray.reserve(data.blocks.size());
             blockCount = 0;
             // similar to resizing the bounds :shrug: maybe make a function?
             blockCountX.clear(); // this kinda repeated code could probably be written in a more elegant way but Idk how so :shrug:
@@ -1001,18 +1034,21 @@ class Construction : public Actor {
                             return;
                         }
                         auto data_block = data.blocks[static_cast<unsigned int>(i)];
-                        if(data_block.block != "") {
+                        if(data_block.id != 0) {
 
                             BlockData block;
-                            block.load(data_block,loader);
+                            block.load(data_block);
                             //std::cout << "<" << x << "," << y << "," << z <<  ">:" << blockMap.at(Location(x,y,z)) << std::endl;
                             blockDataArray.push_back(block);
-                            blockCountX[x - boundsMin.x]++;
-                            blockCountY[y - boundsMin.y]++;
-                            blockCountZ[z - boundsMin.z]++;
-                            addBlockCollider(i,ivec3(x,y,z));
-                            //block.block->onLoad(this,ivec3(x,y,z),block.state);
-                            blockCount++;
+                            auto entry = blockPalette.at(block.id);
+                            if(entry.block != nullptr) {
+                                addBlockCollider(i,ivec3(x,y,z));
+                                entry.block->onLoad(this,ivec3(x,y,z),entry.storage);
+                                blockCount++;
+                                blockCountX[x - boundsMin.x]++;
+                                blockCountY[y - boundsMin.y]++;
+                                blockCountZ[z - boundsMin.z]++;
+                            }
                         } else {
                             std::cout << "empty block " << std::endl;
                             blockDataArray.push_back(BlockData());

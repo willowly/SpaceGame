@@ -7,18 +7,14 @@
 #include "persistance/block/data-block.hpp"
 #include "cista.h"
 
-struct data_BlockStoragePair {
-    data_ivec3 position;
-    data_BlockStorage storage;
-};
 
 struct data_Construction {
     data_Actor actor;
     data_Rigidbody body;
-    cista::raw::vector<data_Block> blocks;
+    cista::raw::vector<data_BlockData> blocks;
+    cista::raw::vector<data_BlockPaletteEntry> palette;
     data_ivec3 boundsMin;
     data_ivec3 boundsMax;
-    cista::raw::vector<data_BlockStoragePair> storages;
     cista::raw::vector<data_ivec3> stepCallbacks;
     bool isStatic;
 };

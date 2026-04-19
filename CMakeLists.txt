@@ -6,11 +6,11 @@ set(OUTPUT_DIR ${OUTPUT_DIR}/bin)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /bigobj /showIncludes")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /bigobj")
 endif()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -Wall -Wextra -Werror=return-type -pedantic -Wno-unused-parameter -H")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -Wall -Wextra -Werror=return-type -pedantic -Wno-unused-parameter")
 endif()
 
 set(CMAKE_VERBOSE_MAKEFILE ON) 
@@ -118,11 +118,7 @@ include_directories(include/imgui)
 
 # include(tracy/public/tracy/tracy.hpp)
 
-
-add_executable(SpaceGame
-src/main.cpp
-
-src/engine/game-application.cpp
+add_library(SpaceGame 
 
 src/graphics/vulkan.cpp
 src/graphics/color.cpp
@@ -131,6 +127,13 @@ src/helper/file-helper.cpp
 src/helper/block-helper.cpp
 
 src/actor/construction.cpp
+
+)
+
+add_executable(SpaceGameApp
+src/main.cpp
+
+src/engine/game-application.cpp
 
 include/imgui/imgui.h
 include/imgui/imgui.cpp
@@ -151,12 +154,23 @@ if(OSX)
 list(APPEND LINKED_LIBRARIES ${COCOA_LIBRARY} ${IOKIT_LIBRARY})
 endif(OSX)
 
-# include(CTest)
+include(CTest)
 # add_executable(SpaceGameTest src/test.cpp)
 
 target_include_directories(SpaceGame PUBLIC ${JoltPhysics_SOURCE_DIR})
 target_compile_features(SpaceGame PRIVATE cxx_std_20 )
-target_link_libraries(SpaceGame PRIVATE ${LINKED_LIBRARIES})
+target_link_libraries(SpaceGame PUBLIC ${LINKED_LIBRARIES})
+
+target_compile_features(SpaceGameApp PRIVATE cxx_std_20 )
+target_link_libraries(SpaceGameApp PUBLIC SpaceGame)
+
+add_executable(SpaceGameTest src/test.cpp)
+target_compile_features(SpaceGameTest PRIVATE cxx_std_20 )
+target_link_libraries(SpaceGameTest PUBLIC SpaceGame Catch2::Catch2WithMain)
+
+list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
+include(Catch)
+catch_discover_tests(SpaceGameTest)
 # important for windows
 
 # target_compile_features(SpaceGameTest PRIVATE cxx_std_20 )
@@ -168,7 +182,7 @@ add_custom_target(SHADERS)
 
 
 if(WIN32)
-    set(OUTPUT_DIR "${CMAKE_BINARY_DIR}")
+    set(OUTPUT_DIR "${CMAKE_BINARY_DIR}/Debug")
 endif(WIN32)
 if(LINUX)
     set(OUTPUT_DIR "${CMAKE_BINARY_DIR}")

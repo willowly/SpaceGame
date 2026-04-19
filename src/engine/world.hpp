@@ -24,6 +24,7 @@
 #include "physics/jolt-trace.hpp"
 #include "physics/jolt-terrain-shape.hpp"
 #include "physics/jolt-userdata.hpp"
+#include "physics/jolt-setup.hpp"
 
 #include "persistance/data-world.hpp"
 #include "persistance/data-loader.hpp"
@@ -118,10 +119,7 @@ class World {
 
         void setupPhysics() {
 
-            JPH::RegisterDefaultAllocator(); //we use the default allocator for jolt
-            JPH::Factory::sInstance = new JPH::Factory(); //set the factory singleton
-            JPH::RegisterTypes(); //idfk
-            TerrainShape::sRegister();
+            Physics::initalizePhysicsGlobal();
 
             temp_allocator = new JPH::TempAllocatorImpl(10 * 1024 * 1024);
             jobSystem = new JPH::JobSystemThreadPool(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers, std::thread::hardware_concurrency() - 1);
@@ -210,6 +208,27 @@ class World {
             iteratingActors--;
 
             return nullptr;
+
+        }
+
+        // this is for testing mainly
+        template <typename T>
+        std::vector<std::shared_ptr<T>> getActorsOfType() {
+
+            std::vector<std::shared_ptr<T>> list;
+            
+            iteratingActors++;
+            for (auto& actor : actors)
+            {
+                std::shared_ptr<T> typed_actor = std::dynamic_pointer_cast<T>(actor);
+                if(typed_actor != nullptr) {
+                    list.push_back(typed_actor);
+                }
+                
+            }
+            iteratingActors--;
+
+            return list;
 
         }
         

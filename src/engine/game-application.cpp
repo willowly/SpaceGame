@@ -29,17 +29,17 @@ void GameApplication::initWindow() {
     
 }
 
-void GameApplication::spawnPlayer() {
+void GameApplication::spawnPlayer(vec3 pos) {
     auto actorPrototype = registry.getActor("player");
     auto playerPrototype = dynamic_cast<Character*>(actorPrototype);
 
     if(playerPrototype != nullptr) {
-        player = world->spawn(Character::makeInstance(playerPrototype,vec3(0,0,0)));
+        player = world->spawn(Character::makeInstance(playerPrototype,pos));
     }
 }
 
 void GameApplication::spawnAsteroidScene()  {
-    spawnPlayer();
+    spawnPlayer(vec3(0,50,0));
 
     std::minstd_rand rnd;
 
@@ -206,9 +206,7 @@ void GameApplication::setup() {
 
     world->constructionMaterial = vulkan->createMaterial<LitMaterialData,ConstructionVertex>("construction",LitMaterialData(registry.getTexture("rock")));
 
-    //spawnAsteroidScene();
-
-    spawnPlayer();
+    spawnAsteroidScene();
 
     lua["world"] = world.get();
 

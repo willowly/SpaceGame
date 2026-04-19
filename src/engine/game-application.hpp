@@ -214,7 +214,7 @@ class GameApplication {
 
         void initWindow();
 
-        void spawnPlayer();
+        void spawnPlayer(vec3 pos = vec3(0,0,0));
 
         void spawnAsteroidScene();
 

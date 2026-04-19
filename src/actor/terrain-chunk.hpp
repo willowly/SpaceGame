@@ -337,6 +337,8 @@ class TerrainChunk {
                     return;
                 }
 
+                Physics::initalizePhysicsGlobal();
+
                 TerrainShapeSettings settings(meshData,terrainData,size*cellSize);
 
                 JPH::Shape::ShapeResult result;

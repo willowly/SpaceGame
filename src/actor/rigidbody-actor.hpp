@@ -75,6 +75,8 @@ class RigidbodyActor : public Actor {
 
         virtual void spawn(World* world) {
 
+            Physics::initalizePhysicsGlobal();
+
             JPH::BodyCreationSettings bodySettings(new JPH::BoxShape(JPH::Vec3(1.0f, 1.0f, 1.0f)), Physics::toJoltVec(position), Physics::toJoltQuat(position), JPH::EMotionType::Dynamic, Layers::MOVING);
 
             bodySettings.mGravityFactor = 0.0f;

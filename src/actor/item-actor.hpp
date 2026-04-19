@@ -37,6 +37,8 @@ class ItemActor : public Actor {
 
         void spawn(World* world) override {
 
+            Physics::initalizePhysicsGlobal();
+
             auto settings = body.getDefaultBodySettings(this,new JPH::SphereShape(0.3f),position,rotation);
 
             settings.mOverrideMassProperties = JPH::EOverrideMassProperties::MassAndInertiaProvided;

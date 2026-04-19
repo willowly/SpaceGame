@@ -176,7 +176,10 @@ class Character : public Actor {
         }
 
         void prePhysics(World* world) override {
-            auto velocity = body.getVelocity();
+
+            // turn into applyGravity function
+
+            
             body.prePhysics(world,position,rotation);
             if(ridingConstruction == nullptr) {
                 world->physics_system.GetBodyInterface().SetObjectLayer(body.getBodyID(),Layers::PLAYER);
@@ -223,9 +226,20 @@ class Character : public Actor {
                     dismount();
                 }
             } else {
-                vec3 targetVelocity = rotation * moveInput * moveSpeed;
+
+                auto gravity = world->getGravityVector(position);
+                if(glm::length(gravity) > 0.05f) {
+                    underGravity = true;
+                }
+
+                velocity += gravity * dt;
+
+                vec3 relativeVelocity = inverseTransformDirection(velocity);
+                vec3 targetVelocity = moveInput * moveSpeed;
+                targetVelocity.y = relativeVelocity.y;
                 // std::cout << "player move input: " << StringHelper::toString(moveInput) << std::endl;
-                velocity = MathHelper::lerp(velocity,targetVelocity,acceleration*dt);
+                relativeVelocity = MathHelper::lerp(relativeVelocity,targetVelocity,acceleration*dt);
+                velocity = transformDirection(relativeVelocity);
                 position += velocity * dt;
 
                 //velocity += world->getGravityVector(position) * dt;
@@ -262,6 +276,10 @@ class Character : public Actor {
                 clickInput = false;
                 interactInput = false;
                 dropInput = false;
+
+            
+                
+                
 
                 body.setVelocity(velocity);
                 body.setAngularVelocity(rotationVelocity);
