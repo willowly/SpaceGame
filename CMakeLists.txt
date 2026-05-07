@@ -65,6 +65,8 @@ find_package(OpenGL REQUIRED)
 include_directories(${FREETYPE_INCLUDE_DIR})
 
 
+include_directories("include/steam")
+
 add_library(STB "include/stb_image.cpp")
 # fucking glob wont work kms
 add_library(Lua "include/lua/src/lapi.c" "include/lua/src/lauxlib.c" "include/lua/src/lbaselib.c" "include/lua/src/lcode.c" "include/lua/src/lcorolib.c" "include/lua/src/lctype.c" "include/lua/src/ldblib.c" "include/lua/src/ldebug.c" "include/lua/src/ldo.c" "include/lua/src/ldump.c" "include/lua/src/lfunc.c" "include/lua/src/lgc.c" "include/lua/src/linit.c" "include/lua/src/liolib.c" "include/lua/src/llex.c" "include/lua/src/lmathlib.c" "include/lua/src/lmem.c" "include/lua/src/loadlib.c" "include/lua/src/lobject.c" "include/lua/src/lopcodes.c" "include/lua/src/loslib.c" "include/lua/src/lparser.c" "include/lua/src/lstate.c" "include/lua/src/lstring.c" "include/lua/src/lstrlib.c" "include/lua/src/ltable.c" "include/lua/src/ltablib.c" "include/lua/src/ltm.c" "include/lua/src/lua.c" "include/lua/src/luac.c" "include/lua/src/lundump.c" "include/lua/src/lutf8lib.c" "include/lua/src/lvm.c" "include/lua/src/lzio.c")
@@ -130,6 +132,8 @@ src/actor/construction.cpp
 
 )
 
+
+
 add_executable(SpaceGameApp
 src/main.cpp
 
@@ -147,7 +151,9 @@ include/imgui/backends/imgui_impl_vulkan.cpp
 include/imgui/backends/imgui_impl_glfw.cpp
 )
 
-
+# if(APPLE)
+# add_library(SteamNetworking "lib/macos/libGameNetworkingSockets.dylib")
+# endif()
 
 list(APPEND LINKED_LIBRARIES Lua glfw STB Vulkan::Headers Jolt TracyClient)
 if(OSX)
@@ -157,9 +163,12 @@ endif(OSX)
 include(CTest)
 # add_executable(SpaceGameTest src/test.cpp)
 
+link_directories(lib/macos)
+
 target_include_directories(SpaceGame PUBLIC ${JoltPhysics_SOURCE_DIR})
 target_compile_features(SpaceGame PRIVATE cxx_std_20 )
 target_link_libraries(SpaceGame PUBLIC ${LINKED_LIBRARIES})
+target_link_libraries(SpaceGame PUBLIC libGameNetworkingSockets.dylib)
 
 target_compile_features(SpaceGameApp PRIVATE cxx_std_20 )
 target_link_libraries(SpaceGameApp PUBLIC SpaceGame)
