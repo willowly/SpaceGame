@@ -1,8 +1,12 @@
 #pragma once
 #include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 #include <algorithm>
 
 using glm::vec3;
+
+#define _USE_MATH_DEFINES // need this for constants (M_E)
+#include <cmath> // for constants
 
 namespace MathHelper {
 
@@ -11,17 +15,30 @@ namespace MathHelper {
         return b*t + a*(1.0f-t);
     }
 
+
     inline float lerp(float a,float b,float t) {
         return b*t + a*(1.0f-t);
     }
 
     inline vec3 clampLength(vec3 a,float length) {
-        return glm::normalize(a) * glm::min((float)a.length(),length);
+        auto currentLength = glm::length(a);
+        if(currentLength < 1.0E-9) {
+            return a;
+        }
+        return glm::normalize(a) * glm::min(currentLength,length);
     }
 
     inline vec3 moveTowards(vec3 a,vec3 b,float maxDelta) {
         vec3 delta = b - a;
         return a + clampLength(delta,maxDelta);
+    }
+
+    inline float moveTowards(float a,float b,float maxDelta) {
+        float delta = b - a;
+        if(delta > maxDelta) {
+            delta = maxDelta;
+        }
+        return a + delta;
     }
 
     inline float sign(float a) {
@@ -43,6 +60,17 @@ namespace MathHelper {
         onLine = std::clamp(onLine,0.0f,glm::length(a2b));
         return (a2b*onLine) + a;
     }
+
+    // returns the acceleration
+    inline float accelerateTo(float current,float target,float velocity,float maxAcceleration,float dt) {
+        
+    }
+
+    // inline float smoothDamp(float current,float target,float& velocity,float smoothTime,float dt) {
+    //     auto w = 2 / smoothTime;
+    //     float next = target + ((current-target) + (velocity + w*(current - target))*dt)*std::powf(M_E,-w*dt);
+    //     velocity = 
+    // }
 
     //
     inline float integerBelow(float a) {

@@ -230,6 +230,21 @@ class Mesh {
 
         }
 
+        // this should not be called when rendering is possible
+        void updateBuffers(Vulkan* vulkan) {
+            if(meshData.vertices.size() == 0) {
+                Debug::warn("Tried to load a model with no vertices");
+                return;
+            }
+            if(meshData.indices.size() == 0) {
+                Debug::warn("Tried to load a model with no indices");
+                return;
+            }
+            vulkan->updateMeshBuffer<V>(meshBuffer,meshData.vertices,meshData.indices);
+            buffersLoaded = true;
+
+        }
+
         void addToRender(Vulkan* vulkan,Material material,glm::mat4 matrix = glm::mat4(1.0f),RenderingSettings settings = {}) {
             if(!buffersLoaded) {
                 Debug::warn("Tried to draw model that is not loaded");

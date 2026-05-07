@@ -211,6 +211,17 @@ class TerrainLoader {
             cameraPosition = position;
         }
 
+        void clear() {
+            std::scoped_lock lock(terrainMutex);
+            terrains.clear();
+            for (auto& job : terrainJobs)
+            {
+                job.finishJob();
+            }
+            
+            
+        }
+
         void stop() {
             stopSignal = true;
             

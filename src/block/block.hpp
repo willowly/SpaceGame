@@ -15,6 +15,7 @@ class Character;
 struct BlockPlaceInfo {
     vec3 normal = {}; //local to the construction
     vec3 lookDir = {};
+    bool attached = false; //is this block being placed attached to terrain?
 };
 
 class Block {
@@ -35,7 +36,7 @@ class Block {
         };
 
         string name; // for prototypes
-        Item* drop; // everthing gets turned into functions...
+        Item* defaultDrop; // everthing gets turned into functions...
 
         struct PlacementData {
             vec3 normal = {};
@@ -76,10 +77,10 @@ class Block {
         }
 
         virtual std::vector<ItemStack> getDrops(Construction* construction,ivec3 position,BlockStorage& storage) {
-            if(drop == nullptr) {
+            if(defaultDrop == nullptr) {
                 return std::vector<ItemStack>();
             } else {
-                return std::vector<ItemStack> {ItemStack(drop,1)};
+                return std::vector<ItemStack> {ItemStack(defaultDrop,1)};
             }
         }
 

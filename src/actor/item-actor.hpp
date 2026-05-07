@@ -31,6 +31,7 @@ class ItemActor : public Actor {
             std::unique_ptr<ItemActor> actor = std::unique_ptr<ItemActor>(newActor);
             actor->position = position;
             actor->rotation = rotation;
+            actor->updateLastTransform();
             actor->stack = stack;
             return actor;
         }
@@ -48,6 +49,7 @@ class ItemActor : public Actor {
             massProperties.mMass = 0.0001f;
             massProperties.mInertia = inertia;
             settings.mMassPropertiesOverride = massProperties;
+            settings.mAllowedDOFs = JPH::EAllowedDOFs::TranslationX | JPH::EAllowedDOFs::TranslationY | JPH::EAllowedDOFs::TranslationZ;
 
             body.spawn(world,this,settings);
 
@@ -55,13 +57,17 @@ class ItemActor : public Actor {
             
         }
 
-        
+        void step(World* world,float dt) override {
+            updateLastTransform();
+            body.applyGravity(world,position,dt);
+        }
 
-        virtual void prePhysics(World* world) override {
+        void prePhysics(World* world) override {
+            
             body.prePhysics(world,position,rotation);
         }
 
-        virtual void postPhysics(World* world) override {
+        void postPhysics(World* world) override {
             body.postPhysics(world,position,rotation);
         }
 
@@ -70,8 +76,8 @@ class ItemActor : public Actor {
             Actor::destroy(world);
         }
 
-        void addRenderables(Vulkan* vulkan,float dt) override {
-            stack.item->addRenderables(vulkan,stack,position,rotation);
+        void addRenderables(Vulkan* vulkan,float dt,float interpolation) override {
+            stack.item->addRenderables(vulkan,stack,getInterpolatedPosition(interpolation),getInterpolatedRotation(interpolation));
         }
 
         

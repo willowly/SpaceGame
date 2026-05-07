@@ -20,6 +20,9 @@ class Actor {
         vec3 position = vec3(0);
         quat rotation = vec3(0);
 
+        vec3 lastPosition = vec3(0);
+        quat lastRotation = vec3(0);
+
 
     public:
 
@@ -35,12 +38,18 @@ class Actor {
         virtual ~Actor() = default;
         Actor(const Actor& actor) = default;
 
+        // general-purpose functions
+
         void setPosition(vec3 position) {
             this->position = position;
         }
 
         vec3 getPosition() {
             return position;
+        }
+
+        vec3 getInterpolatedPosition(float interpolation) {
+            return MathHelper::lerp(lastPosition,position,interpolation);
         }
 
         void setRotation(quat rotation) {
@@ -51,6 +60,10 @@ class Actor {
             return rotation;
         }
 
+        quat getInterpolatedRotation(float interpolation) {
+            return glm::slerp(lastRotation,rotation,interpolation);
+        }
+
 
         virtual glm::mat4 getTransform() {
             glm::mat4 matrix = glm::translate(glm::mat4(1.0f),position);
@@ -58,9 +71,23 @@ class Actor {
             return matrix;
         }
 
+
+        virtual glm::mat4 getInterpolatedTransform(float interpolation) {
+            glm::mat4 matrix = glm::translate(glm::mat4(1.0f),getInterpolatedPosition(interpolation));
+            matrix *= glm::toMat4(getInterpolatedRotation(interpolation));
+            return matrix;
+        }
+
         vec3 transformPoint(vec3 point) {
             glm::mat4 matrix = glm::translate(glm::mat4(1.0f),position);
             matrix *= glm::toMat4(rotation);
+            glm::vec4 v4 = matrix * glm::vec4(point.x,point.y,point.z,1);
+            return vec3(v4.x,v4.y,v4.z);
+        }
+
+        vec3 transformPointInterpolated(vec3 point,float interpolation) {
+            glm::mat4 matrix = glm::translate(glm::mat4(1.0f),getInterpolatedPosition(interpolation));
+            matrix *= glm::toMat4(getInterpolatedRotation(interpolation));
             glm::vec4 v4 = matrix * glm::vec4(point.x,point.y,point.z,1);
             return vec3(v4.x,v4.y,v4.z);
         }
@@ -88,9 +115,7 @@ class Actor {
             rotation *= glm::angleAxis(glm::radians(eulerAngles.z),vec3(0,0,1));
         }
 
-        // virtual std::optional<RaycastHit> raycast(Ray ray, float dist) {
-        //     return std::nullopt;
-        // }
+        // defines the behaviour
 
         virtual void spawn(World* world) {
 
@@ -105,30 +130,28 @@ class Actor {
         }
 
         virtual void step(World* world,float dt) {
-            
+            updateLastTransform();
+        }
+
+        void updateLastTransform() {
+            lastPosition = position;
+            lastRotation = rotation; 
         }
 
         virtual void collisionStart(World* world,const Collision& contact) {
 
         }
 
-        // virtual void collideBasic(Actor* actor,float height,float radius) {
-
-        // }
-
-        virtual void addRenderables(Vulkan* vulkan,float dt) {
+        virtual void addRenderables(Vulkan* vulkan,float dt,float interpolation) {
             if(model == nullptr) return; //if no model, nothing to render :)
             model->addToRender(vulkan,material,position,rotation,vec3(modelScale));
-        }
-
-        //for now to get the player to move differently than the physics sim :)
-        virtual bool playerStep() {
-            return false;
         }
 
         virtual void destroy(World* world) {
             destroyed = true;
         }
+
+        // Factory Functions
 
         static std::unique_ptr<Actor> makeDefaultPrototype() {
             auto ptr = new Actor();
@@ -138,6 +161,8 @@ class Actor {
         static std::unique_ptr<Actor> makeInstance(Actor* prototype,vec3 position = vec3(0),quat rotation = glm::identity<quat>()) {
             return makeInstanceFromPrototype<Actor>(prototype,position,rotation);
         }
+
+        // Saving and loading
 
         virtual data_ActorType getActorDataType() {
             return data_ActorType::DONT_SAVE;
@@ -188,6 +213,7 @@ class Actor {
             actor->name = prototype->name;
             actor->position = position;
             actor->rotation = rotation;
+            actor->updateLastTransform();
             return actor;
         }
         

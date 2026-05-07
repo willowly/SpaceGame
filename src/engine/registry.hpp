@@ -18,24 +18,65 @@ using std::map,std::unique_ptr;
 
 class Registry {
 
+    // id like to do this at some point, unify actors blocks items widgets recipes particles etc into one thing
+        // struct Prototype {
+
+        //     virtual ~Prototype() = 0;
+
+        // };
+
+        // template<typename T>
+        // struct TypedPrototype {
+        //     std::unique_ptr<T> ptr;
+        // };
+
+        // map<string,std::unique_ptr<Prototype>> prototypes;
+
+    
+
     map<string,Mesh<Vertex>> models;
     map<string,TextureID> textures;
     map<string,Sprite> sprites;
     map<string,Material> materials;
-    map<string,Recipe> recipes;
-
-    map<string,unique_ptr<Item>> item;
     
     map<string,unique_ptr<Actor>> actors;
     map<string,unique_ptr<Block>> blocks;
     map<string,unique_ptr<Item>> items;
     map<string,unique_ptr<Widget>> widgets;
-
+    
     map<string,ParticleEffect> particleEffects;
+    map<string,Recipe> recipes;
     
     TextureID errorTexture = 0; 
 
     public:
+
+        void clear() {
+            models.clear();
+            textures.clear();
+            sprites.clear();
+            materials.clear();
+            recipes.clear();
+            actors.clear();
+            blocks.clear();
+            items.clear();
+            widgets.clear();
+            particleEffects.clear();
+        }
+
+        // data assets are everything that is created with lua
+        void clearDataAssets() {
+
+            sprites.clear();
+            materials.clear(); // deleting all the materials would be nice :shrug: but for now its fine
+            recipes.clear();
+            actors.clear();
+            blocks.clear();
+            items.clear();
+            widgets.clear();
+            particleEffects.clear();
+
+        }
 
         bool hasModel(string name) {
             return models.contains(name);
@@ -89,7 +130,7 @@ class Registry {
             if(textures.contains(name)) {
                 return textures.at(name);
             } else {
-                Debug::warn("no texture called " + name + "\"");
+                Debug::warn("no texture called \"" + name + "\"");
             }
             return errorTexture;
         }
@@ -100,7 +141,7 @@ class Registry {
                 if(textures.contains(name)) {
                     return Sprite(textures.at(name));
                 }
-                Debug::warn("no sprite called " + name + "\"");
+                Debug::warn("no sprite called \"" + name + "\"");
             }
             return Sprite(errorTexture);
         }
@@ -216,12 +257,15 @@ class Registry {
         }
 
         Mesh<Vertex>* addModel(string name) {
-            models.emplace(name,Mesh<Vertex>());
+            models.try_emplace(name,Mesh<Vertex>());
             return &models.at(name);
         }
 
-        void addTexture(string name,TextureID texture) {
-            textures.emplace(name,texture);
+        void setTexture(string name,TextureID texture) {
+            textures[name] = texture;
+            if(name == "error") {
+                errorTexture = texture;
+            }
         }
         void addSprite(string name,Sprite sprite) {
             sprites.emplace(name,sprite);

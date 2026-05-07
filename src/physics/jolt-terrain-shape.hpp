@@ -202,6 +202,71 @@ class TerrainShape : public JPH::Shape {
         return x + y * size + z * size * size;
     }
 
+    inline static void sCastConvexVsMesh(const JPH::ShapeCast &inShapeCast, const JPH::ShapeCastSettings &inShapeCastSettings, const JPH::Shape *inShape, JPH::Vec3Arg inScale, const JPH::ShapeFilter &inShapeFilter, JPH::Mat44Arg inCenterOfMassTransform2, const JPH::SubShapeIDCreator &inSubShapeIDCreator1, const JPH::SubShapeIDCreator &inSubShapeIDCreator2, JPH::CastShapeCollector &ioCollector) {
+        
+
+        // can be combined with the other one with some functions 
+        // Get the shapes
+        assert(inShapeCast.mShape->GetType() == JPH::EShapeType::Convex);
+        assert(inShape->GetType() == TERRAIN_SHAPE_TYPE);
+
+        const JPH::ConvexShape *shape1 = static_cast<const JPH::ConvexShape *>(inShapeCast.mShape);
+	    const TerrainShape *shape2 = static_cast<const TerrainShape *>(inShape);
+
+        JPH::CastConvexVsTriangles cast(inShapeCast,inShapeCastSettings,inScale,inCenterOfMassTransform2,inSubShapeIDCreator1, ioCollector);
+            
+        auto bounds1 = inShapeCast.mShape->GetWorldSpaceBounds(inShapeCast.mCenterOfMassStart,inShapeCast.mScale);
+
+        bounds1.Encapsulate(inShapeCast.mShape->GetWorldSpaceBounds(inShapeCast.mCenterOfMassStart.PostTranslated(inShapeCast.mDirection),inShapeCast.mScale));
+
+        auto transformedBounds1 = bounds1.Transformed(inCenterOfMassTransform2.Inversed()); //Inverse transform into shape 2 local space
+
+        auto cellSize = shape2->cellSize;
+        transformedBounds1.mMin /= cellSize;
+        transformedBounds1.mMax /= cellSize;
+
+        auto& voxelData = shape2->voxelData;
+        auto& meshData = shape2->meshData;
+
+        //std::cout << "min: " <<  StringHelper::toString(Physics::toGlmVec(transformedBounds1.mMin)) << std::endl;
+
+        for (int z = std::max(0,(int)floor(transformedBounds1.mMin.GetZ())); z <= std::min(shape2->sizeInCells-1,(int)ceil(transformedBounds1.mMax.GetZ())); z++)
+        {
+            for (int y = std::max(0,(int)floor(transformedBounds1.mMin.GetY())); y <= std::min(shape2->sizeInCells-1,(int)ceil(transformedBounds1.mMax.GetY())); y++)
+            {
+                for (int x = std::max(0,(int)floor(transformedBounds1.mMin.GetX())); x <= std::min(shape2->sizeInCells-1,(int)ceil(transformedBounds1.mMax.GetX())); x++)
+                {
+
+                    auto voxel = voxelData[getPointIndex(x,y,z,shape2->sizeInCells)];
+                    for (int i = voxel.verticesStart;i < voxel.verticesEnd;i += 3)
+                    {
+                        
+                        size_t indexA = meshData.indices[i];
+                        size_t indexB = meshData.indices[i+1];
+                        size_t indexC = meshData.indices[i+2];
+                        //std::cout << indexA << " " << shape2->terrain->vertices.size() << " " << &shape2->terrain->vertices << std::endl;
+                        JPH::Vec3 a = Physics::toJoltVec(meshData.vertices[indexA].pos);
+                        JPH::Vec3 b = Physics::toJoltVec(meshData.vertices[indexB].pos);
+                        JPH::Vec3 c = Physics::toJoltVec(meshData.vertices[indexC].pos);
+
+                        Debug::drawLine(meshData.vertices[indexA].pos,meshData.vertices[indexB].pos,Color::green,0.01f);
+                        Debug::drawLine(meshData.vertices[indexB].pos,meshData.vertices[indexC].pos,Color::green,0.01f);
+                        Debug::drawLine(meshData.vertices[indexC].pos,meshData.vertices[indexA].pos,Color::green,0.01f);
+
+
+                        int id = i/3;
+                        auto triangle_id = inSubShapeIDCreator2.PushID(id,32);
+                        cast.Cast(a,b,c,255,triangle_id.GetID());
+                            
+                    } 
+                    //Debug::drawCube((vec3(x,y,z)+vec3(0.5f))*cellSize + Physics::toGlmVec(inCenterOfMassTransform2.GetTranslation()),vec3(cellSize),glm::identity<quat>(),Color::green,0.03f);
+                    //std::cout << "draw cube " << StringHelper::toString((vec3(x,y,z)+vec3(0.5f))) << std::endl;
+                }
+
+            }
+        }
+    }
+
     inline static void sCollideConvexVsMesh(const Shape *inShape1, const Shape *inShape2, JPH::Vec3Arg inScale1, JPH::Vec3Arg inScale2, JPH::Mat44Arg inCenterOfMassTransform1, JPH::Mat44Arg inCenterOfMassTransform2, const JPH::SubShapeIDCreator &inSubShapeIDCreator1, const JPH::SubShapeIDCreator &inSubShapeIDCreator2, const JPH::CollideShapeSettings &inCollideShapeSettings, JPH::CollideShapeCollector &ioCollector, [[maybe_unused]] const JPH::ShapeFilter &inShapeFilter)
     {
         //JPH_PROFILE_FUNCTION();
@@ -278,6 +343,7 @@ class TerrainShape : public JPH::Shape {
         for (JPH::EShapeSubType s : JPH::sConvexSubShapeTypes)
 	    {
             JPH::CollisionDispatch::sRegisterCollideShape(s, TERRAIN_SHAPE_SUB_TYPE, sCollideConvexVsMesh);
+            JPH::CollisionDispatch::sRegisterCastShape(s, TERRAIN_SHAPE_SUB_TYPE, sCastConvexVsMesh);
         }
         // Specialized collision functions
         

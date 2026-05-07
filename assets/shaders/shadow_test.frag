@@ -9,7 +9,7 @@ layout(binding = 2) uniform sampler2D shadowMaps[];
 #include "ui_push_constant.hlsl"
 
 void main() {
-    outColor = texture(shadowMaps[0],texCoord*2.0f) * push.color;
+    outColor = texture(shadowMaps[0],texCoord) * push.color;
 
     gl_FragDepth = 0.0f;
 

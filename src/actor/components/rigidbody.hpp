@@ -39,9 +39,9 @@ class Actor;
 class Rigidbody {
     
     
-    JPH::Body *body;
+    JPH::Body *body = nullptr;
     vec3 velocity = {};
-    vec3 angularVelocity = {};
+    vec3 angularVelocityRads = {};
     ActorUserData userData;
     
     public:
@@ -66,11 +66,15 @@ class Rigidbody {
         }
 
         void setAngularVelocity(vec3 v) {
-            angularVelocity = v;
+            angularVelocityRads = glm::radians(v);
         }
 
         vec3 getAngularVelocity() {
-            return angularVelocity;
+            return glm::degrees(angularVelocityRads);
+        }
+
+        vec3 getAngularVelocityRadians() {
+            return angularVelocityRads;
         }
         
 
@@ -92,13 +96,14 @@ class Rigidbody {
         
         void spawn(World* world,Actor* actor,JPH::BodyCreationSettings bodySettings) {
             
-            
             body = world->physics_system.GetBodyInterface().CreateBody(bodySettings);
             
             world->physics_system.GetBodyInterface().AddBody(body->GetID(),JPH::EActivation::Activate);
 
-            body->SetLinearVelocity(Physics::toJoltVec(velocity));
-            body->SetAngularVelocity(Physics::toJoltVec(angularVelocity));
+            if(!body->IsStatic()) { 
+                body->SetLinearVelocity(Physics::toJoltVec(velocity));
+                body->SetAngularVelocity(Physics::toJoltVec(angularVelocityRads));
+            }
             body->SetRestitution(0.1f);
             body->SetFriction(2.0f);
             
@@ -108,15 +113,23 @@ class Rigidbody {
             userData.generateCollisionEvents = generateCollisionEvents;
             world->physics_system.GetBodyInterface().SetPosition(body->GetID(),Physics::toJoltVec(position),JPH::EActivation::DontActivate);
             world->physics_system.GetBodyInterface().SetRotation(body->GetID(),Physics::toJoltQuat(rotation).Normalized(),JPH::EActivation::DontActivate);
-            world->physics_system.GetBodyInterface().SetLinearVelocity(body->GetID(),Physics::toJoltVec(velocity));
-            if(useAngularVelocity) world->physics_system.GetBodyInterface().SetAngularVelocity(body->GetID(),Physics::toJoltVec(angularVelocity));
+            if(!body->IsStatic()) { 
+                world->physics_system.GetBodyInterface().SetLinearVelocity(body->GetID(),Physics::toJoltVec(velocity));
+                world->physics_system.GetBodyInterface().SetAngularVelocity(body->GetID(),Physics::toJoltVec(angularVelocityRads));
+            }
         }
 
         void postPhysics(World* world,vec3& position,quat& rotation) {
             position = Physics::toGlmVec(body->GetPosition());
             rotation = Physics::toGlmQuat(body->GetRotation().Normalized());
-            velocity = Physics::toGlmVec(body->GetLinearVelocity());
-            if(useAngularVelocity) angularVelocity = Physics::toGlmVec(body->GetAngularVelocity());
+            if(!body->IsStatic()) { 
+                velocity = Physics::toGlmVec(body->GetLinearVelocity());
+                angularVelocityRads = Physics::toGlmVec(body->GetAngularVelocity());
+            }
+        }
+
+        void applyGravity(World* world,vec3 position,float dt) {
+            velocity += world->getGravityVector(position) * dt;
         }
 
         void destroy(World* world) {
@@ -128,13 +141,13 @@ class Rigidbody {
         data_Rigidbody save() {
             data_Rigidbody data{};
             data.velocity.set(velocity);
-            data.angularVelocity.set(angularVelocity);
+            data.angularVelocity.set(angularVelocityRads);
             return data;
         }
 
         void load(data_Rigidbody data) {
             velocity = data.velocity.toVec3();
-            angularVelocity = data.angularVelocity.toVec3();
+            angularVelocityRads = data.angularVelocity.toVec3();
         }
 
        

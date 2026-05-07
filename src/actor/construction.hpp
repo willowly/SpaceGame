@@ -119,10 +119,12 @@ class Construction : public Actor {
         }
     };
 
-    // we can convert this to just block ID if we use a custom physics shape :shrug:
+    // we can convert this to just block ID if we use a custom physics shape :shrug: <- not true!!!
     struct BlockData {
         BlockID id = 0;
+        bool attached = false;
         std::optional<JPH::Shape*> shapeOpt;
+        BlockData(BlockID id,bool attached) : id(id), attached(attached) {}
         BlockData(BlockID id) : id(id) {}
         BlockData() {}
 
@@ -139,7 +141,7 @@ class Construction : public Actor {
 
     ivec3 boundsMin = {};
     ivec3 boundsMax = {};
-    std::vector<BlockPaletteEntry> blockPalette; 
+    std::vector<BlockPaletteEntry> blockPalette;
     std::vector<BlockData> blockDataArray;
     MeshData<ConstructionVertex> meshData;
 
@@ -155,20 +157,21 @@ class Construction : public Actor {
     std::vector<int> blockCountZ;
 
     vec3 moveControl = {};
-    quat targetRotation = glm::identity<quat>();
-    bool targetRotationEnabled = false;
+    vec3 turnControl = {};
     float turnForce = 1.5;
-    vec3 velocity = {};
 
     int blockCount = 0; //block count
 
     float timer = 0;
+
+    float turnTorque = 30.0f;
 
     bool isStatic = false;
 
     bool physicsShapeChanged = false;
 
     vec3 accumulatedThrustForce = {}; // acculated on step, applied on prePhysics
+    vec3 accumulatedTorque = {};
 
     // Rigidbody Class
     Rigidbody body;
@@ -236,7 +239,9 @@ class Construction : public Actor {
         };
         std::map<Location,bool> stepCallbacks;
 
-        void step(World* world,float dt) {
+        void step(World* world,float dt) override {
+
+            updateLastTransform();
             
             for(auto& pair : stepCallbacks) {
 
@@ -254,7 +259,10 @@ class Construction : public Actor {
 
             timer += dt;
 
+            body.applyGravity(world,position,dt);
+
             accumulatedThrustForce = vec3(0.0f);
+            accumulatedTorque = vec3(0.0f);
             //i have no idea why z and x are inverted :shrug:
             if(moveControl.z > 0.01) {
                 applyForce(vec3(0,0,1) * thrustForces[static_cast<int>(BlockFacing::BACKWARD)] * moveControl.z); //too move forward we must thrust backwards
@@ -274,18 +282,40 @@ class Construction : public Actor {
             if(moveControl.y > 0.01) {
                 applyForce(vec3(0,1,0) * thrustForces[static_cast<int>(BlockFacing::DOWN)] * moveControl.y);
             }
-            
-            if(targetRotationEnabled && !isStatic) {
-                
-                rotation = glm::slerp(rotation,targetRotation,turnForce * dt);
-                body.setAngularVelocity(vec3(0,0,0)); //maybe we have an actual variable for this instead of just relying
+
+            if(turnControl.x < 0.01) {
+                applyTorque(transformDirection(vec3(1,0,0)) * turnControl.x * turnTorque);
             }
+            if(turnControl.x > 0.01) {
+                applyTorque(transformDirection(vec3(1,0,0)) * turnControl.x * turnTorque);
+            }
+            if(turnControl.y < 0.01) {
+                applyTorque(transformDirection(vec3(0,1,0)) * turnControl.y * turnTorque);
+            }
+            if(turnControl.y > 0.01) {
+                applyTorque(transformDirection(vec3(0,1,0)) * turnControl.y * turnTorque);
+            }
+            if(turnControl.z < 0.01) {
+                applyTorque(transformDirection(vec3(0,0,1)) * turnControl.z * turnTorque);
+            }
+            if(turnControl.z > 0.01) {
+                applyTorque(transformDirection(vec3(0,0,1)) * turnControl.z * turnTorque);
+            }
+
+            vec3 angularVelocity = body.getAngularVelocity();
+            angularVelocity += accumulatedTorque * dt;
+            body.setAngularVelocity(angularVelocity);
+            
             
         }
 
         // maybe we should accululate force and apply it prephysics :shrug:
         void applyForce(vec3 force) {
             accumulatedThrustForce += transformDirection(force);
+        }
+
+        void applyTorque(vec3 torque) {
+            accumulatedTorque += torque;
         }
 
         void generateMesh() {
@@ -337,7 +367,7 @@ class Construction : public Actor {
 
         // end move a bunch of these to helper
 
-        void addRenderables(Vulkan* vulkan,float dt) {
+        void addRenderables(Vulkan* vulkan,float dt,float interpolation) override {
             if(meshData.vertices.size() == 0 || meshData.indices.size() == 0) return;
             if(meshState == -1) {
                 
@@ -354,26 +384,12 @@ class Construction : public Actor {
                 }
             }
             if(meshState != -1) {
-                vulkan->addMesh(meshBuffer[meshState],material,getTransform());
+                vulkan->addMesh(meshBuffer[meshState],material,getInterpolatedTransform(interpolation));
             }
-            // center of mass
-            // Debug::drawPoint(position,Color::green);
 
-            // thrust forces
-            // Debug::drawRay(position,transformDirection(thrustForces[BlockFacing::FORWARD]* vec3(0,0,0.1)), Color::blue);
-            // Debug::drawRay(position,transformDirection(thrustForces[BlockFacing::BACKWARD]*vec3(0,0,-0.1)),Color::blue);
-            // Debug::drawRay(position,transformDirection(thrustForces[BlockFacing::UP]*      vec3(0,0.1,0)),Color::yellow);
-            // Debug::drawRay(position,transformDirection(thrustForces[BlockFacing::DOWN]*    vec3(0,-0.1,0)), Color::yellow);
-            // Debug::drawRay(position,transformDirection(thrustForces[BlockFacing::RIGHT]*   vec3(0.1,0,0)), Color::red);
-            // Debug::drawRay(position,transformDirection(thrustForces[BlockFacing::LEFT]*    vec3(-0.1,0,0)),Color::red);
-
-            // // bounds
-            // Debug::drawCube(transformPoint((vec3)(max+min)/2.0f),(vec3)(max-min) + vec3(1),rotation,Color::red);
-
-            // for (auto subShape : physicsShape->GetSubShapes())
-            // {
-            //     Debug::drawPoint(transformPoint(Physics::toGlmVec(subShape.GetPositionCOM())));
-            // }
+            Debug::drawRay(position,transformDirection(vec3(0,0,1)),Color::green);
+            Debug::drawRay(position,body.getAngularVelocity(),Color::blue);
+            Debug::drawRay(position,turnControl,Color::red);
             
         }
 
@@ -434,23 +450,54 @@ class Construction : public Actor {
             
         }
 
+        void setIsStatic(bool value) {
+            if(value != isStatic) {
+                isStatic = value;
+            }
+        }
+
+        JPH::BodyID getBodyID() {
+            return body.getBodyID();
+        }
+
         void spawn(World* world) override {
             
+            spawnBody(world);
+
+        }
+        
+        void spawnBody(World* world) {
             auto bodySettings = body.getDefaultBodySettings(this,physicsShape,position,rotation);
 
             if(isStatic) {
                 bodySettings.mMotionType = JPH::EMotionType::Static;
                 bodySettings.mObjectLayer = Layers::NON_MOVING;
+                body.setVelocity(vec3(0));
             }
 
             bodySettings.mOverrideMassProperties = JPH::EOverrideMassProperties::MassAndInertiaProvided;
             bodySettings.mMassPropertiesOverride.mMass = 1.0f;
+            bodySettings.mAllowDynamicOrKinematic = true;
 
             body.spawn(world,this,bodySettings);
             body.getBody()->SetRestitution(0.1f);
             body.getBody()->SetFriction(2.0);
+        }
 
+        // get the maximum angular acc for rotation v
+        float getMaxAngularAccelerationYaw() {
+            return turnTorque;
+            //return body.getBody()->GetMotionProperties()->MultiplyWorldSpaceInverseInertiaByVector(Physics::toJoltQuat(rotation),Physics::toJoltVec(transformDirection(vec3(0,100.0f,0)))).GetY();
+        }
 
+        float getMaxAngularAccelerationPitch() {
+            return turnTorque;
+            //return body.getBody()->GetMotionProperties()->MultiplyWorldSpaceInverseInertiaByVector(Physics::toJoltQuat(rotation),Physics::toJoltVec(transformDirection(vec3(0,100.0f,0)))).GetY();
+        }
+
+        float getMaxAngularAccelerationRoll() {
+            return turnTorque;
+            //return body.getBody()->GetMotionProperties()->MultiplyWorldSpaceInverseInertiaByVector(Physics::toJoltQuat(rotation),Physics::toJoltVec(transformDirection(vec3(0,100.0f,0)))).GetY();
         }
         
 
@@ -460,15 +507,23 @@ class Construction : public Actor {
                 world->physics_system.GetBodyInterface().NotifyShapeChanged(body.getBodyID(),physicsOldCOM,false,JPH::EActivation::Activate);
             }
             if(!isStatic) {
+                body.getBody()->SetMotionType(JPH::EMotionType::Dynamic);
+                world->physics_system.GetBodyInterface().SetObjectLayer(body.getBodyID(),Layers::MOVING);
                 if(physicsShape->GetMassProperties().mMass > 0.0f) {
                     body.getBody()->GetMotionProperties()->SetMassProperties(JPH::EAllowedDOFs::All,physicsShape->GetMassProperties());
                 }
+            } else {
+                if(body.getBody()->GetMotionType() != JPH::EMotionType::Static) {
+                    world->physics_system.GetBodyInterface().DeactivateBody(body.getBodyID());
+                }
+                body.getBody()->SetMotionType(JPH::EMotionType::Static);
+                world->physics_system.GetBodyInterface().SetObjectLayer(body.getBodyID(),Layers::NON_MOVING);
             }
 
             auto bodyID = body.getBodyID();
             if(!isStatic) {
                 body.prePhysics(world,position,rotation);
-                world->physics_system.GetBodyInterface().AddForce(bodyID,Physics::toJoltVec(accumulatedThrustForce));
+                world->physics_system.GetBodyInterface().AddForce(bodyID,Physics::toJoltVec(accumulatedThrustForce));                                                                                                                                                                                                                                                                                         
             } else {
                 world->physics_system.GetBodyInterface().SetPosition(bodyID,Physics::toJoltVec(position),JPH::EActivation::DontActivate);
                 world->physics_system.GetBodyInterface().SetRotation(bodyID,Physics::toJoltQuat(rotation),JPH::EActivation::DontActivate);
@@ -479,6 +534,9 @@ class Construction : public Actor {
 
         virtual void postPhysics(World* world) {
             body.postPhysics(world,position,rotation);
+            if(isStatic) {
+                body.setVelocity(vec3(0)); // so we dont get invalid velocity
+            }
         }
 
         void destroy(World* world) {
@@ -510,7 +568,11 @@ class Construction : public Actor {
         }
 
         vec3 getVelocity() {
-            return velocity;
+            return body.getVelocity();
+        }
+
+        vec3 getAngularVelocity() {
+            return body.getAngularVelocity();
         }
 
         // END RIGIDBODY COMPONENT
@@ -639,7 +701,11 @@ class Construction : public Actor {
             size_t index = getIndex(location);
             auto state = block.onPlace(this,location,info);
             BlockPaletteEntry entry{&block,state};
-            blockDataArray.at(index) = paletteEntryToID(entry);
+            blockDataArray.at(index) = BlockData(paletteEntryToID(entry),info.attached);
+
+            if(info.attached && !isStatic) {
+                setIsStatic(true);
+            }
 
             addBlockCollider(index,location);
 
@@ -678,6 +744,8 @@ class Construction : public Actor {
             
             
             placeBlockNoUpdate(location,*block,placeInfo);
+
+            
             //printIDList();
 
             //recalculatePivot();
@@ -715,42 +783,55 @@ class Construction : public Actor {
                     for (int x = boundsMin.x; x <= boundsMax.x; x++)
                     {
                         i++; // so continues work
-                        int blockGroup = blockGroups[i];
+                        int blockGroup = blockGroups.at(i);
                         if(blockGroup != 0) {
 
-                            if(blockGroup == originalConstructionGroup) continue;
+                            if(blockGroup == originalConstructionGroup) {
+                                auto blockData = blockDataArray.at(i);
+
+                                if(blockData.attached) {
+                                    setIsStatic(true);
+                                    std::cout << blockGroup << " is attached" << std::endl;
+                                }
+                                continue;
+                            }
 
                             vec3 worldLocation = transformPoint(vec3(x,y,z));
                             if(constructions[blockGroup-1] == nullptr) {
                                 if(originalConstructionGroup == 0) {
                                     originalConstructionGroup = blockGroup;
                                     constructions[blockGroup-1] = this;
+                                    auto blockData = blockDataArray.at(i);
+                                    if(!blockData.attached) {
+                                        setIsStatic(false);
+                                    }
                                     continue;
                                 } else {
-                                    constructions[blockGroup-1] = world->spawn(Construction::makeInstance(material,worldLocation,rotation,isStatic)).get();
-                                    constructions[blockGroup-1]->velocity = velocity; //match velocities
+                                    constructions[blockGroup-1] = world->spawn(Construction::makeInstance(material,worldLocation,rotation)).get();
+                                    constructions[blockGroup-1]->body.setVelocity(body.getVelocity()); //match velocities
                                 }
                             }
                             auto& newConstruction = *constructions[blockGroup-1];
                             ivec3 newLocalLocation = glm::round(newConstruction.inverseTransformPoint(worldLocation));
-                            if(blockGroup != originalConstructionGroup) {
-                                
-                                newConstruction.boundsEncapsulate(newLocalLocation);
-                                int newIndex = newConstruction.getIndex(newLocalLocation);
-                                auto blockData = blockDataArray.at(i);
+                            newConstruction.boundsEncapsulate(newLocalLocation);
+                            int newIndex = newConstruction.getIndex(newLocalLocation);
+                            auto blockData = blockDataArray.at(i);
 
-                                auto blockEntry = blockPalette.at(blockData.id); // we actually do want to copy it here
-
-                                newConstruction.addBlockCount(newLocalLocation);
-                                
-                                blockData.id = newConstruction.paletteEntryToID(blockEntry); // the IDs will need to change for this. Maybe just copying the entire palette is better and then removing the blocks?
-                                newConstruction.blockDataArray.at(newIndex) = blockData;
-                                
-                                newConstruction.addBlockCollider(newIndex,newLocalLocation);
-
-                                removeBlockNoUpdate(vec3(x,y,z)); // remove the original
+                            if(blockData.attached) {
+                                newConstruction.setIsStatic(true);
+                                std::cout << blockGroup << " is attached" << std::endl;
                             }
 
+                            auto blockEntry = blockPalette.at(blockData.id); // we actually do want to copy it here
+
+                            newConstruction.addBlockCount(newLocalLocation);
+                            
+                            blockData.id = newConstruction.paletteEntryToID(blockEntry); // the IDs will need to change for this. Maybe just copying the entire palette is better and then removing the blocks?
+                            newConstruction.blockDataArray.at(newIndex) = blockData;
+                            
+                            newConstruction.addBlockCollider(newIndex,newLocalLocation);
+
+                            removeBlockNoUpdate(vec3(x,y,z)); // remove the original
                         }
                     }
                 }
@@ -792,8 +873,6 @@ class Construction : public Actor {
         void recalculateBounds() {
             ivec3 newMin = ivec3(0);
             ivec3 newMax = ivec3(0);
-
-            printBlockCounts();
 
             bool minSet = false;
             for (size_t i = 0; i < blockCountX.size(); i++)
@@ -871,19 +950,13 @@ class Construction : public Actor {
         }
 
         void setMoveControl(vec3 move) {
-            moveControl = move;
+            moveControl = glm::normalize(move);
         }
 
-        void setTargetRotation(quat target) {
-            targetRotation = target;
-            targetRotationEnabled = true;
+        void setTurnControl(vec3 turn) {
+            turnControl = turn;
         }
 
-        void resetTargets() {
-            moveControl = vec3(0,0,0);
-            targetRotation = rotation;
-            targetRotationEnabled = false;
-        }
 
         size_t getIndex(ivec3 location) {
             ivec3 fromMin = location - boundsMin;
@@ -945,19 +1018,20 @@ class Construction : public Actor {
             }
         }
 
-        static std::unique_ptr<Construction> makeInstance(Material material,vec3 position,quat rotation = glm::identity<quat>(),bool isStatic = false) {
+        static std::unique_ptr<Construction> makeInstance(Material material,vec3 position,quat rotation = glm::identity<quat>()) {
             auto ptr = new Construction();
             ptr->position = position;
             ptr->rotation = rotation;
-            ptr->targetRotation = rotation;
+            ptr->updateLastTransform();
             ptr->material = material;
-            ptr->isStatic = isStatic;
             return std::unique_ptr<Construction>(ptr);
         }
 
-        static std::unique_ptr<Construction> makeInstance(Material material,Block* block,vec3 position,quat rotation = glm::identity<quat>(),bool isStatic = false) {
-            auto ptr = makeInstance(material,position,rotation,isStatic);
-            ptr->placeBlock(ivec3(0),block);
+        static std::unique_ptr<Construction>    makeInstance(Material material,Block* block,vec3 position,quat rotation = glm::identity<quat>(),bool attached = false) {
+            auto ptr = makeInstance(material,position,rotation);
+            BlockPlaceInfo info;
+            info.attached = attached;
+            ptr->placeBlock(ivec3(0),block,info);
             return ptr;
         }
 

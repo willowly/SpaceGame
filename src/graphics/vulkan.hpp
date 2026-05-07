@@ -48,8 +48,8 @@
 #include "imgui/backends/imgui_impl_vulkan.h"
 
 #define FRAMES_IN_FLIGHT 2
-#define DESCRIPTOR_COUNT 128
-#define TRANSFER_COUNT 16
+#define DESCRIPTOR_COUNT 2048
+#define TRANSFER_COUNT 32
 
 #define RENDER_TARGET_COUNT 2
 
@@ -719,6 +719,10 @@ class Vulkan {
 
         void clearObjects() {
             renderObjects.clear();
+        }
+
+        void clearTextures() {
+            textures.clear();
         }
 
         TextureID loadTextureFile(string path) {
@@ -1600,22 +1604,24 @@ class Vulkan {
             // the shadow pass has its own UBO
             SceneDataBufferObject shadowUBO{};
             
-            //Camera shadowCamera;
-            
             vec3 shadowBoundsPos = camera.position;
             quat shadowBoundsRot = glm::quatLookAt(normalizedLightDirection,vec3(0.0f,1.0f,0.0f));
-            shadowBoundsPos = glm::inverse(shadowBoundsRot) * shadowBoundsPos;
-            float roundFactor = (shadowMapSize/(shadowDist*2));
-            shadowBoundsPos.x = glm::floor(shadowBoundsPos.x * roundFactor) / roundFactor;
-            shadowBoundsPos.y = glm::floor(shadowBoundsPos.y * roundFactor) / roundFactor;
-            shadowBoundsPos = shadowBoundsRot * shadowBoundsPos;
+
+            // round to nearest texel
+            // shadowBoundsPos = glm::inverse(shadowBoundsRot) * shadowBoundsPos;
+            // float roundFactor = (shadowMapSize/(shadowDist*2));
+            // shadowBoundsPos.x = glm::floor(shadowBoundsPos.x * roundFactor) / roundFactor;
+            // shadowBoundsPos.y = glm::floor(shadowBoundsPos.y * roundFactor) / roundFactor;
+            // shadowBoundsPos = shadowBoundsRot * shadowBoundsPos;
+
+
             glm::mat4 view = glm::mat4(1.0f);
             view = glm::toMat4(glm::inverse(shadowBoundsRot)) * view;
             view = glm::translate(view,-shadowBoundsPos);
 
             shadowUBO.view = view;
 
-            shadowUBO.proj = glm::ortho(-shadowDist,shadowDist,shadowDist,-shadowDist,-shadowDist,shadowDist);
+            shadowUBO.proj = glm::orthoRH_ZO(-shadowDist,shadowDist,shadowDist,-shadowDist,-shadowDist,shadowDist);
             shadowUBO.viewDir = normalizedLightDirection;
 
             shadowUBO.mainLightColor = vec3(7.0f,9.0f,3.0f);

@@ -42,7 +42,7 @@ class PickaxeTool : public Tool {
         void pickaxe(World* world,Character& user,ItemStack& stack,Ray ray) {
             
             int damage = stack.storage.getInt(DAMAGE_VAR,0);
-            auto worldHitOpt = world->raycast(ray,reach);
+            auto worldHitOpt = world->raycast(ray,reach,LayerMask::excludes({Layers::PLAYER,Layers::ITEM}));
 
 
             if(worldHitOpt) {

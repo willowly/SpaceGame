@@ -153,7 +153,7 @@ namespace API {
 
     inline void getItemStack(sol::table table,std::variant<string,int> key,ItemStack& ref,Registry& registry,bool required = false) {
         Debug::addTrace(keyAsString(key));
-        sol::object obj = table[key]; // be careful with this, its only
+        sol::object obj = table[key];
         if(obj != sol::lua_nil) {
             auto stackOpt = createItemStack(obj,registry);
             if(stackOpt) {

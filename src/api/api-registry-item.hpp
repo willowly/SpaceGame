@@ -23,7 +23,7 @@ namespace API {
 
     inline void loadItemToolType(ObjLoadType loadType,sol::table table,Tool* item,Registry& registry) {
         loadItemBaseType(loadType,table,item,registry);
-        get<float>(table,"look_lerp",item->lookLerp,false);
+        get<float>(table,"smooth_time",item->smoothTime,false);
         getMesh(table,"model",item->heldModel,registry,false);
         getMaterial(table,"material",item->heldModelMaterial,registry,false);
         getMesh(table,"held_model",item->heldModel,registry,false);

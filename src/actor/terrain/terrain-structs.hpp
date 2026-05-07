@@ -29,6 +29,21 @@ struct GenerationSettings {
 
 };
 
+
+struct TerrainSettings {
+
+    GenerationSettings generationSettings;
+
+    float gravity = 0;
+
+    int chunkSize = 30;
+    float baseCellSize = 0.5f; // cell size on the smallest size
+
+    float LODdistance = 300;
+    float LODdistanceFactor = 3; // so the distance between each is a factor of 2
+
+};
+
 struct TerraformResults {
 
     std::vector<ItemStack> items;

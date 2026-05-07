@@ -38,16 +38,15 @@ class Terrain : public Actor {
         chunkLayers =  std::vector<std::map<LocationKey,TerrainChunk>>(LODlayers);
     }
 
-    GenerationSettings settings;
+    GravityWell gravityWell;
+
+    TerrainSettings settings;
     std::vector<std::map<LocationKey,TerrainChunk>> chunkLayers;
     Material material = Material::none;
 
     std::shared_mutex chunksMtx;
 
     std::atomic<int> lockType = 0;
-
-    int chunkSize = 30; //without LOD, all chunks are the same size
-    float cellSize = 0.5f;
 
     int currentLODlayer = -1;
     static const int LODlayers = 3;
@@ -56,9 +55,6 @@ class Terrain : public Actor {
     std::shared_mutex loadedLayersMtx;
     std::array<bool,LODlayers> loadedLayers{};
     int nextLODlayer = 0; // the one that should be loaded next
-
-    float LODdistance = 300;
-    float LODdistanceFactor = 3; // so the distance between each is a factor of 2
 
     unsigned int seed = 0;
 
@@ -102,9 +98,9 @@ class Terrain : public Actor {
         assert(layer >= 0 && layer < LODlayers);
         
         LocationKey key(pos);
-        ivec3 offset = pos*chunkSize;
+        ivec3 offset = pos*settings.chunkSize;
 
-        float newCellSize = cellSize * powf(LODscaleFactor,layer);
+        float newCellSize = settings.baseCellSize * powf(LODscaleFactor,layer);
         
         TerrainChunk* chunk = nullptr;
 
@@ -117,7 +113,7 @@ class Terrain : public Actor {
                 std::cout << std::this_thread::get_id() << "chunk not available" << std::endl;
                 return;
             }
-            chunks.at(key).create(offset,chunkSize,newCellSize,nextChunkId,seed);
+            chunks.at(key).create(offset,settings.chunkSize,newCellSize,nextChunkId,seed);
             //std::cout << std::this_thread::get_id() << "adding chunk " << std::endl;
             chunk = &chunks.at(key);
         }
@@ -126,7 +122,7 @@ class Terrain : public Actor {
 
         nextChunkId++;
 
-        chunk->generateData(settings,address.layer);
+        chunk->generateData(settings.generationSettings,address.layer);
         //chunk.generateMesh();
         
         connect(*chunk,address); // this will end up generating the mesh for us :)
@@ -138,10 +134,10 @@ class Terrain : public Actor {
     }
 
     ivec3 worldToChunkPos(vec3 position) {
-        return glm::floor(position/((float)chunkSize*cellSize));
+        return glm::floor(position/getChunkWorldSizeBase());
     }
     ivec3 worldToChunkPosRounded(vec3 position) {
-        return glm::round(position/((float)chunkSize*cellSize));
+        return glm::round(position/getChunkWorldSizeBase());
     }
 
     string getDebugInfo(int component = -1) {
@@ -171,7 +167,7 @@ class Terrain : public Actor {
 
         //std::cout << "terrain at " << StringHelper::toString(position) << std::endl;
         vec3 cameraPositionRelative = inverseTransformPoint(cameraPosition);
-        vec3 cameraPositionChunk = glm::floor(cameraPositionRelative/((float)chunkSize*cellSize));
+        vec3 cameraPositionChunk = glm::floor(cameraPositionRelative/getChunkWorldSizeBase());
 
 
         {
@@ -244,12 +240,16 @@ class Terrain : public Actor {
     // range of valid coordinates is (-size,size). 0 means 1 single chunk
     int getChunkGridSize(int layer) {
         int chunkSize = getChunkWorldSize(layer);
-        float extent = std::ceilf(settings.radius/chunkSize);
+        float extent = std::ceilf(settings.generationSettings.radius/chunkSize);
         return extent;
     }
 
-    int getChunkWorldSize(int layer) {
-        return chunkSize * cellSize * pow(LODscaleFactor,layer);
+    float getChunkWorldSize(int layer) {
+        return getChunkWorldSizeBase() * pow(LODscaleFactor,layer);
+    }
+
+    float getChunkWorldSizeBase() {
+        return (float)settings.chunkSize*settings.baseCellSize;
     }
 
     void prePhysics(World* world) override {
@@ -266,8 +266,8 @@ class Terrain : public Actor {
         for(auto& pair : chunks) {
             ivec3 pos = pair.first;
             auto chunk = pair.second;
-            vec3 offset = pos*chunkSize;
-            chunk->updatePhysics(world,this,position + (vec3)offset*cellSize);
+            vec3 offset = pos*settings.chunkSize;
+            chunk->updatePhysics(world,this,position + (vec3)offset*settings.baseCellSize);
         }
     }
 
@@ -355,12 +355,18 @@ class Terrain : public Actor {
 
         updateLOD(world);
 
+        //world->addGravityWell(&gravityWell);
+
     }
 
     void step(World* world,float dt) override {
 
         updateLOD(world);
 
+    }
+
+    void destroy(World* world) override {
+        //world->removeGravityWell(&gravityWell);
     }
 
     void updateLOD(World* world) {
@@ -373,14 +379,14 @@ class Terrain : public Actor {
     void setCurrentLODBasedOnDistance(float distance) {
         for (int i = 0; i < LODlayers; i++)
         {
-            if(distance < LODdistance * pow(LODdistanceFactor,i)) {
+            if(distance < settings.LODdistance * pow(settings.LODdistanceFactor,i)) {
                 setCurrentLOD(i);
                 if(currentLODlayer == 0) {
                     nextLODlayer = 1;
                 } else if (currentLODlayer == LODlayers - 1) {
                     nextLODlayer = currentLODlayer - 1;
                 } else {
-                    if (distance < LODdistance * pow(LODdistanceFactor,i-0.5f)) {
+                    if (distance < settings.LODdistance * pow(settings.LODdistanceFactor,i-0.5f)) {
                         nextLODlayer = currentLODlayer - 1;
                     } else {
                         nextLODlayer = currentLODlayer + 1;
@@ -449,7 +455,7 @@ class Terrain : public Actor {
     //     }
     // }
 
-    void addRenderables(Vulkan* vulkan,float dt) override {
+    void addRenderables(Vulkan* vulkan,float dt,float interpolation) override {
 
         ZoneScopedN("Terrain::addRenderables");
         Clock clock;
@@ -476,11 +482,12 @@ class Terrain : public Actor {
     
     //need to manually regenerate the mesh (in case things want to do multiple)
 
-    static std::unique_ptr<Terrain> makeInstance(Material material,GenerationSettings settings,int seed,vec3 position = vec3(0)) {
+    static std::unique_ptr<Terrain> makeInstance(Material material,TerrainSettings settings,int seed,vec3 position = vec3(0)) {
         auto ptr = new Terrain();
         ptr->material = material;
         ptr->settings = settings; 
         ptr->position = position;
+        ptr->gravityWell = GravityWell(position,settings.gravity,settings.generationSettings.radius);
         return std::unique_ptr<Terrain>(ptr);
     }
 

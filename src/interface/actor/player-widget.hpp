@@ -17,6 +17,7 @@ class PlayerWidget : public ActorWidget<Character> {
         InventoryWidget* inventoryWidget;
         ToolbarWidget* toolbarWidget;
         ItemSlotWidget* cursorSlotWidget;
+        TextWidget* speedText;
         vec2 cursorSlotSize = vec2(60,60);
 
         float cursorRectLength = 15;
@@ -43,7 +44,10 @@ class PlayerWidget : public ActorWidget<Character> {
         Rect cursorStackRect = Rect(context.getMousePosition(),cursorSlotSize);
         cursorSlotWidget->draw(context,cursorStackRect,player.cursorStack);
 
+        
         Rect screen = context.getScreenSize();
+        float speed = glm::length(player.getVelocity());
+        speedText->draw(context,vec2(screen.size.x*0.5f,screen.size.y-200),std::format("{0:.2f}",speed));
 
         context.drawRect(Rect::anchored(Rect::centered(vec2(cursorRectLength,cursorRectWidth)),screen,vec2(0.5,0.5)),cursorRectSprite);
         context.drawRect(Rect::anchored(Rect::centered(vec2(cursorRectWidth,cursorRectLength)),screen,vec2(0.5,0.5)),cursorRectSprite);

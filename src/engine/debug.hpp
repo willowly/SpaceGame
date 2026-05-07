@@ -198,48 +198,6 @@ class Debug {
             instance.logInfo = state;
         }
 
-        static string getVertShaderSource() {
-            return R"(
-                #version 410
-                layout (location = 0) in vec3 aPos;
-                layout (location = 1) in vec3 aNormal;
-                layout (location = 2) in vec2 aTexCoord;
-
-                out vec3 normal;
-                out vec2 texCoord;
-
-                uniform mat4 view;
-                uniform mat4 model;
-                uniform mat4 projection;
-                uniform vec4 color;
-
-                void main()
-                {
-                    gl_Position = projection * view * model * vec4(aPos.x, aPos.y, aPos.z, 1.0);
-                    texCoord = aTexCoord;
-                    normal = mat3(transpose(inverse(model))) * aNormal;
-                }
-            )";
-        }
-
-        static string getFragShaderSource() {
-            return R"(
-                #version 410
-
-                in vec2 texCoord;
-                in vec3 normal;
-
-                out vec4 FragColor;
-
-                uniform vec4 color;
-
-                void main()
-                {
-                    FragColor = color;
-                }
-            )";
-        }
-
         // static Shader* getShader() {
         //     Debug* instance = getInstance();
         //     if(instance->_shader == nullptr) {
@@ -330,13 +288,15 @@ class Debug {
                 return;
             }
 
+            RenderingSettings settings;
+            settings.shadowPass = false;
 
             for (auto& p : instance.pointsToDraw)
             {
                 auto mat = glm::mat4(1.0f);
                 mat = glm::translate(mat,p.position);
                 mat = glm::scale(mat,vec3(0.1));
-                vulkan.addMesh(instance.quad,instance.solidMaterial,p.color.asVec4(),mat);
+                vulkan.addMesh(instance.quad,instance.solidMaterial,p.color.asVec4(),mat,settings);
                 p.time -= instance.clock.getTime();
             }
     
@@ -346,7 +306,7 @@ class Debug {
                 auto mat = glm::mat4(1.0f);
                 mat = glm::translate(mat,l.a);
                 mat = glm::scale(mat,l.b-l.a);
-                vulkan.addMesh(instance.line,instance.wireFrameMaterial,l.color.asVec4(),mat);
+                vulkan.addMesh(instance.line,instance.wireFrameMaterial,l.color.asVec4(),mat,settings);
                 l.time -= instance.clock.getTime();
             }
 
@@ -356,7 +316,7 @@ class Debug {
                 mat = glm::translate(mat,cube.origin);
                 mat *= glm::toMat4(cube.rotation);
                 mat = glm::scale(mat,cube.size);
-                vulkan.addMesh(instance.cube,instance.wireFrameMaterial,cube.color.asVec4(),mat);
+                vulkan.addMesh(instance.cube,instance.wireFrameMaterial,cube.color.asVec4(),mat,settings);
                 cube.time -= instance.clock.getTime();
             }
     

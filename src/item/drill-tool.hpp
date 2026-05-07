@@ -59,7 +59,7 @@ class DrillTool : public Tool {
             if(damage >= durability) {
                 return;
             }
-            auto worldHitOpt = world->raycast(user.getLookRay(),reach);
+            auto worldHitOpt = world->raycast(user.getLookRay(),reach,LayerMask::excludes({Layers::PLAYER,Layers::ITEM}));
             std::optional<ItemStack> resultStack; //constructions :shrug:
             if(worldHitOpt) {
                 auto worldHit = worldHitOpt.value();

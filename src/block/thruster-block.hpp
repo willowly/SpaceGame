@@ -19,7 +19,7 @@ class ThrusterBlock : public Block {
 
         Mesh<Vertex>* mesh;
         TextureID texture;
-        float force; //for now this is always backwards
+        float force; //for now this is always forwards
         float sideForce; //for now this is always the 4 directions parrellel to the back
 
         virtual BlockStorage onPlace(Construction* construction,ivec3 position,BlockPlaceInfo placeInfo) {

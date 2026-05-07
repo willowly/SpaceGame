@@ -12,6 +12,7 @@
 #include <Jolt/Physics/Collision/Shape/SphereShape.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Body/BodyActivationListener.h>
+#include <initializer_list>
 
 namespace Layers
 {
@@ -167,4 +168,49 @@ public:
 	{
 		return table[inLayer];
 	}
+};
+
+class LayerMask {
+	ObjectLayerTable objectTable{};
+	BroadPhaseLayerTable broadPhaseTable{};
+
+	public:
+
+		static LayerMask includes(std::initializer_list<JPH::ObjectLayer> layers) {
+			LayerMask mask{};
+			mask.broadPhaseTable = BroadPhaseLayerTable{true,true,false}; // for now this is all we need
+			for (auto layer : layers)
+			{
+				mask.objectTable.at(layer) = true;
+			}
+			return mask;
+			
+		}
+		
+		static LayerMask excludes(std::initializer_list<JPH::ObjectLayer> layers) {
+			LayerMask mask{};
+			mask.broadPhaseTable = BroadPhaseLayerTable{true,true,false}; // for now this is all we need
+			for (size_t i = 0; i < mask.objectTable.size(); i++) //set everything to true
+			{
+				if(i == Layers::DISABLED) break;
+				mask.objectTable.at(i) = true;
+			}
+			for (auto layer : layers)
+			{
+				mask.objectTable.at(layer) = false;
+			}
+			return mask;
+		}
+
+		static LayerMask all() {
+			return LayerMask::excludes({});
+		}
+
+		ObjectLayerFilter getObjectLayerFilter() {
+			return ObjectLayerFilter(objectTable);
+		}
+
+		BroadPhaseLayerFilter getBroadPhaseLayerFilter() {
+			return BroadPhaseLayerFilter(broadPhaseTable);
+		}
 };

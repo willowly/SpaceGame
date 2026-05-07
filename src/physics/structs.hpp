@@ -12,6 +12,7 @@
 #include <Jolt/Jolt.h>
 #include <Jolt/Physics/Body/Body.h>
 #include <Jolt/Physics/Collision/ContactListener.h>
+#include <Jolt/Physics/Body/BodyFilter.h>
 
 class Actor;
 
@@ -28,6 +29,24 @@ struct Ray {
     vec3 origin = {};
     vec3 direction = {};
     Ray(vec3 origin,vec3 direction) : origin(origin), direction(direction) { }
+};
+
+class RaycastSettings {
+    std::unique_ptr<JPH::BodyFilter> bodyFilter;
+
+    public:
+        RaycastSettings() {
+            bodyFilter = std::make_unique<JPH::BodyFilter>();
+        }
+
+        void setIgnoreBody(JPH::BodyID id) {
+            bodyFilter = std::make_unique<JPH::IgnoreSingleBodyFilter>(id);
+        }
+
+        JPH::BodyFilter& getBodyFilter() const {
+            assert(bodyFilter != nullptr);
+            return *bodyFilter;
+        }
 };
 
 struct Collision {

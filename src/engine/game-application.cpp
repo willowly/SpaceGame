@@ -50,16 +50,17 @@ void GameApplication::spawnAsteroidScene()  {
         std::uniform_real_distribution<> dist(-3000, 3000);
         vec3 postion = vec3(dist(rnd),dist(rnd),dist(rnd));
         std::cout << "spawning terrain at position " << StringHelper::toString(postion) << std::endl;
-        auto terrain = world->spawn(Terrain::makeInstance(terrainMaterial,generationSettings,rnd(),postion));
+        auto terrain = world->spawn(Terrain::makeInstance(terrainMaterial,settings,rnd(),postion));
         terrainLoader.addTerrain(terrain);
     }
 
-    auto terrain = world->spawn(Terrain::makeInstance(terrainMaterial,generationSettings,rnd(),vec3(0,0,0)));
+    auto terrain = world->spawn(Terrain::makeInstance(terrainMaterial,settings,rnd(),vec3(0,0,0)));
     terrainLoader.addTerrain(terrain);
 }
 
 void GameApplication::setup() {
-
+    
+    lua = sol::state();
             // Load
     lua.open_libraries(sol::lib::base, sol::lib::package);
     API::loadAPIAll(lua);
@@ -77,18 +78,6 @@ void GameApplication::setup() {
 
     lastTime = (float)glfwGetTime();
 
-    auto prototype = registry.addActor<RigidbodyActor>("physics");
-    prototype->model = registry.getModel("cube");
-    prototype->material = registry.getMaterial("grid");
-
-    auto prototype_cow = registry.addActor<RigidbodyActor>("physics_cow");
-    prototype_cow->model = registry.getModel("cube");
-    prototype_cow->material = registry.getMaterial("cow");
-
-    // prototypes
-
-    auto playerPrototype = registry.addActor<Character>("player");
-
     SkyboxMaterialData skyboxMaterial;
     skyboxMaterial.top = registry.getTexture("space_up");
     skyboxMaterial.bottom = registry.getTexture("space_dn");
@@ -99,29 +88,29 @@ void GameApplication::setup() {
 
     skybox.loadResources(*vulkan,skyboxMaterial);
 
+    // prototypes
+
+    auto playerPrototype = registry.addActor<Character>("player");
+
     // terrain setup
 
     terrainMaterial = vulkan->createMaterial<LitMaterialData,TerrainVertex>("terrain",LitMaterialData(registry.getTexture("rock")));
 
+    
             
-    generationSettings.noiseScale = 1;
-    generationSettings.radius = 40;
-    generationSettings.noiseFactor = 15;
-    generationSettings.noiseOctaves = 5;
-    generationSettings.noiseGain = 0.3f;
-    generationSettings.noiseLacunarity = 2.5f;
-    generationSettings.stoneType.item = registry.getItem("stone");
-    generationSettings.stoneType.texture = registry.getTexture("rock");
-    generationSettings.oreType.item = registry.getItem("tin_ore");
-    generationSettings.oreType.texture = registry.getTexture("tin_ore");
-
-
-    
-    
-
+    settings.generationSettings.noiseScale = 1;
+    settings.generationSettings.radius = 40;
+    settings.generationSettings.noiseFactor = 15;
+    settings.generationSettings.noiseOctaves = 5;
+    settings.generationSettings.noiseGain = 0.3f;
+    settings.generationSettings.noiseLacunarity = 2.5f;
+    settings.generationSettings.stoneType.item = registry.getItem("stone");
+    settings.generationSettings.stoneType.texture = registry.getTexture("rock");
+    settings.generationSettings.oreType.item = registry.getItem("tin_ore");
+    settings.generationSettings.oreType.texture = registry.getTexture("tin_ore");
 
     
-    playerPrototype->model = registry.getModel("capsule_thin");
+    playerPrototype->model = registry.getModel("capsule");
     playerPrototype->material = registry.getMaterial("player");
     registry.addRecipesToVector(playerPrototype->recipes,"crafting",1);
     
@@ -159,6 +148,7 @@ void GameApplication::setup() {
     playerWidget.toolbarWidget = &toolbarWidget;
     playerWidget.cursorSlotWidget = registry.getWidget<ItemSlotWidget>("toolbar_item_slot");
     playerWidget.cursorRectSprite = registry.getSprite("solid");
+    playerWidget.speedText = registry.getWidget<TextWidget>("text_default");
 
     PipelineOptions options;
     options.blend = VK_TRUE;
@@ -198,7 +188,7 @@ void GameApplication::setup() {
     options.depthCompareOp = VK_COMPARE_OP_ALWAYS;
     options.blend = VK_TRUE;
 
-    registry.addMaterial("shadow_test",vulkan->createMaterial<UIMaterialData,UIVertex>("shadow_test",UIMaterialData(),options));
+    //registry.addMaterial("shadow_test",vulkan->createMaterial<UIMaterialData,UIVertex>("shadow_test",UIMaterialData(),options));
 
     //physicsActor = world.spawn(RigidbodyActor::makeInstance(physicsPrototype,player->getEyePosition(),player->getEyeRotation(),player->getEyeDirection()*20.0f,vec3(0.0f)));
 
@@ -207,6 +197,7 @@ void GameApplication::setup() {
     world->constructionMaterial = vulkan->createMaterial<LitMaterialData,ConstructionVertex>("construction",LitMaterialData(registry.getTexture("rock")));
 
     spawnAsteroidScene();
+    //spawnPlayer();
 
     lua["world"] = world.get();
 
@@ -223,8 +214,6 @@ void GameApplication::debugUI(float dt) {
         debugUIOpen = !debugUIOpen;
     }
 
-    
-    
 
     ImGui_ImplVulkan_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -238,8 +227,6 @@ void GameApplication::debugUI(float dt) {
         ImGui::Text("FPS: %8.1f",1.0f/dt);
         auto playerPos = player->getPosition();
         ImGui::Text("position: <%.1f,%.1f,%.1f>",playerPos.x,playerPos.y,playerPos.z);
-        auto playerAngularVelocity = player->body.getAngularVelocity();
-        ImGui::Text("angular velocity: <%.5f,%.5f,%.5f>",playerAngularVelocity.x,playerAngularVelocity.y,playerAngularVelocity.z);
     ImGui::End();
 
     
@@ -296,12 +283,39 @@ void GameApplication::debugUI(float dt) {
 
 }
 
+void GameApplication::reload() {
+    
+    if(world == nullptr) {
+        std::cout << "world is null" << std::endl;
+        return;
+    }
+
+    auto save = world->save();
+    terrainLoader.stop();
+    terrainLoader.clear();
+    world->clear();
+    terrainLoader.start();
+
+    registry.clearDataAssets();
+
+    vulkan->waitIdle(); // we can probably change this later, but for now its fine. just makes sure we finish using all the resources we have before they potentially get modified
+    setup();
+    DataLoaderImpl dataLoader(registry,world->constructionMaterial);
+    world->load(save,dataLoader);
+    player = world->getActorOfType<Character>();
+    lua["player"] = player;
+
+}
+
 void GameApplication::loop() {
+
 
     if(world == nullptr) {
         std::cout << "world is null" << std::endl;
         return;
     }
+
+    // just for showing the framerate
     float averageTime = 0;
     for (size_t i = 0; i < 60; i++)
     {
@@ -314,12 +328,19 @@ void GameApplication::loop() {
     
     // Get inputs, window resize, and more
     glfwPollEvents();
+
+    // if(input.getKeyPressed(GLFW_KEY_F5)) { // work in progress
+    //     reload();
+    // }
     
+
+    // save and load 
     if(input.getKeyPressed(GLFW_KEY_F6)) {
         std::cout << "saving" << std::endl;
         auto data = world->save();
         SaveHelper::save<data_World>(data,"world.dat");
     }
+    
     
     if(input.getKeyPressed(GLFW_KEY_F7)) {
         std::cout << "loading" << std::endl;
@@ -352,7 +373,7 @@ void GameApplication::loop() {
     terrainLoader.setCameraPosition(camera.position);
 
     if(player != nullptr) {
-        player->setCamera(camera);
+        player->setCamera(camera,world->getInterpolationTime());
         player->processInput(input);
     }
 
@@ -375,10 +396,7 @@ void GameApplication::loop() {
     DrawContext drawContext(interface,*vulkan,input);
     Rect screenRect = Rect(drawContext.getScreenSize());
 
-    // cursor
-    Sprite solidSprite = registry.getSprite("solid");
-    interface.drawRect(*vulkan,Rect::anchored(Rect::centered(vec2(4,0.5)),screenRect,vec2(0.5,0.5)),Color::white,solidSprite);
-    interface.drawRect(*vulkan,Rect::anchored(Rect::centered(vec2(0.5,4)),screenRect,vec2(0.5,0.5)),Color::white,solidSprite);
+    
 
     if(player != nullptr) {
         if(player->inMenu) 
@@ -397,14 +415,14 @@ void GameApplication::loop() {
     fpsText.draw(drawContext,vec2(0),std::to_string(1.0f/averageTime));
 
     
-
+    //interface.drawRect(*vulkan,Rect(5,5,300,300),Color::white,Sprite(0),registry.getMaterial("shadow_test"));
     
 
     vulkan->mainLight.direction = glm::quat(glm::radians(vec3(0,1 * dt,0))) * vulkan->mainLight.direction;
 
     Debug::addRenderables(*vulkan);
 
-    debugUI(dt); 
+    debugUI(dt);
     
     // do all the end of frame code in vulkan
     vulkan->render(camera);

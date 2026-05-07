@@ -70,6 +70,8 @@ items.pickaxe = {
     rotation = quat(-5,90,-5)
 }
 
+print("loading pickaxe 2")
+
 
 materials.pickaxe2 = {
     texture="pickaxe2"

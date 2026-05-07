@@ -56,6 +56,21 @@ class Skybox {
     bool readyToRender = false;
     Material material = Material::none;
 
+    void addFace(std::vector<SkyboxVertex>& vertices,std::vector<uint16_t>& indices,quat rot,int face) {
+        uint16_t i = vertices.size();
+        vertices.push_back(SkyboxVertex(rot * vec3(1,1,1),  vec2(0,0),face));
+        vertices.push_back(SkyboxVertex(rot * vec3(-1,1,1), vec2(1,0),face));
+        vertices.push_back(SkyboxVertex(rot * vec3(1,1,-1), vec2(0,1),face));
+        vertices.push_back(SkyboxVertex(rot * vec3(-1,1,-1),vec2(1,1),face));
+        
+        std::vector<int> newIndices = {0,1,2,1,2,3};
+        for(auto index : newIndices) {
+            indices.push_back(i+(uint16_t)index);
+        }
+        // 0,1,2,
+        //     1,2,3,
+    }
+
     public:
     
 
@@ -87,21 +102,6 @@ class Skybox {
         mesh = vulkan.createMeshBuffers(vertices,indices);
         readyToRender = true;
 
-    }
-
-    void addFace(std::vector<SkyboxVertex>& vertices,std::vector<uint16_t>& indices,quat rot,int face) {
-        uint16_t i = vertices.size();
-        vertices.push_back(SkyboxVertex(rot * vec3(1,1,1),  vec2(0,0),face));
-        vertices.push_back(SkyboxVertex(rot * vec3(-1,1,1), vec2(1,0),face));
-        vertices.push_back(SkyboxVertex(rot * vec3(1,1,-1), vec2(0,1),face));
-        vertices.push_back(SkyboxVertex(rot * vec3(-1,1,-1),vec2(1,1),face));
-        
-        std::vector<int> newIndices = {0,1,2,1,2,3};
-        for(auto index : newIndices) {
-            indices.push_back(i+(uint16_t)index);
-        }
-        // 0,1,2,
-        //     1,2,3,
     }
 
     void addRenderables(Vulkan& vulkan,Camera& camera) {

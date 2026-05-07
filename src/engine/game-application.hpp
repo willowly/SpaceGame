@@ -95,8 +95,6 @@ class GameApplication {
         private:
 
         std::unique_ptr<World> world = nullptr;
-        
-        std::vector<std::thread> chunkWorkers;
 
         Registry registry;
 
@@ -144,7 +142,7 @@ class GameApplication {
         std::atomic<bool> closing = false;
         std::atomic<bool> chunkLoadPaused = false;
 
-        GenerationSettings generationSettings;
+        TerrainSettings settings;
 
         float frametimes[60];
         int currentFrameTimeIndex = 0;
@@ -221,6 +219,8 @@ class GameApplication {
         void setup();
 
         void debugUI(float dt);
+
+        void reload();
 
         void loop();
 

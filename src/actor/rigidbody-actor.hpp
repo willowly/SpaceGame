@@ -120,7 +120,7 @@ class RigidbodyActor : public Actor {
             Actor::destroy(world);
         }
 
-        void addRenderables(Vulkan* vulkan,float dt) {
+        void addRenderables(Vulkan* vulkan,float dt,float interpolation) {
             if(model == nullptr) return; //if no model, nothing to render :)
             glm::mat4 matrix(1.0f);
             matrix = glm::translate(matrix,position);

@@ -52,7 +52,7 @@ class Loader {
                 registry.addModel(name);
                 Mesh<Vertex>* model = registry.getModel(name);
                 model->loadFromFile(entry.path().string());
-                model->createBuffers(vulkan);
+                model->updateBuffers(vulkan);
                 Debug::info("Loaded Model \"" + name + "\"",InfoPriority::MEDIUM);
 
             }
@@ -61,6 +61,7 @@ class Loader {
         void loadTextures(Registry& registry,Vulkan* vulkan) {
             Debug::addTrace("textures");
             std::cout << "Loading Textures" << std::endl;
+            vulkan->clearTextures(); // easiest way to do this
             loadTexturesFromDir(registry,vulkan,"textures");
             if(!registry.hasTexture("error")) {
                 Debug::warn("[WARNING] no fallback/error texture!");
@@ -84,7 +85,7 @@ class Loader {
                 
                 if(extension == ".png") {
                     TextureID id = vulkan->loadTextureFile(entry.path().string());
-                    registry.addTexture(name,id);
+                    registry.setTexture(name,id);
                 }
                 // if(extension == ".jpg" || extension == ".jpeg") {
                 //     texture->loadFromFile(entry.path().string(),Texture::Format::RGB);

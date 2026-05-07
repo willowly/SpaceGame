@@ -6,7 +6,27 @@
 
 class PlaceBlockTool: public Tool {
 
-    
+    private:
+
+        enum class TestPlaceResult {
+            Clear,
+            Blocked,
+            Terrain,
+        };
+
+        TestPlaceResult testPlace(World* world,vec3 pointWorld,quat rotation) {
+            auto overlapResult = world->overlapBox(pointWorld,vec3(0.9f),rotation);
+            if(overlapResult) {
+                auto actor = overlapResult.value();
+                Terrain* terrain = dynamic_cast<Terrain*>(actor);
+                if(terrain != nullptr) {
+                    return TestPlaceResult::Terrain;
+                }
+                return TestPlaceResult::Blocked;
+            }
+            return TestPlaceResult::Clear;
+        }
+
     public:
         Block* block;
 
@@ -22,7 +42,7 @@ class PlaceBlockTool: public Tool {
         bool place(World* world,Character& user) {
 
             Ray ray = user.getLookRay();
-            auto worldHitOpt = world->raycast(ray,10);
+            auto worldHitOpt = world->raycast(ray,10,LayerMask::excludes({Layers::PLAYER,Layers::ITEM}));
             if(worldHitOpt) {
                 auto worldHit = worldHitOpt.value();
                 Construction* construction = dynamic_cast<Construction*>(worldHit.actor);
@@ -32,7 +52,19 @@ class PlaceBlockTool: public Tool {
                     vec3 placePointLocal = construction->inverseTransformPoint(placePointWorld);
                     ivec3 placePointLocalInt = glm::round(placePointLocal);
 
+                    auto testResult = testPlace(world,construction->transformPoint(placePointLocalInt),construction->getRotation());
+                    if(testResult == TestPlaceResult::Blocked) {
+                        std::cout << "placement blocked" << std::endl;
+                        // cannot place
+                        return false;
+                    }
+
                     BlockPlaceInfo info;
+
+                    if(testResult == TestPlaceResult::Terrain) {
+                        std::cout << "placed attached" << std::endl;
+                        info.attached = true;
+                    }
                     info.lookDir = construction->inverseTransformDirection(ray.direction);
                     info.normal = construction->inverseTransformDirection(worldHit.hit.normal);
                     construction->placeBlock(placePointLocalInt,block,info);

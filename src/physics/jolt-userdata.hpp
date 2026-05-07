@@ -25,3 +25,16 @@ struct ActorUserData {
 
 
 };
+
+// namespace Physics {
+
+//     inline std::optional<Actor*> getActorFromUserData(uint64_t value) {
+//         if(value != 0) {
+//             auto userDataStruct = ActorUserData::decode(value);
+//             actor = userDataStruct->actor;
+//         } else {
+
+//         }
+//     }
+
+// }

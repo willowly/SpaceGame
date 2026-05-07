@@ -69,7 +69,7 @@ class Item {
 
         }
 
-        virtual void addRenderablesHeld(Vulkan* vulkan,Character& user,float dt) {
+        virtual void addRenderablesHeld(Vulkan* vulkan,Character& user,float dt,float interpolation) {
             
         }
 };

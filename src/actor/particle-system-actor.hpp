@@ -28,7 +28,7 @@ class ParticleEffectActor : public Actor {
             
         }
 
-        void addRenderables(Vulkan* vulkan,float dt) override {
+        void addRenderables(Vulkan* vulkan,float dt,float interpolation) override {
             effect.addRenderables(vulkan,dt);
         }
 

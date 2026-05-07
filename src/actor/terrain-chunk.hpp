@@ -356,8 +356,6 @@ class TerrainChunk {
                     throw std::runtime_error((string)result.GetError());
                 }
 
-                
-
                 body = world->physics_system.GetBodyInterface().CreateBody(bodySettings);
                 world->physics_system.GetBodyInterface().AddBody(body->GetID(),JPH::EActivation::Activate);
 

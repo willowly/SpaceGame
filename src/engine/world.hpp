@@ -29,6 +29,8 @@
 #include "persistance/data-world.hpp"
 #include "persistance/data-loader.hpp"
 
+#include "actor/components/gravity-well.hpp"
+
 using glm::vec3, glm::quat, std::unique_ptr, std::shared_ptr;
 
 #define WORLD
@@ -87,7 +89,9 @@ class World {
 
     vector<shared_ptr<Actor>> actors;
     vector<shared_ptr<Actor>> spawnedActors; //for when we spawn in the step
-    vec3 constantGravity = vec3(0,-15,0);
+    vec3 constantGravity = vec3(0,-5,0);
+
+    vector<GravityWell*> gravityWells;
 
     Camera camera;
 
@@ -114,7 +118,6 @@ class World {
 
         }
     };
-
 
 
         void setupPhysics() {
@@ -187,8 +190,37 @@ class World {
             return shared;
         }
 
+        float getInterpolationTime() {
+            return sinceLastStep / stepDt;
+        }
+
         vec3 getGravityVector(vec3 position) {
-            return constantGravity;
+            vec3 gravity = {};
+            for(auto well : gravityWells) {
+                gravity += well->getGravityVector(position);
+            }
+            return gravity;
+        }
+
+        void addGravityWell(GravityWell* well) {
+            if(well == nullptr) throw std::runtime_error("gravity well is null");
+            if(std::find(gravityWells.begin(),gravityWells.end(),well) != gravityWells.end()) throw std::runtime_error("gravity well already exists");
+            gravityWells.push_back(well);
+        }
+
+        void removeGravityWell(GravityWell* well) {
+            if(well == nullptr) throw std::runtime_error("gravity well is null");
+            auto iter = std::find(gravityWells.begin(),gravityWells.end(),well);
+            if(iter == gravityWells.end())  
+                throw std::runtime_error("gravity well does not exist");
+            gravityWells.erase(iter);
+        }
+
+        JPH::TempAllocatorImpl& getAllocator() {
+            if(temp_allocator == nullptr) {
+                throw std::runtime_error("cannot get temp allocator");
+            }
+            return *temp_allocator;
         }
 
         //probably should remove this, but its for getting the player. Ill think of a better way to handle this I guess
@@ -238,7 +270,7 @@ class World {
             ZoneScoped;
             
             float clock = glfwGetTime();
-            addRenderables(vulkan,dt);
+            addRenderables(vulkan,dt,sinceLastStep/stepDt);
             renderProcessMs = ((float)glfwGetTime() - clock) * 1000;
 
             sinceLastStep += dt;
@@ -256,11 +288,11 @@ class World {
             }
         }
 
-        void addRenderables(Vulkan* vulkan,float dt) {
+        void addRenderables(Vulkan* vulkan,float dt,float interpolation) {
             ZoneScoped;
             for (auto& actor : actors)
             {
-                actor->addRenderables(vulkan,dt);
+                actor->addRenderables(vulkan,dt,interpolation);
             }
             
         }
@@ -353,7 +385,7 @@ class World {
             
         }
 
-        std::optional<WorldRaycastHit> raycast(Ray ray,float dist) {
+        std::optional<WorldRaycastHit> raycast(Ray ray,float dist,LayerMask mask = LayerMask::all(),const RaycastSettings& settings = RaycastSettings()) {
             //ZoneScoped;
             //std::optional<WorldRaycastHit> result = std::nullopt; 
             ray.direction = glm::normalize(ray.direction);
@@ -362,11 +394,10 @@ class World {
             JPH::RayCast raycast(Physics::toJoltVec(ray.origin),Physics::toJoltVec(ray.direction * dist));
             JPH::RayCastResult result;
 
-            BroadPhaseLayerFilter broadFilter(BroadPhaseLayerTable{true,true,false}); // two new custom classes
-            ObjectLayerFilter filter(ObjectLayerTable{true,true,false,false}); //that are annoying as fuck to use because you can't copy them for some reason
+            JPH::BodyFilter bodyFilter;
 
             // what the hell is the point of JPH::RayCast if I can't use it to raycast??
-            physics_system.GetNarrowPhaseQuery().CastRay((JPH::RRayCast)raycast,result,broadFilter,filter,JPH::BodyFilter());
+            physics_system.GetNarrowPhaseQuery().CastRay((JPH::RRayCast)raycast,result,mask.getBroadPhaseLayerFilter(),mask.getObjectLayerFilter(),settings.getBodyFilter());
 
             if(result.mFraction < 1.0f) {
                 float distance = dist * result.mFraction;
@@ -396,6 +427,46 @@ class World {
                 return WorldRaycastHit(actor,RaycastHit(point,normal,distance),component);
             }
 
+            return std::nullopt;
+        }
+
+        std::optional<Actor*> overlapBox(vec3 position,vec3 size,quat rotation = glm::identity<quat>()) {
+            BroadPhaseLayerFilter broadFilter(BroadPhaseLayerTable{true,true,false}); 
+            ObjectLayerFilter filter(ObjectLayerTable{true,true,true,false});
+
+            std::cout << "overlapping box" << std::endl;
+            Debug::drawCube(position,size,rotation,Color::red,0.2f);
+
+            
+
+            class OverlapCollector : public JPH::CollideShapeCollector
+			{
+                void AddHit(const JPH::CollideShapeResult &inResult) override
+				{
+                    auto value = system->GetBodyInterface().GetUserData(inResult.mBodyID2);
+                    if(value != 0) {
+                        auto userDataStruct = ActorUserData::decode(value);
+                        if(userDataStruct->actor != nullptr) {
+                            actor = userDataStruct->actor;
+                            ForceEarlyOut();
+                        }
+                    }
+                }
+                public:
+                    JPH::PhysicsSystem* system;
+                    Actor* actor = nullptr;
+                    OverlapCollector(JPH::PhysicsSystem* system) : system(system) {}
+                
+            };
+
+            JPH::Mat44 mat = JPH::Mat44::sIdentity();
+            mat = mat.PostTranslated(Physics::toJoltVec(position));
+            mat = mat * mat.sRotation(Physics::toJoltQuat(rotation));
+            OverlapCollector collector(&physics_system);
+            physics_system.GetNarrowPhaseQuery().CollideShape(new JPH::BoxShape(Physics::toJoltVec(size*0.5f)),JPH::Vec3::sOne(),mat,JPH::CollideShapeSettings(),JPH::Vec3(0,0,0),collector,broadFilter,filter,JPH::BodyFilter(),JPH::ShapeFilter());
+            if(collector.actor != nullptr) {
+                return collector.actor;
+            }
             return std::nullopt;
         }
 
@@ -446,7 +517,7 @@ class World {
             
         }
 
-        // this should be combined :shrug: to have like 1 param
+        
         void load(data_World data,DataLoader& dataLoader) {
 
             clear();
