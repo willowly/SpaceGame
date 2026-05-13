@@ -42,10 +42,12 @@
 #include "camera.hpp"
 
 
-
 #include "imgui/imgui.h"
 #include "imgui/backends/imgui_impl_glfw.h"
 #include "imgui/backends/imgui_impl_vulkan.h"
+
+#define RENDERER_VULKAN
+#include "engine/window.hpp"
 
 #define FRAMES_IN_FLIGHT 2
 #define DESCRIPTOR_COUNT 2048
@@ -166,7 +168,7 @@ class Vulkan {
     public:
         bool enableValidationLayers = true;
 
-        GLFWwindow* window;
+        Window* window;
         
         const uint32_t apiVersion = VK_API_VERSION_1_3;
 
@@ -180,7 +182,7 @@ class Vulkan {
         unsigned int shadowMapSize = 10000;
         float shadowDist = 50;
 
-        Vulkan(string name,GLFWwindow* window) {
+        Vulkan(string name,Window* window) {
             this->window = window;
             //global
             createVkInstance(name);
@@ -220,6 +222,8 @@ class Vulkan {
         }
         
         ~Vulkan() {
+
+            waitIdle();
 
             ImGui_ImplVulkan_Shutdown();
             
@@ -579,6 +583,8 @@ class Vulkan {
             
             //3. Update scene data buffer
                 updateUniformBuffer(frameIndex,camera);
+
+                bool frameBufferResized = window->getFrameBufferResized();
             
             //4. Get next image and resize if needed
                 if(!frameBufferResized) {
@@ -750,10 +756,6 @@ class Vulkan {
 
         void waitIdle() {
             vkDeviceWaitIdle(device);
-        }
-
-        void setFrameBufferResized() {
-            frameBufferResized = true;
         }
 
         string getTransferString() {
@@ -1159,8 +1161,6 @@ class Vulkan {
         unsigned int frameIndex = 0;
         unsigned int testIndex = 0;
 
-        bool frameBufferResized = false;
-
         bool hasSwapChain = false;
 
         VkPipelineLayout pipelineLayout;
@@ -1481,13 +1481,12 @@ class Vulkan {
                 return capabilities.currentExtent;
             } else {
 
-                int width, height;
-                glfwGetFramebufferSize(window, &width, &height);
+                auto size = window->getFrameBufferSize();
 
 
                 VkExtent2D actualExtent = {
-                    static_cast<uint32_t>(width),
-                    static_cast<uint32_t>(height)
+                    static_cast<uint32_t>(size.x),
+                    static_cast<uint32_t>(size.y)
                 };
 
                 actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
@@ -1589,9 +1588,8 @@ class Vulkan {
             ubo.mainLightDirection = normalizedLightDirection;
             ubo.ambientLightColor = ambientLight.asVec3();
             
-            int width, height;
-            glfwGetFramebufferSize(window,&width,&height);
-            screenSize = vec2(width,height);
+
+            screenSize = window->getFrameBufferSize();
             
             ubo.screen = glm::ortho(0.0f,screenSize.x,0.0f,screenSize.y);
 
@@ -1636,13 +1634,10 @@ class Vulkan {
 
         void recreateSwapChain() {
             // handle minimization
-            int width = 0, height = 0;
             do {
-                glfwGetFramebufferSize(window, &width, &height);
+                screenSize = window->getFrameBufferSize();
                 glfwWaitEvents();
-            } while  (width == 0 || height == 0);
-
-            screenSize = vec2(width,height);
+            } while  (screenSize.x == 0 || screenSize.y == 0);
             
             vkDeviceWaitIdle(device);
 
@@ -1743,9 +1738,7 @@ class Vulkan {
 
         void createSurface() {
 
-            if (glfwCreateWindowSurface(vkInstance, window, nullptr, &vkSurface) != VK_SUCCESS) {
-                throw std::runtime_error("failed to create window surface!");
-            }
+            window->createSurface(vkInstance,&vkSurface);
 
             
 
@@ -2990,8 +2983,8 @@ class Vulkan {
             //this initializes the core structures of imgui
             ImGui::CreateContext();
 
-            //this initializes imgui for GLFW
-            ImGui_ImplGlfw_InitForVulkan(window,true);
+            //this initializes imgui for the window
+            window->initImguiForVulkan();
 
             //this initializes imgui for Vulkan
             ImGui_ImplVulkan_InitInfo init_info = {};

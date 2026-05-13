@@ -38,6 +38,8 @@ class DataLoaderImpl : public DataLoader {
             
             switch (entry.type)
             {
+                case data_ActorType::DUMMY:
+                    return actorLoadSpecPrototype<Actor,data_Actor>(entry);
                 case data_ActorType::PLAYER:
                     
                     return actorLoadSpecPrototype<Character,data_Character,true>(entry);

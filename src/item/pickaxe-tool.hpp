@@ -1,6 +1,7 @@
 #include "tool.hpp"
 #include "actor/terrain.hpp"
 #include "helper/anim.hpp"
+#include "actor/particle-system-actor.hpp"
 #include "math.h"
 #pragma once
 

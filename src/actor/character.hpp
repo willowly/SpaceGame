@@ -40,6 +40,12 @@
 
 #include "persistance/actor/data-character.hpp"
 
+class CharacterObserver {
+    public:
+        virtual void onUpdateHeldItem(ItemStack stack) {};
+        virtual ~CharacterObserver() {};
+};
+
 class Character : public Actor {
 
 
@@ -55,8 +61,8 @@ class Character : public Actor {
         vec3 currentCameraPosition = {};
         vec3 lastCameraPosition = {};
 
-        quat currentCameraRotation = {};
-        quat lastCameraRotation = {};
+        quat currentCameraRotation = glm::identity<quat>();
+        quat lastCameraRotation = glm::identity<quat>();
 
 
         // prototype
@@ -77,6 +83,7 @@ class Character : public Actor {
         float inputBuffer = 0.05f; // 3 frames
         float coyoteTime = 0.1f; // 6 frames
         float cameraClearRadius = 0.2f; // the distance away from a wall that the camera should be
+        bool inventoryDisabled = false;
         
         // inputs
         bool clickInput = false;
@@ -96,6 +103,7 @@ class Character : public Actor {
         static const int toolbarSize = 9;
         std::array<ItemStack,toolbarSize> toolbar = {};
         float groundedTimer = 0; // equal to coyote time when on ground, goes to 0.
+        bool alwaysRender = true;
 
         bool flying = true;
 
@@ -132,6 +140,8 @@ class Character : public Actor {
 
         bool underGravity = false;
 
+        std::vector<CharacterObserver*> observers;
+
         Character(const Character& character) :
             moveSpeed(character.moveSpeed),
             lookPitch(character.lookPitch),
@@ -147,6 +157,7 @@ class Character : public Actor {
             coyoteTime(character.coyoteTime),
             heldItemData(HeldItemData{}),
             cameraClearRadius(character.cameraClearRadius),
+            inventoryDisabled(inventoryDisabled),
             Actor(character)
         {
             
@@ -172,7 +183,7 @@ class Character : public Actor {
                 toolbar[selectedTool].item->addRenderablesHeld(vulkan,*this,dt,interpolation);
             }
             RenderingSettings settings;
-            settings.mainPass = thirdPerson;
+            settings.mainPass = thirdPerson || alwaysRender;
             shake.step(dt);
             if(model == nullptr) return; //if no model, nothing to render :)
             model->addToRender(vulkan,material,getInterpolatedPosition(interpolation),getInterpolatedRotation(interpolation),vec3(modelScale),settings);
@@ -496,6 +507,7 @@ class Character : public Actor {
         }
 
         void destroy(World* world) {
+            Actor::destroy(world);
             body.destroy(world);
         }
 
@@ -658,7 +670,7 @@ class Character : public Actor {
             }
 
             //check for cheats access
-            if(input.getKeyPressed(GLFW_KEY_F1)) {
+            if(input.getKeyPressed(GLFW_KEY_F2)) {
                 noClip = !noClip;
             }
 
@@ -670,10 +682,13 @@ class Character : public Actor {
                 toolbar[selectedTool].item->processInput(input);
             }
 
-            if(input.getKeyPressed(GLFW_KEY_TAB)) {
+            if(input.getKeyPressed(GLFW_KEY_TAB) && !inventoryDisabled) {
                 openMenu();
             }
-            moveMouse(input.getMouseDelta() * 0.01f);
+
+            auto delta = input.getMouseDelta();
+            //std::cout << StringHelper::toString(delta) << std::endl;
+            moveMouse(delta * 0.01f);
         }
 
         void processInputInventory(Input& input) {
@@ -700,6 +715,10 @@ class Character : public Actor {
                 toolbar[selectedTool].item->equip(*this);
                 heldItemData.setAction(0); // reset actions
                 
+            }
+
+            for(auto observer : observers) {
+                observer->onUpdateHeldItem(toolbar[selectedTool]);
             }
             
             

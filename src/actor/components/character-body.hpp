@@ -169,8 +169,8 @@ class CharacterBody {
 
 
         void destroy(World* world) {
-
-            
+            assert(character != nullptr);
+            world->physics_system.GetBodyInterface().RemoveBody(character->GetInnerBodyID());
         }
 
         data_Rigidbody save() {

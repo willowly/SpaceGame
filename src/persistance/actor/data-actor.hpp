@@ -26,6 +26,7 @@ struct data_ActorEntry {
 };
 
 struct data_Actor {
+    unsigned int id;
     data_vec3 position;
     data_quat rotation;
 };

@@ -14,6 +14,9 @@ using glm::vec3, glm::quat;
 class World;
 #endif
 
+typedef unsigned int ActorID;
+#define Invalid_ActorID 0
+
 class Actor {
 
     protected:
@@ -28,6 +31,7 @@ class Actor {
 
         // for tracking prototype names
         string name;
+        ActorID id = Invalid_ActorID; // unique identifier
         
         Mesh<Vertex>* model = nullptr;
         Material material = Material::none;
@@ -35,10 +39,16 @@ class Actor {
 
         bool destroyed = false;
 
+        bool networkLocal = true;
+
         virtual ~Actor() = default;
         Actor(const Actor& actor) = default;
 
         // general-purpose functions
+
+        void setID() {
+
+        }
 
         void setPosition(vec3 position) {
             this->position = position;
@@ -165,7 +175,7 @@ class Actor {
         // Saving and loading
 
         virtual data_ActorType getActorDataType() {
-            return data_ActorType::DONT_SAVE;
+            return data_ActorType::DUMMY;
         }
 
         virtual std::vector<std::uint8_t> createSaveBuffer() {
@@ -182,8 +192,19 @@ class Actor {
         }
 
         void load(const data_Actor& data) {
+            id = data.id;
             position = data.position.toVec3();
             rotation = data.rotation.toQuat();
+        }
+
+        static std::unique_ptr<Actor> makeInstanceFromSave(data_Actor& data,Actor* prototype) {
+            if(prototype == nullptr) throw std::runtime_error("prototype is null");
+            auto actor = makeInstanceFromPrototype(prototype);
+            actor->load(data);
+
+            std::cout << "LOADING DUMMY ACTOR" << std::endl;
+
+            return actor;
         }
 
         template<typename T, typename data_T>

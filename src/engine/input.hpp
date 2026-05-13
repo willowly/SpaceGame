@@ -12,6 +12,7 @@ class Input {
     public:
         vec2 lastMousePosition = {};
         vec2 currentMousePosition = {};
+        vec2 mouseDelta = {};
         map<int,bool> keys;
         map<int,bool> keysPressed;
         map<int,bool> keysReleased;
@@ -70,8 +71,6 @@ class Input {
         }
 
         vec2 getMouseDelta() {
-            vec2 mouseDelta = currentMousePosition - lastMousePosition;
-            lastMousePosition = currentMousePosition;
             return mouseDelta;
         }
 
@@ -87,6 +86,8 @@ class Input {
             keysReleased.clear();
             mouseButtonsPressed.clear();
             mouseButtonsReleased.clear();
+            mouseDelta = currentMousePosition - lastMousePosition;
+            lastMousePosition = currentMousePosition;
         }
 
         

@@ -54,7 +54,7 @@ class GameApplication {
         GameApplication(string name) : name(name) {
             
             initWindow();
-            vulkan = new Vulkan(name,window);
+            //vulkan = new Vulkan(name,window);
 
         }
 
@@ -110,7 +110,7 @@ class GameApplication {
 
         std::vector<float> frameTimes;
 
-        std::shared_ptr<Character> player = nullptr;
+        ActorID player = nullptr;
 
         Interface interface;
 
@@ -159,7 +159,7 @@ class GameApplication {
 
         static void framebufferResizeCallback(GLFWwindow* window, int width, int height) {
             auto app = reinterpret_cast<GameApplication*>(glfwGetWindowUserPointer(window));
-            app->vulkan->setFrameBufferResized();
+            //app->vulkan->setFrameBufferResized();
         }
 
         static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)

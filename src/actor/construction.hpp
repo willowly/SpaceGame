@@ -807,7 +807,7 @@ class Construction : public Actor {
                                     }
                                     continue;
                                 } else {
-                                    constructions[blockGroup-1] = world->spawn(Construction::makeInstance(material,worldLocation,rotation)).get();
+                                    constructions[blockGroup-1] = world->spawn(Construction::makeInstance(material,worldLocation,rotation));
                                     constructions[blockGroup-1]->body.setVelocity(body.getVelocity()); //match velocities
                                 }
                             }

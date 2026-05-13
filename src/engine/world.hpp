@@ -87,8 +87,9 @@ class World {
         }
     };
 
-    vector<shared_ptr<Actor>> actors;
-    vector<shared_ptr<Actor>> spawnedActors; //for when we spawn in the step
+    vector<unique_ptr<Actor>> actors;
+    vector<unique_ptr<Actor>> spawnedActors; //for when we spawn in the step
+    map<ActorID,Actor*> actorIDMap;
     vec3 constantGravity = vec3(0,-5,0);
 
     vector<GravityWell*> gravityWells;
@@ -169,25 +170,40 @@ class World {
 
         int iteratingActors = 0; //so we dont resize the actor vector when iterating over it. int so that we can have nested iterations
 
-
+        int nextID = 1;
 
         World() {
             setupPhysics();
         }
 
         template<typename T>
-        shared_ptr<T> spawn(unique_ptr<T> spawned) {
+        T* spawn(unique_ptr<T> spawned) {
 
-            shared_ptr<T> shared = std::move(spawned);
-            if(iteratingActors > 0) {
-                spawnedActors.push_back(shared);
+            
+            auto* rawSpawned = spawned.get();
+            spawnedActors.push_back(std::move(spawned));
+            // raw spawned?
+
+            rawSpawned->spawn(this); // do actor specific spawning code
+            if(rawSpawned->id == Invalid_ActorID) { //maybe a bit jank but only add a custom id if there isn't already one
+                rawSpawned->id = nextID; // possible this should be in the actual actor creation
+                nextID++;
             } else {
-                actors.push_back(shared);
+                nextID = rawSpawned->id; //to make sure ids of other entities are unique
             }
 
-            shared->spawn(this); // do actor specific spawning code
+            actorIDMap[rawSpawned->id] = rawSpawned;
 
-            return shared;
+            return rawSpawned;
+        }
+
+        template <typename T>
+        T* getActor(ActorID id) {
+            if(actorIDMap.contains(id)) {
+                return dynamic_cast<T*>(actorIDMap.at(id));
+            } else {
+                return nullptr;
+            }
         }
 
         float getInterpolationTime() {
@@ -223,21 +239,45 @@ class World {
             return *temp_allocator;
         }
 
+        std::vector<Actor*> getActors() {
+
+            std::vector<Actor*> list;
+            
+            
+            getActors(list);
+            
+
+            return list;
+
+        }
+
+        void getActors(std::vector<Actor*>& list) {
+
+            list.clear();
+            
+            
+            for (auto& actor : actors)
+            {
+                if(actor->destroyed) continue;
+                list.push_back(actor.get());
+                
+            }
+
+        }
+
         //probably should remove this, but its for getting the player. Ill think of a better way to handle this I guess
         template <typename T>
-        std::shared_ptr<T> getActorOfType() {
+        ActorID getActorOfType() {
             
-            iteratingActors++;
             for (auto& actor : actors)
             {
                 std::shared_ptr<T> typed_actor = std::dynamic_pointer_cast<T>(actor);
                 if(typed_actor != nullptr) {
-                    iteratingActors--;
-                    return typed_actor;
+                    
+                    return typed_actor->id;
                 }
                 
             }
-            iteratingActors--;
 
             return nullptr;
 
@@ -245,20 +285,20 @@ class World {
 
         // this is for testing mainly
         template <typename T>
-        std::vector<std::shared_ptr<T>> getActorsOfType() {
+        std::vector<ActorID> getActorsOfType() {
 
-            std::vector<std::shared_ptr<T>> list;
+            std::vector<ActorID> list;
             
-            iteratingActors++;
+            
             for (auto& actor : actors)
             {
                 std::shared_ptr<T> typed_actor = std::dynamic_pointer_cast<T>(actor);
                 if(typed_actor != nullptr) {
-                    list.push_back(typed_actor);
+                    list.push_back(typed_actor->id);
                 }
                 
             }
-            iteratingActors--;
+            
 
             return list;
 
@@ -288,6 +328,18 @@ class World {
             }
         }
 
+        // do rendering, step and everything else
+        void frameClient(Vulkan* vulkan,float dt) {
+            
+            ZoneScoped;
+            
+            float clock = glfwGetTime();
+            addRenderables(vulkan,dt,1);
+            eraseDestroyedActors();
+            addSpawnedActors();
+        }
+
+
         void addRenderables(Vulkan* vulkan,float dt,float interpolation) {
             ZoneScoped;
             for (auto& actor : actors)
@@ -303,12 +355,12 @@ class World {
 
             {
                 //ZoneScopedN("prePhysics")
-                iteratingActors++;
+                
                 for (auto& actor : actors)
                 {
                     actor->prePhysics(this);
                 }
-                iteratingActors--;
+                
             }
 
             physics_system.SetGravity(JPH::Vec3(0.0,-10.0,0.0));
@@ -317,12 +369,12 @@ class World {
 
             {
                 //ZoneScopedN("postPhysics")
-                iteratingActors++;
+                
                 for (auto& actor : actors)
                 {
                     actor->postPhysics(this);
                 }
-                iteratingActors--;
+                
             }
 
             for (auto& collision : contactListener.collisions)
@@ -335,30 +387,42 @@ class World {
         void step(float dt) {
             ZoneScoped;
             
-            iteratingActors++;
+            
             for (auto& actor : actors)
             {
-                actor->step(this,dt);
+                if(actor->networkLocal) {
+                    actor->step(this,dt);
+                }
             }
+
+            eraseDestroyedActors(); 
+            
+            addSpawnedActors();
+            
+
+            physicsStep(dt);
+
+            
+        }
+
+        void eraseDestroyedActors() {
             // remove the ones marked as destroyed
             for (int i = actors.size() - 1; i >= 0; i--)
             {
                 auto& actor = actors[i];
                 if(actor->destroyed) {
+                    actorIDMap.erase(actor->id);
                     actors.erase(actors.begin()+i);
                 }
-            }   
-            iteratingActors--;
+            }  
+        }
 
+        void addSpawnedActors() {
             // this needs to happen first, because newly spawned actors need to have prePhysics() and postPhysics() called on them as well, since they are already in the physic system
             for(auto& actor : spawnedActors) {
                 actors.push_back(std::move(actor));
             }
             spawnedActors.clear();
-
-            physicsStep(dt);
-
-            
         }
 
         void applyGravityIfEnabled(Actor* actor,float dt) {
@@ -372,14 +436,14 @@ class World {
 
             std::vector<Actor*> results;
 
-            iteratingActors++;
+            
             for (auto& actor : actors)
             {
                 if(glm::length2(actor->getPosition() - pos) < radius*radius) {
                     results.push_back(actor.get());
                 }
             }
-            iteratingActors--;
+            
 
             return results;
             
@@ -472,7 +536,7 @@ class World {
 
         data_World save() {
             data_World data;
-            iteratingActors++;
+            
             for (auto& actor : actors)
             {
                 data_ActorType type = actor->getActorDataType();
@@ -492,13 +556,13 @@ class World {
                 
                 data.actors.push_back(data_entry);
             }
-            iteratingActors--;
+            
             return data;
         }
 
         void clear() {
 
-            iteratingActors++;
+            
             for (auto& actor : actors)
             {
                 if(!actor->destroyed) {
@@ -506,10 +570,11 @@ class World {
 
                 }
             }
-            iteratingActors--;
+            
 
             actors.clear();
             spawnedActors.clear();
+            actorIDMap.clear();
             contactListener.collisions.clear();
             camera = Camera();
             sinceLastStep = 0;
@@ -524,16 +589,27 @@ class World {
 
             for (auto& data_actor : data.actors)
             {
-                auto newActor = dataLoader.loadActor(data_actor);
-                if(newActor == nullptr) {
-                    Debug::warn("actor to load is null");
-                    continue;
-                }
-                auto spawned_shared = spawn(std::move(newActor));
+                loadActor(data_actor,dataLoader);
                 // if(data_actor.type == data_ActorType::PLAYER) {
                 //     auto possible_player = dynamic_cast<std::shared_ptr<Character>>()>(spawned_shared);
                 // }
             }
+        }
+
+        void destroyActor(ActorID id) {
+            auto actor = getActor<Actor>(id);
+            if(actor != nullptr) {
+                actor->destroy(this);
+            }
+        }
+
+        Actor* loadActor(data_ActorEntry data_entry,DataLoader& dataLoader) {
+            auto newActor = dataLoader.loadActor(data_entry);
+            if(newActor == nullptr) {
+                Debug::warn("actor to load is null");
+                return nullptr;
+            }
+            return spawn(std::move(newActor));
         }
 
 
@@ -542,3 +618,12 @@ class World {
         }
 
 };
+
+// template <>
+// Actor* World::getActor<Actor>(ActorID id) {
+//     if(actorIDMap.contains(id)) {
+//         return actorIDMap.at(id);
+//     } else {
+//         return nullptr;
+//     }
+// }

@@ -10,7 +10,7 @@ class Camera {
 
     public:
         vec3 position = vec3(0);
-        quat rotation = quat(1,0,0,0);
+        quat rotation = glm::identity<quat>();
         // float pitch;
         // float yaw;
         float fov = 45.0f;

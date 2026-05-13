@@ -70,7 +70,7 @@ include_directories("include/steam")
 add_library(STB "include/stb_image.cpp")
 # fucking glob wont work kms
 add_library(Lua "include/lua/src/lapi.c" "include/lua/src/lauxlib.c" "include/lua/src/lbaselib.c" "include/lua/src/lcode.c" "include/lua/src/lcorolib.c" "include/lua/src/lctype.c" "include/lua/src/ldblib.c" "include/lua/src/ldebug.c" "include/lua/src/ldo.c" "include/lua/src/ldump.c" "include/lua/src/lfunc.c" "include/lua/src/lgc.c" "include/lua/src/linit.c" "include/lua/src/liolib.c" "include/lua/src/llex.c" "include/lua/src/lmathlib.c" "include/lua/src/lmem.c" "include/lua/src/loadlib.c" "include/lua/src/lobject.c" "include/lua/src/lopcodes.c" "include/lua/src/loslib.c" "include/lua/src/lparser.c" "include/lua/src/lstate.c" "include/lua/src/lstring.c" "include/lua/src/lstrlib.c" "include/lua/src/ltable.c" "include/lua/src/ltablib.c" "include/lua/src/ltm.c" "include/lua/src/lua.c" "include/lua/src/luac.c" "include/lua/src/lundump.c" "include/lua/src/lutf8lib.c" "include/lua/src/lvm.c" "include/lua/src/lzio.c")
-include_directories("include/lua/src")
+target_include_directories(Lua SYSTEM PUBLIC "include/lua/src")
 
 option(TRACY_ENABLE "" ON)
 option(TRACY_ON_DEMAND "" ON)
@@ -137,7 +137,7 @@ src/actor/construction.cpp
 add_executable(SpaceGameApp
 src/main.cpp
 
-src/engine/game-application.cpp
+# src/engine/game-application.cpp
 
 include/imgui/imgui.h
 include/imgui/imgui.cpp
@@ -163,15 +163,30 @@ endif(OSX)
 include(CTest)
 # add_executable(SpaceGameTest src/test.cpp)
 
+if(APPLE)
 link_directories(lib/macos)
+endif()
+
+if(WIN32)
+link_directories(lib/win)
+endif()
+
+add_library(GameNetworkingSockets STATIC IMPORTED)
+
+set_target_properties(GameNetworkingSockets PROPERTIES
+    IMPORTED_LOCATION "C:\\Users\\wille\\Documents\\Hike\\SpaceGame\\build\\Debug\\GameNetworkingSockets.lib"
+)
 
 target_include_directories(SpaceGame PUBLIC ${JoltPhysics_SOURCE_DIR})
 target_compile_features(SpaceGame PRIVATE cxx_std_20 )
 target_link_libraries(SpaceGame PUBLIC ${LINKED_LIBRARIES})
-target_link_libraries(SpaceGame PUBLIC libGameNetworkingSockets.dylib)
+target_link_libraries(SpaceGame PUBLIC GameNetworkingSockets)
 
 target_compile_features(SpaceGameApp PRIVATE cxx_std_20 )
 target_link_libraries(SpaceGameApp PUBLIC SpaceGame)
+if(WIN32)
+    target_link_options(SpaceGameApp PRIVATE "-mwindows")
+endif()
 
 add_executable(SpaceGameTest src/test.cpp)
 target_compile_features(SpaceGameTest PRIVATE cxx_std_20 )
