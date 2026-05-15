@@ -10,6 +10,8 @@
 
 #include "network-init.hpp"
 
+#include "message-sender.hpp"
+
 #include "cista.h"
 
 using std::string;
@@ -31,7 +33,7 @@ struct IncomingMessageClient {
     IncomingMessageClient(T message) : contents(message) { }
 };
 
-class GameClient {
+class GameClient : public IMessageSender {
 
     static GameClient* instance;
 
@@ -177,6 +179,10 @@ class GameClient {
         void handleConnections() {
             instance = this;
 		    m_pInterface->RunCallbacks();
+        }
+
+        void sendRawMessage(string type,cista::byte_buf contents) override {
+            sendRawMessage<cista::byte_buf>(type,contents);
         }
 
         template <typename T>

@@ -33,6 +33,7 @@ class Camera {
         }
 
         void setAspect(float x,float y) {
+            if(x == 0 || y == 0) return; // we will not set the aspect today (would cause an error in glm)
             this->aspect = x/y;
         }
 

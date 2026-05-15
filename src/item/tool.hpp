@@ -14,7 +14,6 @@ class Tool : public Item {
         Material heldModelMaterial = Material::none;
         vec3 modelOffset = vec3(0.3,-0.3,-1);
         quat modelRotation = quat(vec3(0,glm::radians(45.0f),0));
-        quat lookOrientation = glm::identity<quat>(); //the rendered one, that gets lerped
         float modelScale =  0.3f;
         float smoothTime = 0.01f; //lower value is faster
     
@@ -38,7 +37,7 @@ class Tool : public Item {
 
 
         virtual void equip(Character& user) {
-            lookOrientation = user.getEyeRotation();
+            user.heldItemData.lookOrientation = user.getEyeRotation();
         }
 
         virtual void unequip(Character& user) {
@@ -63,11 +62,11 @@ class Tool : public Item {
 
         virtual void addRenderablesHeld(Vulkan* vulkan,Character& user,float dt,float interpolation) override {
             if(heldModel != nullptr) {
-                lookOrientation = glm::slerp(lookOrientation,user.getEyeRotation(),1 - pow(smoothTime,dt));
+                user.heldItemData.lookOrientation = glm::slerp(user.heldItemData.lookOrientation,user.getEyeRotation(),1 - pow(smoothTime,dt));
                 auto animation = animate(user,dt);
                 auto matrix = glm::mat4(1.0f);
                 matrix = glm::translate(matrix,user.getEyePositionInterpolated(interpolation));
-                matrix = matrix * glm::toMat4(lookOrientation);
+                matrix = matrix * glm::toMat4(user.heldItemData.lookOrientation);
                 matrix = glm::translate(matrix,modelOffset + animation.second);
                 matrix = matrix * glm::toMat4(modelRotation * animation.first);
                 matrix = glm::scale(matrix,vec3(modelScale));

@@ -40,16 +40,15 @@
 
 #include "persistance/actor/data-character.hpp"
 
-class CharacterObserver {
+#include "helper/observer.hpp"
+
+
+class Character : public Actor, public Observable<Character*> {
+
+
     public:
-        virtual void onUpdateHeldItem(ItemStack stack) {};
-        virtual ~CharacterObserver() {};
-};
 
-class Character : public Actor {
-
-
-    public: 
+        inline static const string EVENT_UPDATE_HELD_ITEM = "update_held_item";   
 
         // Prototype constructors
         
@@ -111,6 +110,7 @@ class Character : public Actor {
             float actionTimer;
             float animationTimer;
             int action;
+            quat lookOrientation = glm::identity<quat>(); //the rendered one, that gets lerped
             void setAction(int newAction) {
                 action = newAction;
                 actionTimer = 0;
@@ -139,8 +139,6 @@ class Character : public Actor {
         float recipeTimer = 0; //
 
         bool underGravity = false;
-
-        std::vector<CharacterObserver*> observers;
 
         Character(const Character& character) :
             moveSpeed(character.moveSpeed),
@@ -241,6 +239,10 @@ class Character : public Actor {
                 if(abs(v) != abs(target)) v = 0;
                 v = MathHelper::lerp(v,target,groundAcceleration*dt);
             }
+        }
+
+        ItemStack getHeldItemStack() {
+            return toolbar.at(selectedTool);
         }
 
         vec3 getVelocity() {
@@ -717,9 +719,7 @@ class Character : public Actor {
                 
             }
 
-            for(auto observer : observers) {
-                observer->onUpdateHeldItem(toolbar[selectedTool]);
-            }
+            notify(EVENT_UPDATE_HELD_ITEM,this);
             
             
         }

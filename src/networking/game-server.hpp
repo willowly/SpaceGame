@@ -11,6 +11,8 @@
 
 #include "network-init.hpp"
 
+#include "message-sender.hpp"
+
 #include "cista.h"
 
 typedef unsigned int ActorID;
@@ -47,7 +49,7 @@ struct IncomingMessageServer {
     IncomingMessageServer(ConnectedClient* client,T message) : client(client), contents(message) { }
 };
 
-class GameServer {
+class GameServer : public IMessageSender {
 
     inline static GameServer* instance = nullptr;
     ISteamNetworkingSockets *m_pInterface = {};
@@ -161,6 +163,10 @@ class GameServer {
             m_pInterface->SendMessageToConnection( client.connection, message.c_str(), (uint32)message.length(), k_nSteamNetworkingSend_Reliable, nullptr );
         }
 
+        void sendRawMessage(string type,cista::byte_buf contents) override {
+            sendRawMessageToAllClients(type,contents);
+        }
+
         template <typename T>
         void sendMessageToClient(const ConnectedClient& client,T contents) {
             auto byte_buf = cista::serialize(contents);
@@ -168,9 +174,19 @@ class GameServer {
             sendRawMessageToClient(client,T::getMessageType().c_str(),byte_buf);
         }
 
-        void sendRawMessageToAllClients(const char type[4],string contents) {
+        template <typename T>
+        void sendRawMessageToAllClients(string type,T contents) {
             for(auto& pair : connections) {
                 sendRawMessageToClient(pair.second,type,contents);
+            }
+        }
+
+        template <typename T>
+        void sendMessageToAllClientsExcept(ConnectedClient* client,T contents) {
+            for(auto& pair : connections) {
+                if(&pair.second != client) {
+                    sendMessageToClient(pair.second,contents);
+                }
             }
         }
 

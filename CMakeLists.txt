@@ -137,7 +137,7 @@ src/actor/construction.cpp
 add_executable(SpaceGameApp
 src/main.cpp
 
-# src/engine/game-application.cpp
+src/engine/game-application.cpp
 
 include/imgui/imgui.h
 include/imgui/imgui.cpp

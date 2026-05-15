@@ -271,7 +271,7 @@ class World {
             
             for (auto& actor : actors)
             {
-                std::shared_ptr<T> typed_actor = std::dynamic_pointer_cast<T>(actor);
+                T* typed_actor = dynamic_cast<T*>(actor.get());
                 if(typed_actor != nullptr) {
                     
                     return typed_actor->id;
@@ -279,7 +279,7 @@ class World {
                 
             }
 
-            return nullptr;
+            return Invalid_ActorID;
 
         }
 

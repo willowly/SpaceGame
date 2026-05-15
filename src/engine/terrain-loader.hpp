@@ -13,7 +13,7 @@ enum class TerrainJobState {
 class TerrainJob {
 
     std::shared_mutex mutex;
-    std::shared_ptr<Terrain> terrain = nullptr;
+    ActorID terrain;
     ChunkAddress address;
     TerrainJobState state = TerrainJobState::FINISHED;
     public:
@@ -23,7 +23,7 @@ class TerrainJob {
             return state;
         }
         
-        bool trySetJob(std::shared_ptr<Terrain> terrain,ChunkAddress address) {
+        bool trySetJob(ActorID terrain,ChunkAddress address) {
 
             
             std::unique_lock lock(mutex,std::defer_lock);
@@ -39,7 +39,7 @@ class TerrainJob {
         }
 
         //shared_ptr is null if it failed
-        std::pair<std::shared_ptr<Terrain>,ChunkAddress> tryGetJob() {
+        std::pair<ActorID,ChunkAddress> tryGetJob() {
 
             
             
@@ -47,12 +47,12 @@ class TerrainJob {
 
             
             if(lock.try_lock()) {
-                if(state != TerrainJobState::WAITING) return std::pair<std::shared_ptr<Terrain>,ChunkAddress>(nullptr,ChunkAddress());;
+                if(state != TerrainJobState::WAITING) return std::pair<ActorID,ChunkAddress>(Invalid_ActorID,ChunkAddress());;
                 state = TerrainJobState::IN_PROGRESS;
                 worker = std::this_thread::get_id();
-                return std::pair<std::shared_ptr<Terrain>,ChunkAddress>(terrain,address);
+                return std::pair<ActorID,ChunkAddress>(terrain,address);
             }
-            return std::pair<std::shared_ptr<Terrain>,ChunkAddress>(nullptr,ChunkAddress());
+            return std::pair<ActorID,ChunkAddress>(Invalid_ActorID,ChunkAddress());
         }
 
         void finishJob() {
@@ -77,7 +77,8 @@ class TerrainLoader {
     private:
 
     std::thread mainThread;
-    std::vector<std::shared_ptr<Terrain>> terrains;
+    std::vector<ActorID> terrains;
+    World* world;
     std::mutex terrainMutex;
     std::atomic<bool> stopSignal;
 
@@ -111,7 +112,7 @@ class TerrainLoader {
                         static_assert(terrainJobCount > 0);
                         //std::cout << "MAIN: checking job" << jobIndex << std::endl;
                         jobIndex = getNextJob(jobIndex);
-                        if(terrainJobs.at(jobIndex).trySetJob(terrain,address)) {
+                        if(terrainJobs.at(jobIndex).trySetJob(terrain->id,address)) {
                             terrain->addPlaceholder(address);
                             //std::cout << "MAIN: setting job" << jobIndex << std::endl;
                             break;
@@ -141,8 +142,9 @@ class TerrainLoader {
                 static_assert(terrainJobCount > 0);
                 jobIndex = getNextJob(jobIndex);
                 auto pair = (terrainJobs.at(jobIndex).tryGetJob());
-                if(pair.first != nullptr) {
-                    pair.first->addChunk(pair.second);
+                auto terrain = world->getActor<Terrain>(pair.first);
+                if(terrain != nullptr) {
+                    terrain->addChunk(pair.second);
                     terrainJobs.at(jobIndex).finishJob();
                     //std::cout << std::this_thread::get_id() << "WORKER: done job" << jobIndex << std::endl;
                 }
@@ -155,14 +157,20 @@ class TerrainLoader {
         return cameraPosition;
     }
 
-    std::shared_ptr<Terrain> getTerrain(int index) {
+
+
+    ActorID getTerrainID(int index) {
         ZoneScoped
         std::scoped_lock lock(terrainMutex);
         assert(index >= 0);
         if(static_cast<int>(terrains.size()) <= index) {
-            return nullptr;
+            return Invalid_ActorID;
         }
         return terrains.at(index);
+    }
+
+    Terrain* getTerrain(int index) {
+        return world->getActor<Terrain>(getTerrainID(index));
     }
 
     int getTerrainVectorSize() {
@@ -172,13 +180,16 @@ class TerrainLoader {
     }
 
     public:
-        void addTerrain(std::shared_ptr<Terrain> terrain) {
+        void addTerrain(ActorID terrain) {
             ZoneScoped
             std::scoped_lock lock(terrainMutex);
             terrains.push_back(terrain);
         }
 
-        void start() {
+        void start(World* world) {
+            assert(world != nullptr);
+            
+            this->world = world;
 
             if(workerThreads.size() > 0) {
                 throw std::runtime_error("tried to start terrain loader when its already going!");

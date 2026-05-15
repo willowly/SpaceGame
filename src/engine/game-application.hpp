@@ -1,4 +1,4 @@
-#pragma once
+ #pragma once
 #define VULKAN_NO_PROTOTYPES
 #include <iostream>
 #include <stdexcept>
@@ -40,6 +40,8 @@
 
 #include "interface/debug/cheats-menu.hpp"
 
+#include "engine/window.hpp"
+
 JPH_SUPPRESS_WARNINGS
 
 using std::string;
@@ -48,23 +50,19 @@ using std::unique_ptr, std::shared_ptr;
 
 class GameApplication {
 
-    
-
     public:
-        GameApplication(string name) : name(name) {
+        GameApplication() {
             
-            initWindow();
-            //vulkan = new Vulkan(name,window);
+            window = new Window("Super Space Miner 2000",1280,720);
+
+            vulkan = new Vulkan("SpaceGame Vulkan Instance",window);
 
         }
 
         ~GameApplication() {
             
             delete vulkan;
-
-            glfwDestroyWindow(window);
-
-            glfwTerminate();
+            delete window;
         }
         string name;
         uint32_t windowWidth = 1280;
@@ -73,10 +71,11 @@ class GameApplication {
 
             setup();
 
-            terrainLoader.start();
+            terrainLoader.start(world.get());
             
+            input = window->pollInput();
 
-            while (!glfwWindowShouldClose(window)) {
+            while (!window->shouldClose()) {
                 loop();
 
                 // if(input.getKey(GLFW_KEY_ESCAPE)) {
@@ -102,7 +101,7 @@ class GameApplication {
         
         sol::state lua;
 
-        GLFWwindow* window = nullptr;   
+        Window* window = nullptr;   
         
         Vulkan* vulkan;
 
@@ -110,7 +109,7 @@ class GameApplication {
 
         std::vector<float> frameTimes;
 
-        ActorID player = nullptr;
+        ActorID playerID = Invalid_ActorID;
 
         Interface interface;
 

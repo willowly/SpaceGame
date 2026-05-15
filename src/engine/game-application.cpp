@@ -1,40 +1,12 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include "game-application.hpp"
 
-void GameApplication::initWindow() {
-    glfwInit();
-
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-
-    glfwSetErrorCallback(errorCallback);
-    window = glfwCreateWindow(windowWidth, windowHeight, name.c_str(), nullptr, nullptr);
-    glfwSetWindowUserPointer(window, this);
-    glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
-
-    //Inputs
-    glfwSetKeyCallback(window,keyCallback);
-    glfwSetCursorPosCallback(window, mouseCallback); 
-    glfwSetCharCallback(window, characterCallback);
-    glfwSetMouseButtonCallback(window, mouseButtonCallback);
-
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    
-    
-    if (window == NULL) {
-        std::cout << "Window didn't load properly" << std::endl;
-        glfwTerminate();
-        return;
-    }
-    
-}
-
 void GameApplication::spawnPlayer(vec3 pos) {
     auto actorPrototype = registry.getActor("player");
     auto playerPrototype = dynamic_cast<Character*>(actorPrototype);
 
     if(playerPrototype != nullptr) {
-        player = world->spawn(Character::makeInstance(playerPrototype,pos));
+        playerID = world->spawn(Character::makeInstance(playerPrototype,pos))->id;
     }
 }
 
@@ -51,11 +23,11 @@ void GameApplication::spawnAsteroidScene()  {
         vec3 postion = vec3(dist(rnd),dist(rnd),dist(rnd));
         std::cout << "spawning terrain at position " << StringHelper::toString(postion) << std::endl;
         auto terrain = world->spawn(Terrain::makeInstance(terrainMaterial,settings,rnd(),postion));
-        terrainLoader.addTerrain(terrain);
+        terrainLoader.addTerrain(terrain->id);
     }
 
     auto terrain = world->spawn(Terrain::makeInstance(terrainMaterial,settings,rnd(),vec3(0,0,0)));
-    terrainLoader.addTerrain(terrain);
+    terrainLoader.addTerrain(terrain->id);
 }
 
 void GameApplication::setup() {
@@ -68,7 +40,6 @@ void GameApplication::setup() {
     // load from files and lua scripts
     loader.loadAll(registry,lua,vulkan);
 
-    glfwPollEvents();
     input.clearInputBuffers(); // reset mouse position;
 
     Debug::loadRenderResources(*vulkan);
@@ -202,7 +173,7 @@ void GameApplication::setup() {
     lua["world"] = world.get();
 
     // lua
-    lua["player"] = player;
+    lua["player"] = world->getActor<Character>(playerID);
 
     lua.do_file("scripts/start.lua");
 
@@ -223,10 +194,14 @@ void GameApplication::debugUI(float dt) {
     if(!debugUIOpen) return;
     //imgui commands
 
+    auto player = world->getActor<Character>(playerID);
+
     ImGui::Begin("Info");
         ImGui::Text("FPS: %8.1f",1.0f/dt);
-        auto playerPos = player->getPosition();
-        ImGui::Text("position: <%.1f,%.1f,%.1f>",playerPos.x,playerPos.y,playerPos.z);
+        if(player != nullptr) {
+            auto playerPos = player->getPosition();
+            ImGui::Text("position: <%.1f,%.1f,%.1f>",playerPos.x,playerPos.y,playerPos.z);
+        }
     ImGui::End();
 
     
@@ -294,7 +269,7 @@ void GameApplication::reload() {
     terrainLoader.stop();
     terrainLoader.clear();
     world->clear();
-    terrainLoader.start();
+    terrainLoader.start(world.get());
 
     registry.clearDataAssets();
 
@@ -302,8 +277,8 @@ void GameApplication::reload() {
     setup();
     DataLoaderImpl dataLoader(registry,world->constructionMaterial);
     world->load(save,dataLoader);
-    player = world->getActorOfType<Character>();
-    lua["player"] = player;
+    playerID = world->getActorOfType<Character>();
+    lua["player"] = playerID;
 
 }
 
@@ -325,9 +300,6 @@ void GameApplication::loop() {
 
 
     ZoneScoped;
-    
-    // Get inputs, window resize, and more
-    glfwPollEvents();
 
     // if(input.getKeyPressed(GLFW_KEY_F5)) { // work in progress
     //     reload();
@@ -346,25 +318,25 @@ void GameApplication::loop() {
         std::cout << "loading" << std::endl;
         auto dataOpt = SaveHelper::load<data_World>("world.dat");
         if(dataOpt) {
-            player = nullptr;
+            playerID = Invalid_ActorID;
             DataLoaderImpl dataLoader(registry,world->constructionMaterial);
             world->load(dataOpt.value(),dataLoader);
-            player = world->getActorOfType<Character>();
-            lua["player"] = player;
+            playerID = world->getActorOfType<Character>();
+            lua["player"] = playerID;
         }
     }
 
+    auto player = world->getActor<Character>(playerID);
+
     auto& camera = world->getCamera();
 
-    int frameWidth;
-    int frameHeight;
-    glfwGetFramebufferSize(window,&frameWidth,&frameHeight);
+    ivec2 frameSize = window->getFrameBufferSize();
 
     // Get time
     float dt = (float)glfwGetTime() - lastTime;
     lastTime = glfwGetTime();
 
-    camera.setAspect(frameWidth,frameHeight);
+    camera.setAspect(frameSize.x,frameSize.y);
     
     // test inputs
     //camera.rotate(vec3(mouseDelta.y * dt,mouseDelta.x * dt,0));
@@ -373,6 +345,7 @@ void GameApplication::loop() {
     terrainLoader.setCameraPosition(camera.position);
 
     if(player != nullptr) {
+        player->alwaysRender = false;
         player->setCamera(camera,world->getInterpolationTime());
         player->processInput(input);
     }
@@ -401,11 +374,11 @@ void GameApplication::loop() {
     if(player != nullptr) {
         if(player->inMenu) 
         {
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            window->setCursorMode(CursorMode::Normal);
         } 
         else 
         {
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            window->setCursorMode(CursorMode::Locked);
             drawContext.disableClicks();
         }
         playerWidget.draw(drawContext,*player);
