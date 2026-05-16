@@ -115,6 +115,11 @@ class Actor {
             rotation *= glm::angleAxis(glm::radians(eulerAngles.z),vec3(0,0,1));
         }
 
+        void updateLastTransform() {
+            lastPosition = position;
+            lastRotation = rotation; 
+        }
+
         // defines the behaviour
 
         virtual void spawn(World* world) {
@@ -131,11 +136,6 @@ class Actor {
 
         virtual void step(World* world,float dt) {
             updateLastTransform();
-        }
-
-        void updateLastTransform() {
-            lastPosition = position;
-            lastRotation = rotation; 
         }
 
         virtual void collisionStart(World* world,const Collision& contact) {
