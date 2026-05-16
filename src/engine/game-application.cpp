@@ -167,8 +167,8 @@ void GameApplication::setup() {
 
     world->constructionMaterial = vulkan->createMaterial<LitMaterialData,ConstructionVertex>("construction",LitMaterialData(registry.getTexture("rock")));
 
-    spawnAsteroidScene();
-    //spawnPlayer();
+    //spawnAsteroidScene();
+    spawnPlayer();
 
     lua["world"] = world.get();
 

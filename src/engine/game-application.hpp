@@ -73,9 +73,10 @@ class GameApplication {
 
             terrainLoader.start(world.get());
             
-            input = window->pollInput();
-
+            
+            
             while (!window->shouldClose()) {
+                input = window->pollInput();
                 loop();
 
                 // if(input.getKey(GLFW_KEY_ESCAPE)) {

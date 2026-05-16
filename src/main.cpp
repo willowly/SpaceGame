@@ -7,6 +7,7 @@
 
 #include "engine/game-application.hpp"
 #include "networking/net-test-app.hpp"
+#include "engine/test-app.hpp"
 #include <iostream>
 #include <print>
 
@@ -19,7 +20,7 @@ int main() {
 
     try {
         
-        NetTestApp app;
+        TestApp app;
 
         app.run();
 
