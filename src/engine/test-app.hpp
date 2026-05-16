@@ -28,39 +28,6 @@
 #include <functional>
 
 class TestApp {
-
-    Window* window;
-    Vulkan* vulkan;
     
-    void setup() {
-        
-    }
-
-    void loop() {
-
-    }
-
-    public:
-
-        TestApp() {
-            window = new Window("Test app",100,100);
-            vulkan = new Vulkan("Whatever",window);
-        }
-
-        ~TestApp() {
-            delete vulkan;
-            delete window;
-        }
-
-        void run() {
-
-            
-            while(!window->shouldClose()) {
-
-                window->pollInput();
-                
-                // do stuff
-            }
-        }
 
 };
