@@ -191,6 +191,23 @@ class Actor {
             return data;
         }
 
+        std::optional<data_ActorEntry> getDataEntry() {
+            data_ActorEntry data_entry;
+            data_ActorType type = getActorDataType();
+            if (type == data_ActorType::DONT_SAVE)
+                return std::nullopt;
+
+            data_entry.type = type;
+            auto buf = createSaveBuffer();
+            data_entry.name = name;
+            data_entry.data.reserve(buf.size());
+            for (size_t i = 0; i < buf.size(); i++)
+            {
+                data_entry.data.push_back(buf[i]);
+            }
+            return data_entry;
+        }
+
         void load(const data_Actor& data) {
             id = data.id;
             position = data.position.toVec3();

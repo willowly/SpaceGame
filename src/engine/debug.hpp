@@ -82,6 +82,8 @@ class Debug {
         bool logInfo = false;
         static std::unique_ptr<Debug> _instance;
 
+        std::set<string> warnings;
+
         vector<string> trace;
 
         vector<string> luaConsole;
@@ -242,8 +244,17 @@ class Debug {
             instance.logFile << string << std::endl;
         }
 
-        static void warn(string string) {
-            addToLog("[WARNING] " + string + traceString());
+        static const std::set<string>& getWarnings() {
+            Debug& instance = getInstance();
+            return instance.warnings;
+        }
+
+        static void warn(string str) {
+            string full = str + traceString();
+            Debug& instance = getInstance();
+            instance.warnings.insert(full);
+            addToLog("[WARNING] " + full);
+            
         }
 
         static void info(string string,InfoPriority priority) {

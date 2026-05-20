@@ -15,13 +15,14 @@ class Loader {
 
     public:
 
-        
+        inline const static string DEFAULT_CONSTRUCTION_MATERIAL_KEY;
 
         void loadAll(Registry& registry,sol::state& lua,Vulkan* vulkan) {
             std::cout << "Current loader path is: " << std::filesystem::current_path() << '\n';
             loadModels(registry,vulkan);
             loadTextures(registry,vulkan);
             loadShaders(registry,vulkan);
+            loadDefaultMaterials(registry,vulkan);
             loadFonts(registry,vulkan);
             runLoadScript(registry,vulkan,lua);
         }
@@ -94,6 +95,10 @@ class Loader {
                 Debug::info("Loaded Texture \"" + name + "\"",InfoPriority::MEDIUM);
 
             }
+        }
+
+        void loadDefaultMaterials(Registry& registry,Vulkan* vulkan) {
+            registry.addMaterial(DEFAULT_CONSTRUCTION_MATERIAL_KEY,vulkan->createMaterial<LitMaterialData,ConstructionVertex>("construction",LitMaterialData(registry.getTexture("rock"))));
         }
 
         void loadShaders(Registry& registry,Vulkan* vulkan) {

@@ -6,6 +6,8 @@
 
 #include "Jolt/Physics/Collision/Shape/SphereShape.h"
 
+#include "persistance/actor/data-item-actor.hpp"
+
 class ItemActor : public Actor {
 
     
@@ -24,8 +26,7 @@ class ItemActor : public Actor {
 
         static std::unique_ptr<ItemActor> makeInstance(ItemStack stack,vec3 position = vec3(0),quat rotation = Random::rotation()) {
             if(stack.isEmpty()) {
-                Debug::warn("tried to make an item_actor with an empty stack");
-                return nullptr;
+                Debug::warn("trying to make an item_actor with an empty stack");
             }
             auto newActor = new ItemActor();
             std::unique_ptr<ItemActor> actor = std::unique_ptr<ItemActor>(newActor);
@@ -77,7 +78,45 @@ class ItemActor : public Actor {
         }
 
         void addRenderables(Vulkan* vulkan,float dt,float interpolation) override {
+            assert(stack.item != nullptr);
             stack.item->addRenderables(vulkan,stack,getInterpolatedPosition(interpolation),getInterpolatedRotation(interpolation));
+        }
+
+        // Saving
+
+        data_ActorType getActorDataType() {
+            return data_ActorType::ITEM_ACTOR;
+        }
+
+        static std::unique_ptr<Actor> makeInstanceFromSave(const data_ItemActor& data,DataLoader& loader) {
+            ItemStack stack;
+            stack.load(data.stack,loader);
+            auto actor = makeInstance(stack);
+            actor->load(data,loader);
+
+            std::cout << "LOADING ITEM ACTOR" << std::endl;
+
+            return actor;
+        }
+
+        std::vector<std::uint8_t> createSaveBuffer() override {
+            auto data = save();
+            auto buf = cista::serialize(data);
+            return buf;
+        }
+
+        data_ItemActor save() {
+            data_ItemActor data;
+            data.actor = Actor::save();
+            data.body = body.save();
+            data.stack = stack.save();
+            return data;
+        }
+
+        void load(const data_ItemActor& data,DataLoader& loader) {
+            Actor::load(data.actor);
+            body.load(data.body);
+            stack.load(data.stack,loader);
         }
 
         

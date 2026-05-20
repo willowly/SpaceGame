@@ -155,7 +155,8 @@ class Character : public Actor, public Observable<Character*> {
             coyoteTime(character.coyoteTime),
             heldItemData(HeldItemData{}),
             cameraClearRadius(character.cameraClearRadius),
-            inventoryDisabled(inventoryDisabled),
+            inventoryDisabled(character.inventoryDisabled),
+            widget(character.widget),
             Actor(character)
         {
             
@@ -260,218 +261,13 @@ class Character : public Actor, public Observable<Character*> {
             rotation = glm::quatLookAt(basisZ,basisY);
         }
 
-        void step(World* world,float dt) override {
-
-            updateLastTransform();
-
-            auto velocity = body.getVelocity();
-            if(ridingConstruction != nullptr) {
-                
-                // turn camera
-                //angularVelocity.z = MathHelper::lerp(angularVelocity.z,rotationInput * rotationSpeed,rotationAcceleration * dt);
-                
-
-                if(brakeInput) {
-                    ridingConstruction->setMoveControl(ridingConstruction->inverseTransformDirection(MathHelper::clampLength(-ridingConstruction->getVelocity(),1)));
-                } else {
-                    ridingConstruction->setMoveControl(ridingConstructionRotation  * glm::angleAxis(glm::radians(180.0f),vec3(0,1,0)) * moveInput); //we have to turn around bc we are facing negative Z
-                }
-
-                // rotation *= glm::angleAxis(glm::radians(lookPitch),vec3(-1,0,0));
-                // lookPitch = 0;
-                
-                // // this big rotation could be factored out by just getting the "correct sitting rotation"
-                // auto delta = glm::inverse(ridingConstruction->getRotation() * ridingConstructionRotation * glm::quat(glm::radians(vec3(0.0f,180.0f,0.0f)))) * rotation;
-
-                // vec3 deltaEuler = glm::degrees(glm::eulerAngles(delta));
-                auto constructionVelocity = ridingConstruction->inverseTransformDirection(ridingConstruction->getAngularVelocity());
-
-                auto worldConstructionAngularVelocityRadians = glm::radians(ridingConstruction->getAngularVelocity());
-                // kinda janky but to move the player with the construction
-                rotation += dt * 0.5f * glm::quat(0,worldConstructionAngularVelocityRadians.x,worldConstructionAngularVelocityRadians.y,worldConstructionAngularVelocityRadians.z) * rotation;
-                rotation = glm::normalize(rotation);
-                
-                // //lookPitch -= constructionVelocity.x * dt;
-                // deltaEuler.x *= -1; // I have no idea why this works :( 
-                // deltaEuler.z *= -1;
-
-                //rotation = glm::angleAxis(glm::radians(ridingConstruction->getAngularVelocity()/z) * dt,ridingConstruction->transformDirection(vec3(0,0,-1))) * rotation;
-
-                if(turnInput.x == 0) {
-                    turnInput.x = -constructionVelocity.x;
-                    if(abs(turnInput.x) > 1) {
-                        turnInput.x = glm::sign(turnInput.x);
-                    }
-                }
-                if(turnInput.y == 0) {
-                    turnInput.y = -constructionVelocity.y;
-                    if(abs(turnInput.y) > 1) {
-                        turnInput.y = glm::sign(turnInput.y);
-                    }
-                }
-                if(turnInput.z == 0) {
-                    turnInput.z = -constructionVelocity.z;
-                    if(abs(turnInput.z) > 1) {
-                        turnInput.z = glm::sign(turnInput.z);
-                    }
-                }
-
-                // if(deltaEuler.y != 0) {
-
-                //     auto maxAccelerationYaw = ridingConstruction->getMaxAngularAccelerationYaw();
-
-                //     // solve to make the next stop distance closer to the actual distance
-                //     turnInput.y = (sign(deltaEuler.y) * sqrt(abs(deltaEuler.y) * 2*maxAccelerationYaw)-constructionVelocity.y) / (maxAccelerationYaw * dt);
-                    
-                //     if(abs(turnInput.y) > 1) {//clamp to -1,1
-                //         turnInput.y = glm::sign(turnInput.y);
-                //     }
-                // }
-
-                // if(deltaEuler.x != 0) {
-
-                //     auto maxAccelerationPitch = ridingConstruction->getMaxAngularAccelerationPitch();
-
-                //     // solve to make the next stop distance closer to the actual distance
-                //     turnInput.x = (sign(deltaEuler.x) * sqrt(abs(deltaEuler.x) * 2*maxAccelerationPitch)-constructionVelocity.x) / (maxAccelerationPitch * dt); 
-                    
-                //     if(abs(turnInput.x) > 1) { //clamp to -1,1
-                //         turnInput.x = glm::sign(turnInput.x);
-                //     }
-                // }
-
-                // if(deltaEuler.z != 0) {
-
-                //     auto maxAccelerationRoll = ridingConstruction->getMaxAngularAccelerationRoll();
-
-                //     // solve to make the next stop distance closer to the actual distance
-                //     turnInput.z = (sign(deltaEuler.z) * sqrt(abs(deltaEuler.z) * 2*maxAccelerationRoll)-constructionVelocity.z) / (maxAccelerationRoll * dt); 
-                    
-                //     if(abs(turnInput.z) > 1) { //clamp to -1,1
-                //         turnInput.z = glm::sign(turnInput.z);
-                //     }
-                // }
-                
-                ridingConstruction->setTurnControl(turnInput);
-                //std::cout << "deltaEuler:" << deltaEuler.z << " velocity: "<< constructionVelocity.z << std::endl;
-
-                position = ridingConstruction->transformPoint(ridingConstructionPoint);
-                //setUpVector(ridingConstruction->transformDirection(vec3(0.0f,1.0f,0.0f)));
-
-                if(interactInput) {
-                    dismount();
-                }
-            } else {
-
-                auto gravity = world->getGravityVector(position);
-                
-                if(flying) gravity = vec3(0);
-
-
-                if(glm::length(gravity) > 0.05f) {
-                    underGravity = true;
-                    setUpVector(-gravity);
-                } else {
-                    underGravity = false;
-                }
-
-                if(body.getGroundState() == JPH::CharacterBase::EGroundState::OnGround) {
-                    groundedTimer = coyoteTime;
-                }
-
-                vec3 relativeVelocity = inverseTransformDirection(velocity);
-                vec3 moveXZ = vec3(moveInput.x,0,moveInput.z);
-                if(glm::length(moveXZ) != 0) moveXZ = glm::normalize(moveXZ);
-                vec3 targetVelocity = moveXZ * moveSpeed;
-                if(flying) {
-                    targetVelocity.y = moveInput.y * moveSpeed;
-                } else {
-                    targetVelocity.y = relativeVelocity.y;
-                }
-                
-                // std::cout << "player move input: " << StringHelper::toString(moveInput) << std::endl;
-                if(groundedTimer == 0) {
-                    relativeVelocity = MathHelper::lerp(relativeVelocity,targetVelocity,airAcceleration*dt);
-                } else {
-                    relativeVelocity = MathHelper::lerp(relativeVelocity,targetVelocity,groundAcceleration*dt);
-                }
-
-                
-
-                velocity = transformDirection(relativeVelocity);
-
-                //velocity += world->getGravityVector(position) * dt;
-                
-                if(!underGravity) {
-                    // there might be soe 
-                    angularVelocity.z = MathHelper::lerp(angularVelocity.z,rotationInput * rotationSpeed,rotationAcceleration * dt);
-                    angularVelocity.x = MathHelper::lerp(angularVelocity.x,fmin(abs(lookPitch),rotationSpeed) * sign(lookPitch),rotationAcceleration * dt);
-                    //angularVelocity.x = fmax(abs(angularVelocity.x),abs(lookPitch))
-                    lookPitch -= angularVelocity.x * dt;
-                    vec3 eyePos = getEyePosition();
-                    rotation = glm::angleAxis(glm::radians(angularVelocity.z) * dt,transformDirection(vec3(0,0,-1))) * rotation;
-                    rotation = glm::angleAxis(glm::radians(angularVelocity.x) * dt,transformDirection(vec3(-1,0,0))) * rotation;
-                    position = eyePos - transformDirection(vec3(0,height*0.5f,0)); // to rotate around eye
-                }
-
-                if(!inMenu) {
-                    if(interactInput) {
-                        interact(world);
-                    }
-                    auto& selectedStack = toolbar.at(selectedTool);
-                    if(!selectedStack.isEmpty()) {
-                        selectedStack.item->step(world,*this,toolbar.at(selectedTool),dt);
-                        heldItemData.actionTimer += dt;
-                        if(dropInput) {
-                            selectedStack.amount--;
-                            auto droppedItemStack = ItemStack(selectedStack.item,1,selectedStack.storage);
-                            world->spawn(ItemActor::makeInstance(droppedItemStack,getEyePosition() + getEyeDirection() * itemDropDistance,getEyeRotation()));
-                        }
-                    }
-                    
-                }
-
-                clickInput = false;
-                interactInput = false;
-                dropInput = false;
-
-                
-                if(jumpInput > 0 && groundedTimer > 0) {
-                    vec3 relativeVelocity = inverseTransformDirection(velocity);
-                    relativeVelocity.y = jumpForce;
-                    velocity = transformDirection(relativeVelocity);
-                    jumpInput = 0;
-                    groundedTimer = 0;
-                }
-
-                jumpInput = MathHelper::moveTowards(jumpInput,0,dt);
-                
-
-                body.setVelocity(velocity);
-
-                body.update(world,this,position,rotation,gravity,dt);
-
-                auto actors = world->overlapSphere(position,3);
-                for (auto actor : actors)
-                {
-                    auto itemActor = dynamic_cast<ItemActor*>(actor);
-                    if(itemActor != nullptr) {
-                        // should be an acceleration thingy idk
-                        auto velocity = itemActor->body.getVelocity();
-                        vec3 delta = (position - itemActor->getPosition());
-                        velocity = glm::normalize(delta) * 10.0f;
-                        itemActor->body.setVelocity(velocity);
-                    }
-                }
-                
-
-                // if(!noClip) {
-                //     world->collideBasic(this,height,radius);
-                // }
-            }
-
+        void updateLastCameraPosition() {
             lastCameraPosition = currentCameraPosition;
             lastCameraRotation = currentCameraRotation;
+        }
+
+        void handleCamera(World* world) {
+            updateLastCameraPosition();
 
             // camera
             if(ridingConstruction == nullptr && !thirdPerson) {
@@ -494,7 +290,163 @@ class Character : public Actor, public Observable<Character*> {
             }
 
             currentCameraRotation = getEyeRotation();
+        }
 
+        void doConstructionControl(float dt) {
+            if(brakeInput) {
+                    ridingConstruction->setMoveControl(ridingConstruction->inverseTransformDirection(MathHelper::clampLength(-ridingConstruction->getVelocity(),1)));
+                } else {
+                    ridingConstruction->setMoveControl(ridingConstructionRotation  * glm::angleAxis(glm::radians(180.0f),vec3(0,1,0)) * moveInput); //we have to turn around bc we are facing negative Z
+                }
+
+                auto constructionVelocity = ridingConstruction->inverseTransformDirection(ridingConstruction->getAngularVelocity());
+
+                auto worldConstructionAngularVelocityRadians = glm::radians(ridingConstruction->getAngularVelocity());
+                
+                // kinda janky but to move the player with the construction
+                rotation += dt * 0.5f * glm::quat(0,worldConstructionAngularVelocityRadians.x,worldConstructionAngularVelocityRadians.y,worldConstructionAngularVelocityRadians.z) * rotation;
+                rotation = glm::normalize(rotation);
+                
+
+                if(turnInput.x == 0) {
+                    turnInput.x = -constructionVelocity.x;
+                    if(abs(turnInput.x) > 1) {
+                        turnInput.x = glm::sign(turnInput.x);
+                    }
+                }
+                if(turnInput.y == 0) {
+                    turnInput.y = -constructionVelocity.y;
+                    if(abs(turnInput.y) > 1) {
+                        turnInput.y = glm::sign(turnInput.y);
+                    }
+                }
+                if(turnInput.z == 0) {
+                    turnInput.z = -constructionVelocity.z;
+                    if(abs(turnInput.z) > 1) {
+                        turnInput.z = glm::sign(turnInput.z);
+                    }
+                }
+                
+                ridingConstruction->setTurnControl(turnInput);
+
+                position = ridingConstruction->transformPoint(ridingConstructionPoint);
+
+                if(interactInput) {
+                    dismount();
+                }
+        }
+
+        void doMovement(World* world,float dt) {
+
+            auto velocity = body.getVelocity();
+            
+
+            // gravity
+            auto gravity = world->getGravityVector(position);
+            if(flying) gravity = vec3(0);
+            if(glm::length(gravity) > 0.05f) {
+                underGravity = true;
+                setUpVector(-gravity);
+            } else {
+                underGravity = false;
+            }
+
+            // grounded
+            if(body.getGroundState() == JPH::CharacterBase::EGroundState::OnGround) {
+                groundedTimer = coyoteTime;
+            }
+
+            // movement
+            vec3 relativeVelocity = inverseTransformDirection(velocity);
+            vec3 moveXZ = vec3(moveInput.x,0,moveInput.z);
+            if(glm::length(moveXZ) != 0) moveXZ = glm::normalize(moveXZ);
+            vec3 targetVelocity = moveXZ * moveSpeed;
+
+            if(flying) {
+                targetVelocity.y = moveInput.y * moveSpeed;
+            } else {
+                targetVelocity.y = relativeVelocity.y;
+            }
+
+            if(groundedTimer == 0) {
+                relativeVelocity = MathHelper::lerp(relativeVelocity,targetVelocity,airAcceleration*dt);
+            } else {
+                relativeVelocity = MathHelper::lerp(relativeVelocity,targetVelocity,groundAcceleration*dt);
+            }
+            velocity = transformDirection(relativeVelocity);
+
+            // jumping
+            if(jumpInput > 0 && groundedTimer > 0) {
+                vec3 relativeVelocity = inverseTransformDirection(velocity);
+                relativeVelocity.y = jumpForce;
+                velocity = transformDirection(relativeVelocity);
+                jumpInput = 0;
+                groundedTimer = 0;
+            }
+
+            jumpInput = MathHelper::moveTowards(jumpInput,0,dt);
+            
+            // turning in midair
+            if(!underGravity) {
+
+                angularVelocity.z = MathHelper::lerp(angularVelocity.z,rotationInput * rotationSpeed,rotationAcceleration * dt);
+                angularVelocity.x = MathHelper::lerp(angularVelocity.x,fmin(abs(lookPitch),rotationSpeed) * sign(lookPitch),rotationAcceleration * dt);
+
+                lookPitch -= angularVelocity.x * dt;
+                vec3 eyePos = getEyePosition();
+                rotation = glm::angleAxis(glm::radians(angularVelocity.z) * dt,transformDirection(vec3(0,0,-1))) * rotation;
+                rotation = glm::angleAxis(glm::radians(angularVelocity.x) * dt,transformDirection(vec3(-1,0,0))) * rotation;
+                position = eyePos - transformDirection(vec3(0,height*0.5f,0)); // to rotate around eye
+            }
+            
+
+            body.setVelocity(velocity);
+
+            body.update(world,this,position,rotation,gravity,dt);
+            
+
+            // if(!noClip) {
+            //     world->collideBasic(this,height,radius);
+            // }
+        }
+
+
+        void handleInteraction(World* world) {
+            if(interactInput) {
+                interact(world);
+            }
+        }
+
+        void handleHeldItem(World* world,float dt) {
+            auto& selectedStack = toolbar.at(selectedTool);
+            if(!selectedStack.isEmpty()) {
+                selectedStack.item->step(world,*this,toolbar.at(selectedTool),dt);
+                heldItemData.actionTimer += dt;
+                if(dropInput) {
+                    selectedStack.amount--;
+                    auto droppedItemStack = ItemStack(selectedStack.item,1,selectedStack.storage);
+                    world->spawn(ItemActor::makeInstance(droppedItemStack,getEyePosition() + getEyeDirection() * itemDropDistance,getEyeRotation()));
+                    notify(EVENT_UPDATE_HELD_ITEM,this);
+                }
+            }
+        }
+
+        void attractItems(World* world) {
+            auto actors = world->overlapSphere(position,3);
+            for (auto actor : actors)
+            {
+                auto itemActor = dynamic_cast<ItemActor*>(actor);
+                if(itemActor != nullptr) {
+                    // should be an acceleration thingy idk
+                    auto velocity = itemActor->body.getVelocity();
+                    vec3 delta = (position - itemActor->getPosition());
+                    velocity = glm::normalize(delta) * 10.0f;
+                    itemActor->body.setVelocity(velocity);
+                }
+            }
+        }
+
+        void handleCrafting(float dt) {
             if(currentRecipe != nullptr) {
                 if(!craftingStackHasIngredients(*currentRecipe)) {
                     cancelCraft();
@@ -506,6 +458,62 @@ class Character : public Actor, public Observable<Character*> {
                     }
                 }
             }
+        }
+
+        void step(World* world,float dt) override {
+
+            updateLastTransform();
+
+            
+            if(ridingConstruction != nullptr) {
+                
+                doConstructionControl(dt);
+                
+            } else {
+
+                doMovement(world,dt);
+
+                // interaction and dropping
+                if(!inMenu) {
+                    handleInteraction(world);
+
+                    handleHeldItem(world,dt);
+                    
+                }
+
+                attractItems(world);
+
+                // reset inputs
+                clickInput = false;
+                interactInput = false;
+                dropInput = false;
+            }
+
+            handleCamera(world);
+
+            handleCrafting(dt);
+        }
+
+        void stepClient(World* world,float dt) {
+            updateLastTransform();
+
+            if(ridingConstruction != nullptr) {
+                
+                doConstructionControl(dt);
+                
+            } else {
+
+                doMovement(world,dt);
+                
+            }
+
+            handleCamera(world);
+
+            // reset inputs
+            clickInput = false;
+            interactInput = false;
+            dropInput = false;
+
         }
 
         void destroy(World* world) {

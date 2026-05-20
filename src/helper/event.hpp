@@ -4,50 +4,71 @@
 #include <vector>
 
 
-class Subscription {
-    friend class BaseEvent;
-    size_t index;
-};
-
-class BaseEvent {
-
+template <typename... Args>
+class EventListener
+{
+    public:
+        virtual void onEvent(Args... args)
+        {
+            
+        }
+        virtual ~EventListener() = default;
 };
 
 template <typename... Args>
-class Event : public BaseEvent {
+class Event
+{
+public:
 
-    struct Lock {
-        bool& b;
-        Lock(bool& b) : b(b) {
+    struct Lock
+    {
+        bool &b;
+        Lock(bool &b) : b(b)
+        {
             b = true;
         }
-        Lock(const Lock&) = delete;
-        Lock& operator=(const Lock&) = delete;
+        Lock(const Lock &) = delete;
+        Lock &operator=(const Lock &) = delete;
         ~Lock() { b = false; }
     };
 
-    std::vector<std::function<void(Args...)>> functions;
+    std::vector<EventListener<Args...> *> listeners;
     bool locked = false;
 
-    public:
-        Subscription subscribe(std::function<void(Args...)> func) {
-            if(locked) throw std::runtime_error("cannot subscribe inside own event");
-            functions.push_back(func);
-            return Subscription{functions.size()};
+public:
+    void subscribe(EventListener<Args...> *listener)
+    {
+        if (locked)
+            throw std::runtime_error("cannot subscribe inside own event");
+        auto iter = std::find(listeners.begin(), listeners.end(), listener);
+        if (iter == listeners.end())
+        {
+            listeners.push_back(listener);
         }
+    }
 
-        void unSubscribe(Subscription subscription) {
-            functions[subscription.index] = {};
+    void unSubscribe(EventListener<Args...> *listener)
+    {
+        if (locked)
+            throw std::runtime_error("cannot unsubscribe inside own event");
+        auto iter = std::find(listeners.begin(), listeners.end(), listener);
+        if (iter != listeners.end())
+        {
+            listeners.erase(iter);
         }
+    }
 
-        void operator()(const Args&... args) {
-            if(locked) throw std::runtime_error("cannot call events recursively");
-            Lock lock(locked);
-            for(auto& func : functions) {
-                if(func) {
-                    func(args...);
-                }
+    void operator()(Args... args)
+    {
+        if (locked)
+            throw std::runtime_error("cannot call events recursively");
+        Lock lock(locked);
+        for (auto &listener : listeners)
+        {
+            if (listener != nullptr)
+            {
+                listener->onEvent(args...);
             }
         }
-
+    }
 };

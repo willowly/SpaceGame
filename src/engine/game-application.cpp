@@ -85,19 +85,6 @@ void GameApplication::setup() {
     playerPrototype->material = registry.getMaterial("player");
     registry.addRecipesToVector(playerPrototype->recipes,"crafting",1);
     
-    // UI
-    toolbarWidget.itemSlotSprite = registry.getSprite("item_slot");
-    toolbarWidget.sprite = registry.getSprite("tech_hotbar");
-    toolbarWidget.selectorSprite =  registry.getSprite("tech_hotbar_selector");
-    toolbarWidget.selectorSize = 95;
-    toolbarWidget.slotSize = 75;
-    toolbarWidget.slotHeight = 137;
-    toolbarWidget.slotGap = 3;
-    
-
-    inventoryWidget.backgroundSprite = registry.getSprite("solid");
-    inventoryWidget.font = &font;
-    inventoryWidget.tooltipTextTitle = registry.getWidget<TextWidget>("text_default");
 
     furnaceWidget.solid = registry.getSprite("solid");
     furnaceWidget.font = &font;
@@ -106,17 +93,10 @@ void GameApplication::setup() {
 
     auto itemSlotWidget = registry.getWidget<ItemSlotWidget>("item_slot");
 
-    clearItemSlotWidget.sprite = registry.getSprite("solid");
-    clearItemSlotWidget.font = &font;
-    clearItemSlotWidget.color = Color::clear;
-
-    inventoryWidget.itemSlot = itemSlotWidget;
-    inventoryWidget.recipeSlot = registry.getWidget<ItemSlotWidget>("recipe_slot");
     furnaceWidget.itemSlot = itemSlotWidget;
-    toolbarWidget.itemSlot = registry.getWidget<ItemSlotWidget>("toolbar_item_slot");
     
-    playerWidget.inventoryWidget = &inventoryWidget;
-    playerWidget.toolbarWidget = &toolbarWidget;
+    playerWidget.inventoryWidget = registry.getWidget<InventoryWidget>("inventory");
+    playerWidget.toolbarWidget = registry.getWidget<ToolbarWidget>("toolbar");
     playerWidget.cursorSlotWidget = registry.getWidget<ItemSlotWidget>("toolbar_item_slot");
     playerWidget.cursorRectSprite = registry.getSprite("solid");
     playerWidget.speedText = registry.getWidget<TextWidget>("text_default");

@@ -18,6 +18,14 @@ struct MessageSpawnActor {
     
 };
 
+struct MessageDestroyActor {
+
+    static string getMessageType() { return "DSRY"; }
+
+    ActorID id = Invalid_ActorID;
+    
+};
+
 // server telling the client "hey you control this one"
 struct MessageSetPlayerControl {
 

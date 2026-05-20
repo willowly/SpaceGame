@@ -226,16 +226,17 @@ namespace API {
         bool propertySet = false;
         sol::object obj = table[key];
         if(obj.is<string>()) {
-            bool propertySet = false;
             string str = obj.as<string>();
             T* widget = registry.getWidget<T>(str); //emits warning for us
             if(widget != nullptr) {
                 ref = widget;
                 propertySet = true;
+            } else {
+                Debug::warn("widget " + str + " is incorrect type! supposed to be: " + (string)typeid(T).name());
             }
         }
         if(!propertySet && required) {
-            Debug::warn("No value found for widget! " + (string)typeid(T).name());
+            Debug::warn("No value found for required widget! " + (string)typeid(T).name());
         }
         Debug::subtractTrace();
     }

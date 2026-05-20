@@ -33,6 +33,16 @@ class DataLoaderImpl : public DataLoader {
             return nullptr;
         }
 
+        template <typename T, typename data_T>
+        std::unique_ptr<Actor> actorLoadGeneric(data_ActorEntry entry) {
+            try {
+                data_ItemActor* data = cista::deserialize<data_ItemActor>(entry.data);
+                return T::makeInstanceFromSave(*data,*this);
+            } catch(std::runtime_error e) {
+                std::cout << "Failed to deserialize actor data from buffer: "<< e.what() << std::endl;
+            }
+        }
+
         std::unique_ptr<Actor> loadActor(data_ActorEntry entry) {
             
             
@@ -41,8 +51,9 @@ class DataLoaderImpl : public DataLoader {
                 case data_ActorType::DUMMY:
                     return actorLoadSpecPrototype<Actor,data_Actor>(entry);
                 case data_ActorType::PLAYER:
-                    
                     return actorLoadSpecPrototype<Character,data_Character,true>(entry);
+                case data_ActorType::ITEM_ACTOR:
+                    return actorLoadGeneric<ItemActor,data_ItemActor>(entry);
                 case data_ActorType::PHYSICS:
                     return actorLoadSpecPrototype<RigidbodyActor,data_RigidbodyActor>(entry);
                  case data_ActorType::CONSTRUCTION:

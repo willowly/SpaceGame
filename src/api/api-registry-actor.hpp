@@ -36,6 +36,7 @@ namespace API {
         get<float>(table,"coyote_time",actor->coyoteTime);
         get<float>(table,"camera_clear_radius",actor->cameraClearRadius);
         get<bool>(table,"inventory_disabled",actor->inventoryDisabled);
+        getWidget<ActorWidget<Character>>(table,"widget",actor->widget,registry);
     }
     
     inline void addActorWithTypeAndLoad(string type,string name,sol::table table,Registry& registry) {

@@ -20,7 +20,7 @@ int main() {
 
     try {
         
-        TestApp app;
+        NetTestApp app;
 
         app.run();
 

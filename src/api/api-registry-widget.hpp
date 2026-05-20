@@ -33,18 +33,31 @@ namespace API {
         Debug::info("Loaded Item Slot Widget \"" + name + "\"",InfoPriority::MEDIUM);
     }
 
-    // void addInventoryWidget(string name,sol::table table,Registry& registry) {
-    //     InventoryWidget* widget = registry.addWidget<InventoryWidget>(name);
-    //     getSprite(table,"background_sprite",widget->backgroundSprite,registry);
-    //     get<vec2>(table,"size",widget->size);
-    //     get<float>(table,"padding",widget->padding);
-    //     get<vec2>(table,"slot_size",widget->slotSize);
-    //     get<float>(table,"spacing",widget->spacing);
-    //     getWidget<ItemSlotWidget>(table,"item_slot",widget->itemSlot,registry,true);
-    //     getWidget<TextWidget>(table,"tooltip_text_title",widget->tooltipTextTitle,registry,true);
-    //     widget->font = &registry.font;
-    //     Debug::info("Loaded Inventory Widget \"" + name + "\"",InfoPriority::MEDIUM);
-    // }
+    inline void addToolbarWidget(string name,sol::table table,Registry& registry) {
+        auto* widget = registry.addWidget<ToolbarWidget>(name);
+        getSprite(table,"sprite",widget->sprite,registry,true);
+        getSprite(table,"item_slot_sprite",widget->itemSlotSprite,registry,true);
+        getSprite(table,"selector_sprite",widget->selectorSprite,registry,true);
+        getWidget<ItemSlotWidget>(table,"item_slot",widget->itemSlot,registry,true);
+        get<float>(table,"slot_size",widget->slotSize);
+        get<float>(table,"slot_gap",widget->slotGap);
+        get<float>(table,"slot_height",widget->slotHeight);
+        get<float>(table,"selector_size",widget->selectorSize);
+        Debug::info("Loaded Item Slot Widget \"" + name + "\"",InfoPriority::MEDIUM);
+    }
+
+    inline void addInventoryWidget(string name,sol::table table,Registry& registry) {
+        InventoryWidget* widget = registry.addWidget<InventoryWidget>(name);
+        getSprite(table,"background_sprite",widget->backgroundSprite,registry);
+        get<vec2>(table,"size",widget->size);
+        get<float>(table,"padding",widget->padding);
+        get<vec2>(table,"slot_size",widget->slotSize);
+        get<float>(table,"spacing",widget->spacing);
+        getWidget<ItemSlotWidget>(table,"item_slot",widget->itemSlot,registry,true);
+        getWidget<TextWidget>(table,"tooltip_text_title",widget->tooltipTextTitle,registry,true);
+        widget->font = &registry.font;
+        Debug::info("Loaded Inventory Widget \"" + name + "\"",InfoPriority::MEDIUM);
+    }
 
     inline void addWidgetWithTypeAndLoad(string type,string name,ObjLoadType loadType,sol::table table,Registry& registry) {
         if(loadType == ObjLoadType::INVALID) {
@@ -63,8 +76,12 @@ namespace API {
             addItemSlotWidget(name,table,registry);
             return;
         }
+        if(type == "toolbar") {
+            addToolbarWidget(name,table,registry);
+            return;
+        }
         if(type == "inventory") {
-            //addInventoryWidget(name,table,registry);
+            addInventoryWidget(name,table,registry);
             return;
         }
         Item* block = registry.addItem<ResourceItem>(name);

@@ -31,6 +31,8 @@
 
 #include "actor/components/gravity-well.hpp"
 
+#include "helper/event.hpp"
+
 using glm::vec3, glm::quat, std::unique_ptr, std::shared_ptr;
 
 #define WORLD
@@ -153,7 +155,8 @@ class World {
 
     public:
 
-        
+        inline static const string EVENT_SPAWN_ACTOR = "spawn";
+
         JPH::PhysicsSystem physics_system;
 
         // Global resources. Idk what to do about this tbh
@@ -171,6 +174,14 @@ class World {
         int iteratingActors = 0; //so we dont resize the actor vector when iterating over it. int so that we can have nested iterations
 
         int nextID = 1;
+
+        struct EventActorSpawned { World* world; Actor* actor;};
+
+        Event<EventActorSpawned> onActorSpawned;
+
+        struct EventActorDestroyed { World* world; Actor* actor;};
+
+        Event<EventActorDestroyed> onActorDestroyed;
 
         World() {
             setupPhysics();
@@ -193,6 +204,8 @@ class World {
             }
 
             actorIDMap[rawSpawned->id] = rawSpawned;
+
+            onActorSpawned(EventActorSpawned{this,rawSpawned});
 
             return rawSpawned;
         }
@@ -372,14 +385,18 @@ class World {
                 
                 for (auto& actor : actors)
                 {
-                    actor->postPhysics(this);
+                    if(actor->networkLocal) {
+                        actor->postPhysics(this);
+                    }
                 }
                 
             }
 
             for (auto& collision : contactListener.collisions)
             {
-                collision.actor->collisionStart(this,collision);
+                if(collision.actor->networkLocal) {
+                    collision.actor->collisionStart(this,collision);
+                }
             }
             contactListener.collisions.clear();
         }
@@ -399,7 +416,6 @@ class World {
             
             addSpawnedActors();
             
-
             physicsStep(dt);
 
             
@@ -411,6 +427,7 @@ class World {
             {
                 auto& actor = actors[i];
                 if(actor->destroyed) {
+                    onActorDestroyed({this,actor.get()});
                     actorIDMap.erase(actor->id);
                     actors.erase(actors.begin()+i);
                 }

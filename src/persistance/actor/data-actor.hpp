@@ -14,6 +14,7 @@ enum data_ActorType {
     PLAYER,
     PHYSICS,
     CONSTRUCTION,
+    ITEM_ACTOR,
     DONT_SAVE,
     ACTOR_TYPES_COUNT
 };

@@ -25,6 +25,7 @@
 #include "networking/message/message-character.hpp"
 
 #include "actor/character.hpp"
+#include "interface/debug/issues-menu.hpp"
 
 #include <string>
 
@@ -61,6 +62,8 @@ class NetTestApp
 
     Skybox skybox;
 
+    Interface interface;
+
     World world;
 
     float actorUpdateDt = {};
@@ -81,7 +84,7 @@ class NetTestApp
         IMessageSender* server = nullptr;
 
 
-        void onEvent(string event,Character* character) override
+        void onEvent(string event,Character* character,EventObject* obj) override
         {
             assert(server != nullptr);
 
@@ -96,7 +99,7 @@ class NetTestApp
             assert(character != nullptr);
             ItemStack stack = character->getHeldItemStack();
             string name;
-            if(stack.item != nullptr) {
+            if(!stack.isEmpty()) {
                 name = stack.item->name;
             } else {
                 name = "";
@@ -106,28 +109,51 @@ class NetTestApp
         }
     };
 
+    struct NetworkWorldObserver : public EventListener<World::EventActorSpawned>, public EventListener<World::EventActorDestroyed>
+    {
+        GameServer* server = nullptr;
+
+        void onEvent(World::EventActorSpawned event) override
+        {
+            assert(server != nullptr);
+
+            assert(event.actor != nullptr);
+
+            if(event.actor->getActorDataType() == data_ActorType::PLAYER) {
+                return; 
+            }
+
+            auto dataOpt = event.actor->getDataEntry();
+            if(dataOpt) {
+                server->sendMessageToAllClients(MessageSpawnActor(dataOpt.value()));
+            }
+
+            
+        }
+
+        void onEvent(World::EventActorDestroyed event) override
+        {
+            assert(server != nullptr);
+
+            assert(event.actor != nullptr);
+
+            server->sendMessageToAllClients(MessageDestroyActor(event.actor->id));
+
+            
+        }
+    };
+
     NetworkCharacterObserver networkCharacterObserver;
+    NetworkWorldObserver worldObserver;
 
     std::vector<string> chatLog;
 
     void sendActorToClient(Actor *actor, const ConnectedClient client,bool isLocalPlayer = false)
     {
-        actor->createSaveBuffer();
-        data_ActorEntry data_entry;
-        data_ActorType type = actor->getActorDataType();
-        if (type == data_ActorType::DONT_SAVE)
-            return;
-
-        data_entry.type = type;
-        auto buf = actor->createSaveBuffer();
-        data_entry.name = actor->name;
-        data_entry.data.reserve(buf.size());
-        for (size_t i = 0; i < buf.size(); i++)
-        {
-            data_entry.data.push_back(buf[i]);
+        auto dataOpt = actor->getDataEntry();
+        if(dataOpt) {
+            server.sendMessageToClient(client, MessageSpawnActor(dataOpt.value(),isLocalPlayer));
         }
-
-        server.sendMessageToClient(client, MessageSpawnActor(data_entry,isLocalPlayer));
     }
 
     void sendActorUpdates()
@@ -180,7 +206,9 @@ class NetTestApp
 
         vulkan->waitIdle();
 
-        loader.loadAll(registry, lua, vulkan);
+        interface.loadRenderResources(*vulkan);
+
+        loader.loadAll(registry, lua, vulkan); 
 
         SkyboxMaterialData skyboxMaterial;
         skyboxMaterial.top = registry.getTexture("space_up");
@@ -191,6 +219,15 @@ class NetTestApp
         skyboxMaterial.back = registry.getTexture("space_bk");
 
         skybox.loadResources(*vulkan, skyboxMaterial);
+
+        auto playerWidget = registry.addWidget<PlayerWidget>("player_widget");
+        playerWidget->inventoryWidget = registry.getWidget<InventoryWidget>("inventory");
+        playerWidget->toolbarWidget = registry.getWidget<ToolbarWidget>("toolbar");
+        playerWidget->cursorSlotWidget = registry.getWidget<ItemSlotWidget>("toolbar_item_slot");
+        playerWidget->cursorRectSprite = registry.getSprite("solid");
+        playerWidget->speedText = registry.getWidget<TextWidget>("text_default");
+
+        registry.getActor<Character>("player")->widget = playerWidget;
 
         server.addRawMessageCallback("CHAT", [&](IncomingMessageServer<string> message)
         { 
@@ -233,7 +270,7 @@ class NetTestApp
         client.addMessageCallback<MessageSpawnActor>([&](IncomingMessageClient<MessageSpawnActor> message)
         {
             
-            DataLoaderImpl dataLoader(registry,Material::none);
+            DataLoaderImpl dataLoader(registry,world.constructionMaterial);
             auto actor = world.loadActor(message.contents.actorEntry,dataLoader);
             if(actor != nullptr) {
                 actor->networkLocal = false;
@@ -242,7 +279,6 @@ class NetTestApp
                 playerID = actor->id;
                 auto player = dynamic_cast<Character*>(actor);
                 if(player != nullptr) {
-                    player->networkLocal = true;
                     player->alwaysRender = false;
                     player->addObserver(&networkCharacterObserver);
                 } else {
@@ -250,6 +286,15 @@ class NetTestApp
                 }
 
             }
+        });
+
+        client.addMessageCallback<MessageDestroyActor>([&](IncomingMessageClient<MessageDestroyActor> message)
+        {
+            auto actor = world.getActor<Actor>(message.contents.id);
+            if(actor != nullptr) {
+                actor->destroy(&world);
+            }
+            
         });
 
         client.addMessageCallback<MessageUpdateActorTransform>([&](IncomingMessageClient<MessageUpdateActorTransform> message)
@@ -276,6 +321,10 @@ class NetTestApp
 
         client.addRawMessageCallback("CHAT", [&](IncomingMessageClient<string> message)
         { chatLog.push_back(message.contents); });
+
+        worldObserver.server = &server;
+
+        world.constructionMaterial = registry.getMaterial(Loader::DEFAULT_CONSTRUCTION_MATERIAL_KEY);
 
         lua["world"] = &world;
     }
@@ -339,8 +388,11 @@ class NetTestApp
     {
         destroyLocalPlayer();
         world.clear();
+        world.onActorSpawned.unSubscribe(&worldObserver);
+        world.onActorDestroyed.unSubscribe(&worldObserver);
         chatLog.clear();
         appState = AppState::MainMenu;
+        networkCharacterObserver.server = nullptr;
     }
 
     void startHost()
@@ -350,6 +402,8 @@ class NetTestApp
         server.openSocket(nPort);
         spawnLocalPlayer();
         world.spawn(Actor::makeInstance(registry.getActor<Actor>("plane")));
+        world.onActorSpawned.subscribe(&worldObserver);
+        world.onActorDestroyed.subscribe(&worldObserver);
         // lua.do_file("scripts/start.lua");
     }
 
@@ -429,6 +483,11 @@ class NetTestApp
             displayChatLog();
         }
         world.frame(vulkan, dt);
+        auto player = world.getActor<Character>(playerID);
+        if (player != nullptr)
+        {
+            player->stepClient(&world,dt);
+        }
         actorUpdateDt += dt;
         if (actorUpdateDt > 0.05)
         {
@@ -457,7 +516,7 @@ class NetTestApp
         }
     }
 
-    void handlePlayer(Camera &camera, Input &input)
+    void handlePlayer(Camera &camera, Input &input,DrawContext drawContext)
     {
         if (playerID == Invalid_ActorID)
             return;
@@ -465,14 +524,20 @@ class NetTestApp
         if (player != nullptr)
         {
             player->setCamera(camera, world.getInterpolationTime());
-            if (!mouseControl)
+            if (!mouseControl && !player->inMenu)
             {
-                player->processInput(input);
                 window->setCursorMode(CursorMode::Locked);
+                drawContext.disableClicks();
             }
             else
             {
                 window->setCursorMode(CursorMode::Normal);
+            }
+
+            if(!mouseControl) player->processInput(input);
+
+            if(player->widget != nullptr) {
+                player->widget->draw(drawContext,*player);
             }
         }
         else
@@ -520,6 +585,8 @@ class NetTestApp
         }
         ImGui::End();
 
+        DebugMenu::issuesMenu();
+
         auto input = window->pollInput();
 
         if (input.getKeyPressed(GLFW_KEY_F1))
@@ -527,11 +594,13 @@ class NetTestApp
             mouseControl = !mouseControl;
         }
 
+        DrawContext drawContext(interface,*vulkan,input);
+
         skybox.addRenderables(*vulkan, camera);
 
         camera.rotate(vec3(0, 2, 0) * dt);
 
-        handlePlayer(camera, input);
+        handlePlayer(camera, input,drawContext);
 
         display(camera);
     }

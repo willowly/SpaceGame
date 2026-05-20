@@ -16,7 +16,7 @@ class Camera {
         float fov = 45.0f;
         float nearClip = 0.1f;
         float farClip = 5000.0f;
-        float aspect;
+        float aspect = 1;
 
         void move(vec3 motion) {
             position += motion;
