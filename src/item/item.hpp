@@ -69,6 +69,15 @@ class Item {
 
         }
 
+        virtual void stepClient(World* world,Character& user,ItemStack& stack,float dt) {
+
+        }
+        
+        
+        virtual void receiveActionEvent(World* world,Character& user,ItemStack& stack,int actionEvent) {
+            
+        }
+
         virtual void addRenderablesHeld(Vulkan* vulkan,Character& user,float dt,float interpolation) {
             
         }

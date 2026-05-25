@@ -33,9 +33,9 @@ struct IncomingMessageClient {
     IncomingMessageClient(T message) : contents(message) { }
 };
 
-class GameClient : public IMessageSender {
+class ClientSocket : public IMessageSender {
 
-    static GameClient* instance;
+    static ClientSocket* instance;
 
     ISteamNetworkingSockets *m_pInterface = nullptr;
     HSteamNetConnection m_hConnection = {};
@@ -91,7 +91,7 @@ class GameClient : public IMessageSender {
 
     public:
 
-        GameClient() { 
+        ClientSocket() { 
             Network::InitSteamDatagramConnectionSockets();
             m_pInterface = SteamNetworkingSockets();
         }
@@ -210,4 +210,4 @@ class GameClient : public IMessageSender {
         }
 };
 
-GameClient* GameClient::instance = nullptr;
+ClientSocket* ClientSocket::instance = nullptr;

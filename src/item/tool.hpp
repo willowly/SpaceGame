@@ -5,6 +5,8 @@
 #include "actor/character.hpp"
 #include "item.hpp"
 
+#include "helper/event.hpp"
+
 using glm::vec3,glm::quat,glm::mat4;
 
 class Tool : public Item {
@@ -16,9 +18,6 @@ class Tool : public Item {
         quat modelRotation = quat(vec3(0,glm::radians(45.0f),0));
         float modelScale =  0.3f;
         float smoothTime = 0.01f; //lower value is faster
-    
-        bool clickInput = false;
-        bool clickHold = false;
 
         Tool() {
 
@@ -44,16 +43,12 @@ class Tool : public Item {
             
         }
 
-
-        virtual void processInput(Input& input) {
-            if(input.getMouseButtonPressed(GLFW_MOUSE_BUTTON_1)) {
-                clickInput = true;
-            }
-            clickHold = input.getMouseButton(GLFW_MOUSE_BUTTON_1);
-        }
-
         virtual void step(World* world,Character& user,ItemStack& stack,float dt) {
 
+        }
+
+        void sendActionEvent(Character& user,int actionEvent) {
+            user.onToolAction({&user,this,actionEvent});
         }
 
         virtual std::pair<quat,vec3> animate(Character& user,float dt) {

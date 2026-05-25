@@ -20,7 +20,7 @@ typedef unsigned int ActorID;
 using std::string;
 
 class ConnectedClient {
-    friend class GameServer;
+    friend class ServerSocket;
 
     public:
         string name;
@@ -49,9 +49,9 @@ struct IncomingMessageServer {
     IncomingMessageServer(ConnectedClient* client,T message) : client(client), contents(message) { }
 };
 
-class GameServer : public IMessageSender {
+class ServerSocket : public IMessageSender {
 
-    inline static GameServer* instance = nullptr;
+    inline static ServerSocket* instance = nullptr;
     ISteamNetworkingSockets *m_pInterface = {};
     HSteamNetPollGroup m_hPollGroup = {};
     HSteamListenSocket m_hListenSock = {};
@@ -118,7 +118,7 @@ class GameServer : public IMessageSender {
     }
     public:
 
-        GameServer() {
+        ServerSocket() {
             Network::InitSteamDatagramConnectionSockets();
             m_pInterface = SteamNetworkingSockets();
         }

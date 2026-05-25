@@ -32,6 +32,8 @@
 
 #include "block/block-id.hpp"
 
+#include "helper/event.hpp"
+
 using glm::ivec3,glm::vec3;
 using std::unordered_map;
 
@@ -217,7 +219,13 @@ class Construction : public Actor {
         // 5 - RIGHT
         float thrustForces[6];
 
-        
+        struct EventBlockPlaced { Construction* construction = nullptr; BlockPaletteEntry blockEntry; ivec3 position;};
+
+        Event<EventBlockPlaced> onBlockPlaced;
+
+        struct EventBlockBroken { Construction* construction = nullptr; ivec3 position;};
+
+        Event<EventBlockBroken> onBlockBroken;
 
         // idk
         struct Location {
@@ -605,6 +613,18 @@ class Construction : public Actor {
             }
         }
 
+        // remove block with no other side-effects or breakup calculations. Used for networking rn
+        void removeBlock(ivec3 location) {
+
+            removeBlockNoUpdate(location); //does the main removal, tracking, and storage/callback cleanup 
+
+            recalculateBoundsFromBreak(location); //reduce bounds or break up construction. makes index invalid
+
+            generateMesh();
+
+
+        }
+
 
         // used by placing and breaking. Handles removal, tracking, physics, and storage/callback cleanup
         void removeBlockNoUpdate(ivec3 location) {
@@ -614,7 +634,11 @@ class Construction : public Actor {
             auto& blockData = blockDataArray.at(index);
             auto& blockEntry = blockPalette.at(blockData.id);
 
+
             if(blockEntry.block != nullptr) {
+
+                onBlockBroken({this,location}); // will only happen if there was a block to be broken
+
                 blockEntry.block->onBreak(this,location,blockEntry.storage);
                 removeBlockCount(location);
                 
@@ -697,19 +721,27 @@ class Construction : public Actor {
 
         //assumes its not replacing a block. handles tracking and collider
         void placeBlockNoUpdate(ivec3 location,Block& block,BlockPlaceInfo info = BlockPlaceInfo()) {
-            addBlockCount(location);
-            size_t index = getIndex(location);
-            auto state = block.onPlace(this,location,info);
-            BlockPaletteEntry entry{&block,state};
-            blockDataArray.at(index) = BlockData(paletteEntryToID(entry),info.attached);
 
-            if(info.attached && !isStatic) {
+            auto state = block.onPlace(this,location,info);
+            placeBlockNoUpdate(location,block,state,info.attached);
+            //printIDList();
+        }
+
+        void placeBlockNoUpdate(ivec3 location,Block& block,BlockStorage storage,bool attached) {
+
+            addBlockCount(location);
+            
+            size_t index = getIndex(location);
+            BlockPaletteEntry entry{&block,storage};
+            onBlockPlaced({this,entry,location});
+            block.onLoad(this,location,storage);
+            blockDataArray.at(index) = BlockData(paletteEntryToID(entry),attached);
+
+            if(attached && !isStatic) {
                 setIsStatic(true);
             }
 
             addBlockCollider(index,location);
-
-            //printIDList();
         }
 
         void addBlockCollider(size_t index,ivec3 location) {
@@ -740,8 +772,6 @@ class Construction : public Actor {
             boundsEncapsulate(location);
             
             removeBlockNoUpdate(location);
-
-            
             
             placeBlockNoUpdate(location,*block,placeInfo);
 
@@ -749,6 +779,21 @@ class Construction : public Actor {
             //printIDList();
 
             //recalculatePivot();
+            generateMesh();
+        }
+
+        void placeBlock(ivec3 location,Block* block,BlockStorage storage,bool attached) {
+
+             if(block == nullptr) {
+                Debug::warn("tried to place null block");
+                return;
+            }
+            boundsEncapsulate(location);
+
+            removeBlockNoUpdate(location);
+
+            placeBlockNoUpdate(location,*block,storage,attached);
+
             generateMesh();
         }
 

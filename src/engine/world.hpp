@@ -205,8 +205,6 @@ class World {
 
             actorIDMap[rawSpawned->id] = rawSpawned;
 
-            onActorSpawned(EventActorSpawned{this,rawSpawned});
-
             return rawSpawned;
         }
 
@@ -437,7 +435,11 @@ class World {
         void addSpawnedActors() {
             // this needs to happen first, because newly spawned actors need to have prePhysics() and postPhysics() called on them as well, since they are already in the physic system
             for(auto& actor : spawnedActors) {
+                auto rawSpawned = actor.get();
+
                 actors.push_back(std::move(actor));
+
+                onActorSpawned(EventActorSpawned{this,rawSpawned}); //its here so modifications to the actor right after spawn but before get transferred too
             }
             spawnedActors.clear();
         }

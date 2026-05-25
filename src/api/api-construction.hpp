@@ -35,7 +35,7 @@ namespace API {
         sol::usertype<Construction> construction = lua.new_usertype<Construction>("construction",sol::no_constructor);
 
         construction["setBounds"] = &Construction::setBounds;
-        construction["placeBlock"] = &Construction::placeBlock;
+        //construction["placeBlock"] = &Construction::placeBlock;
         construction["breakBlock"] = &Construction::breakBlock;
         construction["position"] = sol::property(&Construction::getPosition,&Construction::setPosition);
         construction["rotate"] = &Construction::rotate;

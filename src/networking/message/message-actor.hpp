@@ -26,15 +26,6 @@ struct MessageDestroyActor {
     
 };
 
-// server telling the client "hey you control this one"
-struct MessageSetPlayerControl {
-
-    static string getMessageType() { return "SPLC"; }
-
-    ActorID id = Invalid_ActorID;
-    
-};
-
 struct MessageUpdateActorTransform {
 
     static string getMessageType() { return "UACT"; }

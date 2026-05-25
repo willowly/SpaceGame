@@ -4,8 +4,9 @@
 #include <format>
 
 #include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 
-using std::string, glm::vec4, glm::vec3, glm::vec2,glm::ivec3,glm::mat4;
+using std::string, glm::vec4, glm::vec3, glm::vec2,glm::ivec3,glm::mat4,glm::quat;
 
 namespace StringHelper {
 
@@ -23,6 +24,9 @@ namespace StringHelper {
         return tokens;
     }
     inline std::string toString(vec4 v) {
+        return std::format("<{},{},{},{}>",v.x,v.y,v.z,v.w);
+    }
+    inline std::string toString(quat v) {
         return std::format("<{},{},{},{}>",v.x,v.y,v.z,v.w);
     }
     inline std::string toString(vec3 v) {

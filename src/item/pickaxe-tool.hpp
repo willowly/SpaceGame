@@ -24,6 +24,11 @@ class PickaxeTool : public Tool {
             COOLDOWN
         };
 
+        enum ActionEvent {
+            MINE = 0,
+
+        };
+
         quat anticipationRotation = glm::quat(vec3(0,0,glm::radians(50.0f)));
         float anticipationTime = 0.3f;
         quat cooldownRotation = glm::quat(vec3(0,0,glm::radians(-50.0f)));
@@ -123,26 +128,59 @@ class PickaxeTool : public Tool {
             
         }
 
-        virtual void step(World* world,Character& user,ItemStack& stack,float dt) {
+        //returns the state if transition occurs
+        std::optional<State> handleTransitions(Character& user,ItemStack& stack,float dt) {
             switch ((State)user.heldItemData.action) {
                 case State::NEUTRAL:
 
-                    if(clickHold) {
+                    if(user.heldItemData.clickHold) {
                         user.heldItemData.setAction(State::ANTICIPATION);
+                        return State::ANTICIPATION;
                     }
                     break;
                 case State::ANTICIPATION:
                     if(user.heldItemData.actionTimer > anticipationTime) {
                         user.heldItemData.setAction(State::COOLDOWN);
-                        pickaxe(world,user,stack,user.getLookRay());
+                        return State::COOLDOWN;
                     }
                     break;
                 case State::COOLDOWN:
                     if(user.heldItemData.actionTimer > cooldownTime) {
                         user.heldItemData.setAction(State::NEUTRAL);
+                        return State::NEUTRAL;
                     }
                     break;
             }
+            return std::nullopt;
+        }
+
+        void receiveActionEvent(World* world,Character& user,ItemStack& stack,int actionEvent) override {
+            switch(actionEvent) {
+                case ActionEvent::MINE:
+                    pickaxe(world,user,stack,user.getLookRay());
+                    break;
+            }
+        }
+
+        void step(World* world,Character& user,ItemStack& stack,float dt,bool client) {
+
+            auto stateOpt = handleTransitions(user,stack,dt);
+            if(stateOpt) {
+                if(stateOpt.value() == State::COOLDOWN) {
+                    if(!client) pickaxe(world,user,stack,user.getLookRay());
+                    sendActionEvent(user,ActionEvent::MINE);
+                }
+            }
+        }
+
+        virtual void step(World* world,Character& user,ItemStack& stack,float dt) {
+
+            step(world,user,stack,dt,false);
+        }
+
+        virtual void stepClient(World* world,Character& user,ItemStack& stack,float dt) {
+
+            step(world,user,stack,dt,true);
         }
 
 

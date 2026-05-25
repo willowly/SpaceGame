@@ -40,10 +40,10 @@
 
 #include "persistance/actor/data-character.hpp"
 
-#include "helper/observer.hpp"
+#include "helper/event.hpp"
 
 
-class Character : public Actor, public Observable<Character*> {
+class Character : public Actor {
 
 
     public:
@@ -111,6 +111,8 @@ class Character : public Actor, public Observable<Character*> {
             float animationTimer;
             int action;
             quat lookOrientation = glm::identity<quat>(); //the rendered one, that gets lerped
+            bool clickInput = false;
+            bool clickHold = false;
             void setAction(int newAction) {
                 action = newAction;
                 actionTimer = 0;
@@ -139,6 +141,8 @@ class Character : public Actor, public Observable<Character*> {
         float recipeTimer = 0; //
 
         bool underGravity = false;
+
+
 
         Character(const Character& character) :
             moveSpeed(character.moveSpeed),
@@ -172,6 +176,22 @@ class Character : public Actor, public Observable<Character*> {
         CharacterBody body;
 
         vec3 angularVelocity = vec3(0.0f);
+
+        struct EventHeldItemChanged { Character* character = nullptr; ItemStack stack; int slot;};
+
+        Event<EventHeldItemChanged> onHeldItemChanged;
+
+        struct EventInventoryChanged { Character* character = nullptr; ItemStack stack; bool lose = false;};
+
+        Event<EventInventoryChanged> onInventoryChanged;
+
+        struct EventItemDropInput { Character* character = nullptr;};
+
+        Event<EventItemDropInput> onItemDropInput;
+
+        struct EventToolAction { Character* character = nullptr; Item* tool = nullptr; int actionEvent;};
+
+        Event<EventToolAction> onToolAction;
 
 
         void addRenderables(Vulkan* vulkan,float dt,float interpolation) override {
@@ -417,6 +437,10 @@ class Character : public Actor, public Observable<Character*> {
             }
         }
 
+        vec3 getItemDropPosition() {
+            return getEyePosition() + getEyeDirection() * itemDropDistance;
+        }
+
         void handleHeldItem(World* world,float dt) {
             auto& selectedStack = toolbar.at(selectedTool);
             if(!selectedStack.isEmpty()) {
@@ -426,7 +450,27 @@ class Character : public Actor, public Observable<Character*> {
                     selectedStack.amount--;
                     auto droppedItemStack = ItemStack(selectedStack.item,1,selectedStack.storage);
                     world->spawn(ItemActor::makeInstance(droppedItemStack,getEyePosition() + getEyeDirection() * itemDropDistance,getEyeRotation()));
-                    notify(EVENT_UPDATE_HELD_ITEM,this);
+                    onHeldItemChanged({this,selectedStack,selectedTool});
+                }
+            }
+        }
+
+        void handleHeldItemClient(World* world,float dt) {
+            auto& selectedStack = toolbar.at(selectedTool);
+            if(!selectedStack.isEmpty()) {
+                selectedStack.item->stepClient(world,*this,toolbar.at(selectedTool),dt);
+                heldItemData.actionTimer += dt;
+                if(dropInput) {
+                    onItemDropInput({this});
+                }
+            }
+        }
+
+        void receiveToolActionEvent(World* world,Item* tool,int actionEvent) {
+            auto& selectedStack = toolbar.at(selectedTool);
+            if(!selectedStack.isEmpty()) {
+                if(selectedStack.item == tool) {
+                    selectedStack.item->receiveActionEvent(world,*this,selectedStack,actionEvent);
                 }
             }
         }
@@ -504,6 +548,8 @@ class Character : public Actor, public Observable<Character*> {
             } else {
 
                 doMovement(world,dt);
+
+                handleHeldItemClient(world,dt);
                 
             }
 
@@ -688,9 +734,13 @@ class Character : public Actor, public Observable<Character*> {
                 flying = !flying;
             }
 
-            if(!toolbar[selectedTool].isEmpty()) {
-                toolbar[selectedTool].item->processInput(input);
+            // if(!toolbar[selectedTool].isEmpty()) {
+            //     toolbar[selectedTool].item->processInput(input);
+            // }
+            if(input.getMouseButtonPressed(GLFW_MOUSE_BUTTON_1)) {
+                heldItemData.clickInput = true;
             }
+            heldItemData.clickHold = input.getMouseButton(GLFW_MOUSE_BUTTON_1);
 
             if(input.getKeyPressed(GLFW_KEY_TAB) && !inventoryDisabled) {
                 openMenu();
@@ -724,10 +774,11 @@ class Character : public Actor, public Observable<Character*> {
             if(!toolbar[selectedTool].isEmpty()) {
                 toolbar[selectedTool].item->equip(*this);
                 heldItemData.setAction(0); // reset actions
-                
+                heldItemData.clickInput = false;
+                heldItemData.clickHold = false;
             }
 
-            notify(EVENT_UPDATE_HELD_ITEM,this);
+            onHeldItemChanged({this,toolbar[selectedTool],selectedTool});
             
             
         }
@@ -845,6 +896,7 @@ class Character : public Actor, public Observable<Character*> {
         }
 
         void give(ItemStack stack) {
+            onInventoryChanged({this,stack});
             for (auto& toolbarStack : toolbar)
             {
                 if(toolbarStack.tryInsert(stack)) {
@@ -860,6 +912,7 @@ class Character : public Actor, public Observable<Character*> {
         }
 
         int take(Item* item,int amount) {
+            onInventoryChanged({this,ItemStack(item,amount),true});
             int amountTaken = 0;
             for (auto& toolbarStack : toolbar)
             {

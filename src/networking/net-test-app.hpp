@@ -7,8 +7,8 @@
 #include "tracy/Tracy.hpp"
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 
-#include "game-client.hpp"
-#include "game-server.hpp"
+#include "client-socket.hpp"
+#include "server-socket.hpp"
 
 #include "graphics/vulkan.hpp"
 #include "engine/window.hpp"
@@ -23,6 +23,10 @@
 
 #include "networking/message/message-actor.hpp"
 #include "networking/message/message-character.hpp"
+
+#include "networking/listener/network-world-listener.hpp"
+#include "networking/listener/network-character-listener.hpp"
+#include "networking/listener/network-construction-listener.hpp"
 
 #include "actor/character.hpp"
 #include "interface/debug/issues-menu.hpp"
@@ -57,8 +61,8 @@ class NetTestApp
     Registry registry;
     Clock clock;
 
-    GameServer server;
-    GameClient client;
+    ServerSocket server;
+    ClientSocket client;
 
     Skybox skybox;
 
@@ -78,73 +82,13 @@ class NetTestApp
     char messageBuffer[1024] = "";
     char nameBuffer[1024] = "user";
 
-    struct NetworkCharacterObserver : Observer<Character*>
-    {
+    
+    NetworkWorldListener worldListener;
 
-        IMessageSender* server = nullptr;
+    NetworkCharacterListener clientCharacterListener;
+     
 
-
-        void onEvent(string event,Character* character,EventObject* obj) override
-        {
-            assert(server != nullptr);
-
-            if(event == Character::EVENT_UPDATE_HELD_ITEM) {
-                updateHeldItem(character);
-            }
-
-            
-        }
-
-        void updateHeldItem(Character* character) {
-            assert(character != nullptr);
-            ItemStack stack = character->getHeldItemStack();
-            string name;
-            if(!stack.isEmpty()) {
-                name = stack.item->name;
-            } else {
-                name = "";
-            }
-            MessageCharacterUpdateItemEvent message(name,character->id);
-            server->sendMessage(message);
-        }
-    };
-
-    struct NetworkWorldObserver : public EventListener<World::EventActorSpawned>, public EventListener<World::EventActorDestroyed>
-    {
-        GameServer* server = nullptr;
-
-        void onEvent(World::EventActorSpawned event) override
-        {
-            assert(server != nullptr);
-
-            assert(event.actor != nullptr);
-
-            if(event.actor->getActorDataType() == data_ActorType::PLAYER) {
-                return; 
-            }
-
-            auto dataOpt = event.actor->getDataEntry();
-            if(dataOpt) {
-                server->sendMessageToAllClients(MessageSpawnActor(dataOpt.value()));
-            }
-
-            
-        }
-
-        void onEvent(World::EventActorDestroyed event) override
-        {
-            assert(server != nullptr);
-
-            assert(event.actor != nullptr);
-
-            server->sendMessageToAllClients(MessageDestroyActor(event.actor->id));
-
-            
-        }
-    };
-
-    NetworkCharacterObserver networkCharacterObserver;
-    NetworkWorldObserver worldObserver;
+    std::map<ActorID,ConnectedClient> actorOwnershipMap;
 
     std::vector<string> chatLog;
 
@@ -229,6 +173,11 @@ class NetTestApp
 
         registry.getActor<Character>("player")->widget = playerWidget;
 
+        worldListener.server = &server; // this needs to happen like first
+        worldListener.subscribeAll(world);
+        worldListener.registerType<NetworkCharacterListener>(data_ActorType::PLAYER);
+        worldListener.registerType<NetworkConstructionListener>(data_ActorType::CONSTRUCTION);
+
         server.addRawMessageCallback("CHAT", [&](IncomingMessageServer<string> message)
         { 
             serverReceiveMessage(message.client->getName(), message.contents); 
@@ -244,7 +193,7 @@ class NetTestApp
             }
             auto newPlayer = spawnRemotePlayer(message.client);
             sendActorToClient(newPlayer, *message.client,true);
-            server.sendMessageToClient(*message.client, MessageSetPlayerControl(newPlayer->id)); // tell the player who they control
+            server.sendMessageToAllClientsExcept(message.client, MessageSpawnActor(newPlayer->getDataEntry().value(),false));
         });
 
         server.addRawMessageCallback("LEAV", [&](IncomingMessageServer<string> message)
@@ -259,10 +208,24 @@ class NetTestApp
         { 
             auto character = world.getActor<Character>(message.contents.actor);
             if(character != nullptr) {
-                character->setToolbar(0,ItemStack(registry.getItem((string)message.contents.itemName),1));
-                character->setCurrentTool(0);
+                character->setCurrentTool(message.contents.slot);
             } else {
-                chatLog.push_back("character is nullptr");
+                Debug::warn("incoming message character is nullptr");
+            }
+            server.sendMessageToAllClientsExcept(message.client,message.contents);
+        });
+
+        server.addMessageCallback<MessageCharacterDropItemEvent>([&](IncomingMessageServer<MessageCharacterDropItemEvent> message)
+        { 
+            auto character = world.getActor<Character>(message.contents.actor);
+            if(character != nullptr) {
+                ItemStack stack;
+                DataLoaderImpl dataLoader(registry,world.constructionMaterial);
+                stack.load(message.contents.stack,dataLoader);
+                character->take(stack);
+                world.spawn(ItemActor::makeInstance(stack,message.contents.position.toVec3()));
+            } else {
+                Debug::warn("incoming message character is nullptr");
             }
             server.sendMessageToAllClientsExcept(message.client,message.contents);
         });
@@ -278,9 +241,10 @@ class NetTestApp
             if(message.contents.localPlayer) {
                 playerID = actor->id;
                 auto player = dynamic_cast<Character*>(actor);
+                clientCharacterListener.subscribeClient(*actor);
+                clientCharacterListener.messageSender = &client;
                 if(player != nullptr) {
                     player->alwaysRender = false;
-                    player->addObserver(&networkCharacterObserver);
                 } else {
                     Debug::warn("player is not of Character type!");
                 }
@@ -299,30 +263,100 @@ class NetTestApp
 
         client.addMessageCallback<MessageUpdateActorTransform>([&](IncomingMessageClient<MessageUpdateActorTransform> message)
         {
+            if(message.contents.id == playerID) return; //just skip for now
+            
             receiveActorUpdate(message.contents);
         });
 
         server.addMessageCallback<MessageUpdateActorTransform>([&](IncomingMessageServer<MessageUpdateActorTransform> message)
         {
             receiveActorUpdate(message.contents);
-            server.sendMessageToAllClientsExcept(message.client,message.contents);
         });
 
         client.addMessageCallback<MessageCharacterUpdateItemEvent>([&](IncomingMessageClient<MessageCharacterUpdateItemEvent> message)
         { 
+            if(message.contents.actor == playerID) return; //ignore for now
+
             auto character = world.getActor<Character>(message.contents.actor);
             if(character != nullptr) {
-                character->setToolbar(0,ItemStack(registry.getItem((string)message.contents.itemName),1));
-                character->setCurrentTool(0);
+                character->setToolbar(message.contents.slot,ItemStack(registry.getItem((string)message.contents.itemName),1));
+                character->setCurrentTool(message.contents.slot);
             } else {
-                chatLog.push_back("character is nullptr");
+                Debug::warn("incoming message character is nullptr");
+            }
+        });
+
+        client.addMessageCallback<MessageCharacterInventoryChangeEvent>([&](IncomingMessageClient<MessageCharacterInventoryChangeEvent> message)
+        { 
+            auto character = world.getActor<Character>(message.contents.actor);
+            if(character != nullptr) {
+                ItemStack stack;
+                DataLoaderImpl dataLoader(registry,world.constructionMaterial);
+                stack.load(message.contents.stack,dataLoader);
+                if(message.contents.lose) {
+                    character->take(stack);
+                } else {
+                    character->give(stack);
+                }
+            } else {
+                Debug::warn("incoming message character is nullptr");
+            }
+        });
+
+
+        client.addMessageCallback<MessageConstructionPlaceBlockEvent>([&](IncomingMessageClient<MessageConstructionPlaceBlockEvent> message)
+        { 
+            auto construction = world.getActor<Construction>(message.contents.actor);
+
+            vec3 location = message.contents.position.toVec3();
+            DataLoaderImpl dataLoader(registry,world.constructionMaterial);
+            Block* block = dataLoader.getBlockPrototype((string)message.contents.block);
+            BlockStorage storage;
+            storage.load(message.contents.storage,dataLoader);
+
+            if(construction != nullptr) {
+                construction->placeBlock(location,block,storage,false);
+            } else {
+                Debug::warn("incoming message construction is nullptr");
+            }
+        });
+
+        client.addMessageCallback<MessageConstructionBreakBlockEvent>([&](IncomingMessageClient<MessageConstructionBreakBlockEvent> message)
+        { 
+            auto construction = world.getActor<Construction>(message.contents.actor);
+
+            vec3 location = message.contents.position.toVec3();
+            if(construction != nullptr) {
+                construction->removeBlock(location);
+            } else {
+                Debug::warn("incoming message construction is nullptr");
+            }
+        });
+
+        server.addMessageCallback<MessageCharacterToolActionEvent>([&](IncomingMessageServer<MessageCharacterToolActionEvent> message)
+        { 
+            auto character = world.getActor<Character>(message.contents.actor);
+
+            DataLoaderImpl dataLoader(registry,world.constructionMaterial);
+            Item* tool = dataLoader.getItemPrototype((string)message.contents.tool);
+            if(character != nullptr) {
+                auto position = character->getPosition();
+                auto rotation = character->getRotation();
+                auto pitch = character->lookPitch;
+                character->setPosition(message.contents.position.toVec3());
+                character->setRotation(message.contents.rotation.toQuat());
+                character->lookPitch = message.contents.lookPitch;
+                character->receiveToolActionEvent(&world,tool,message.contents.actionEvent);
+                character->setPosition(position);
+                character->setRotation(rotation);
+                character->lookPitch = pitch;
+            } else {
+                Debug::warn("incoming message construction is nullptr");
             }
         });
 
         client.addRawMessageCallback("CHAT", [&](IncomingMessageClient<string> message)
         { chatLog.push_back(message.contents); });
-
-        worldObserver.server = &server;
 
         world.constructionMaterial = registry.getMaterial(Loader::DEFAULT_CONSTRUCTION_MATERIAL_KEY);
 
@@ -345,10 +379,8 @@ class NetTestApp
         auto player = world.spawn(Character::makeInstance(registry.getActor<Character>("player")));
         player->alwaysRender = false;
 
-        player->addObserver(&networkCharacterObserver);
-
         player->give(ItemStack(registry.getItem("pickaxe"), 1));
-        player->give(ItemStack(registry.getItem("tin_plate"), 1));
+        player->give(ItemStack(registry.getItem("tin_plate"), 99));
         player->give(ItemStack(registry.getItem("furnace"), 1));
         playerID = player->id;
         lua["player"] = playerID;
@@ -358,9 +390,9 @@ class NetTestApp
     {
         Character *character = world.spawn(Character::makeInstance(registry.getActor<Character>("player")));
         server.setClientActorID(client, character->id);
-        character->networkLocal = false;
+        character->networkLocal = true;
         character->give(ItemStack(registry.getItem("pickaxe"), 1));
-        character->give(ItemStack(registry.getItem("tin_plate"), 1));
+        character->give(ItemStack(registry.getItem("tin_plate"), 99));
         character->give(ItemStack(registry.getItem("furnace"), 1));
         return character;
     }
@@ -388,22 +420,20 @@ class NetTestApp
     {
         destroyLocalPlayer();
         world.clear();
-        world.onActorSpawned.unSubscribe(&worldObserver);
-        world.onActorDestroyed.unSubscribe(&worldObserver);
+        world.onActorSpawned.unSubscribe(&worldListener);
+        world.onActorDestroyed.unSubscribe(&worldListener);
         chatLog.clear();
         appState = AppState::MainMenu;
-        networkCharacterObserver.server = nullptr;
     }
 
     void startHost()
     {
         appState = AppState::Host;
-        networkCharacterObserver.server = &server;
         server.openSocket(nPort);
         spawnLocalPlayer();
         world.spawn(Actor::makeInstance(registry.getActor<Actor>("plane")));
-        world.onActorSpawned.subscribe(&worldObserver);
-        world.onActorDestroyed.subscribe(&worldObserver);
+        world.onActorSpawned.subscribe(&worldListener);
+        world.onActorDestroyed.subscribe(&worldListener);
         // lua.do_file("scripts/start.lua");
     }
 
@@ -436,7 +466,6 @@ class NetTestApp
     {
         client.setName(nameBuffer);
         std::cout << "starting client" << std::endl;
-        networkCharacterObserver.server = &client;
         appState = AppState::Client;
         if (client.getStatus() == ClientStatus::Disconnected)
         {

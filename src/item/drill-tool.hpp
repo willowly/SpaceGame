@@ -50,7 +50,7 @@ class DrillTool : public Tool {
 
         virtual void step(World* world,Character& user,ItemStack& stack,float dt) {
 
-            if(!clickHold) {
+            if(!user.heldItemData.clickHold) {
                 return;
             }
             

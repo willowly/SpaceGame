@@ -28,6 +28,10 @@ class PlaceBlockTool: public Tool {
         }
 
     public:
+
+        enum class ActionEvent {
+            Place = 0,
+        };
         Block* block;
 
         PlaceBlockTool() {
@@ -92,15 +96,34 @@ class PlaceBlockTool: public Tool {
             return std::pair<quat,vec3>(glm::identity<quat>(),vec3());
         }
 
+        void receiveActionEvent(World* world,Character& user,ItemStack& stack,int actionEvent) override {
+            switch((ActionEvent)actionEvent) {
+                case ActionEvent::Place:
+                    if(place(world,user)) {
+                        placeAnimationTimer = placeAnimationTime; //animate
+                        user.take(ItemStack(stack.item,1));
+                        user.refreshTool(); //in case we run out
+                    }
+                    break;
+            }
+        }
+
 
         virtual void step(World* world,Character& user,ItemStack& stack,float dt) {
-            if(clickInput) {
-                clickInput = false;
+            if(user.heldItemData.clickInput) {
+                user.heldItemData.clickInput = false;
                 if(place(world,user)) {
                     placeAnimationTimer = placeAnimationTime; //animate
                     stack.amount--;
                     user.refreshTool(); //in case we run out
                 }
+            }
+        }
+
+        virtual void stepClient(World* world,Character& user,ItemStack& stack,float dt) {
+            if(user.heldItemData.clickInput) {
+                user.heldItemData.clickInput = false;
+                sendActionEvent(user,(int)ActionEvent::Place);
             }
         }
 
