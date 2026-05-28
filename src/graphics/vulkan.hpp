@@ -28,6 +28,8 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 
+#include "engine/object.hpp"
+
 #include "color.hpp"
 
 // #include <tracy/Tracy.hpp>
@@ -94,10 +96,16 @@ struct Image {
 
 };
 
+struct TextureInfo {
+    string name;
+    int width = 0;
+    int height = 0;
+};
+
 typedef unsigned int TextureID;
 
 
-struct LitMaterialData {
+struct LitMaterialData : public Object {
 
     LitMaterialData() {
         
@@ -109,6 +117,10 @@ struct LitMaterialData {
         
     TextureID texture;
     vec4 color = vec4(1);
+
+    string getTypeName() {
+        return "lit_material";
+    }
 
     
 };
@@ -748,10 +760,26 @@ class Vulkan {
             texture.image = createTextureImage(name,texWidth,texHeight,texChannels,data);
             texture.view = createTextureImageView(texture.image);
             texture.sampler = createTextureSampler(texture.image);
+            texture.info.name = name;
+            texture.info.width = texWidth;
+            texture.info.height = texHeight;
+            texture.imguiDesciptor = ImGui_ImplVulkan_AddTexture(texture.sampler,texture.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
             textures.push_back(texture);
             updateDescriptorSet();
             
             return textures.size() - 1;
+        }
+
+        TextureInfo getTextureInfo(TextureID id) {
+            return textures[id].info;
+        }
+
+        void setTextureName(TextureID id,string name) {
+            textures[id].info.name = name;
+        }
+
+        ImTextureID getImGuiTextureID(TextureID id) {
+            return (ImTextureID)textures[id].imguiDesciptor;
         }
 
         void waitIdle() {
@@ -1124,6 +1152,9 @@ class Vulkan {
             Image image;
             VkSampler sampler;
             VkImageView view;
+            TextureInfo info;
+
+            VkDescriptorSet imguiDesciptor;
                 
         };
 

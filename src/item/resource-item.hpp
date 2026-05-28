@@ -8,5 +8,9 @@ class ResourceItem : public Item {
 
     public:
 
+        string getTypeName() override {
+            return "resource_item";
+        }
+
 
 };

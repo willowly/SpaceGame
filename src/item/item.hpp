@@ -3,6 +3,7 @@
 #include "engine/input.hpp"
 #include "graphics/vulkan.hpp"
 #include "helper/sprite.hpp"
+#include "engine/object.hpp"
 
 using std::string;
 
@@ -18,7 +19,7 @@ struct ItemDisplayData {
     ItemDisplayData(float barPercent) : bar(true), barPercent(barPercent) {}
 };
 
-class Item {
+class Item : public Object {
     public:
         
 
@@ -30,7 +31,6 @@ class Item {
 
         }
 
-        string name;
         string displayName;
         Sprite defaultSprite;
         Mesh<Vertex>* defaultModel = nullptr;
@@ -80,5 +80,9 @@ class Item {
 
         virtual void addRenderablesHeld(Vulkan* vulkan,Character& user,float dt,float interpolation) {
             
+        }
+
+        virtual string getTypeName() {
+            return "item";
         }
 };

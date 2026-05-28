@@ -183,5 +183,9 @@ class PickaxeTool : public Tool {
             step(world,user,stack,dt,true);
         }
 
+        string getTypeName() override {
+            return "pickaxe_tool";
+        }
+
 
 };

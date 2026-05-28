@@ -34,4 +34,8 @@ class CockpitBlock : public Block {
             BlockFacing facing = storage.getFacing(FACING_VAR);
             character.ride(construction,position,BlockHelper::getRotationFromFacing(facing));
         }
+
+        string getTypeName() override {
+            return "cockpit";
+        }
 };

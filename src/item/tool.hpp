@@ -69,4 +69,8 @@ class Tool : public Item {
             }
         }
 
+        virtual string getTypeName() {
+            return "tool";
+        }
+
 };

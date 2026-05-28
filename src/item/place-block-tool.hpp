@@ -34,14 +34,16 @@ class PlaceBlockTool: public Tool {
         };
         Block* block;
 
+        string getTypeName() override {
+            return "place_block_tool";
+        }
+
         PlaceBlockTool() {
             
         }
 
         quat placeAnimationRotation = glm::quat(vec3(glm::radians(-50.0f),0,0));
         float placeAnimationTime = 0.2;
-
-        float placeAnimationTimer = 0;
     
         bool place(World* world,Character& user) {
 
@@ -88,9 +90,8 @@ class PlaceBlockTool: public Tool {
 
         virtual std::pair<quat,vec3> animate(Character& user,float dt) {
 
-            if(placeAnimationTimer > 0) {
-                placeAnimationTimer -= dt;
-                return std::pair<quat,vec3>(glm::slerp(glm::identity<quat>(),placeAnimationRotation,placeAnimationTimer),vec3());
+            if(user.heldItemData.animationTimer < placeAnimationTime) {
+                return std::pair<quat,vec3>(glm::slerp(glm::identity<quat>(),placeAnimationRotation,placeAnimationTime - user.heldItemData.animationTimer),vec3());
             }
 
             return std::pair<quat,vec3>(glm::identity<quat>(),vec3());
@@ -100,7 +101,6 @@ class PlaceBlockTool: public Tool {
             switch((ActionEvent)actionEvent) {
                 case ActionEvent::Place:
                     if(place(world,user)) {
-                        placeAnimationTimer = placeAnimationTime; //animate
                         user.take(ItemStack(stack.item,1));
                         user.refreshTool(); //in case we run out
                     }
@@ -113,7 +113,7 @@ class PlaceBlockTool: public Tool {
             if(user.heldItemData.clickInput) {
                 user.heldItemData.clickInput = false;
                 if(place(world,user)) {
-                    placeAnimationTimer = placeAnimationTime; //animate
+                    user.heldItemData.setAction(0);
                     stack.amount--;
                     user.refreshTool(); //in case we run out
                 }

@@ -6,6 +6,7 @@
 
 #include "api/api-all.hpp"
 
+#include "api/type-info-all.hpp"
 
 #include "debug.hpp"
 
@@ -15,7 +16,7 @@ class Loader {
 
     public:
 
-        inline const static string DEFAULT_CONSTRUCTION_MATERIAL_KEY;
+        inline const static string DEFAULT_CONSTRUCTION_MATERIAL_KEY = "default_construction";
 
         void loadAll(Registry& registry,sol::state& lua,Vulkan* vulkan) {
             std::cout << "Current loader path is: " << std::filesystem::current_path() << '\n';
@@ -24,8 +25,10 @@ class Loader {
             loadShaders(registry,vulkan);
             loadDefaultMaterials(registry,vulkan);
             loadFonts(registry,vulkan);
+            loadTypeInfo(registry);
             runLoadScript(registry,vulkan,lua);
         }
+        
 
 
 
@@ -87,6 +90,7 @@ class Loader {
                 if(extension == ".png") {
                     TextureID id = vulkan->loadTextureFile(entry.path().string());
                     registry.setTexture(name,id);
+                    vulkan->setTextureName(id,name);
                 }
                 // if(extension == ".jpg" || extension == ".jpeg") {
                 //     texture->loadFromFile(entry.path().string(),Texture::Format::RGB);
@@ -117,6 +121,10 @@ class Loader {
             font.charSize = vec2(8,12);
             font.textureSize = vec2(312,12);
             font.characters = "0123456789x.ABCDEFGHIJKLMNOPQRSTUVWXYZ ";
+        }
+
+        void loadTypeInfo(Registry& registry) {
+            TypeInfoLoader::loadAll(registry);
         }
 
         void runLoadScript(Registry& registry,Vulkan* vulkan,sol::state& lua) {

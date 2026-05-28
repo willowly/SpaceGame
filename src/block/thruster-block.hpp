@@ -56,4 +56,8 @@ class ThrusterBlock : public Block {
             construction->thrustForces[static_cast<int>(BlockHelper::rotateFacingByFacing(BlockFacing::LEFT,facing))] -= sideForce;
             construction->thrustForces[static_cast<int>(facing)] -= force;
         }
+
+        string getTypeName() override {
+            return "thruster";
+        }
 };

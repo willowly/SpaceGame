@@ -61,9 +61,12 @@ void GameApplication::setup() {
 
     // prototypes
 
-    auto playerPrototype = registry.addActor<Character>("player");
+    auto playerPrototype = registry.getActor<Character>("player");
 
     // terrain setup
+
+    //IMGUI FONT SETUp
+    //ImGui::PushFont(defaultFont, 14.0f);
 
     terrainMaterial = vulkan->createMaterial<LitMaterialData,TerrainVertex>("terrain",LitMaterialData(registry.getTexture("rock")));
 
@@ -81,8 +84,6 @@ void GameApplication::setup() {
     settings.generationSettings.oreType.texture = registry.getTexture("tin_ore");
 
     
-    playerPrototype->model = registry.getModel("capsule");
-    playerPrototype->material = registry.getMaterial("player");
     registry.addRecipesToVector(playerPrototype->recipes,"crafting",1);
     
 
@@ -94,12 +95,6 @@ void GameApplication::setup() {
     auto itemSlotWidget = registry.getWidget<ItemSlotWidget>("item_slot");
 
     furnaceWidget.itemSlot = itemSlotWidget;
-    
-    playerWidget.inventoryWidget = registry.getWidget<InventoryWidget>("inventory");
-    playerWidget.toolbarWidget = registry.getWidget<ToolbarWidget>("toolbar");
-    playerWidget.cursorSlotWidget = registry.getWidget<ItemSlotWidget>("toolbar_item_slot");
-    playerWidget.cursorRectSprite = registry.getSprite("solid");
-    playerWidget.speedText = registry.getWidget<TextWidget>("text_default");
 
     PipelineOptions options;
     options.blend = VK_TRUE;
@@ -116,8 +111,6 @@ void GameApplication::setup() {
     FurnaceBlock* furnace = static_cast<FurnaceBlock*>(registry.getBlock("furnace"));
     registry.addRecipesToVector(furnace->recipes,"smelting",1);
     furnace->widget = &furnaceWidget;
-
-    playerPrototype->widget = &playerWidget;
     // wowie
     auto effectPrototype = registry.addActor<ParticleEffectActor>("effect");
     auto& effect = effectPrototype->effect;
@@ -147,15 +140,18 @@ void GameApplication::setup() {
 
     world->constructionMaterial = vulkan->createMaterial<LitMaterialData,ConstructionVertex>("construction",LitMaterialData(registry.getTexture("rock")));
 
+    assetViewer.registry = &registry;
+    assetViewer.vulkan = vulkan;
+
     //spawnAsteroidScene();
-    spawnPlayer();
+    // spawnPlayer();
 
-    lua["world"] = world.get();
+    // lua["world"] = world.get();
 
-    // lua
-    lua["player"] = world->getActor<Character>(playerID);
+    // // lua
+    // lua["player"] = world->getActor<Character>(playerID);
 
-    lua.do_file("scripts/start.lua");
+    // lua.do_file("scripts/start.lua");
 
 }
 
@@ -232,6 +228,8 @@ void GameApplication::debugUI(float dt) {
     if(player != nullptr && world != nullptr) {
         DebugMenu::cheatsMenu(*player,*world,registry);
     }
+
+    assetViewer.display();
 
     ImGui::ShowDemoWindow();
 

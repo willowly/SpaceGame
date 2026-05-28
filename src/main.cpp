@@ -14,13 +14,11 @@
 //#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 
 using std::string;
-
-
 int main() {
 
     try {
-        
-        NetTestApp app;
+
+        GameApplication app;
 
         app.run();
 

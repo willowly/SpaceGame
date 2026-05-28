@@ -5,6 +5,7 @@
 #include <item/item-stack.hpp>
 #include "block-facing.hpp"
 #include "helper/block-storage.hpp"
+#include "engine/object.hpp"
 
 
 class Construction;
@@ -18,7 +19,7 @@ struct BlockPlaceInfo {
     bool attached = false; //is this block being placed attached to terrain?
 };
 
-class Block {
+class Block : public Object {
 
     
 
@@ -35,14 +36,13 @@ class Block {
             Unique
         };
 
-        string name; // for prototypes
         Item* defaultDrop; // everthing gets turned into functions...
+        bool solid = false; // should probably also be a function just unsure rn
 
         struct PlacementData {
             vec3 normal = {};
         };
 
-        bool solid = false; // should probably also be a function just unsure rn
 
 
     
@@ -85,5 +85,9 @@ class Block {
         }
 
         virtual void onInteract(Construction* construction,ivec3 position,BlockStorage& storage,Character& character) {}
+
+        string getTypeName() override {
+            return "block";
+        }
 
 };

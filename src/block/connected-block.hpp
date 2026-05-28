@@ -20,4 +20,8 @@ class ConnectedBlock : public Block {
         virtual void addToMesh(Construction* construction,MeshData<ConstructionVertex>& meshData,ivec3 position,BlockStorage& storage) {
             BlockHelper::addConnectedBlock(construction,meshData,position,texture);
         }
+
+        string getTypeName() override {
+            return "connected";
+        }
 };

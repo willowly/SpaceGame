@@ -169,8 +169,7 @@ namespace API {
 
     //i actually think these should go in here, otherwise theres a dependancy nightmare
 
-    inline Material createLitMaterial(sol::object obj,Registry& registry,Vulkan* vulkan) {
-        LitMaterialData materialData;
+    inline Material createLitMaterial(sol::object obj,Registry& registry,Vulkan* vulkan,LitMaterialData& materialData) {
         VkPipeline pipeline = registry.litShader;
         sol::table table = obj;
         string shader = "lit";

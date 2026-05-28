@@ -41,6 +41,7 @@ class DataLoaderImpl : public DataLoader {
             } catch(std::runtime_error e) {
                 std::cout << "Failed to deserialize actor data from buffer: "<< e.what() << std::endl;
             }
+            return nullptr;
         }
 
         std::unique_ptr<Actor> loadActor(data_ActorEntry entry) {

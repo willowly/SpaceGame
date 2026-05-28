@@ -13,6 +13,7 @@
 
 #include "engine/debug.hpp"
 #include <algorithm>
+#include "api/type-info.hpp"
 
 using std::map,std::unique_ptr;
 
@@ -38,6 +39,9 @@ class Registry {
     map<string,TextureID> textures;
     map<string,Sprite> sprites;
     map<string,Material> materials;
+    map<string,std::unique_ptr<Object>> materialDataMap;
+
+
     
     map<string,unique_ptr<Actor>> actors;
     map<string,unique_ptr<Block>> blocks;
@@ -46,6 +50,7 @@ class Registry {
     
     map<string,ParticleEffect> particleEffects;
     map<string,Recipe> recipes;
+    map<string,TypeInfo> typeInfo;
     
     TextureID errorTexture = 0; 
 
@@ -118,6 +123,10 @@ class Registry {
             return particleEffects.contains(name);
         }
 
+        bool hasTypeInfo(string name) {
+            return typeInfo.contains(name);
+        }
+
         Mesh<Vertex>* getModel(string name) {
             if(models.contains(name)) {
                 return &models.at(name);
@@ -139,7 +148,7 @@ class Registry {
                 return sprites.at(name);
             } else {
                 if(textures.contains(name)) {
-                    return Sprite(textures.at(name));
+                    return Sprite(name,textures.at(name));
                 }
                 Debug::warn("no sprite called \"" + name + "\"");
             }
@@ -152,6 +161,12 @@ class Registry {
                 Debug::warn("no material called \"" + name + "\"");
             }
             return Material::none;
+        }
+        Object* getMaterialData(string name) {
+            if(materialDataMap.contains(name)) {
+                return materialDataMap.at(name).get();
+            }
+            return nullptr;
         }
         Actor* getActor(string name) {
             if(actors.contains(name)) {
@@ -211,16 +226,13 @@ class Registry {
             return nullptr;
         }
 
-        const map<string,unique_ptr<Item>>& getItems() {
-            return items;
-        }
-
-        const map<string,unique_ptr<Block>>& getBlocks() {
-            return blocks;
-        }
-
-        const map<string,Recipe>& getRecipes() {
-            return recipes;
+        TypeInfo* getTypeInfo(string name) {
+            if(typeInfo.contains(name)) {
+                return &typeInfo.at(name);
+            } else {
+                Debug::warn("no type info called \"" + name + "\"");
+            }
+            return nullptr;
         }
 
         Widget* getWidget(string name) {
@@ -247,6 +259,30 @@ class Registry {
             
         }
 
+        map<string,unique_ptr<Item>>& getItems() {
+            return items;
+        }
+
+        map<string,unique_ptr<Block>>& getBlocks() {
+            return blocks;
+        }
+
+        map<string,Recipe>& getRecipes() {
+            return recipes;
+        }
+
+        map<string,Mesh<Vertex>>& getModels() {
+            return models;
+        }
+
+        map<string,TextureID>& getTextures() {
+            return textures;
+        }
+
+        map<string,Material>& getMaterials() {
+            return materials;
+        }
+
         ParticleEffect* getParticleEffect(string name) {
             if(particleEffects.contains(name)) {
                 return &particleEffects.at(name);
@@ -258,6 +294,7 @@ class Registry {
 
         Mesh<Vertex>* addModel(string name) {
             models.try_emplace(name,Mesh<Vertex>());
+            models.at(name).name = name;
             return &models.at(name);
         }
 
@@ -268,14 +305,24 @@ class Registry {
             }
         }
         void addSprite(string name,Sprite sprite) {
+            sprite.name = name;
             sprites.emplace(name,sprite);
         }
         void addRecipe(string name,Recipe recipe) {
             recipe.name = name;
             recipes.emplace(name,recipe);
         }
+
+
         void addMaterial(string name,Material material) {
+            material.name = name;
             materials.emplace(name,material);
+        }
+        template <typename T>
+        void addMaterial(string name,Material material,T materialData) {
+            addMaterial(name,material);
+            materialData.name = name;
+            materialDataMap[name] = std::make_unique<T>(materialData);
         }
 
         template <typename T>
@@ -310,6 +357,11 @@ class Registry {
 
         void addParticleEffect(string name,ParticleEffect effect) {
             particleEffects.emplace(name,effect);
+        }
+
+        TypeInfo* addTypeInfo(string name) {
+            typeInfo.emplace(std::piecewise_construct,std::make_tuple(name),std::make_tuple(name));
+            return &typeInfo.at(name);
         }
 
         VkPipeline litShader;

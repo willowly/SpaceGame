@@ -88,7 +88,7 @@ struct std::hash<Vertex>
 
 
 template <typename V>
-class Mesh {
+class Mesh : public Object {
     public:
 
         MeshData<V> meshData;
@@ -261,6 +261,10 @@ class Mesh {
             auto matrix = MathHelper::getTransformMatrix(position,rotation,scale);
             addToRender(vulkan,material,matrix,settings);
 
+        }
+
+        string getTypeName() override {
+            return "mesh<" + (string)typeid(V).name() + ">";
         }
 
     private:

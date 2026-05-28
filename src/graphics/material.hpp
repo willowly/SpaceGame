@@ -14,6 +14,7 @@ class Material {
     Material(VkPipeline pipeline,VkPipeline shadowPipeline, MaterialHandle data) : pipeline(pipeline), shadowPipeline(shadowPipeline), data(data) {}
     Material() {}
     public:
+        string name = "material"; //for tracking
         static const Material none;
         bool isValid() {
             return data != 0;

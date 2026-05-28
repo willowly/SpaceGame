@@ -25,10 +25,11 @@ namespace API {
             Debug::addTrace("materials");
             Debug::addTrace(name);
 
-            Material material = createLitMaterial(obj,registry,vulkan);
+            LitMaterialData litMaterialData;
+            Material material = createLitMaterial(obj,registry,vulkan,litMaterialData);
             if(material.isValid()) {
                 Debug::info("Loaded Material \"" + name + "\"",InfoPriority::MEDIUM);
-                registry.addMaterial(name,material);
+                registry.addMaterial(name,material,litMaterialData);
             }
             // we dont really need to have a warning here since createLitMaterial should emit one (thats more helpful)
             Debug::subtractTrace();

@@ -164,4 +164,8 @@ class FurnaceBlock : public Block {
             
 
         }
+
+        string getTypeName() override {
+            return "furnace";
+        }
 };

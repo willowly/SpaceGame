@@ -30,6 +30,10 @@ class DrillTool : public Tool {
 
         int durability = 10;
 
+        string getTypeName() override {
+            return "drill_tool";
+        }
+
         const int DAMAGE_VAR = 0;
 
         void drill(World* world,Character& user,ItemStack& stack,Ray ray,float dt) {

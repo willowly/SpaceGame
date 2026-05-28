@@ -42,6 +42,9 @@
 
 #include "engine/window.hpp"
 
+#include "api/type-info.hpp"
+#include "interface/debug/asset-menu.hpp"
+
 JPH_SUPPRESS_WARNINGS
 
 using std::string;
@@ -149,6 +152,10 @@ class GameApplication {
 
         bool debugUIOpen = false;
         char consoleBuffer[1024] = ""; //temp
+
+
+        // debug menu
+        DebugMenu::AssetViewer assetViewer;
         
 
         float lastTime = 0; //tells how long its been since the last update

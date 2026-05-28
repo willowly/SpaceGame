@@ -1,9 +1,10 @@
 #pragma once
 
 #include "item-stack.hpp"
+#include "engine/object.hpp"
 
 
-struct Recipe {
+struct Recipe : public Object {
 
     string name;
     string category;
@@ -17,5 +18,9 @@ struct Recipe {
 
     Recipe(ItemStack result) : result(result) {
         
+    }
+
+    string getTypeName() override {
+        return "recipe";
     }
 };
