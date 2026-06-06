@@ -1,0 +1,23 @@
+durability: 300
+mine_radius: 0.750000
+mine_amount: 5.000000
+reach: 5.000000
+anticipation_time: 0.300000
+cooldown_time: 0.500000
+anticipation_rotation: <0,0,0.42261827,0.90630776>
+cooldown_rotation: <0,0,-0.42261827,0.90630776>
+held_model: pickaxe
+held_model_material: pickaxe
+model_offset: <0.2,-0.4,-0.5>
+model_rotation: <0,0.7071068,0,0.7071068>
+model_scale: 0.300000
+smooth_time: 0.010000
+display_name: Pickaxe
+default_sprite: 
+  texture: pickaxe_item
+  rect: 
+    position: <0,0>
+    size: <0,0>
+default_model: pickaxe
+default_material: pickaxe
+default_model_scale: 0.300000

@@ -1,0 +1,4 @@
+mesh: cockpit
+texture: cockpit
+default_drop: cockpit
+solid: 0

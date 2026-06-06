@@ -40,8 +40,6 @@ class Registry {
     map<string,Sprite> sprites;
     map<string,Material> materials;
     map<string,std::unique_ptr<Object>> materialDataMap;
-
-
     
     map<string,unique_ptr<Actor>> actors;
     map<string,unique_ptr<Block>> blocks;
@@ -51,6 +49,7 @@ class Registry {
     map<string,ParticleEffect> particleEffects;
     map<string,Recipe> recipes;
     map<string,TypeInfo> typeInfo;
+    map<string,string> typeIdToName;
     
     TextureID errorTexture = 0; 
 
@@ -226,6 +225,13 @@ class Registry {
             return nullptr;
         }
 
+        string getTypeName(string typeidName) {
+            if(typeIdToName.contains(typeidName)) {
+                return typeIdToName.at(typeidName);
+            }
+            return "unknown";
+        }
+
         TypeInfo* getTypeInfo(string name) {
             if(typeInfo.contains(name)) {
                 return &typeInfo.at(name);
@@ -359,8 +365,10 @@ class Registry {
             particleEffects.emplace(name,effect);
         }
 
+        template<typename T>
         TypeInfo* addTypeInfo(string name) {
             typeInfo.emplace(std::piecewise_construct,std::make_tuple(name),std::make_tuple(name));
+            typeIdToName[typeid(T).name()] = name;
             return &typeInfo.at(name);
         }
 

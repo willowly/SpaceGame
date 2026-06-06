@@ -3,6 +3,7 @@
 #include "api/type-info-item.hpp"
 #include "api/type-info-block.hpp"
 #include "api/type-info-graphics.hpp"
+#include "api/type-info-math.hpp"
 
 
 namespace TypeInfoLoader {
@@ -12,6 +13,7 @@ namespace TypeInfoLoader {
         TypeInfoLoader::loadBlock(registry);
         TypeInfoLoader::loadItem(registry);
         TypeInfoLoader::loadGraphics(registry);
+        TypeInfoLoader::loadMath(registry);
 
     }
 

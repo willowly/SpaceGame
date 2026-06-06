@@ -1,0 +1,20 @@
+place_animation_rotation: <-0.42261827,0,0,0.90630776>
+place_animation_time: 0.200000
+block: tin
+held_model: item_plate
+held_model_material: tin_plate
+model_offset: <0.3,-0.3,-1>
+model_rotation: <0,0.38268346,0,0.9238795>
+model_scale: 0.300000
+smooth_time: 0.010000
+display_name: Tin Plate
+default_sprite: 
+  texture: tin_plate
+  rect: 
+    position: <0,0>
+    size: <0,0>
+
+
+default_model: item_plate
+default_material: tin_plate
+default_model_scale: 0.300000

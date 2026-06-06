@@ -1,0 +1,4 @@
+mesh: thruster
+texture: error
+default_drop: thruster
+solid: 0

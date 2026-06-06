@@ -1,0 +1,11 @@
+display_name: Tin Ore
+default_sprite: 
+  texture: tin_ore_item
+  rect: 
+    position: <0,0>
+    size: <0,0>
+
+
+default_model: item_ore
+default_material: tin_ore
+default_model_scale: 0.300000

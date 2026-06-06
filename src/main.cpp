@@ -18,7 +18,7 @@ int main() {
 
     try {
 
-        GameApplication app;
+        NetTestApp app;
 
         app.run();
 

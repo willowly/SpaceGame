@@ -6,7 +6,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-using std::string, glm::vec4, glm::vec3, glm::vec2,glm::ivec3,glm::mat4,glm::quat;
+using std::string, glm::vec4, glm::vec3, glm::vec2,glm::ivec2,glm::ivec3,glm::mat4,glm::quat;
 
 namespace StringHelper {
 
@@ -36,6 +36,9 @@ namespace StringHelper {
         return std::format("<{},{},{}>",v.x,v.y,v.z);
     }
     inline std::string toString(vec2 v) {
+        return std::format("<{},{}>",v.x,v.y);
+    }
+    inline std::string toString(ivec2 v) {
         return std::format("<{},{}>",v.x,v.y);
     }
 
