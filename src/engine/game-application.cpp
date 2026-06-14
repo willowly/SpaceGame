@@ -1,3 +1,4 @@
+#include "interface/actor/player-widget.hpp"
 #define GLM_ENABLE_EXPERIMENTAL
 #include "game-application.hpp"
 
@@ -63,6 +64,8 @@ void GameApplication::setup() {
 
     auto playerPrototype = registry.getActor<Character>("player");
 
+    registry.addWidget<PlayerWidget>("playerWidget");
+
     // terrain setup
 
     //IMGUI FONT SETUp
@@ -103,9 +106,6 @@ void GameApplication::setup() {
     materialData.texture = registry.getTexture("rock");
     auto particleMaterial = vulkan->createMaterial<LitMaterialData,Vertex>("lit",materialData,options);
 
-
-    fpsText.font = &font;
-
     // recipes
     
     FurnaceBlock* furnace = static_cast<FurnaceBlock*>(registry.getBlock("furnace"));
@@ -144,14 +144,14 @@ void GameApplication::setup() {
     assetViewer.vulkan = vulkan;
 
     //spawnAsteroidScene();
-    // spawnPlayer();
+    spawnPlayer();
 
-    // lua["world"] = world.get();
+    lua["world"] = world.get();
 
-    // // lua
-    // lua["player"] = world->getActor<Character>(playerID);
+    // lua
+    lua["player"] = world->getActor<Character>(playerID);
 
-    // lua.do_file("scripts/start.lua");
+    lua.do_file("scripts/start.lua");
 
 }
 
@@ -353,17 +353,17 @@ void GameApplication::loop() {
         if(player->inMenu) 
         {
             window->setCursorMode(CursorMode::Normal);
-        } 
+        }
         else 
         {
             window->setCursorMode(CursorMode::Locked);
             drawContext.disableClicks();
         }
-        playerWidget.draw(drawContext,*player);
+        player->widget->draw(drawContext,*player);
     }
     
 
-    fpsText.draw(drawContext,vec2(0),std::to_string(1.0f/averageTime));
+    //fpsText.draw(drawContext,vec2(0),std::to_string(1.0f/averageTime));
 
     
     //interface.drawRect(*vulkan,Rect(5,5,300,300),Color::white,Sprite(0),registry.getMaterial("shadow_test"));
@@ -380,8 +380,6 @@ void GameApplication::loop() {
     vulkan->clearObjects();
 
     Debug::clearDebugShapes();
-
-    //std::cout << (int)(renderClock.reset() * 1000) << "ms" << std::endl;
 
     input.clearInputBuffers();
 

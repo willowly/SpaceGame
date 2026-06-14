@@ -296,16 +296,16 @@ class World {
 
         // this is for testing mainly
         template <typename T>
-        std::vector<ActorID> getActorsOfType() {
+        std::vector<T*> getActorsOfType() {
 
-            std::vector<ActorID> list;
+            std::vector<T*> list;
             
             
             for (auto& actor : actors)
             {
-                std::shared_ptr<T> typed_actor = std::dynamic_pointer_cast<T>(actor);
+                T* typed_actor = dynamic_cast<T*>(actor.get());
                 if(typed_actor != nullptr) {
-                    list.push_back(typed_actor->id);
+                    list.push_back(typed_actor);
                 }
                 
             }

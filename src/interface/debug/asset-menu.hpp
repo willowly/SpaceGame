@@ -1,8 +1,13 @@
+#include "api/type-info.hpp"
 #include "imgui/imgui.h"
 #include "engine/registry.hpp"
 #include "engine/loader.hpp"
 #include "imgui/misc/fonts/IconsLucide.h"
 #include "api/asset-serializer.hpp"
+#include <array>
+#include <cstring>
+#include <memory>
+#include <type_traits>
 
 namespace DebugMenu {
 
@@ -34,6 +39,29 @@ namespace DebugMenu {
         std::map<string,TextureObject> textureObjects;
         std::map<string,std::function<DisplayFunction>> displayFunctions;
         AssetSerializer serializer;
+
+        std::array<char, 1000> searchBuffer;
+
+        using CachedObjectMap = std::map<string,Object*>;
+        std::map<string,CachedObjectMap> cachedObjectMaps;
+
+        bool objectMapsOutOfDate = true;
+
+        template<typename T>
+        void loadCachedObjectMap(string name,map<string,unique_ptr<T>>& map) {
+            cachedObjectMaps["item"].clear();
+            for (auto& pair : map) {
+                cachedObjectMaps["item"][pair.first] = pair.second.get();
+            }
+        }
+
+        void refreshCachedObjectMaps() {
+            assert(registry != nullptr);
+            loadCachedObjectMap("block",registry->getBlocks());
+            loadCachedObjectMap("item",registry->getItems());
+            //loadCachedObjectMap("actor",registry->getActors());
+            
+        }
         
         template<typename T>
         void tab(string name,std::map<string,T>& map) {
@@ -124,6 +152,7 @@ namespace DebugMenu {
             objectInspector(obj);
             ImGui::End();
         }
+
         template<typename T>
         void displayProperties(T obj,TypeInfo* info) {
             string typeName = prettyPrintLabel(info->getName());
@@ -210,10 +239,13 @@ namespace DebugMenu {
                 return SelectorResponse::Goto;
             }
             ImGui::SameLine();
-            if(ImGui::Button("w",ImVec2(ImGui::GetFrameHeight(),ImGui::GetFrameHeight()))) {
+            ImGui::PushFont(iconFont);
+            if(ImGui::Button(ICON_LC_CIRCLE_DOT,ImVec2(ImGui::GetFrameHeight(),ImGui::GetFrameHeight()))) {
                 ImGui::PopID();
+                ImGui::PopFont();
                 return SelectorResponse::Change;
             }
+            ImGui::PopFont();
             ImGui::SameLine();
             ImGui::Text(label);
             ImGui::PopID();
@@ -316,11 +348,28 @@ namespace DebugMenu {
         template<typename T>
         void displayObjectReference(const char* label,T obj,GenericPropertyInfo* property) {
             Object* ref = property->getObj(obj);
-            
-            auto response = selector(label,(ref->name + " (" + ref->getTypeName() + ")"));
+
+            string typeName = ref->getTypeName();
+            string baseTypeName = ref->getTypeName();
+            auto* typeInfo = registry->getTypeInfo(typeName);
+            if(typeInfo != nullptr) {
+                baseTypeName = registry->getTypeInfo(typeName)->getRootName();
+            }
+
+            ImGui::PushID(label);
+            auto response = selector(label,(ref->name + " (" + typeName + ")"));
             if(response == SelectorResponse::Goto) {
                 selectedObject = ref;
             }
+            if(response == SelectorResponse::Change) {
+                openSelectorPopup("ObjectRefPopup");
+            }
+            if(cachedObjectMaps.contains(baseTypeName)) {
+                if(selectorPopup("ObjectRefPopup",cachedObjectMaps[baseTypeName],ref->name,ref)) {
+                    property->set(obj,ref);
+                }
+            }
+            ImGui::PopID();
         }
 
         bool displaySprite(const char* label,std::any value) {
@@ -341,13 +390,61 @@ namespace DebugMenu {
             //ImGui::LabelText(label,"%s",sprite.name.c_str());
         }
 
+        void openSelectorPopup(string id) {
+            ImGui::OpenPopup(id.c_str());
+            strcpy(searchBuffer.data(), "");
+            if(objectMapsOutOfDate) {
+                refreshCachedObjectMaps();
+            }
+            ImGui::SetKeyboardFocusHere(1);
+        }
+
+        template<bool texturePopup = false,typename PropertyType>
+        bool selectorPopup(string id,map<string, PropertyType> & map,string selectedName,PropertyType& property) {
+            if(ImGui::BeginPopup(id.c_str())) {
+                ImGui::InputText("##Search", searchBuffer.data(), searchBuffer.size());
+                if(ImGui::BeginListBox("##List")) {
+                    for(auto& pair : map) {
+
+                        if(pair.first.find(searchBuffer.data(),0) == string::npos) continue;
+                        
+                        if(ImGui::Selectable(pair.first.c_str(),selectedName == pair.first)) {
+                            property = pair.second;
+                            ImGui::CloseCurrentPopup();
+                            ImGui::EndListBox();
+                            ImGui::End();
+                            return true;
+                        }
+                        if constexpr(texturePopup) {
+                            if(ImGui::IsItemHovered()) {
+                                if(ImGui::BeginTooltip()) {
+                                    auto info = vulkan->getTextureInfo(pair.second);
+                                    displayImage(100,vulkan->getImGuiTextureID(pair.second), info.width, info.height);
+                                    ImGui::EndTooltip();
+                                }
+                            }
+                        }
+                    }
+                    ImGui::EndListBox();
+                }
+                ImGui::End();
+            }
+            return false;
+        }
+
         template<typename T>
         void displayMaterial(const char* label,T obj,GenericPropertyInfo* property,bool showImage = true) {
             Material material = property->get<Material>(obj);
 
+            ImGui::PushID(label);
             auto response = selector(label,material.name);
             if(response == SelectorResponse::Change) {
+                openSelectorPopup("MaterialPopup");
             }
+            if(selectorPopup("MaterialPopup",registry->getMaterials(),material.name,material)) {
+                property->set(obj,material);
+            }
+            ImGui::PopID();
             if(response == SelectorResponse::Goto) {
                 auto data = registry->getMaterialData(material.name);
                 if(data != nullptr) {
@@ -363,13 +460,15 @@ namespace DebugMenu {
                 auto info = vulkan->getTextureInfo(id);
                 if(showImage) displayImage(imageDisplaySizeSmall,vulkan->getImGuiTextureID(id),info.width,info.height);
                 auto response = selector(label,info.name);
-                if(response == SelectorResponse::Change) {
-                }
                 if(response == SelectorResponse::Goto) {
                     textureObjects[info.name].load(id,vulkan);
                     textureObjects[info.name].name = info.name;
                     selectedObject = &textureObjects[info.name];
                 }
+                if(response == SelectorResponse::Change) {
+                    openSelectorPopup("TexturePopup");
+                }
+                selectorPopup<true>("TexturePopup",registry->getTextures(),info.name,id);
             } else {
                 ImGui::LabelText(label,"%i",id);
             }
@@ -415,6 +514,7 @@ namespace DebugMenu {
 
             AssetViewer() {
                 addDefaultDisplayFunctions();
+                strcpy(searchBuffer.data(), "");
             }
             Registry* registry = nullptr;
             Vulkan* vulkan = nullptr;
@@ -438,7 +538,12 @@ namespace DebugMenu {
 
                 if(iconFont == nullptr) {
                     ImGuiIO& io = ImGui::GetIO();
-                    iconFont = io.Fonts->AddFontFromFileTTF("fonts\\lucide.ttf");
+                    #ifdef __APPLE__
+                        iconFont = io.Fonts->AddFontFromFileTTF("fonts/lucide.ttf");
+                    #endif
+                    #ifndef __APPLE__
+                        iconFont = io.Fonts->AddFontFromFileTTF("fonts\\lucide.ttf");
+                    #endif
                 }
                 
                 ImGui::Begin("Registry");

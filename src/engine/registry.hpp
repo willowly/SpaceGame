@@ -13,6 +13,7 @@
 
 #include "engine/debug.hpp"
 #include <algorithm>
+#include <type_traits>
 #include "api/type-info.hpp"
 
 using std::map,std::unique_ptr;
@@ -48,8 +49,12 @@ class Registry {
     
     map<string,ParticleEffect> particleEffects;
     map<string,Recipe> recipes;
+
     map<string,TypeInfo> typeInfo;
     map<string,string> typeIdToName;
+
+    map<string,unique_ptr<Object>> objectMap;
+    map<string,std::any> anyMap;
     
     TextureID errorTexture = 0; 
 
@@ -126,6 +131,16 @@ class Registry {
             return typeInfo.contains(name);
         }
 
+        template<typename T>
+        bool has(string name) {
+            if constexpr(std::is_convertible_v<T, Object*>) {
+                return objectMap.contains(name);
+            } else {
+                return anyMap.contains(name);
+            }
+            
+        }
+
         Mesh<Vertex>* getModel(string name) {
             if(models.contains(name)) {
                 return &models.at(name);
@@ -183,6 +198,36 @@ class Registry {
                 Debug::warn("no recipe called \"" + name + "\"");
             }
             return nullptr;
+        }
+
+        template<typename T>
+        string typedKey(string name) {
+            return typeid(T).name() + name;
+        }
+
+        template<typename T>
+        T get(string name) {
+            string key = typedKey<T>(name);
+            if constexpr(std::is_convertible_v<T, Object*>) {
+                if (objectMap.contains(key)) {
+                    return static_cast<T>(objectMap.at(key).get());
+                } else {
+                    Debug::warn("object" + name + "\" at key " + key);
+                    return nullptr;
+                }
+            } else {
+                if (anyMap.contains(key)) {
+                    return any_cast<T>(anyMap.at(key));
+                } else {
+                    Debug::warn("object" + name + "\" at key " + key);
+                    if(std::is_pointer_v<T>) {
+                        return nullptr;
+                    } else {
+                        return T();
+                    }
+                }
+            }
+            
         }
 
         void addRecipesToVector(std::vector<Recipe*>& recipeList,string category,int maxIngredients) {
@@ -364,6 +409,21 @@ class Registry {
         void addParticleEffect(string name,ParticleEffect effect) {
             particleEffects.emplace(name,effect);
         }
+
+        // template<typename T>
+        // void add(string name) {
+        //     string key = typedKey<T>(name);
+        //     if constexpr(std::is_convertible_v<T, Object*>) {
+        //         if (objectMap.contains(key)) {
+        //             return static_cast<T>(objectMap.at(key).get());
+        //         }
+        //     } else {
+        //         if (anyMap.contains(key)) {
+        //             return any_cast<T>(anyMap.at(key));
+        //         }
+        //     }
+            
+        // }
 
         template<typename T>
         TypeInfo* addTypeInfo(string name) {

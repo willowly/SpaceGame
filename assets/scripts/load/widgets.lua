@@ -43,3 +43,10 @@ widgets.inventory = {
     recipe_slot = "recipe_slot";
 };
 
+widgets.player_widget = {
+    type = "inventory",
+    background_sprite = "solid";
+    tooltip_text_title = "text_default";
+    item_slot = "item_slot";
+    recipe_slot = "recipe_slot";
+};

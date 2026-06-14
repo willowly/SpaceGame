@@ -171,16 +171,20 @@ if(WIN32)
 link_directories(lib/win)
 endif()
 
-add_library(GameNetworkingSockets STATIC IMPORTED)
+# add_library(GameNetworkingSockets STATIC IMPORTED)
 
+if(WIN32)
 set_target_properties(GameNetworkingSockets PROPERTIES
-    IMPORTED_LOCATION "C:\\Users\\wille\\Documents\\Hike\\SpaceGame\\build\\Debug\\GameNetworkingSockets.lib"
+    IMPORTED_LOCATION "${CMAKE_CURRENT_LIST_DIR}/Debug/GameNetworkingSockets.lib"
 )
+endif()
+
+
 
 target_include_directories(SpaceGame PUBLIC ${JoltPhysics_SOURCE_DIR})
 target_compile_features(SpaceGame PRIVATE cxx_std_20 )
 target_link_libraries(SpaceGame PUBLIC ${LINKED_LIBRARIES})
-target_link_libraries(SpaceGame PUBLIC GameNetworkingSockets)
+# target_link_libraries(SpaceGame PUBLIC GameNetworkingSockets)
 
 target_compile_features(SpaceGameApp PRIVATE cxx_std_20 )
 target_link_libraries(SpaceGameApp PUBLIC SpaceGame)

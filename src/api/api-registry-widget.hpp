@@ -2,10 +2,12 @@
 
 #include <sol/sol.hpp>
 
+#include "actor/components/inventory.hpp"
 #include "engine/registry.hpp"
 #include "engine/debug.hpp"
 #include <graphics/color.hpp>
 #include "api/api-registry.hpp"
+#include "interface/actor/player-widget.hpp"
 #include <interface/widgets-all.hpp>
 
 using std::string,std::variant;
@@ -58,6 +60,23 @@ namespace API {
         widget->font = &registry.font;
         Debug::info("Loaded Inventory Widget \"" + name + "\"",InfoPriority::MEDIUM);
     }
+
+    // inline void addPlayerWidget(string name,sol::table table,Registry& registry) {
+    //     PlayerWidget* widget = registry.addWidget<PlayerWidget>(name);
+    //     getSprite(table,"cursorRectSprite");
+    //     getWidget<InventoryWidget>(,"inventoryWidget");
+    //     get "toolbarWidget";
+    //     get "cursorSlotWidget";
+    //     get "speedText";
+    //     get<vec2>(table,"size",widget->size);
+    //     get<float>(table,"padding",widget->padding);
+    //     get<vec2>(table,"slot_size",widget->slotSize);
+    //     get<float>(table,"spacing",widget->spacing);
+    //     getWidget<ItemSlotWidget>(table,"item_slot",widget->itemSlot,registry,true);
+    //     getWidget<TextWidget>(table,"tooltip_text_title",widget->tooltipTextTitle,registry,true);
+    //     widget->font = &registry.font;
+    //     Debug::info("Loaded Inventory Widget \"" + name + "\"",InfoPriority::MEDIUM);
+    // }
 
     inline void addWidgetWithTypeAndLoad(string type,string name,ObjLoadType loadType,sol::table table,Registry& registry) {
         if(loadType == ObjLoadType::INVALID) {

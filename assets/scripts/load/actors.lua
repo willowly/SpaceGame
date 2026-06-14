@@ -1,7 +1,8 @@
 actors.player = {
     type = "character",
     model = "capsule",
-    material = "player"
+    material = "player",
+    widget = "player_widget"
 }
 actors.plane = {
     type = "actor",

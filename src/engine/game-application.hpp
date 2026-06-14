@@ -117,12 +117,6 @@ class GameApplication {
 
         Interface interface;
 
-        PlayerWidget playerWidget;
-        ToolbarWidget toolbarWidget;
-        InventoryWidget inventoryWidget;
-        ItemSlotWidget clearItemSlotWidget;
-        TextWidget fpsText;
-
         FurnaceWidget furnaceWidget;
 
         Font font;
