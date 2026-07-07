@@ -1,4 +1,7 @@
+#include <vector>
 #pragma once
+
+using std::vector;
 
 template<typename V>
 struct MeshData {

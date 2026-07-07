@@ -6,7 +6,7 @@
 #include "interface/widget.hpp"
 
 
-class ItemSlotWidget : public Widget {
+class ItemSlotWidget : public Object {
 
     public:
         Sprite sprite;
@@ -69,6 +69,10 @@ class ItemSlotWidget : public Widget {
             }
 
             return context.mouseInside(rect);
+        }
+
+        string getTypeName() override {
+            return "item_slot_widget";
         }
 
 };

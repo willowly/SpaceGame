@@ -1,0 +1,14 @@
+type: resource_item
+display_name: Bunny
+default_sprite: 
+  texture: bnuy
+  rect: 
+    position: 
+      x: 0.000000
+      y: 0.000000
+    size: 
+      x: 0.000000
+      y: 0.000000
+default_model: cube
+default_material: bunny
+default_model_scale: 0.300000

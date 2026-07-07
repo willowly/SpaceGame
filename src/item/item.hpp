@@ -4,6 +4,7 @@
 #include "graphics/vulkan.hpp"
 #include "helper/sprite.hpp"
 #include "engine/object.hpp"
+#include "graphics/material/material-object.hpp"
 
 using std::string;
 
@@ -34,7 +35,7 @@ class Item : public Object {
         string displayName;
         Sprite defaultSprite;
         Mesh<Vertex>* defaultModel = nullptr;
-        Material defaultMaterial = Material::none;
+        MaterialObject* defaultMaterial = nullptr;
         float defaultModelScale = 0.3f;
 
         virtual ~Item() {}
@@ -48,9 +49,9 @@ class Item : public Object {
         }
 
         virtual void addRenderables(Vulkan* vulkan,ItemStack& stack,vec3 position,quat rotation) {
-            if(defaultModel != nullptr) {
-                defaultModel->addToRender(vulkan,defaultMaterial,position,rotation,vec3(defaultModelScale));
-            }
+            if(defaultModel == nullptr) return;
+            if(defaultMaterial == nullptr) return;
+            defaultModel->addToRender(vulkan,defaultMaterial->material,position,rotation,vec3(defaultModelScale));
         }
 
         virtual void equip(Character& user) {

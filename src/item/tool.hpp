@@ -13,7 +13,7 @@ class Tool : public Item {
 
     public:
         Mesh<Vertex>* heldModel = nullptr;
-        Material heldModelMaterial = Material::none;
+        MaterialObject* heldModelMaterial = nullptr;
         vec3 modelOffset = vec3(0.3,-0.3,-1);
         quat modelRotation = quat(vec3(0,glm::radians(45.0f),0));
         float modelScale =  0.3f;
@@ -21,15 +21,6 @@ class Tool : public Item {
 
         Tool() {
 
-        }
-        Tool(Mesh<Vertex>* heldModel,Material heldModelMaterial,vec3 modelOffset,quat modelRotation,float modelScale,float lookLerp) : heldModel(heldModel), heldModelMaterial(heldModelMaterial), modelOffset(modelOffset),modelRotation(modelRotation),modelScale(modelScale),smoothTime(smoothTime) {
-
-        }
-        Tool(Mesh<Vertex>* heldModel,Material heldModelMaterial,vec3 modelOffset,quat modelRotation) : heldModel(heldModel), heldModelMaterial(heldModelMaterial), modelOffset(modelOffset), modelRotation(modelRotation) {
-            
-        }
-        Tool(Mesh<Vertex>* heldModel,Material heldModelMaterial) : heldModel(heldModel), heldModelMaterial(heldModelMaterial) {
-            
         }
 
         virtual ~Tool() {}
@@ -57,6 +48,7 @@ class Tool : public Item {
 
         virtual void addRenderablesHeld(Vulkan* vulkan,Character& user,float dt,float interpolation) override {
             if(heldModel != nullptr) {
+                if(heldModelMaterial == nullptr) return;
                 user.heldItemData.lookOrientation = glm::slerp(user.heldItemData.lookOrientation,user.getEyeRotation(),1 - pow(smoothTime,dt));
                 auto animation = animate(user,dt);
                 auto matrix = glm::mat4(1.0f);
@@ -65,7 +57,7 @@ class Tool : public Item {
                 matrix = glm::translate(matrix,modelOffset + animation.second);
                 matrix = matrix * glm::toMat4(modelRotation * animation.first);
                 matrix = glm::scale(matrix,vec3(modelScale));
-                heldModel->addToRender(vulkan,heldModelMaterial,matrix);
+                heldModel->addToRender(vulkan,heldModelMaterial->material,matrix);
             }
         }
 

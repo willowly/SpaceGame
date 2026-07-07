@@ -53,5 +53,9 @@ class PlayerWidget : public ActorWidget<Character> {
         context.drawRect(Rect::anchored(Rect::centered(vec2(cursorRectWidth,cursorRectLength)),screen,vec2(0.5,0.5)),cursorRectSprite);
     }
 
+    string getTypeName() override {
+        return "player_widget";
+    }
+
     
 };

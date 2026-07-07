@@ -10,10 +10,9 @@
 class DataLoaderImpl : public DataLoader {
 
     Registry& registry;
-    Material constructionMaterial;
 
     public:
-        DataLoaderImpl(Registry& registry,Material constructionMaterial) : registry(registry), constructionMaterial(constructionMaterial) {}
+        DataLoaderImpl(Registry& registry) : registry(registry) {}
 
         template <typename T, typename data_T, bool includeLoader = false>
         std::unique_ptr<Actor> actorLoadSpecPrototype(data_ActorEntry entry) {
@@ -60,7 +59,7 @@ class DataLoaderImpl : public DataLoader {
                  case data_ActorType::CONSTRUCTION:
                     try {
                         data_Construction* data = cista::deserialize<data_Construction>(entry.data);
-                        auto construction = Construction::makeInstanceFromSave(*data,constructionMaterial,*this);
+                        auto construction = Construction::makeInstanceFromSave(*data,registry.getMaterial(Loader::DEFAULT_CONSTRUCTION_MATERIAL_KEY),*this);
                         return construction;
                     } catch(std::runtime_error e) {
                         std::cout << "Failed to deserialize actor data from buffer: "<< e.what() << std::endl;

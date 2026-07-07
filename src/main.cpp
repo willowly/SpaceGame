@@ -19,6 +19,7 @@ int main() {
     try {
 
         GameApplication app;
+        
 
         app.run();
 

@@ -1,0 +1,10 @@
+type: recipe
+category: smelting
+time: 5.000000
+ingredients: 
+  0: 
+    item: tin_ore
+    amount: 2
+result: 
+  item: tin_plate
+  amount: 1

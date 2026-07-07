@@ -4,7 +4,7 @@
 
 struct Sprite {
     string name = "sprite";
-    TextureID texture;
+    TextureID texture = 0;
     Rect rect = Rect::unitSquare;
 
     Sprite() {}

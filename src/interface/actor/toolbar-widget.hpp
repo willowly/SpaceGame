@@ -6,7 +6,7 @@
 #include "interface/item-slot-widget.hpp"
 #include "interface/widget.hpp"
 
-class ToolbarWidget : public Widget {
+class ToolbarWidget : public Object {
     
     public:
         Sprite itemSlotSprite;
@@ -52,5 +52,9 @@ class ToolbarWidget : public Widget {
                 
             }
             
+        }
+
+        string getTypeName() override {
+            return "toolbar_widget";
         }
 };

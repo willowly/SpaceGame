@@ -135,4 +135,8 @@ class FurnaceWidget : public BlockWidget<FurnaceBlock> {
 
             tooltipTextTitle->draw(context,tooltip.position + vec2(2.0f,2.0f),text);
         }
+
+        string getTypeName() override {
+            return "furnace_widget";
+        }
 };

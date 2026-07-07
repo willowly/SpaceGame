@@ -32,7 +32,7 @@ class PlaceBlockTool: public Tool {
         enum class ActionEvent {
             Place = 0,
         };
-        Block* block;
+        Block* block = nullptr;
 
         string getTypeName() override {
             return "place_block_tool";

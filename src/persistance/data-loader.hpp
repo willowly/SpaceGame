@@ -2,7 +2,7 @@
 #include "data-generic.hpp"
 #include "actor/data-actor.hpp"
 #include "item/data-item-stack.hpp"
-#include "graphics/material.hpp"
+#include "graphics/material/material.hpp"
 #include <string>
 
 

@@ -1,3 +1,4 @@
+type: furnace
 fuel_max: 10.000000
 craft_speed: 1.000000
 mesh: furnace

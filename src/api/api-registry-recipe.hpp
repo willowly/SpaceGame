@@ -30,13 +30,11 @@ namespace API {
         while(i < 50) {
             sol::object element = ingredients[i];
             if(element == sol::lua_nil) {
-                std::cout << "exiting " << std::endl;
                 break;
             }
             ItemStack stack;
             getItemStack(ingredients,i,stack,registry,true);
             recipe.ingredients.push_back(stack);
-            std::cout << "ingredient: " << stack.item->name << " x" << stack.amount << std::endl;
             i++;
         }
         if(i == 50) {

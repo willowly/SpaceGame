@@ -2,6 +2,7 @@
 
 #include "terrain-vertex.hpp"
 #include "voxel-data.hpp"
+#include "graphics/material/lit-material.hpp"
 
 struct TerrainMaterial {
     LitMaterialData terrainTypes[8];
@@ -14,7 +15,7 @@ struct TerrainType {
 
 struct GenerationSettings {
     float noiseScale = 100;
-    float radius = 50;
+    float radius = 20;
     float noiseFactor = 30;
     int noiseOctaves = 1;
     float noiseGain = 0.5f;

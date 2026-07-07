@@ -17,8 +17,8 @@ class ThrusterBlock : public Block {
         // ints
         static const int FACING_VAR = 0;
 
-        Mesh<Vertex>* mesh;
-        TextureID texture;
+        Mesh<Vertex>* mesh = nullptr;
+        TextureID texture = 0;
         float force; //for now this is always forwards
         float sideForce; //for now this is always the 4 directions parrellel to the back
 

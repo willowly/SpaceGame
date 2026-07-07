@@ -1,11 +1,14 @@
+type: resource_item
 display_name: Stone
 default_sprite: 
-	texture: stone_item
-	rect: 
-		position: <0,0>
-		size: <0,0>
-
-
+  texture: stone_item
+  rect: 
+    position: 
+      x: 0.000000
+      y: 0.000000
+    size: 
+      x: 0.000000
+      y: 0.000000
 default_model: item_ore
 default_material: stone
 default_model_scale: 0.300000

@@ -36,7 +36,7 @@ class Block : public Object {
             Unique
         };
 
-        Item* defaultDrop; // everthing gets turned into functions...
+        Item* defaultDrop = nullptr; // everthing gets turned into functions...
         bool solid = false; // should probably also be a function just unsure rn
 
         struct PlacementData {

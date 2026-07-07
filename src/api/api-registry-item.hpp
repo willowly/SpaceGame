@@ -16,18 +16,18 @@ namespace API {
         get<string>(table,"display_name",item->displayName,true);
         getSprite(table,"icon",item->defaultSprite,registry,true);
         item->defaultModel = registry.getModel("item_default");
-        item->defaultMaterial = registry.getMaterial("item_default");
+        //item->defaultMaterial = registry.getMaterial("item_default");
         getMesh(table,"model",item->defaultModel,registry,false);
-        getMaterial(table,"material",item->defaultMaterial,registry,false);
+        //getMaterial(table,"material",item->defaultMaterial,registry,false);
     }
 
     inline void loadItemToolType(ObjLoadType loadType,sol::table table,Tool* item,Registry& registry) {
         loadItemBaseType(loadType,table,item,registry);
         get<float>(table,"smooth_time",item->smoothTime,false);
         getMesh(table,"model",item->heldModel,registry,false);
-        getMaterial(table,"material",item->heldModelMaterial,registry,false);
+        // getMaterial(table,"material",item->heldModelMaterial,registry,false);
         getMesh(table,"held_model",item->heldModel,registry,false);
-        getMaterial(table,"held_material",item->heldModelMaterial,registry,false);
+        // getMaterial(table,"held_material",item->heldModelMaterial,registry,false);
         get<vec3>(table,"offset",item->modelOffset,false);
         get<quat>(table,"rotation",item->modelRotation,false);
         get<float>(table,"scale",item->modelScale,false);

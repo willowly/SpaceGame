@@ -246,6 +246,7 @@ class Construction : public Actor {
 
         };
         std::map<Location,bool> stepCallbacks;
+        std::map<Location,bool> controlCallbacks;
 
         void step(World* world,float dt) override {
 
@@ -1044,6 +1045,10 @@ class Construction : public Actor {
 
         void addStepCallback(ivec3 location) {
             stepCallbacks[Location(location)] = true;
+        }
+
+        void addControlCallback(ivec3 location) {
+            controlCallbacks[Location(location)] = true;
         }
 
         void createBlockMap(map<Location,BlockData>& blockMap) {

@@ -51,6 +51,8 @@
 #define RENDERER_VULKAN
 #include "engine/window.hpp"
 
+#include "material/material.hpp"
+
 #define FRAMES_IN_FLIGHT 2
 #define DESCRIPTOR_COUNT 2048
 #define TRANSFER_COUNT 32
@@ -103,29 +105,6 @@ struct TextureInfo {
 };
 
 typedef unsigned int TextureID;
-
-
-struct LitMaterialData : public Object {
-
-    LitMaterialData() {
-        
-    }
-
-    LitMaterialData(TextureID texture,vec4 color = vec4(1)) : texture(texture), color(color) {
-
-    }
-        
-    TextureID texture;
-    vec4 color = vec4(1);
-
-    string getTypeName() {
-        return "lit_material";
-    }
-
-    
-};
-
-#include "material.hpp"
 
 struct MeshBuffer : Buffer {
     VkDeviceSize indexOffset = 0;
@@ -398,6 +377,10 @@ class Vulkan {
             {
                 if(!renderObject.settings.shadowPass) continue;
 
+                if(!renderObject.material.isValid()) {
+                    continue;
+                }
+
                 MeshBuffer meshBuffer = renderObject.meshBuffer;
                 if(currentMeshBuffer != meshBuffer.buffer) {
                     
@@ -477,6 +460,10 @@ class Vulkan {
             {
 
                 if(!renderObject.settings.mainPass) continue;
+
+                if(!renderObject.material.isValid()) {
+                    continue;
+                }
 
                 MeshBuffer meshBuffer = renderObject.meshBuffer;
                 if(currentMeshBuffer != meshBuffer.buffer) {
@@ -736,12 +723,48 @@ class Vulkan {
         }
 
         void clearObjects() {
+
             renderObjects.clear();
+
         }
 
         void clearTextures() {
+
+            for(auto texture : textures) {
+                destroyTextureResources(texture);
+            }
             textures.clear();
+
         }
+        
+        void clearBuffers() {
+
+            for (auto buffer_opt : managedBuffers)
+            {
+                if(buffer_opt) {
+                    auto buffer = buffer_opt.value();
+                    vmaDestroyBuffer(allocator, buffer.buffer, buffer.allocation);
+                }
+            }
+            managedBuffers.clear();
+
+        }
+
+        void clearPipelines() {
+            for(auto pipeline : managedPipelines) {
+                vkDestroyPipeline(device,pipeline,nullptr);
+            }
+            managedPipelines.clear();
+        }
+        
+        void clearResources() {
+
+            clearBuffers();
+            clearTextures();
+            clearPipelines();
+
+        }
+        
 
         TextureID loadTextureFile(string path) {
             int texWidth, texHeight, texChannels;

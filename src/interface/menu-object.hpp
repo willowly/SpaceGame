@@ -4,7 +4,7 @@
 
 class Character;
 
-class MenuObject : public Widget {
+class MenuObject {
     public:
         virtual void drawMenu(DrawContext context,Character& user) = 0;
 

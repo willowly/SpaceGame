@@ -5,6 +5,7 @@
 #include "engine/registry.hpp"
 #include "engine/debug.hpp"
 #include <graphics/color.hpp>
+#include "graphics/material/lit-material.hpp"
 
 using std::string,std::variant,glm::vec3;
 
@@ -226,7 +227,7 @@ namespace API {
         sol::object obj = table[key];
         if(obj.is<string>()) {
             string str = obj.as<string>();
-            T* widget = registry.getWidget<T>(str); //emits warning for us
+            T* widget = registry.getPtr<T>(str); //emits warning for us
             if(widget != nullptr) {
                 ref = widget;
                 propertySet = true;

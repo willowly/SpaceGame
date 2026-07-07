@@ -5,6 +5,6 @@
 
 #include "actor/inventory-widget.hpp"
 #include "actor/toolbar-widget.hpp"
-
+#include "actor/player-widget.hpp"
 
 #include "block/furnace-widget.hpp"

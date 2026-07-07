@@ -10,19 +10,42 @@ using std::string, glm::vec4, glm::vec3, glm::vec2,glm::ivec2,glm::ivec3,glm::ma
 
 namespace StringHelper {
 
-    inline std::vector<std::string> split(std::string s, const std::string& delimiter) {
+    inline std::vector<std::string> split(std::string s, const std::string& delimiter,int limit = 0) {
         std::vector<std::string> tokens;
         size_t pos = 0;
         std::string token;
+        int i = 0;
         while ((pos = s.find(delimiter)) != std::string::npos) {
             token = s.substr(0, pos);
             tokens.push_back(token);
             s.erase(0, pos + delimiter.length());
+            i++;
+            if(limit != 0 && i >= limit) {
+                break;
+            }
         }
         tokens.push_back(s);
 
         return tokens;
     }
+
+    inline void ltrim(std::string &s) {
+        s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
+            return !std::isspace(ch);
+        }));
+    }
+
+    inline void rtrim(std::string &s) {
+        s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
+            return !std::isspace(ch);
+        }).base(), s.end());
+    }
+
+    inline void trim(std::string &s) {
+        ltrim(s);
+        rtrim(s);
+    }
+
     inline std::string toString(vec4 v) {
         return std::format("<{},{},{},{}>",v.x,v.y,v.z,v.w);
     }

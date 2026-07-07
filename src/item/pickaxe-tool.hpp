@@ -14,10 +14,6 @@ class PickaxeTool : public Tool {
 
         }
 
-        PickaxeTool(Mesh<Vertex>* heldModel,Material heldModelMaterial,vec3 modelOffset,quat modelRotation) : Tool(heldModel,heldModelMaterial,modelOffset,modelRotation) {
-            
-        }
-
         enum State {
             NEUTRAL,
             ANTICIPATION,

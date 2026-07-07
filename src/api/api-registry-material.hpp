@@ -6,6 +6,7 @@
 #include "engine/debug.hpp"
 #include <graphics/color.hpp>
 #include <api/api-registry-general.hpp>
+#include "graphics/material/lit-material.hpp"
 
 using std::string,std::variant;
 

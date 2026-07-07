@@ -8,7 +8,7 @@
 #include "interface/text-widget.hpp"
 #include "interface/item-slot-widget.hpp"
 
-class InventoryWidget : public Widget{
+class InventoryWidget : public Object{
     
     public:
         Sprite backgroundSprite;
@@ -131,11 +131,19 @@ class InventoryWidget : public Widget{
             
             Rect tooltip = Rect(context.getMousePosition()+vec2(3,3),vec2(70,25));
 
+            if(recipe.result.isEmpty()) {
+                return;
+            }
+
             string text = "CRAFT " + recipe.result.item->displayName;
 
             tooltip.size.x = tooltipTextTitle->getSize(text).x + 4.0f;
             context.drawRect(tooltip,backgroundSprite,Color(0.05,0.05,0.05));
 
             tooltipTextTitle->draw(context,tooltip.position + vec2(2.0f,2.0f),text);
+        }
+
+        string getTypeName() override {
+            return "inventory_widget";
         }
 };

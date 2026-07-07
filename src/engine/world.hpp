@@ -278,19 +278,19 @@ class World {
 
         //probably should remove this, but its for getting the player. Ill think of a better way to handle this I guess
         template <typename T>
-        ActorID getActorOfType() {
+        T* getActorOfType() {
             
             for (auto& actor : actors)
             {
                 T* typed_actor = dynamic_cast<T*>(actor.get());
                 if(typed_actor != nullptr) {
                     
-                    return typed_actor->id;
+                    return typed_actor;
                 }
                 
             }
 
-            return Invalid_ActorID;
+            return nullptr;
 
         }
 
@@ -597,6 +597,7 @@ class World {
             contactListener.collisions.clear();
             camera = Camera();
             sinceLastStep = 0;
+            nextID = 1;
 
             
         }

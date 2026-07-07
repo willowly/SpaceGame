@@ -14,7 +14,7 @@ namespace DebugMenu {
         }
 
         if(ImGui::BeginPopup("GiveItemPopup")) {
-            for (auto& pair : registry.getItems())
+            for (auto pair : registry.getItems())
             {
                 auto& item = pair.second;
                 string name = item->displayName;
@@ -29,24 +29,24 @@ namespace DebugMenu {
                 }
                 if(ImGui::Button(name.c_str())) {
                     if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-                        player.give(ItemStack(item.get(),1));
+                        player.give(ItemStack(item,1));
                     }
                     if (ImGui::IsMouseClicked(ImGuiMouseButton_Right)) {
                         ImGui::OpenPopup(("GiveItemPopup_" + name).c_str());
                     }
                     if(ImGui::BeginPopup("GiveItemPopup")) {
                         if(ImGui::Button("Give x5")) {
-                            player.give(ItemStack(item.get(),5));
+                            player.give(ItemStack(item,5));
                         }
                         if(ImGui::Button("Give x10")) {
-                            player.give(ItemStack(item.get(),10));
+                            player.give(ItemStack(item,10));
                         }
                         if(ImGui::Button("Give x100")) {
-                            player.give(ItemStack(item.get(),100));
+                            player.give(ItemStack(item,100));
                         }
                         ImGui::End();
                     }
-                    player.give(ItemStack(item.get(),1));
+                    player.give(ItemStack(item,1));
                 }
             }
             ImGui::End();

@@ -14,6 +14,10 @@ materials.tin_block = {
     texture=textures.tin_block,
 }
 
+materials.tin_plate = {
+    texture = "plate"
+}
+
 materials.furnace = {
     texture="furnace"
 }

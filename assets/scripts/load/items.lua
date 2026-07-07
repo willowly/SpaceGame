@@ -8,10 +8,6 @@ items.stone = {
     material = "stone",
 }
 
-
-materials.tin_plate = {
-    texture = "plate"
-}
 items.tin_plate = {
     type = "placetool",
     display_name = "Tin Plate",

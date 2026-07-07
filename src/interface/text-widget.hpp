@@ -5,7 +5,7 @@
 #include "font.hpp"
 #include "interface/widget.hpp"
 
-class TextWidget : public Widget {
+class TextWidget : public Object {
 
     public:
 
@@ -36,6 +36,10 @@ class TextWidget : public Widget {
     vec2 getSize(string text) {
         float width = height/ratio;
         return vec2((width + spacing) * text.size(),height);
+    }
+
+    string getTypeName() override {
+        return "text_widget";
     }
     
 };

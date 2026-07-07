@@ -1,0 +1,7 @@
+type: thruster
+force: 0.000000
+side_force: 0.000000
+mesh: pipe
+texture: pipe1
+default_drop: pipe
+solid: 0

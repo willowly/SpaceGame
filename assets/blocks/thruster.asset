@@ -1,3 +1,6 @@
+type: thruster
+force: 20000.000000
+side_force: 4000.000000
 mesh: thruster
 texture: error
 default_drop: thruster

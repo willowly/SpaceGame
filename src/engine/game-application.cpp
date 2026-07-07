@@ -27,7 +27,7 @@ void GameApplication::spawnAsteroidScene()  {
         terrainLoader.addTerrain(terrain->id);
     }
 
-    auto terrain = world->spawn(Terrain::makeInstance(terrainMaterial,settings,rnd(),vec3(0,0,0)));
+    auto terrain = world->spawn(Terrain::makeInstance(terrainMaterial,settings,rnd(),vec3(0,-25,0)));
     terrainLoader.addTerrain(terrain->id);
 }
 
@@ -64,7 +64,15 @@ void GameApplication::setup() {
 
     auto playerPrototype = registry.getActor<Character>("player");
 
-    registry.addWidget<PlayerWidget>("playerWidget");
+    auto playerWidget = registry.addObject<PlayerWidget>("playerWidget");
+    playerWidget->inventoryWidget = registry.getPtr<InventoryWidget>("inventory");
+
+    playerWidget->toolbarWidget = registry.getPtr<ToolbarWidget>("toolbar");
+    playerWidget->cursorSlotWidget = registry.getPtr<ItemSlotWidget>("clear_item_slot");
+    playerWidget->speedText = registry.getPtr<TextWidget>("text_default");
+    playerWidget->cursorRectSprite = registry.getSprite("solid");
+
+    playerPrototype->widget = playerWidget;
 
     // terrain setup
 
@@ -76,7 +84,7 @@ void GameApplication::setup() {
     
             
     settings.generationSettings.noiseScale = 1;
-    settings.generationSettings.radius = 40;
+    settings.generationSettings.radius = 15;
     settings.generationSettings.noiseFactor = 15;
     settings.generationSettings.noiseOctaves = 5;
     settings.generationSettings.noiseGain = 0.3f;
@@ -92,10 +100,10 @@ void GameApplication::setup() {
 
     furnaceWidget.solid = registry.getSprite("solid");
     furnaceWidget.font = &font;
-    furnaceWidget.tooltipTextTitle = registry.getWidget<TextWidget>("text_default");
-    furnaceWidget.recipeSlot = registry.getWidget<ItemSlotWidget>("recipe_slot");
+    furnaceWidget.tooltipTextTitle = registry.getPtr<TextWidget>("text_default");
+    furnaceWidget.recipeSlot = registry.getPtr<ItemSlotWidget>("recipe_slot");
 
-    auto itemSlotWidget = registry.getWidget<ItemSlotWidget>("item_slot");
+    auto itemSlotWidget = registry.getPtr<ItemSlotWidget>("item_slot");
 
     furnaceWidget.itemSlot = itemSlotWidget;
 
@@ -124,13 +132,8 @@ void GameApplication::setup() {
     effect.particleSize = {0.2f,0.0f};
     effect.initialAngularVelocity = {0.0f,90.0f};
 
-    auto pickaxe = dynamic_cast<PickaxeTool*>(registry.getItem("pickaxe")); 
-    pickaxe->testEffect = effectPrototype;
-
-    options = {};
-    options.depthTestEnabled = VK_TRUE;
-    options.depthCompareOp = VK_COMPARE_OP_ALWAYS;
-    options.blend = VK_TRUE;
+    // auto pickaxe = dynamic_cast<PickaxeTool*>(registry.getItem("pickaxe")); 
+    // pickaxe->testEffect = effectPrototype;
 
     //registry.addMaterial("shadow_test",vulkan->createMaterial<UIMaterialData,UIVertex>("shadow_test",UIMaterialData(),options));
 
@@ -143,7 +146,8 @@ void GameApplication::setup() {
     assetViewer.registry = &registry;
     assetViewer.vulkan = vulkan;
 
-    //spawnAsteroidScene();
+
+    spawnAsteroidScene();
     spawnPlayer();
 
     lua["world"] = world.get();
@@ -243,19 +247,24 @@ void GameApplication::reload() {
         return;
     }
 
-    auto save = world->save();
+    auto data = save();
     terrainLoader.stop();
     terrainLoader.clear();
     world->clear();
-    terrainLoader.start(world.get());
+    
+    registry.clear();
+    vulkan->clearBuffers();
+    vulkan->clearTextures();
 
-    registry.clearDataAssets();
+    assetViewer.reload();
 
+    window->setCursorMode(CursorMode::Normal);
+    
+    
     vulkan->waitIdle(); // we can probably change this later, but for now its fine. just makes sure we finish using all the resources we have before they potentially get modified
     setup();
-    DataLoaderImpl dataLoader(registry,world->constructionMaterial);
-    world->load(save,dataLoader);
-    playerID = world->getActorOfType<Character>();
+    load(data); 
+    terrainLoader.start(world.get());
     lua["player"] = playerID;
 
 }
@@ -279,28 +288,25 @@ void GameApplication::loop() {
 
     ZoneScoped;
 
-    // if(input.getKeyPressed(GLFW_KEY_F5)) { // work in progress
-    //     reload();
-    // }
+    if(input.getKeyPressed(GLFW_KEY_F5)) { // work in progress
+        reload();
+    }
     
 
     // save and load 
     if(input.getKeyPressed(GLFW_KEY_F6)) {
         std::cout << "saving" << std::endl;
-        auto data = world->save();
-        SaveHelper::save<data_World>(data,"world.dat");
+        SaveHelper::save(save(),"save.dat");
     }
     
     
     if(input.getKeyPressed(GLFW_KEY_F7)) {
         std::cout << "loading" << std::endl;
-        auto dataOpt = SaveHelper::load<data_World>("world.dat");
+        auto dataOpt = SaveHelper::load<data_GameSave>("save.dat");
         if(dataOpt) {
             playerID = Invalid_ActorID;
-            DataLoaderImpl dataLoader(registry,world->constructionMaterial);
-            world->load(dataOpt.value(),dataLoader);
-            playerID = world->getActorOfType<Character>();
-            lua["player"] = playerID;
+            DataLoaderImpl dataLoader(registry);
+            load(dataOpt.value());
         }
     }
 
@@ -359,7 +365,7 @@ void GameApplication::loop() {
             window->setCursorMode(CursorMode::Locked);
             drawContext.disableClicks();
         }
-        player->widget->draw(drawContext,*player);
+        if(player->widget != nullptr) player->widget->draw(drawContext,*player);
     }
     
 
@@ -385,5 +391,26 @@ void GameApplication::loop() {
 
     //FrameMark;
     
+
+}
+
+data_GameSave GameApplication::save() {
+
+    data_GameSave data;
+    data.world = world->save();
+    data.playerID = playerID;
+
+    return data;
+
+}
+
+void GameApplication::load(data_GameSave data) {
+
+    DataLoaderImpl dataLoader(registry);
+    terrainLoader.stop();
+    world->load(data.world,dataLoader);
+    playerID = data.playerID;
+    lua["player"] = playerID;
+    terrainLoader.start(world.get());
 
 }

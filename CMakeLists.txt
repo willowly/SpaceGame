@@ -6,7 +6,7 @@ set(OUTPUT_DIR ${OUTPUT_DIR}/bin)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /bigobj /fsantize=address /we4183 /we4715")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /bigobj /we4183 /we4715")
 endif()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
@@ -171,11 +171,11 @@ if(WIN32)
 link_directories(lib/win)
 endif()
 
-# add_library(GameNetworkingSockets STATIC IMPORTED)
+ add_library(GameNetworkingSockets STATIC IMPORTED)
 
 if(WIN32)
 set_target_properties(GameNetworkingSockets PROPERTIES
-    IMPORTED_LOCATION "${CMAKE_CURRENT_LIST_DIR}/Debug/GameNetworkingSockets.lib"
+    IMPORTED_LOCATION "${CMAKE_CURRENT_LIST_DIR}/build/Debug/GameNetworkingSockets.lib"
 )
 endif()
 
@@ -184,7 +184,7 @@ endif()
 target_include_directories(SpaceGame PUBLIC ${JoltPhysics_SOURCE_DIR})
 target_compile_features(SpaceGame PRIVATE cxx_std_20 )
 target_link_libraries(SpaceGame PUBLIC ${LINKED_LIBRARIES})
-# target_link_libraries(SpaceGame PUBLIC GameNetworkingSockets)
+target_link_libraries(SpaceGame PUBLIC GameNetworkingSockets)
 
 target_compile_features(SpaceGameApp PRIVATE cxx_std_20 )
 target_link_libraries(SpaceGameApp PUBLIC SpaceGame)
@@ -219,10 +219,10 @@ if(APPLE)
     set(OUTPUT_DIR "${CMAKE_BINARY_DIR}")
 endif(APPLE)
 
-add_custom_target(Assets
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/assets ${OUTPUT_DIR}
-)
-add_dependencies(SpaceGame Assets)
+# add_custom_target(Assets
+#     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/assets ${OUTPUT_DIR}
+# )
+# add_dependencies(SpaceGame Assets)
 
 macro(compile_shader shader_path)
     add_custom_command(
@@ -268,5 +268,5 @@ compile_shader("shadow_test")
 compile_shader_compute("dither")
 
 add_custom_target(SpaceGame_Shaders DEPENDS ${SHADER_OUTPUTS} SOURCES ${SHADER_SOURCES})
-add_dependencies(SpaceGame_Shaders Assets)
+# add_dependencies(SpaceGame_Shaders Assets)
 add_dependencies(SpaceGame SpaceGame_Shaders)

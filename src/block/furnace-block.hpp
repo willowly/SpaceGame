@@ -3,6 +3,7 @@
 #include "block.hpp"
 #include "actor/construction.hpp"
 #include "actor/character.hpp"
+#include "helper/block-helper.hpp"
 #include "interface/block/block-menu-object.hpp"
 #include "interface/block/block-widget.hpp"
 #include "item/recipe.hpp"
@@ -34,8 +35,8 @@ class FurnaceBlock : public Block {
         BlockWidget<FurnaceBlock>* widget;
         std::vector<Recipe*> recipes;
 
-        Mesh<Vertex>* mesh;
-        TextureID texture;
+        Mesh<Vertex>* mesh = nullptr;
+        TextureID texture = 0;
     
         FurnaceBlock() : Block() {
         }

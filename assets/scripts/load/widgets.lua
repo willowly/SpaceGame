@@ -8,6 +8,11 @@ widgets.item_slot = {
     sprite = "item_slot",
     color = color(0.2,0.2,0.2),
 }
+widgets.clear_item_slot = {
+    type = "item_slot",
+    sprite = "solid",
+    color = color(0.0,0.0,0.0,0.0),
+}
 
 widgets.toolbar_item_slot = {
     type = "item_slot",
@@ -36,14 +41,6 @@ widgets.toolbar = {
 }
 
 widgets.inventory = {
-    type = "inventory",
-    background_sprite = "solid";
-    tooltip_text_title = "text_default";
-    item_slot = "item_slot";
-    recipe_slot = "recipe_slot";
-};
-
-widgets.player_widget = {
     type = "inventory",
     background_sprite = "solid";
     tooltip_text_title = "text_default";

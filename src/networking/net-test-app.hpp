@@ -164,12 +164,12 @@ class NetTestApp
 
         skybox.loadResources(*vulkan, skyboxMaterial);
 
-        auto playerWidget = registry.addWidget<PlayerWidget>("player_widget");
-        playerWidget->inventoryWidget = registry.getWidget<InventoryWidget>("inventory");
-        playerWidget->toolbarWidget = registry.getWidget<ToolbarWidget>("toolbar");
-        playerWidget->cursorSlotWidget = registry.getWidget<ItemSlotWidget>("toolbar_item_slot");
+        auto playerWidget = registry.addObject<PlayerWidget>("player_widget");
+        playerWidget->inventoryWidget = registry.getPtr<InventoryWidget>("inventory");
+        playerWidget->toolbarWidget = registry.getPtr<ToolbarWidget>("toolbar");
+        playerWidget->cursorSlotWidget = registry.getPtr<ItemSlotWidget>("toolbar_item_slot");
         playerWidget->cursorRectSprite = registry.getSprite("solid");
-        playerWidget->speedText = registry.getWidget<TextWidget>("text_default");
+        playerWidget->speedText = registry.getPtr<TextWidget>("text_default");
 
         registry.getActor<Character>("player")->widget = playerWidget;
 

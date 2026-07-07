@@ -15,7 +15,7 @@ using std::string,std::variant;
 namespace API {
     
     inline void addTextWidget(string name,sol::table table,Registry& registry) {
-        TextWidget* widget = registry.addWidget<TextWidget>(name);
+        TextWidget* widget = registry.addObject<TextWidget>(name);
         get<float>(table,"height",widget->height);
         get<float>(table,"ratio",widget->ratio);
         get<float>(table,"spacing",widget->spacing);
@@ -25,7 +25,7 @@ namespace API {
     }
 
     inline void addItemSlotWidget(string name,sol::table table,Registry& registry) {
-        ItemSlotWidget* widget = registry.addWidget<ItemSlotWidget>(name);
+        ItemSlotWidget* widget = registry.addObject<ItemSlotWidget>(name);
         getSprite(table,"sprite",widget->sprite,registry);
         getSprite(table,"bar_sprite",widget->barSprite,registry);
         get<Color>(table,"color",widget->color);
@@ -36,7 +36,7 @@ namespace API {
     }
 
     inline void addToolbarWidget(string name,sol::table table,Registry& registry) {
-        auto* widget = registry.addWidget<ToolbarWidget>(name);
+        auto* widget = registry.addObject<ToolbarWidget>(name);
         getSprite(table,"sprite",widget->sprite,registry,true);
         getSprite(table,"item_slot_sprite",widget->itemSlotSprite,registry,true);
         getSprite(table,"selector_sprite",widget->selectorSprite,registry,true);
@@ -49,20 +49,21 @@ namespace API {
     }
 
     inline void addInventoryWidget(string name,sol::table table,Registry& registry) {
-        InventoryWidget* widget = registry.addWidget<InventoryWidget>(name);
+        InventoryWidget* widget = registry.addObject<InventoryWidget>(name);
         getSprite(table,"background_sprite",widget->backgroundSprite,registry);
         get<vec2>(table,"size",widget->size);
         get<float>(table,"padding",widget->padding);
         get<vec2>(table,"slot_size",widget->slotSize);
         get<float>(table,"spacing",widget->spacing);
         getWidget<ItemSlotWidget>(table,"item_slot",widget->itemSlot,registry,true);
+        getWidget<ItemSlotWidget>(table,"recipe_slot",widget->recipeSlot,registry,true);
         getWidget<TextWidget>(table,"tooltip_text_title",widget->tooltipTextTitle,registry,true);
         widget->font = &registry.font;
         Debug::info("Loaded Inventory Widget \"" + name + "\"",InfoPriority::MEDIUM);
     }
 
     // inline void addPlayerWidget(string name,sol::table table,Registry& registry) {
-    //     PlayerWidget* widget = registry.addWidget<PlayerWidget>(name);
+    //     PlayerWidget* widget = registry.addObject<PlayerWidget>(name);
     //     getSprite(table,"cursorRectSprite");
     //     getWidget<InventoryWidget>(,"inventoryWidget");
     //     get "toolbarWidget";

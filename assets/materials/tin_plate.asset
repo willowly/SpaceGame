@@ -1,0 +1,9 @@
+type: lit_material
+data: 
+  texture: plate
+  color: 
+    x: 1.000000
+    y: 1.000000
+    z: 1.000000
+    w: 1.000000
+shader: lit

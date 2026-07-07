@@ -1,4 +1,7 @@
-world:spawn(actors.plane)
-
-print("spawned plane");
-
+print("hello")
+print(items.pickaxe)
+print(player)
+player:give(items.pickaxe,1)
+player:give(items.tin_plate,99)
+player:give(items.thruster,99)
+player:give(items.cockpit,99)

@@ -51,6 +51,11 @@ using std::string;
 using std::unique_ptr, std::shared_ptr;
 
 
+struct data_GameSave {
+    data_World world;
+    ActorID playerID;
+};
+
 class GameApplication {
 
     public:
@@ -225,9 +230,8 @@ class GameApplication {
 
         void loop();
 
-        
+        data_GameSave save();
 
-        
-
+        void load(data_GameSave data);
         
 };

@@ -13,7 +13,7 @@ class ConnectedBlock : public Block {
             solid = true;
         }
 
-        TextureID texture;
+        TextureID texture = 0;
 
         int connectionType = 0; // :shrug: idk
 

@@ -4,6 +4,7 @@
 #include "api/type-info-block.hpp"
 #include "api/type-info-graphics.hpp"
 #include "api/type-info-math.hpp"
+#include "api/type-info-widget.hpp"
 
 
 namespace TypeInfoLoader {
@@ -14,6 +15,7 @@ namespace TypeInfoLoader {
         TypeInfoLoader::loadItem(registry);
         TypeInfoLoader::loadGraphics(registry);
         TypeInfoLoader::loadMath(registry);
+        TypeInfoLoader::loadWidget(registry);
 
     }
 

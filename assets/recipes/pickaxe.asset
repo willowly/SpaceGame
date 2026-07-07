@@ -1,0 +1,10 @@
+type: recipe
+category: crafting
+time: 3.000000
+ingredients: 
+  0: 
+    item: tin_plate
+    amount: 5
+result: 
+  item: pickaxe
+  amount: 1

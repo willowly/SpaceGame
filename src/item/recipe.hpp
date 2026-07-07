@@ -6,7 +6,6 @@
 
 struct Recipe : public Object {
 
-    string name;
     string category;
     ItemStack result;
     std::vector<ItemStack> ingredients;

@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include "graphics/vulkan.hpp"
 
 #include "graphics/camera.hpp"
 #include "graphics/mesh-data.hpp"

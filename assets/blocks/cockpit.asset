@@ -1,3 +1,4 @@
+type: cockpit
 mesh: cockpit
 texture: cockpit
 default_drop: cockpit
