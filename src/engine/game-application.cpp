@@ -41,6 +41,17 @@ void GameApplication::setup() {
     // load from files and lua scripts
     loader.loadAll(registry,lua,vulkan);
 
+    // // test
+    //     AssetSerializer serializer;
+    //     serializer.registry = &registry;
+    //     serializer.vulkan = vulkan;
+
+    //     std::ifstream file("blocks/thruster.asset");
+
+
+    //     serializer.deserialize<Block>(file);
+    // //test
+
     input.clearInputBuffers(); // reset mouse position;
 
     Debug::loadRenderResources(*vulkan);

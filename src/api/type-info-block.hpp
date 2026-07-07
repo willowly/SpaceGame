@@ -17,6 +17,7 @@ namespace TypeInfoLoader {
         thruster->addConstProperty("side_force",&ThrusterBlock::sideForce);
         thruster->addConstProperty("mesh",&ThrusterBlock::mesh);
         thruster->addConstProperty("texture",&ThrusterBlock::texture);
+        thruster->addConstProperty("cube_model",&ThrusterBlock::cubeModel);
         thruster->setParent(block);
 
         TypeInfo* cockpit = registry.addTypeInfo<CockpitBlock>("cockpit");

@@ -34,6 +34,8 @@
 
 #include "helper/event.hpp"
 
+#include "block/display/block-display.hpp"
+
 using glm::ivec3,glm::vec3;
 using std::unordered_map;
 
@@ -164,8 +166,6 @@ class Construction : public Actor {
 
     int blockCount = 0; //block count
 
-    float timer = 0;
-
     float turnTorque = 30.0f;
 
     bool isStatic = false;
@@ -186,11 +186,6 @@ class Construction : public Actor {
         blockCountX.push_back(0);
         blockCountY.push_back(0);
         blockCountZ.push_back(0);
-        
-        for (size_t i = 0; i < 6; i++)
-        {
-            thrustForces[i] = 0;
-        }
 
         blockPalette.push_back(BlockPaletteEntry());
         
@@ -217,7 +212,7 @@ class Construction : public Actor {
         // 3 - DOWN
         // 4 - LEFT
         // 5 - RIGHT
-        float thrustForces[6];
+        // float thrustForces[6];
 
         struct EventBlockPlaced { Construction* construction = nullptr; BlockPaletteEntry blockEntry; ivec3 position;};
 
@@ -248,9 +243,14 @@ class Construction : public Actor {
         std::map<Location,bool> stepCallbacks;
         std::map<Location,bool> controlCallbacks;
 
+        std::vector<std::unique_ptr<BlockDisplay>> blockDisplays;
+
         void step(World* world,float dt) override {
 
             updateLastTransform();
+
+            accumulatedThrustForce = vec3(0.0f);
+            accumulatedTorque = vec3(0.0f);
             
             for(auto& pair : stepCallbacks) {
 
@@ -266,31 +266,7 @@ class Construction : public Actor {
                 }
             }
 
-            timer += dt;
-
             body.applyGravity(world,position,dt);
-
-            accumulatedThrustForce = vec3(0.0f);
-            accumulatedTorque = vec3(0.0f);
-            //i have no idea why z and x are inverted :shrug:
-            if(moveControl.z > 0.01) {
-                applyForce(vec3(0,0,1) * thrustForces[static_cast<int>(BlockFacing::BACKWARD)] * moveControl.z); //too move forward we must thrust backwards
-            }
-            if(moveControl.z < 0.01) {
-                applyForce(vec3(0,0,1) * thrustForces[static_cast<int>(BlockFacing::FORWARD)] * moveControl.z);
-            }
-            if(moveControl.x < 0.01) {
-                applyForce(vec3(1,0,0) * thrustForces[static_cast<int>(BlockFacing::RIGHT)] * moveControl.x);
-            }
-            if(moveControl.x > 0.01) {
-                applyForce(vec3(1,0,0) * thrustForces[static_cast<int>(BlockFacing::LEFT)] * moveControl.x);
-            }
-            if(moveControl.y < 0.01) {
-                applyForce(vec3(0,1,0) * thrustForces[static_cast<int>(BlockFacing::UP)] * moveControl.y);
-            }
-            if(moveControl.y > 0.01) {
-                applyForce(vec3(0,1,0) * thrustForces[static_cast<int>(BlockFacing::DOWN)] * moveControl.y);
-            }
 
             if(turnControl.x < 0.01) {
                 applyTorque(transformDirection(vec3(1,0,0)) * turnControl.x * turnTorque);
@@ -396,9 +372,13 @@ class Construction : public Actor {
                 vulkan->addMesh(meshBuffer[meshState],material,getInterpolatedTransform(interpolation));
             }
 
+            for(auto& display : blockDisplays) {
+                display->addRenderables(vulkan,this,dt,interpolation);
+            }
+
             Debug::drawRay(position,transformDirection(vec3(0,0,1)),Color::green);
-            Debug::drawRay(position,body.getAngularVelocity(),Color::blue);
-            Debug::drawRay(position,turnControl,Color::red);
+            // Debug::drawRay(position,body.getAngularVelocity(),Color::blue);
+            // Debug::drawRay(position,turnControl,Color::red);
             
         }
 
@@ -996,7 +976,14 @@ class Construction : public Actor {
         }
 
         void setMoveControl(vec3 move) {
-            moveControl = glm::normalize(move);
+            moveControl = move;
+            if(glm::length(moveControl) > 1) {
+                moveControl = glm::normalize(moveControl);
+            }
+        }
+
+        vec3 getMoveControl() {
+            return moveControl;
         }
 
         void setTurnControl(vec3 turn) {
@@ -1049,6 +1036,24 @@ class Construction : public Actor {
 
         void addControlCallback(ivec3 location) {
             controlCallbacks[Location(location)] = true;
+        }
+
+        BlockDisplay* addBlockDisplay(std::unique_ptr<BlockDisplay> display) {
+            assert(display != nullptr);
+            auto rawPtr = display.get();
+            blockDisplays.push_back(std::move(display));
+            return rawPtr;
+        }
+
+        void removeBlockDisplay(BlockDisplay* display) {
+            assert(display != nullptr);
+            for (int i = blockDisplays.size() - 1; i >= 0; i--)
+            {
+                if(blockDisplays.at(i).get() == display) {
+                    blockDisplays.erase(blockDisplays.begin() + i);
+                }
+            }
+            
         }
 
         void createBlockMap(map<Location,BlockData>& blockMap) {

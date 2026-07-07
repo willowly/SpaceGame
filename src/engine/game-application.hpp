@@ -82,7 +82,6 @@ class GameApplication {
             terrainLoader.start(world.get());
             
             
-            
             while (!window->shouldClose()) {
                 input = window->pollInput();
                 loop();

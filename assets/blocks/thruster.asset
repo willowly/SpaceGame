@@ -3,5 +3,18 @@ force: 20000.000000
 side_force: 4000.000000
 mesh: thruster
 texture: error
+cube_model: 
+  mesh: cube
+  material: cow
+  offset: 
+    x: 0.000000
+    y: 0.000000
+    z: 0.500000
+  rotation: 
+    x: 0.000000
+    y: 0.000000
+    z: 0.000000
+    w: 1.000000
+  scale: 0.300000
 default_drop: thruster
 solid: 0

@@ -7,6 +7,7 @@
 #include "block/block-facing.hpp"
 // #include "block/block.hpp"
 #include "persistance/block/data-block-storage.hpp"
+#include "block/display/block-display.hpp"
 
 #include <variant>
 
@@ -19,6 +20,7 @@ class BlockStorage : public GenericStorage {
 
     std::vector<ItemStack> stacks;
     std::vector<ResourcePointer> pointers;
+    std::vector<BlockDisplay*> blockDisplays;
     public:
         void setStack(size_t index,ItemStack value) {
             if(stacks.size() <= index) {
@@ -60,6 +62,22 @@ class BlockStorage : public GenericStorage {
                 return nullptr;
             }
         }
+
+        
+        void setBlockDisplay(size_t index,BlockDisplay* value) {
+            if(blockDisplays.size() <= index) {
+                blockDisplays.resize(index+1);
+            }
+            blockDisplays[index] = value;
+        }
+
+        BlockDisplay* getBlockDisplay(size_t index) {
+            if(blockDisplays.size() <= index) {
+                return nullptr;
+            }
+            return blockDisplays[index];
+        }
+
 
         void clear() {
             GenericStorage::clear();

@@ -251,7 +251,7 @@ class AssetSerializer {
             string key = tokens[0];
             string value = tokens[1];
             StringHelper::trim(value);
-            if(key.find_first_not_of("  ") < indents) {
+            if(key.find_first_not_of(" ") < indents*2) {
                 file.seekg(lastPosition);
                 return map;
             }
@@ -276,7 +276,9 @@ class AssetSerializer {
         }
             
         for(auto& property : info->getProperties()) {
-            deserializeProperty(obj,property.get(),map[property->name]);
+            if(map.contains(property->name)) {
+                deserializeProperty(obj,property.get(),map[property->name]);
+            }
         }
         if(info->getParent() != nullptr) {
             deserializeProperties(obj,info->getParent(),map);
@@ -392,7 +394,7 @@ class AssetSerializer {
                 return nullptr;
             }
 
-            auto uniqueTypedPtr = deserializeStub(file,typeInfo,map);
+            auto uniqueTypedPtr = deserializeStub<T>(file,typeInfo,map);
 
             if(uniqueTypedPtr == nullptr) {
                 return nullptr;
