@@ -4,3 +4,4 @@
 #include "connected-block.hpp"
 #include "furnace-block.hpp"
 #include "thruster-block.hpp"
+#include "slope-block.hpp"

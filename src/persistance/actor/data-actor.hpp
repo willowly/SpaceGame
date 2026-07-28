@@ -9,19 +9,9 @@
 class Actor;
 class Registry;
 
-enum data_ActorType {
-    DUMMY,
-    PLAYER,
-    PHYSICS,
-    CONSTRUCTION,
-    ITEM_ACTOR,
-    DONT_SAVE,
-    ACTOR_TYPES_COUNT
-};
-
 
 struct data_ActorEntry {
-    data_ActorType type;
+    cista::raw::string type;
     cista::raw::string name;
     cista::raw::vector<std::uint8_t> data;
 };

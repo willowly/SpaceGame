@@ -12,11 +12,11 @@
 
 using glm::vec3,std::optional,MathHelper::sign;
 
-struct RaycastHit {
+struct SimpleRaycastHit {
     vec3 point = {};
     vec3 normal = {};
     float distance;
-    RaycastHit(vec3 point,vec3 normal,float distance) : point(point),normal(normal),distance(distance) { }
+    SimpleRaycastHit(vec3 point,vec3 normal,float distance) : point(point),normal(normal),distance(distance) { }
 };
 
 struct Ray {

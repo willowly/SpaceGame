@@ -63,8 +63,29 @@ class ItemActor : public Actor {
             body.applyGravity(world,position,dt);
         }
 
+        vec3 getVelocity() override {
+            return body.getVelocity();
+        }
+
+        void setVelocity(vec3 velocity) override {
+            body.setVelocity(velocity);
+        }
+
+        bool hasVelocity() override {
+            return true;
+        }
+
+        vec3 getAngularVelocity() override
+        {
+            return body.getAngularVelocity();
+        }
+
+        void setAngularVelocity(vec3 v) override
+        {
+            return body.setAngularVelocity(v);
+        }
+
         void prePhysics(World* world) override {
-            
             body.prePhysics(world,position,rotation);
         }
 
@@ -84,8 +105,8 @@ class ItemActor : public Actor {
 
         // Saving
 
-        data_ActorType getActorDataType() {
-            return data_ActorType::ITEM_ACTOR;
+        string getActorDataType() {
+            return "item_actor";
         }
 
         static std::unique_ptr<Actor> makeInstanceFromSave(const data_ItemActor& data,DataLoader& loader) {

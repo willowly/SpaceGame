@@ -491,60 +491,26 @@ class Terrain : public Actor {
         return std::unique_ptr<Terrain>(ptr);
     }
 
+    string getActorDataType() {
+        return "";
+    }
 
-    // void drawCellsOnRay(Ray ray,float dist) {
-
-        
-    //     //assert(abs(glm::length(ray.direction) - 1) > 0.001);
-        
-    //     Debug::drawRay(ray.origin,ray.direction*10.0f,Color::white);
-    //     Ray cellSpaceRay = Ray(transformPoint(ray.origin),transformDirection(ray.direction));
-    //     cellSpaceRay.origin = cellSpaceRay.origin/cellSize;
-    //     float cellDist = dist/cellSize;
-    //     float yxSlope = cellSpaceRay.direction.y/abs(cellSpaceRay.direction.x);
-    //     float zxSlope = cellSpaceRay.direction.z/abs(cellSpaceRay.direction.x);
-    //     std::cout << cellDist*cellSpaceRay.direction.x << std::endl;
-    //     int xDir = ray.direction.x > 0 ? 1 : -1;
-    //     float xOffset = MathHelper::fromFloor(cellSpaceRay.origin.x*xDir);
-    //     for(int i = 1;((i-1)*cellSize) <= (abs(cellSpaceRay.direction.x)*dist+xOffset);i++) {
-
-            
-            
-    //         ivec3 cellPos = ivec3(
-    //                 xDir*floor(i+cellSpaceRay.origin.x)-1,
-    //                 MathHelper::integerBelow(((i-xOffset)*yxSlope)+cellSpaceRay.origin.y),
-    //                 MathHelper::integerBelow(((i-xOffset)*zxSlope)+cellSpaceRay.origin.z)
-    //         );
-    //         Debug::drawCube(getCellWorldPos(cellPos),vec3(cellSize),Color::green);
+    //     virtual std::vector<std::uint8_t> createSaveBuffer() {
+    //         auto data = save();
+    //         auto buf = cista::serialize(data);
+    //         return buf;
     //     }
 
-    //     float xySlope = cellSpaceRay.direction.x/cellSpaceRay.direction.y;
-    //     float zySlope = cellSpaceRay.direction.z/cellSpaceRay.direction.y;
-    //     for(int i = 1;i <= ceil(cellDist*cellSpaceRay.direction.y)+1;i++) {
+    //     data_Construction save() {
 
-    //         float offset = MathHelper::fromFloor(cellSpaceRay.origin.y);
-
-    //         ivec3 cellPos = ivec3(
-    //                 MathHelper::integerBelow(((i-offset)*xySlope)+cellSpaceRay.origin.x),
-    //                 floor(i+cellSpaceRay.origin.y)-1,
-    //                 MathHelper::integerBelow(((i-offset)*zySlope)+cellSpaceRay.origin.z)
-    //         );
-    //         Debug::drawCube(getCellWorldPos(cellPos),vec3(cellSize),Color::magenta);
     //     }
 
-    //     float xzSlope = cellSpaceRay.direction.x/cellSpaceRay.direction.z;
-    //     float yzSlope = cellSpaceRay.direction.y/cellSpaceRay.direction.z;
-    //     for(int i = 1;i <= ceil(cellDist*cellSpaceRay.direction.z)+1;i++) {
+    //     static std::unique_ptr<Actor> makeInstanceFromSave(data_Construction& data,Material material,DataLoader& loader) {
+    //         auto actor = makeInstance(material,vec3(0.0f));
+    //         actor->load(data,loader);
+    //         std::cout << "LOADING CONSTRUCTION ACTOR" << std::endl;
 
-    //         float offset = MathHelper::fromFloor(cellSpaceRay.origin.z);
-
-    //         ivec3 cellPos = ivec3(
-    //                 MathHelper::integerBelow(((i-offset)*xzSlope)+cellSpaceRay.origin.x),
-    //                 MathHelper::integerBelow(((i-offset)*yzSlope)+cellSpaceRay.origin.y),
-    //                 floor(i+cellSpaceRay.origin.z)-1
-    //         );
-    //         Debug::drawCube(getCellWorldPos(cellPos),vec3(cellSize),Color::red);
+    //         return actor;
     //     }
-    // }
 
 };

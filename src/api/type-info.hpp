@@ -20,6 +20,7 @@ enum class PropertyTypeEnum {
     Float,
     String,
     Bool,
+    Enum,
 
     // Vec2,
     // IVec2,
@@ -38,6 +39,8 @@ struct GenericPropertyInfo {
     string name;
     GenericPropertyInfo(string name) : name(name) {}
 
+    virtual int getEnumValue(std::any obj) const = 0;
+    virtual int getEnumValue(Object* obj) const = 0;
     virtual std::any get(std::any obj) const = 0;
     virtual std::any get(Object* obj) const = 0;
     virtual std::any getPtr(std::any obj) const = 0;
@@ -55,7 +58,8 @@ struct GenericPropertyInfo {
         return std::any_cast<T>(get(obj));
     }
 
-
+    virtual void setEnumValue(std::any obj,int value) const = 0;
+    virtual void setEnumValue(Object* obj,int value) const = 0;
     virtual void set(std::any obj,std::any value) const = 0;
     virtual void set(Object* obj,std::any value) const = 0;
     virtual void set(Object* obj,Object* value) const = 0;
@@ -102,6 +106,9 @@ struct GenericPropertyInfo {
     inline static PropertyTypeEnum getPropertyTypeGeneric() {
         if constexpr(std::is_convertible_v<T,Object*>) {
             return PropertyTypeEnum::ObjectPointer;
+        }
+        if constexpr(std::is_enum_v<T>) {
+            return PropertyTypeEnum::Enum;
         }
         if constexpr(IsVector<T>::value) {
             return PropertyTypeEnum::Vector;
@@ -204,6 +211,39 @@ struct ElementPropertyInfo : GenericPropertyInfo {
         }
     }
 
+    int getEnumValue(std::any obj) const override {
+        if constexpr(std::is_enum_v<PropertyType>) {
+            ClassType* typedObj = std::any_cast<ClassType*>(obj);
+            return (int)(typedObj->at(index));
+        } else {
+            return 0;
+        }
+    }
+    
+    int getEnumValue(Object* obj) const override {
+        if constexpr(std::is_enum_v<PropertyType>) {
+            ClassType* typedObj = dynamic_cast<ClassType*>(obj);
+            assert(typedObj != nullptr);
+            return (int)(typedObj->at(index));
+        } else {
+            return 0;
+        }
+    }
+
+    void setEnumValue(std::any obj,int value) const override {
+        if constexpr(std::is_enum_v<PropertyType>) {
+            ClassType* typedObj = std::any_cast<ClassType*>(obj);
+            (typedObj->at(index)) = value;
+        }
+    }
+
+    void setEnumValue(Object* obj,int value) const override {
+        if constexpr(std::is_enum_v<PropertyType>) {
+            ClassType* typedObj = dynamic_cast<ClassType*>(obj);
+            assert(typedObj != nullptr);
+            (typedObj->at(index)) = value;
+        }
+    }
 
     PropertyTypeEnum getPropertyType() const override {
         return getPropertyTypeGeneric<PropertyType>();
@@ -372,6 +412,41 @@ struct PropertyInfo : GenericPropertyInfo {
         }
     }
 
+    int getEnumValue(std::any obj) const override {
+        if constexpr(std::is_enum_v<PropertyType>) {
+            ClassType* typedObj = std::any_cast<ClassType*>(obj);
+            return (int)(typedObj->*(property));
+        } else {
+            return 0;
+        }
+    }
+    
+    int getEnumValue(Object* obj) const override {
+        if constexpr(std::is_enum_v<PropertyType>) {
+            ClassType* typedObj = dynamic_cast<ClassType*>(obj);
+            assert(typedObj != nullptr);
+            return (int)(typedObj->*(property));
+        } else {
+            return 0;
+        }
+    }
+
+    void setEnumValue(std::any obj,int value) const override {
+        if constexpr(std::is_enum_v<PropertyType>) {
+            ClassType* typedObj = std::any_cast<ClassType*>(obj);
+            (typedObj->*(property)) = (PropertyType)value;
+        }
+    }
+
+    void setEnumValue(Object* obj,int value) const override {
+        if constexpr(std::is_enum_v<PropertyType>) {
+            ClassType* typedObj = dynamic_cast<ClassType*>(obj);
+            assert(typedObj != nullptr);
+            (typedObj->*(property)) = (PropertyType)value;
+        }
+    }
+    
+
 
 
     PropertyTypeEnum getPropertyType() const override {
@@ -525,6 +600,8 @@ class TypeInfo {
     public:
         std::function<std::unique_ptr<Object>()> constructorFunction = {};
         std::vector<TypeInfo*> derived;
+        bool isEnum;
+        std::vector<string> enumNames;
         TypeInfo(TypeInfo& typeinfo) = delete;
         TypeInfo() = default;
         TypeInfo(string name) : name(name) {}
@@ -558,6 +635,7 @@ class TypeInfo {
                 parent->addDerviedType(info);
             }
         }
+        
 
         string getName() {
             return name;

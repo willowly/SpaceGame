@@ -46,7 +46,7 @@ class Tool : public Item {
             return std::pair<quat,vec3>(glm::identity<quat>(),vec3());
         }
 
-        virtual void addRenderablesHeld(Vulkan* vulkan,Character& user,float dt,float interpolation) override {
+        void addRenderablesHeld(Vulkan* vulkan,Character& user,float dt,float interpolation) override {
             if(heldModel != nullptr) {
                 if(heldModelMaterial == nullptr) return;
                 user.heldItemData.lookOrientation = glm::slerp(user.heldItemData.lookOrientation,user.getEyeRotation(),1 - pow(smoothTime,dt));

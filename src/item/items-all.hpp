@@ -2,3 +2,5 @@
 #include "pickaxe-tool.hpp"
 #include "drill-tool.hpp"
 #include "resource-item.hpp"
+#include "claw-item.hpp"
+#include "hammer-tool.hpp"

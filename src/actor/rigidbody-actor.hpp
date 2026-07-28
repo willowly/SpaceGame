@@ -129,8 +129,8 @@ class RigidbodyActor : public Actor {
             model->addToRender(vulkan,material,matrix);
         }
 
-        data_ActorType getActorDataType() {
-            return data_ActorType::PHYSICS;
+        string getActorDataType() {
+            return "physics";
         }
 
         virtual std::vector<std::uint8_t> createSaveBuffer() {

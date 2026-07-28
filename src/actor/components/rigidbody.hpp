@@ -87,6 +87,8 @@ class Rigidbody {
         JPH::BodyCreationSettings getDefaultBodySettings(Actor* actor,JPH::Shape* shape,vec3 position,quat rotation) {
             JPH::BodyCreationSettings bodySettings(shape, Physics::toJoltVec(position), Physics::toJoltQuat(position), JPH::EMotionType::Dynamic, Layers::MOVING);
             bodySettings.mGravityFactor = 0.0f;
+            bodySettings.mLinearDamping = 0.0f;
+            bodySettings.mAngularDamping = 0.0f;
             userData.actor = actor;
             userData.component = 0;
             userData.generateCollisionEvents = generateCollisionEvents;

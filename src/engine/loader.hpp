@@ -254,7 +254,6 @@ class Loader {
             lua["items"] = API::ItemRegistry(registry);
             lua["recipes"] = API::RecipeRegistry(registry);
             lua["widgets"] = API::WidgetRegistry(registry);
-            lua["particle_effects"] = API::ParticleEffectRegistry(registry);
             lua.do_file("scripts/load.lua");
         }
 

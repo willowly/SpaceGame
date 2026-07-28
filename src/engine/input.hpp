@@ -12,6 +12,7 @@ class Input {
     public:
         vec2 lastMousePosition = {};
         vec2 currentMousePosition = {};
+        float currentMouseScrollDelta = {};
         vec2 mouseDelta = {};
         map<int,bool> keys;
         map<int,bool> keysPressed;
@@ -88,6 +89,7 @@ class Input {
             mouseButtonsReleased.clear();
             mouseDelta = currentMousePosition - lastMousePosition;
             lastMousePosition = currentMousePosition;
+            currentMouseScrollDelta = 0;
         }
 
         

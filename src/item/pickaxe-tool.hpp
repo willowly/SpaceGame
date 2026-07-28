@@ -44,26 +44,26 @@ class PickaxeTool : public Tool {
         void pickaxe(World* world,Character& user,ItemStack& stack,Ray ray) {
             
             int damage = stack.storage.getInt(DAMAGE_VAR,0);
-            auto worldHitOpt = world->raycast(ray,reach,LayerMask::excludes({Layers::PLAYER,Layers::ITEM}));
+            auto hitOpt = world->raycast(ray,reach,LayerMask::excludes({Layers::PLAYER,Layers::ITEM}));
 
 
-            if(worldHitOpt) {
-                auto worldHit = worldHitOpt.value();
-                Construction* construction = dynamic_cast<Construction*>(worldHit.actor);
+            if(hitOpt) {
+                auto hit = hitOpt.value();
+                Construction* construction = dynamic_cast<Construction*>(hit.actor);
                 if(construction != nullptr) {
-                    vec3 placePointWorld = worldHit.hit.point - worldHit.hit.normal * 0.5f;
+                    vec3 placePointWorld = hit.point - hit.normal * 0.5f;
                     vec3 placePointLocal = construction->inverseTransformPoint(placePointWorld);
                     ivec3 placePointLocalInt = glm::round(placePointLocal);
                     construction->breakBlock(world,placePointLocalInt);
                     user.shake.startShake();
                     damage++;
                 }
-                Terrain* terrain = dynamic_cast<Terrain*>(worldHit.actor);
+                Terrain* terrain = dynamic_cast<Terrain*>(hit.actor);
                 if(terrain != nullptr) {
-                    terrain->terraformSphere(world,worldHit.hit.point,mineRadius,-mineAmount);
+                    terrain->terraformSphere(world,hit.point,mineRadius,-mineAmount);
 
                     if(testEffect != nullptr) {
-                        world->spawn(ParticleEffectActor::makeInstance(testEffect,worldHit.hit.point)); //hmm
+                        world->spawn(ParticleEffectActor::makeInstance(testEffect,hit.point)); //hmm
                     }
 
                     user.shake.startShake();

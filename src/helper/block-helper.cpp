@@ -51,7 +51,7 @@ BlockFacing BlockHelper::rotateFacingByFacing(BlockFacing a, BlockFacing b) {
     return getFacingFromVector(vec3(0,0,1) * getRotationFromFacing(a) * getRotationFromFacing(b));
 }
 
-void BlockHelper::addBlockFace(Construction* construction,MeshData<ConstructionVertex>& meshData,vec3 position,quat rotation,TextureID textureID,Rect texRect) {
+void BlockHelper::addBlockFace(Construction* construction,MeshData<ConstructionVertex>& meshData,vec3 position,quat rotation,TextureID textureID,Rect texRect,bool sloped) {
 
 
     if(construction == nullptr) {
@@ -60,14 +60,16 @@ void BlockHelper::addBlockFace(Construction* construction,MeshData<ConstructionV
     }
 
 
+    float leftSideZ = sloped ? -0.5f : 0.5f;
+    vec3 normal = sloped ? glm::normalize(vec3(-1.0,0.0,1.0)) : vec3(0.0,0.0,1.0);
     int indexOffset = meshData.vertices.size();
     auto faceVerts = vector<ConstructionVertex> {
 
         // the texcoords aren't how you'd expect but if you think about it makes sense (I hope) idk theres weirdness about texture sampling
-        ConstructionVertex(Vertex(vec3(0.5,0.5,0.5),vec3(0.0,0.0,1.0),texRect.bottomRight()),textureID),
-        ConstructionVertex(Vertex(vec3(0.5,-0.5,0.5),vec3(0.0,0.0,1.0),texRect.topRight()),textureID),
-        ConstructionVertex(Vertex(vec3(-0.5,0.5,0.5),vec3(0.0,0.0,1.0),texRect.bottomLeft()),textureID),
-        ConstructionVertex(Vertex(vec3(-0.5,-0.5,0.5),vec3(0.0,0.0,1.0),texRect.topLeft()),textureID)
+        ConstructionVertex(Vertex(vec3(0.5,0.5,0.5),normal,texRect.bottomRight()),textureID),
+        ConstructionVertex(Vertex(vec3(0.5,-0.5,0.5),normal,texRect.topRight()),textureID),
+        ConstructionVertex(Vertex(vec3(-0.5,0.5,leftSideZ),normal,texRect.bottomLeft()),textureID),
+        ConstructionVertex(Vertex(vec3(-0.5,-0.5,leftSideZ),normal,texRect.topLeft()),textureID)
     };
     for(auto vertex : faceVerts) {
         vertex.pos = rotation * vertex.pos;
@@ -329,4 +331,50 @@ void BlockHelper::addConnectedBlock(Construction* construction,MeshData<Construc
     if(!construction->solidInDirection(position,ivec3(-1,0,0))) addConnectedBlockFace(construction,meshData,position,rotation * quat(glm::radians(vec3(0,-90,0))) ,texture);
     if(!construction->solidInDirection(position,ivec3(0,1,0)))  addConnectedBlockFace(construction,meshData,position,rotation * quat(glm::radians(vec3(-90,0,0))) ,texture); //this is flipped from how id expect :shrug: 
     if(!construction->solidInDirection(position,ivec3(0,-1,0))) addConnectedBlockFace(construction,meshData,position,rotation * quat(glm::radians(vec3( 90,0,0))) ,texture);
+}
+
+void BlockHelper::addSlopedBlock(Construction* construction,MeshData<ConstructionVertex>& meshData,ivec3 position,int orientation,TextureID texture) {
+    // if(!construction->solidInDirection(position,ivec3(0,0,1)))  addConnectedBlockFace(construction,meshData,position,rotation,                                     texture);
+    // if(!construction->solidInDirection(position,ivec3(0,0,-1))) addConnectedBlockFace(construction,meshData,position,rotation * quat(glm::radians(vec3(0,180,0))), texture);
+
+    auto orientationZ = orientation % 4;
+    auto orientationX = orientation / 4;
+
+    auto rotation = quat(glm::radians(vec3(90 * orientationX,0,90 * orientationZ)));
+
+    ivec2 gridSize(8,8);
+
+    int id = 0;
+
+    ivec2 gridPos = ivec2((id % gridSize.x),id/gridSize.y); //see below comment about backwardsness
+
+    Rect rect((vec2)gridPos/(vec2)gridSize,1.0f/(vec2)gridSize);
+
+    addBlockFace(construction,meshData,position,rotation,texture,rect,true);
+    addConnectedBlockFace(construction,meshData,position,rotation * quat(glm::radians(vec3(0,180,0))),                                     texture);
+    addConnectedBlockFace(construction,meshData,position,rotation * quat(glm::radians(vec3(0,90,0))), texture);
+
+
+    for(int i = -1; i <= 1; i += 2) {
+        int indexOffset = meshData.vertices.size();
+        auto faceVerts = vector<ConstructionVertex> {
+
+            // the texcoords aren't how you'd expect but if you think about it makes sense (I hope) idk theres weirdness about texture sampling
+            ConstructionVertex(Vertex(vec3(0.5,i*0.5,0.5),vec3(0,i,0),rect.bottomRight()),texture),
+            ConstructionVertex(Vertex(vec3(0.5,i*0.5,-0.5),vec3(0,i,0),rect.topLeft()),texture),
+            ConstructionVertex(Vertex(vec3(-0.5,i*0.5,-0.5),vec3(0,i,0),rect.bottomLeft()),texture),
+        };
+        for(auto vertex : faceVerts) {
+            vertex.pos = rotation * vertex.pos;
+            vertex.pos += position;
+            vertex.normal = rotation * vertex.normal;
+            meshData.vertices.push_back(vertex); 
+        }
+        auto faceIndices = vector<uint16_t> {
+            0,1,2
+        };
+        for(auto index : faceIndices) {
+            meshData.indices.push_back(index + indexOffset); 
+        }
+    }
 }

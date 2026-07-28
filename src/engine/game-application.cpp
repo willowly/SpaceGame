@@ -12,22 +12,22 @@ void GameApplication::spawnPlayer(vec3 pos) {
 }
 
 void GameApplication::spawnAsteroidScene()  {
-    spawnPlayer(vec3(0,50,0));
+    spawnPlayer(vec3(0,30,0));
 
     std::minstd_rand rnd;
 
     rnd.seed(0);
 
-    for (size_t i = 0; i < 10; i++)
-    {
-        std::uniform_real_distribution<> dist(-3000, 3000);
-        vec3 postion = vec3(dist(rnd),dist(rnd),dist(rnd));
-        std::cout << "spawning terrain at position " << StringHelper::toString(postion) << std::endl;
-        auto terrain = world->spawn(Terrain::makeInstance(terrainMaterial,settings,rnd(),postion));
-        terrainLoader.addTerrain(terrain->id);
-    }
+    // for (size_t i = 0; i < 10; i++)
+    // {
+    //     std::uniform_real_distribution<> dist(-3000, 3000);
+    //     vec3 postion = vec3(dist(rnd),dist(rnd),dist(rnd));
+    //     std::cout << "spawning terrain at position " << StringHelper::toString(postion) << std::endl;
+    //     auto terrain = world->spawn(Terrain::makeInstance(terrainMaterial,settings,rnd(),postion));
+    //     terrainLoader.addTerrain(terrain->id);
+    // }
 
-    auto terrain = world->spawn(Terrain::makeInstance(terrainMaterial,settings,rnd(),vec3(0,-25,0)));
+    auto terrain = world->spawn(Terrain::makeInstance(terrainMaterial,settings,rnd(),vec3(0,0,0)));
     terrainLoader.addTerrain(terrain->id);
 }
 
@@ -40,17 +40,6 @@ void GameApplication::setup() {
     
     // load from files and lua scripts
     loader.loadAll(registry,lua,vulkan);
-
-    // // test
-    //     AssetSerializer serializer;
-    //     serializer.registry = &registry;
-    //     serializer.vulkan = vulkan;
-
-    //     std::ifstream file("blocks/thruster.asset");
-
-
-    //     serializer.deserialize<Block>(file);
-    // //test
 
     input.clearInputBuffers(); // reset mouse position;
 
@@ -91,8 +80,6 @@ void GameApplication::setup() {
     //ImGui::PushFont(defaultFont, 14.0f);
 
     terrainMaterial = vulkan->createMaterial<LitMaterialData,TerrainVertex>("terrain",LitMaterialData(registry.getTexture("rock")));
-
-    
             
     settings.generationSettings.noiseScale = 1;
     settings.generationSettings.radius = 15;
@@ -131,17 +118,6 @@ void GameApplication::setup() {
     registry.addRecipesToVector(furnace->recipes,"smelting",1);
     furnace->widget = &furnaceWidget;
     // wowie
-    auto effectPrototype = registry.addActor<ParticleEffectActor>("effect");
-    auto& effect = effectPrototype->effect;
-    effect.spawnRate = 0;
-    effect.initialSpawnCount = 20;
-    effect.initialVelocity = {0.0f,5.0f};
-    effect.emitterShape.radius = 0.5f;
-    effect.mesh = registry.getModel("rock_shard");
-    effect.material = particleMaterial;
-    effect.lifeTime = {0.5f,1.0f};
-    effect.particleSize = {0.2f,0.0f};
-    effect.initialAngularVelocity = {0.0f,90.0f};
 
     // auto pickaxe = dynamic_cast<PickaxeTool*>(registry.getItem("pickaxe")); 
     // pickaxe->testEffect = effectPrototype;
@@ -157,9 +133,7 @@ void GameApplication::setup() {
     assetViewer.registry = &registry;
     assetViewer.vulkan = vulkan;
 
-
     spawnAsteroidScene();
-    spawnPlayer();
 
     lua["world"] = world.get();
 
@@ -193,6 +167,7 @@ void GameApplication::debugUI(float dt) {
             auto playerPos = player->getPosition();
             ImGui::Text("position: <%.1f,%.1f,%.1f>",playerPos.x,playerPos.y,playerPos.z);
         }
+        ImGui::Text("Scroll: %8.1f",input.currentMouseScrollDelta);
     ImGui::End();
 
     
@@ -274,7 +249,7 @@ void GameApplication::reload() {
     
     vulkan->waitIdle(); // we can probably change this later, but for now its fine. just makes sure we finish using all the resources we have before they potentially get modified
     setup();
-    load(data); 
+    load(data);
     terrainLoader.start(world.get());
     lua["player"] = playerID;
 
@@ -418,10 +393,8 @@ data_GameSave GameApplication::save() {
 void GameApplication::load(data_GameSave data) {
 
     DataLoaderImpl dataLoader(registry);
-    terrainLoader.stop();
     world->load(data.world,dataLoader);
     playerID = data.playerID;
     lua["player"] = playerID;
-    terrainLoader.start(world.get());
 
 }

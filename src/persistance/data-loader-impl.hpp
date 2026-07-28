@@ -46,30 +46,20 @@ class DataLoaderImpl : public DataLoader {
         std::unique_ptr<Actor> loadActor(data_ActorEntry entry) {
             
             
-            switch (entry.type)
-            {
-                case data_ActorType::DUMMY:
-                    return actorLoadSpecPrototype<Actor,data_Actor>(entry);
-                case data_ActorType::PLAYER:
-                    return actorLoadSpecPrototype<Character,data_Character,true>(entry);
-                case data_ActorType::ITEM_ACTOR:
-                    return actorLoadGeneric<ItemActor,data_ItemActor>(entry);
-                case data_ActorType::PHYSICS:
-                    return actorLoadSpecPrototype<RigidbodyActor,data_RigidbodyActor>(entry);
-                 case data_ActorType::CONSTRUCTION:
-                    try {
-                        data_Construction* data = cista::deserialize<data_Construction>(entry.data);
-                        auto construction = Construction::makeInstanceFromSave(*data,registry.getMaterial(Loader::DEFAULT_CONSTRUCTION_MATERIAL_KEY),*this);
-                        return construction;
-                    } catch(std::runtime_error e) {
-                        std::cout << "Failed to deserialize actor data from buffer: "<< e.what() << std::endl;
-                    }
-                    break;
-                
-                default:
-                    std::cout << "INVALID ACTOR";
-                    break;
+            if(entry.type == "dummy") return actorLoadSpecPrototype<Actor,data_Actor>(entry);
+            if(entry.type == "character") return actorLoadSpecPrototype<Character,data_Character,true>(entry);
+            if(entry.type == "item_actor") return actorLoadGeneric<ItemActor,data_ItemActor>(entry);
+            if(entry.type == "physics") return actorLoadSpecPrototype<RigidbodyActor,data_RigidbodyActor>(entry);
+            if(entry.type == "construction") {
+                try {
+                    data_Construction* data = cista::deserialize<data_Construction>(entry.data);
+                    auto construction = Construction::makeInstanceFromSave(*data,registry.getMaterial(Loader::DEFAULT_CONSTRUCTION_MATERIAL_KEY),*this);
+                    return construction;
+                } catch(std::runtime_error e) {
+                    std::cout << "Failed to deserialize actor data from buffer: "<< e.what() << std::endl;
+                }
             }
+            Debug::warn("Invalid Actor in save file: " + (string)entry.type);
             return nullptr;
         }
 

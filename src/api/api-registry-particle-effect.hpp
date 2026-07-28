@@ -13,7 +13,7 @@ using std::string,std::variant;
 namespace API {
 
 
-    inline void getParticleFloatRange(sol::table table,std::variant<string,int> key,ParticleEffect::FloatRange& range,bool required = false) {
+    inline void getParticleFloatRange(sol::table table,std::variant<string,int> key,FloatRange& range,bool required = false) {
         Debug::addTrace(keyAsString(key)); 
         sol::object obj = table[key];
         if(obj == sol::lua_nil) {
@@ -49,14 +49,13 @@ namespace API {
 
     inline void loadParticleEffect(sol::table table,ParticleEffect& effect,Registry& registry) {
         getMesh(table,"mesh",effect.mesh,registry);
-        getMaterial(table,"material",effect.material,registry);
         get<float>(table,"spawnRate",effect.spawnRate);
         get<int>(table,"initial_spawn_count",effect.initialSpawnCount);
         getParticleFloatRange(table,"initial_velocity",effect.initialVelocity);
         getParticleFloatRange(table,"life_time",effect.lifeTime);
         getParticleFloatRange(table,"particle_size",effect.particleSize);
         getParticleFloatRange(table,"initial_angular_velocity",effect.initialAngularVelocity);
-        get<float>(table,"radius",effect.emitterShape.radius); //just for now lol, I dont want to deal with the shape stuff until I have reason to
+        //get<float>(table,"emitterShape",effect.emitterShape); //just for now lol, I dont want to deal with the shape stuff until I have reason to
     }
 
     struct ParticleEffectRegistry {

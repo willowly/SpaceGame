@@ -747,6 +747,7 @@ class Vulkan {
                 }
             }
             managedBuffers.clear();
+            totalAllocatedBuffersCount = 0;
 
         }
 

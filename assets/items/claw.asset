@@ -1,27 +1,25 @@
-type: place_block_tool
-place_animation_rotation: 
-  x: -0.422618
-  y: 0.000000
-  z: 0.000000
-  w: 0.906308
-place_animation_time: 0.200000
-block: pipe
-held_model: pipe
-held_model_material: cow
+type: claw_tool
+range: 30
+force: 3.000000
+velocity_threshold: 0.500000
+angular_damping: 90.000000
+scroll_speed: 1.000000
+held_model: claw
+held_model_material: claw
 model_offset: 
   x: 0.300000
   y: -0.300000
   z: -1.000000
 model_rotation: 
   x: 0.000000
-  y: 0.382683
+  y: 0.000000
   z: 0.000000
   w: 0.923880
 model_scale: 0.300000
 smooth_time: 0.010000
-display_name: Pipe
+display_name: Claw Gun
 default_sprite: 
-  texture: thruster_item
+  texture: grapple
   rect: 
     position: 
       x: 0.000000
@@ -29,6 +27,6 @@ default_sprite:
     size: 
       x: 0.000000
       y: 0.000000
-default_model: pipe
-default_material: cow
+default_model: block
+default_material: claw
 default_model_scale: 0.300000

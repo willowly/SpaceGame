@@ -60,13 +60,13 @@ class DrillTool : public Tool {
             if(damage >= durability) {
                 return;
             }
-            auto worldHitOpt = world->raycast(user.getLookRay(),reach,LayerMask::excludes({Layers::PLAYER,Layers::ITEM}));
+            auto hitOpt = world->raycast(user.getLookRay(),reach,LayerMask::excludes({Layers::PLAYER,Layers::ITEM}));
             std::optional<ItemStack> resultStack; //constructions :shrug:
-            if(worldHitOpt) {
-                auto worldHit = worldHitOpt.value();
-                Construction* construction = dynamic_cast<Construction*>(worldHit.actor);
+            if(hitOpt) {
+                auto hit = hitOpt.value();
+                Construction* construction = dynamic_cast<Construction*>(hit.actor);
                 if(construction != nullptr) {
-                    vec3 placePointWorld = worldHit.hit.point - worldHit.hit.normal * 0.5f;
+                    vec3 placePointWorld = hit.point - hit.normal * 0.5f;
                     vec3 placePointLocal = construction->inverseTransformPoint(placePointWorld);
                     ivec3 placePointLocalInt = glm::round(placePointLocal);
                     auto blockPair = construction->getBlock(placePointLocalInt);
@@ -74,9 +74,9 @@ class DrillTool : public Tool {
                     //user.shake.startShake();
                     damage += dt;
                 }
-                Terrain* terrain = dynamic_cast<Terrain*>(worldHit.actor);
+                Terrain* terrain = dynamic_cast<Terrain*>(hit.actor);
                 if(terrain != nullptr) {
-                    terrain->terraformSphere(world,worldHit.hit.point,mineRadius,-mineAmount * dt);
+                    terrain->terraformSphere(world,hit.point,mineRadius,-mineAmount * dt);
 
                     //user.shake.startShake();
     

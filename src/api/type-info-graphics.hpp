@@ -3,6 +3,7 @@
 #include "graphics/vulkan.hpp"
 #include "graphics/material/lit-material.hpp"
 #include "graphics/basic-model.hpp"
+#include "actor/components/particle-effect.hpp"
 
 
 namespace TypeInfoLoader {
@@ -30,12 +31,31 @@ namespace TypeInfoLoader {
 
         TypeInfo* mesh = registry.addTypeInfo<Mesh<Vertex>>("mesh");
 
-        TypeInfo* basic_model = registry.addTypeInfo<BasicModel>("basic_model");
-        basic_model->addConstProperty("mesh",&BasicModel::mesh);
-        basic_model->addConstProperty("material",&BasicModel::material);
-        basic_model->addConstProperty("offset",&BasicModel::offset);
-        basic_model->addConstProperty("rotation",&BasicModel::rotation);
-        basic_model->addConstProperty("scale",&BasicModel::scale);
+        TypeInfo* basicModel = registry.addTypeInfo<BasicModel>("basic_model");
+        basicModel->addConstProperty("mesh",&BasicModel::mesh);
+        basicModel->addConstProperty("material",&BasicModel::material);
+        basicModel->addConstProperty("offset",&BasicModel::offset);
+        basicModel->addConstProperty("rotation",&BasicModel::rotation);
+        basicModel->addConstProperty("scale",&BasicModel::scale);
+
+        TypeInfo* particleEffectSettings = registry.addTypeInfo<ParticleEffectSettings>("particle_effect_settings");
+        
+        particleEffectSettings->addConstProperty("mesh",&ParticleEffectSettings::mesh);
+        particleEffectSettings->addConstProperty("material",&ParticleEffectSettings::material);
+        particleEffectSettings->addConstProperty("spawn_rate",&ParticleEffectSettings::spawnRate);
+        particleEffectSettings->addConstProperty("initial_spawn_count",&ParticleEffectSettings::initialSpawnCount);
+        particleEffectSettings->addConstProperty("initial_velocity",&ParticleEffectSettings::initialVelocity);
+        particleEffectSettings->addConstProperty("inherit_velocity",&ParticleEffectSettings::inheritVelocity);
+        particleEffectSettings->addConstProperty("life_time",&ParticleEffectSettings::lifeTime); 
+        particleEffectSettings->addConstProperty("particle_size",&ParticleEffectSettings::particleSize);
+        particleEffectSettings->addConstProperty("initial_angular_velocity",&ParticleEffectSettings::initialAngularVelocity);
+        particleEffectSettings->addConstProperty("emitter_shape",&ParticleEffectSettings::emitterShape);
+        particleEffectSettings->addConstProperty("emitter_offset",&ParticleEffectSettings::emitterOffset);
+        particleEffectSettings->addConstProperty("emitter_radius",&ParticleEffectSettings::emitterRadius);
+
+        TypeInfo* floatRange = registry.addTypeInfo<FloatRange>("float_range");
+        floatRange->addConstProperty("start",&FloatRange::start);
+        floatRange->addConstProperty("end",&FloatRange::end);
         
     }
 

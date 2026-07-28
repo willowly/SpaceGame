@@ -261,6 +261,9 @@ namespace DebugMenu {
                 case PropertyTypeEnum::Int:
                     displayInt(label,obj,property,changed);
                     break;
+                case PropertyTypeEnum::Enum:
+                    displayEnum(label,obj,property,changed);
+                    break;
                 case PropertyTypeEnum::Bool:
                     displayBool(label,obj,property,changed);
                     break;
@@ -328,6 +331,15 @@ namespace DebugMenu {
                 changed = true;
             }
         }
+
+        template<typename T>
+        void displayEnum(const char* label,T obj,GenericPropertyInfo* property,bool& changed) {
+            int f = property->getEnumValue(obj);
+            if(ImGui::InputInt(label,&f)) {
+                property->setEnumValue(obj,f);
+                changed = true;
+            }
+        }
         
         template<typename T>
         void displayFloat(const char* label,T obj,GenericPropertyInfo* property,bool& changed) {
@@ -346,13 +358,6 @@ namespace DebugMenu {
             property->set<vec2>(obj,vec2(list[0],list[1]));
         }
         
-        template<typename T>
-        void displayVec3(const char* label,T obj,GenericPropertyInfo* property,bool& changed) {
-            vec3 f = property->get<vec3>(obj);
-            float list[] = {f.x,f.y,f.z};
-            ImGui::InputFloat3(label,list);
-            property->set<vec3>(obj,vec3(list[0],list[1],list[2]));
-        }
 
         template<typename T>
         void displayVec4(const char* label,T obj,GenericPropertyInfo* property,bool& changed) {
@@ -462,6 +467,17 @@ namespace DebugMenu {
             return false;
             
             //ImGui::LabelText(label,"%s",sprite.name.c_str());
+        }
+
+        bool displayVec3(const char* label,std::any& value,bool& changed) {
+            vec3 f = std::any_cast<vec3>(value);
+            float list[] = {f.x,f.y,f.z};
+            if(ImGui::InputFloat3(label,list)) {
+                value = vec3(list[0],list[1],list[2]);
+                changed = true;
+                return true;
+            }
+            return false;
         }
 
         void openSelectorPopup(string id) {
@@ -704,6 +720,7 @@ namespace DebugMenu {
             addDisplayFunction<Sprite>(&AssetViewer::displaySprite);
             addDisplayFunction<Rect>(&AssetViewer::displayRect);
             addDisplayFunction<Mesh<Vertex>*>(&AssetViewer::displayMesh);
+            addDisplayFunction<vec3>(&AssetViewer::displayVec3);
         }
 
     

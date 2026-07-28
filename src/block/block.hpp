@@ -62,8 +62,12 @@ class Block : public Object {
 
         }
 
-        // when this block is loaded
+        // when this block is loaded. Happens when placed and when loaded from a save
         virtual void onLoad(Construction* construction,ivec3 position,BlockStorage& storage) {
+
+        }
+
+        virtual void onHammer(Construction* construction,vec3 hammerPosition,ivec3 blockPosition,BlockStorage& storage) {
 
         }
 

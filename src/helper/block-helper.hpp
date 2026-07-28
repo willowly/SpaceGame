@@ -10,7 +10,7 @@ namespace BlockHelper {
 
     BlockFacing rotateFacingByFacing(BlockFacing a, BlockFacing b);
 
-    void addBlockFace(Construction* construction,MeshData<ConstructionVertex>& meshData,vec3 position,quat rotation,TextureID textureID,Rect texRect = Rect::unitSquare);
+    void addBlockFace(Construction* construction,MeshData<ConstructionVertex>& meshData,vec3 position,quat rotation,TextureID textureID,Rect texRect = Rect::unitSquare,bool sloped = false);
     
 
     void addSingleBlock(Construction* construction,MeshData<ConstructionVertex>& meshData,ivec3 position,quat rotation,TextureID texture);
@@ -22,8 +22,9 @@ namespace BlockHelper {
 
     ivec3 rotateByFacing(ivec3 vec,BlockFacing facing);
 
-
     void addConnectedBlockFace(Construction* construction,MeshData<ConstructionVertex>& meshData,vec3 position,quat rotation,TextureID textureID) ;
 
     void addConnectedBlock(Construction* construction,MeshData<ConstructionVertex>& meshData,ivec3 position,TextureID texture);
+
+    void addSlopedBlock(Construction* construction,MeshData<ConstructionVertex>& meshData,ivec3 position,int orientation,TextureID texture);
 }

@@ -42,7 +42,7 @@ namespace Physics {
         }
 
     
-    std::optional<RaycastHit> intersectRayPlane(Ray plane,Ray ray) {
+    std::optional<SimpleRaycastHit> intersectRayPlane(Ray plane,Ray ray) {
 
         // assuming vectors are normalized
         float denom = glm::dot(plane.direction, ray.direction);
@@ -54,14 +54,14 @@ namespace Physics {
         vec3 delta = plane.origin - ray.origin;
         float distance = glm::dot(delta,plane.direction) / denom;
         if(distance >= 0) {
-            return RaycastHit(ray.origin + ray.direction * distance,plane.direction,distance);
+            return SimpleRaycastHit(ray.origin + ray.direction * distance,plane.direction,distance);
         } else {
             return std::nullopt;
         }
 
     }
 
-    RaycastHit intersectLinePlane(Ray plane,Ray line) {
+    SimpleRaycastHit intersectLinePlane(Ray plane,Ray line) {
 
         // assuming vectors are normalized
         float denom = glm::dot(plane.direction, line.direction);
@@ -72,15 +72,15 @@ namespace Physics {
 
         vec3 delta = plane.origin - line.origin;
         float distance = glm::dot(delta,plane.direction) / denom;
-        return RaycastHit(line.origin + line.direction * distance,plane.direction,distance);
+        return SimpleRaycastHit(line.origin + line.direction * distance,plane.direction,distance);
 
     }
 
-    std::optional<RaycastHit> intersectRayTriangle(vec3 a,vec3 b,vec3 c,Ray ray) {
+    std::optional<SimpleRaycastHit> intersectRayTriangle(vec3 a,vec3 b,vec3 c,Ray ray) {
 
         vec3 normal = MathHelper::normalFromPlanePoints(a,b,c);
 
-        std::optional<RaycastHit> hit_opt = intersectRayPlane(Ray(a,normal),ray);
+        std::optional<SimpleRaycastHit> hit_opt = intersectRayPlane(Ray(a,normal),ray);
 
         if(!hit_opt) return hit_opt; //if theres no hit, dont bother with the other checks
 
@@ -102,7 +102,7 @@ namespace Physics {
 
     // TODO: make intersect box hollow with dstToBox = dstB - dstToBox;
 
-    std::optional<RaycastHit> intersectRayBox(vec3 halfSize,Ray ray) {
+    std::optional<SimpleRaycastHit> intersectRayBox(vec3 halfSize,Ray ray) {
         vec3 min = -halfSize;
         vec3 max = halfSize;
 
@@ -136,10 +136,10 @@ namespace Physics {
         vec3 point = ray.origin + ray.direction * dstToBox;
         vec3 normal = boxNormalAt(vec3(0),halfSize,point);
         
-        return RaycastHit(point,normal,dstToBox); 
+        return SimpleRaycastHit(point,normal,dstToBox); 
     }
 
-    std::optional<RaycastHit> intersectRayBox(vec3 position,vec3 halfSize,Ray ray) {
+    std::optional<SimpleRaycastHit> intersectRayBox(vec3 position,vec3 halfSize,Ray ray) {
 
         ray.origin -= position;
 
@@ -153,7 +153,7 @@ namespace Physics {
 
     }
 
-    std::optional<RaycastHit> intersectRayBox(vec3 position,vec3 halfSize,quat rotation,Ray ray) {
+    std::optional<SimpleRaycastHit> intersectRayBox(vec3 position,vec3 halfSize,quat rotation,Ray ray) {
 
 
         ray.origin -= position;

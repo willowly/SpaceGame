@@ -17,7 +17,8 @@ namespace TypeInfoLoader {
         thruster->addConstProperty("side_force",&ThrusterBlock::sideForce);
         thruster->addConstProperty("mesh",&ThrusterBlock::mesh);
         thruster->addConstProperty("texture",&ThrusterBlock::texture);
-        thruster->addConstProperty("cube_model",&ThrusterBlock::cubeModel);
+        thruster->addConstProperty("thrust_effect",&ThrusterBlock::thrustEffect);
+        thruster->addConstProperty("small_thrust_effect",&ThrusterBlock::smallThrustEffect);
         thruster->setParent(block);
 
         TypeInfo* cockpit = registry.addTypeInfo<CockpitBlock>("cockpit");
@@ -37,7 +38,13 @@ namespace TypeInfoLoader {
         TypeInfo* connected = registry.addTypeInfo<ConnectedBlock>("connected");
         connected->constructorFunction = [&]() {return std::make_unique<ConnectedBlock>();};
         connected->addConstProperty("texture",&ConnectedBlock::texture);
+        connected->addConstProperty("slope",&ConnectedBlock::slope);
         connected->setParent(block);
+
+        TypeInfo* sloped = registry.addTypeInfo<SlopedBlock>("sloped");
+        sloped->constructorFunction = [&]() {return std::make_unique<SlopedBlock>();};
+        sloped->addConstProperty("texture",&SlopedBlock::texture);
+        sloped->setParent(block);
     }
 
 }

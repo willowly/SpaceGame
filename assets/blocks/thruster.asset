@@ -2,19 +2,54 @@ type: thruster
 force: 20000.000000
 side_force: 4000.000000
 mesh: thruster
-texture: error
-cube_model: 
-  mesh: cube
-  material: cow
-  offset: 
+texture: thruster
+thrust_effect: 
+  mesh: item_ore
+  material: smoke
+  spawn_rate: 30.000000
+  initial_spawn_count: 0
+  initial_velocity: 
+    start: 4.000000
+    end: 10.000000
+  inherit_velocity: 1
+  life_time: 
+    start: 1.000000
+    end: 1.000000
+  particle_size: 
+    start: 0.300000
+    end: 0.000000
+  initial_angular_velocity: 
+    start: 0.000000
+    end: 10.000000
+  emitter_shape: 1
+  emitter_offset: 
     x: 0.000000
     y: 0.000000
     z: 0.500000
-  rotation: 
+  emitter_radius: 0.300000
+small_thrust_effect: 
+  mesh: item_ore
+  material: smoke
+  spawn_rate: 10.000000
+  initial_spawn_count: 0
+  initial_velocity: 
+    start: 2.000000
+    end: 5.000000
+  inherit_velocity: 1
+  life_time: 
+    start: 0.500000
+    end: 0.500000
+  particle_size: 
+    start: 0.100000
+    end: 0.000000
+  initial_angular_velocity: 
+    start: 0.000000
+    end: 10.000000
+  emitter_shape: 1
+  emitter_offset: 
     x: 0.000000
     y: 0.000000
-    z: 0.000000
-    w: 1.000000
-  scale: 0.300000
+    z: 0.500000
+  emitter_radius: 0.100000
 default_drop: thruster
 solid: 0

@@ -1,13 +1,7 @@
-type: place_block_tool
-place_animation_rotation: 
-  x: -0.422618
-  y: 0.000000
-  z: 0.000000
-  w: 0.906308
-place_animation_time: 0.200000
-block: super_thruster
-held_model: thruster
-held_model_material: material
+type: hammer_tool
+block: sloped_tin
+held_model: 
+held_model_material: 
 model_offset: 
   x: 0.300000
   y: -0.300000
@@ -19,9 +13,9 @@ model_rotation:
   w: 0.923880
 model_scale: 0.300000
 smooth_time: 0.010000
-display_name: Super Thruster
+display_name: 
 default_sprite: 
-  texture: thruster_item
+  texture: hammer_item
   rect: 
     position: 
       x: 0.000000
@@ -29,6 +23,6 @@ default_sprite:
     size: 
       x: 0.000000
       y: 0.000000
-default_model: thruster
-default_material: material
+default_model: 
+default_material: 
 default_model_scale: 0.300000

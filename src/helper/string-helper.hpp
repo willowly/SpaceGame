@@ -47,19 +47,19 @@ namespace StringHelper {
     }
 
     inline std::string toString(vec4 v) {
-        return std::format("<{},{},{},{}>",v.x,v.y,v.z,v.w);
+        return std::format("<{:5.3f},{:5.3f},{:5.3f},{:5.3f}>",v.x,v.y,v.z,v.w);
     }
     inline std::string toString(quat v) {
-        return std::format("<{},{},{},{}>",v.x,v.y,v.z,v.w);
+        return std::format("<{:5.3f},{:5.3f},{:5.3f},{:5.3f}>",v.x,v.y,v.z,v.w);
     }
     inline std::string toString(vec3 v) {
-        return std::format("<{},{},{}>",v.x,v.y,v.z);
+        return std::format("<{:5.3f},{:5.3f},{:5.3f}>",v.x,v.y,v.z);
     }
     inline std::string toString(ivec3 v) {
         return std::format("<{},{},{}>",v.x,v.y,v.z);
     }
     inline std::string toString(vec2 v) {
-        return std::format("<{},{}>",v.x,v.y);
+        return std::format("<{:5.3f},{:5.3f}>",v.x,v.y);
     }
     inline std::string toString(ivec2 v) {
         return std::format("<{},{}>",v.x,v.y);

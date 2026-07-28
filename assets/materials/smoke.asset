@@ -1,6 +1,6 @@
 type: lit_material
 data: 
-  texture: thruster
+  texture: solid
   color: 
     x: 1.000000
     y: 1.000000

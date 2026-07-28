@@ -77,7 +77,7 @@ class Character : public Actor {
         float rotationSpeed = 90;
         float rotationAcceleration = 5;
         float itemDropDistance = 4;
-        vec3 thirdPersonCameraOffset = vec3(1,0.5f,10);
+        vec3 thirdPersonCameraOffset = vec3(1,2.0f,10);
         vec3 thirdPersonCameraRot = {};
         float inputBuffer = 0.05f; // 3 frames
         float coyoteTime = 0.1f; // 6 frames
@@ -88,6 +88,7 @@ class Character : public Actor {
         bool clickInput = false;
         bool interactInput = false;
         bool dropInput = false;
+        bool targetInput = 0;
         float rotationInput = 0;
         bool brakeInput = false;
         float jumpInput = 0; // if above 0, the input is active. set to 0 to consume. for buffering inputs
@@ -98,6 +99,7 @@ class Character : public Actor {
         bool noClip = false;
         vec3 moveInput = {};
         vec3 turnInput = {}; //temp for constructions
+        float constructionTurnSensitivity = 0.1f;
         int selectedTool = 0;
         static const int toolbarSize = 9;
         std::array<ItemStack,toolbarSize> toolbar = {};
@@ -113,6 +115,11 @@ class Character : public Actor {
             quat lookOrientation = glm::identity<quat>(); //the rendered one, that gets lerped
             bool clickInput = false;
             bool clickHold = false;
+            bool altClickInput = false;
+            bool altClickHold = false;
+            float scrollDelta;
+            vec2 mouseDelta;
+            Actor* attachedActor;
             void setAction(int newAction) {
                 action = newAction;
                 actionTimer = 0;
@@ -141,6 +148,8 @@ class Character : public Actor {
         float recipeTimer = 0; //
 
         bool underGravity = false;
+
+        ActorID targetedActorID = Invalid_ActorID;
 
 
 
@@ -275,10 +284,15 @@ class Character : public Actor {
         }
 
         void setUpVector(vec3 up) {
+            auto oldRotation = rotation;
+            vec3 oldLook = getEyeDirection();
             vec3 basisY = glm::normalize(up);
             vec3 basisX = glm::cross(basisY,transformDirection(vec3(0,0,1)));
             vec3 basisZ = glm::cross(basisY,basisX);
             rotation = glm::quatLookAt(basisZ,basisY);
+            vec3 delta = glm::cross(oldLook,getEyeDirection());
+            delta = inverseTransformDirection(glm::degrees(delta));
+            lookPitch += delta.x;
         }
 
         void updateLastCameraPosition() {
@@ -304,7 +318,7 @@ class Character : public Actor {
                 }
                 auto hitOpt = world->raycast(Ray(getEyePosition(),delta),glm::length(delta),LayerMask::excludes({Layers::PLAYER,Layers::ITEM}),settings);
                 if(hitOpt) {
-                    auto hit = hitOpt.value().hit;
+                    auto hit = hitOpt.value();
                     currentCameraPosition = hit.point + (getLookRay().direction * cameraClearRadius * (1-glm::max(glm::dot(hit.normal,delta),0.0f)));
                 }
             }
@@ -319,35 +333,57 @@ class Character : public Actor {
                     ridingConstruction->setMoveControl(ridingConstructionRotation  * glm::angleAxis(glm::radians(180.0f),vec3(0,1,0)) * moveInput); //we have to turn around bc we are facing negative Z
                 }
 
-                auto constructionVelocity = ridingConstruction->inverseTransformDirection(ridingConstruction->getAngularVelocity());
+                auto constructionAngularVelocity = ridingConstruction->getAngularVelocity();
 
                 auto worldConstructionAngularVelocityRadians = glm::radians(ridingConstruction->getAngularVelocity());
                 
                 // kinda janky but to move the player with the construction
-                rotation += dt * 0.5f * glm::quat(0,worldConstructionAngularVelocityRadians.x,worldConstructionAngularVelocityRadians.y,worldConstructionAngularVelocityRadians.z) * rotation;
-                rotation = glm::normalize(rotation);
-                
+                //rotation += dt * 0.5f * glm::quat(0,0,0,ridingConstruction->inverseTransformDirection(constructionAngularVelocity).z) * rotation;
+                //rotation = glm::normalize(rotation);
+                // auto shipForward = ridingConstructionRotation * ridingConstruction->transformDirection(vec3(0,0,1.0f));
 
-                if(turnInput.x == 0) {
-                    turnInput.x = -constructionVelocity.x;
-                    if(abs(turnInput.x) > 1) {
-                        turnInput.x = glm::sign(turnInput.x);
-                    }
-                }
-                if(turnInput.y == 0) {
-                    turnInput.y = -constructionVelocity.y;
-                    if(abs(turnInput.y) > 1) {
-                        turnInput.y = glm::sign(turnInput.y);
-                    }
-                }
-                if(turnInput.z == 0) {
-                    turnInput.z = -constructionVelocity.z;
-                    if(abs(turnInput.z) > 1) {
-                        turnInput.z = glm::sign(turnInput.z);
-                    }
-                }
+                // auto playerForward = getLookRay().direction;
                 
-                ridingConstruction->setTurnControl(turnInput);
+                rotation *= glm::angleAxis(glm::radians(lookPitch),vec3(-1,0,0));
+                lookPitch = 0;
+                //setUpVector(ridingConstruction->transformDirection(vec3(0,1,0) * ridingConstructionRotation));
+                
+                auto delta = glm::inverse(ridingConstruction->getRotation()) * (rotation * ridingConstructionRotation * glm::angleAxis(glm::radians(180.0f),vec3(0,1,0)) * glm::angleAxis(glm::radians(lookPitch),vec3(1,0,0)));
+
+
+                //std::cout << "delta: " << StringHelper::toString(glm::degrees(glm::eulerAngles(ridingConstruction->getRotation()))) << " - " << StringHelper::toString(glm::degrees(glm::eulerAngles(rotation))) << " = " << StringHelper::toString(glm::degrees(glm::eulerAngles(delta))) << std::endl;
+
+                //auto deltaRoll = shipRoll - playerRoll;
+
+                
+                auto kp = 20.0f;
+                auto kd = 0.2f;
+                
+                vec3 turnControl = -vec3(delta.x,delta.y,delta.z) * kp;
+                turnControl += -ridingConstruction->inverseTransformDirection(constructionAngularVelocity) * kd;
+                //turnInput.y = -glm::eulerAngles(delta).y * kp;
+                // if(turnInput.x == 0) {
+                //     turnInput.x = -constructionVelocity.x;
+                //     if(abs(turnInput.x) > 1) {
+                //         turnInput.x = glm::sign(turnInput.x);
+                //     }
+                // }
+                // if(turnInput.y == 0) {
+                //     turnInput.y = -constructionVelocity.y;
+                //     if(abs(turnInput.y) > 1) {
+                //         turnInput.y = glm::sign(turnInput.y);
+                //     }
+                // }
+                // if(turnInput.z == 0) {
+                //     turnInput.z = (-ridingConstruction->inverseTransformDirection(constructionAngularVelocity).z * kd) - shipRoll * kp;
+                //     if(abs(turnInput.z) > 1) {
+                //         turnInput.z = glm::sign(turnInput.z);
+                //     }
+                // }
+
+                turnControl.z += turnInput.z * 5;
+                
+                ridingConstruction->setTurnControl(turnControl);
 
                 position = ridingConstruction->transformPoint(ridingConstructionPoint);
 
@@ -387,6 +423,13 @@ class Character : public Actor {
             } else {
                 targetVelocity.y = relativeVelocity.y;
             }
+            
+            if(targetedActorID != Invalid_ActorID) {
+                auto targetedActor = world->getActor<Actor>(targetedActorID);
+                if(targetedActor->hasVelocity()) {
+                    targetVelocity += inverseTransformDirection(targetedActor->getVelocity());
+                }
+            }
 
             if(groundedTimer == 0) {
                 relativeVelocity = MathHelper::lerp(relativeVelocity,targetVelocity,airAcceleration*dt);
@@ -405,6 +448,9 @@ class Character : public Actor {
             }
 
             jumpInput = MathHelper::moveTowards(jumpInput,0,dt);
+
+            
+
             
             // turning in midair
             if(!underGravity) {
@@ -508,12 +554,21 @@ class Character : public Actor {
 
             updateLastTransform();
 
+            if(targetedActorID != Invalid_ActorID) {
+                vec3 cubePosition = world->getActor<Actor>(targetedActorID)->getPosition();
+                quat rotation = glm::quatLookAt(glm::normalize(getEyePosition()-cubePosition),transformDirection(vec3(0.0f,1.0f,0.0f)));
+                Debug::drawCube(cubePosition,vec3(1.0f),rotation,Color::green,dt);
+            }
             
             if(ridingConstruction != nullptr) {
+
+                world->physics_system.GetBodyInterface().SetObjectLayer(body.getCharacter()->GetInnerBodyID(),Layers::DISABLED);
                 
                 doConstructionControl(dt);
                 
             } else {
+
+                world->physics_system.GetBodyInterface().SetObjectLayer(body.getCharacter()->GetInnerBodyID(),Layers::PLAYER);
 
                 doMovement(world,dt);
 
@@ -522,16 +577,31 @@ class Character : public Actor {
                     handleInteraction(world);
 
                     handleHeldItem(world,dt);
+
+                    if(targetInput) {
+                        targetedActorID = Invalid_ActorID;
+                        auto hitOpt = world->raycast(getLookRay(),std::numeric_limits<float>::max(),LayerMask::excludes({Layers::PLAYER,Layers::ITEM}));
+                        if(hitOpt) {
+                            auto hit = hitOpt.value();
+                            if(hit.actor != nullptr) {
+                                targetedActorID = hit.actor->id;
+                            }
+                        }
+                        targetInput = false; 
+                    }
                     
                 }
 
                 attractItems(world);
 
-                // reset inputs
+            }
+
+            // reset inputs
                 clickInput = false;
                 interactInput = false;
                 dropInput = false;
-            }
+            heldItemData.scrollDelta = 0;
+            heldItemData.mouseDelta = vec2(0.0f);
 
             handleCamera(world);
 
@@ -559,6 +629,7 @@ class Character : public Actor {
             clickInput = false;
             interactInput = false;
             dropInput = false;
+            heldItemData.scrollDelta = 0;
 
         }
 
@@ -577,6 +648,7 @@ class Character : public Actor {
             ridingConstructionRotation = rotation;
             this->rotation = construction->getRotation() * ridingConstructionRotation * glm::quat(glm::radians(vec3(0.0f,180.0f,0.0f)));
             lookPitch = 0;
+            turnInput = {};
         }
 
         void dismount() {
@@ -591,13 +663,13 @@ class Character : public Actor {
                 dismount();
                 return;
             }
-            auto worldHitOpt = world->raycast(Ray(getEyePosition(),getEyeDirection()),10,LayerMask::excludes({Layers::PLAYER,Layers::ITEM}));
-            if(worldHitOpt) {
-                auto worldHit = worldHitOpt.value();
-                Construction* construction = dynamic_cast<Construction*>(worldHit.actor);
+            auto hitOpt = world->raycast(Ray(getEyePosition(),getEyeDirection()),10,LayerMask::excludes({Layers::PLAYER,Layers::ITEM}));
+            if(hitOpt) {
+                auto hit = hitOpt.value();
+                Construction* construction = dynamic_cast<Construction*>(hit.actor);
                 if(construction != nullptr) {
                     std::cout << "interacted with construction" << std::endl;
-                    vec3 interactPointWorld = worldHit.hit.point - worldHit.hit.normal * 0.5f;
+                    vec3 interactPointWorld = hit.point - hit.normal * 0.5f;
                     vec3 interactPointLocal = construction->inverseTransformPoint(interactPointWorld);
                     ivec3 interactPointInt = glm::round(interactPointLocal);
                     auto data = construction->getBlock(interactPointInt);
@@ -625,7 +697,7 @@ class Character : public Actor {
 
         void processInputNormal(Input& input) {
             moveInput = vec3(0,0,0);
-            turnInput = vec3(0,0,0);
+            //turnInput = vec3(0,0,0);
             if(input.getKey(GLFW_KEY_W)) {
                 moveInput.z -= 1; //im not sure why this exists :shrug:
             }
@@ -645,6 +717,7 @@ class Character : public Actor {
                 moveInput.y -= 1;
             }
             rotationInput = 0;
+            turnInput.z = 0;
             if(input.getKey(GLFW_KEY_Q)) {
                 rotationInput -= 1;
                 turnInput.z -= 1;
@@ -734,19 +807,32 @@ class Character : public Actor {
                 flying = !flying;
             }
 
+            if(input.getMouseButtonPressed(GLFW_MOUSE_BUTTON_3)) {
+                targetInput = inputBuffer;
+            }
+
             // if(!toolbar[selectedTool].isEmpty()) {
             //     toolbar[selectedTool].item->processInput(input);
             // }
+            heldItemData.scrollDelta += input.currentMouseScrollDelta;
             if(input.getMouseButtonPressed(GLFW_MOUSE_BUTTON_1)) {
                 heldItemData.clickInput = true;
             }
+            if(input.getMouseButtonPressed(GLFW_MOUSE_BUTTON_2)) {
+                heldItemData.altClickInput = true;
+            }
             heldItemData.clickHold = input.getMouseButton(GLFW_MOUSE_BUTTON_1);
+            heldItemData.altClickHold = input.getMouseButton(GLFW_MOUSE_BUTTON_2);
 
             if(input.getKeyPressed(GLFW_KEY_TAB) && !inventoryDisabled) {
                 openMenu();
             }
 
             auto delta = input.getMouseDelta();
+            heldItemData.mouseDelta += delta;
+
+            turnInput.x += delta.y * 0.01f;
+            turnInput.y -= delta.x * 0.01f;
             //std::cout << StringHelper::toString(delta) << std::endl;
             moveMouse(delta * 0.01f);
         }
@@ -1025,8 +1111,8 @@ class Character : public Actor {
             return true;
         }
 
-        data_ActorType getActorDataType() {
-            return data_ActorType::PLAYER;
+        string getActorDataType() {
+            return "character";
         }
 
         virtual std::vector<std::uint8_t> createSaveBuffer() {

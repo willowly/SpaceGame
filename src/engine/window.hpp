@@ -70,6 +70,13 @@ class Window {
             #endif
         }
 
+        static void scrollCallback(GLFWwindow* window, double xOffset, double yOffset)
+        {
+            auto app = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
+            auto& input = app->input;
+            input.currentMouseScrollDelta += yOffset;
+        }
+
         static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
         {
             auto app = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
@@ -99,6 +106,7 @@ class Window {
             glfwSetCursorPosCallback(glfwWindow, mouseCallback); 
             glfwSetCharCallback(glfwWindow, characterCallback);
             glfwSetMouseButtonCallback(glfwWindow, mouseButtonCallback);
+            glfwSetScrollCallback(glfwWindow,scrollCallback);
             
             
             if (glfwWindow == NULL) {

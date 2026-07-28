@@ -40,13 +40,16 @@ namespace TypeInfoLoader {
         tool->addConstProperty("smooth_time",&Tool::smoothTime);
         
         TypeInfo* place = registry.addTypeInfo<PlaceBlockTool>("place_block_tool");
-        place->constructorFunction = [&]() {return std::make_unique<PlaceBlockTool>();};
         place->setParent(tool);
         place->constructorFunction = [&]() {return std::make_unique<PlaceBlockTool>();};
         place->addConstProperty("place_animation_rotation",&PlaceBlockTool::placeAnimationRotation);
         place->addConstProperty("place_animation_time",&PlaceBlockTool::placeAnimationTime);
         place->addConstProperty("block",&PlaceBlockTool::block);
 
+        TypeInfo* hammer = registry.addTypeInfo<HammerTool>("hammer_tool");
+        hammer->setParent(tool);
+        hammer->constructorFunction = [&]() {return std::make_unique<HammerTool>();};
+        
         TypeInfo* pickaxe = registry.addTypeInfo<PickaxeTool>("pickaxe_tool");
         pickaxe->setParent(tool);
         pickaxe->constructorFunction = [&]() {return std::make_unique<PickaxeTool>();};
@@ -60,6 +63,25 @@ namespace TypeInfoLoader {
 
         pickaxe->addConstProperty("anticipation_rotation",&PickaxeTool::anticipationRotation);
         pickaxe->addConstProperty("cooldown_rotation",&PickaxeTool::cooldownRotation);
+
+        TypeInfo* clawTool = registry.addTypeInfo<ClawTool>("claw_tool");
+        clawTool->setParent(tool);
+        clawTool->constructorFunction = [&]() {return std::make_unique<ClawTool>();};
+        clawTool->addConstProperty("range",&ClawTool::range);
+        clawTool->addConstProperty("force",&ClawTool::force);
+        clawTool->addConstProperty("velocity_threshold",&ClawTool::velocityThreshold);
+        clawTool->addConstProperty("angular_damping",&ClawTool::angularDamping);
+        clawTool->addConstProperty("scroll_speed",&ClawTool::scrollSpeed);
+
+        TypeInfo* drillTool = registry.addTypeInfo<DrillTool>("drill_tool");
+        drillTool->setParent(tool);
+        drillTool->constructorFunction = [&]() {return std::make_unique<DrillTool>();};
+
+        // work on building
+
+        // TypeInfo* newTool = registry.addTypeInfo<NewTool>("new_tool");
+        // newTool->setParent(tool);
+        // newTool->constructorFunction = [&]() {return std::make_unique<NewTool>();};
     }
 
 }

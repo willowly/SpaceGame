@@ -11,7 +11,6 @@
 #include <api/api-registry-block.hpp>
 #include <api/api-registry-item.hpp>
 #include <api/api-registry-recipe.hpp>
-#include <api/api-registry-particle-effect.hpp>
 #include <api/api-registry-widget.hpp>
 
 using std::string,std::variant;

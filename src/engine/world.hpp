@@ -112,12 +112,14 @@ class World {
 
 
 
-    struct WorldRaycastHit {
+    struct RaycastHit {
         Actor* actor;
-        RaycastHit hit;
+        vec3 point = {};
+        vec3 normal = {};
+        float distance;
         int component;
 
-        WorldRaycastHit(Actor* actor,RaycastHit hit,int component = 0) : actor(actor), hit(hit), component(component) {
+        RaycastHit(Actor* actor,SimpleRaycastHit hit,int component = 0) : actor(actor), point(hit.point), normal(hit.normal), distance(hit.distance), component(component) {
 
         }
     };
@@ -468,7 +470,7 @@ class World {
             
         }
 
-        std::optional<WorldRaycastHit> raycast(Ray ray,float dist,LayerMask mask = LayerMask::all(),const RaycastSettings& settings = RaycastSettings()) {
+        std::optional<RaycastHit> raycast(Ray ray,float dist,LayerMask mask = LayerMask::all(),const RaycastSettings& settings = RaycastSettings()) {
             //ZoneScoped;
             //std::optional<WorldRaycastHit> result = std::nullopt; 
             ray.direction = glm::normalize(ray.direction);
@@ -507,7 +509,7 @@ class World {
                     actor = userDataStruct->actor;
                     component = userDataStruct->component;
                 }
-                return WorldRaycastHit(actor,RaycastHit(point,normal,distance),component);
+                return RaycastHit(actor,SimpleRaycastHit(point,normal,distance),component);
             }
 
             return std::nullopt;
@@ -518,7 +520,7 @@ class World {
             ObjectLayerFilter filter(ObjectLayerTable{true,true,true,false});
 
             std::cout << "overlapping box" << std::endl;
-            Debug::drawCube(position,size,rotation,Color::red,0.2f);
+            //Debug::drawCube(position,size,rotation,Color::red,0.2f);
 
             
 
@@ -558,8 +560,8 @@ class World {
             
             for (auto& actor : actors)
             {
-                data_ActorType type = actor->getActorDataType();
-                if(type == data_ActorType::DONT_SAVE) {
+                string type = actor->getActorDataType();
+                if(type == "") { // dont save
                     continue;
                 }
                 data_ActorEntry data_entry;

@@ -1,5 +1,4 @@
-type: connected
+type: sloped
 texture: basic_block_sheet
-slope: sloped_tin
 default_drop: tin_plate
-solid: 1
+solid: 0

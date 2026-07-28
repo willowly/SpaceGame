@@ -6,10 +6,15 @@
 class ParticleEffectActor : public Actor {
 
     
+    ParticleEffect effect;
 
     public:
-        ParticleEffect effect;
+        ParticleEffectSettings settings;
         bool destroyWhenZeroParticles = true;
+
+        ParticleEffectActor() : effect(&settings) {
+            
+        }
 
         virtual ~ParticleEffectActor() noexcept = default;
 

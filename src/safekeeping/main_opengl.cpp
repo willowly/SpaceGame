@@ -255,8 +255,8 @@ int main()
         //auto hit_opt = terrain->raycast(player->getLookRay(),10);
         auto worldhit_opt = world.raycast(Ray(player->getEyePosition(),player->getEyeDirection()),10);
         if(worldhit_opt) {
-            auto worldHit = worldhit_opt.value();
-            auto hit = worldHit.hit;
+            auto hit = worldhit_opt.value();
+            auto hit = hit.;
             Debug::drawPoint(hit.point,Color::red);
             Debug::drawLine(hit.point,hit.point+hit.normal,Color::red);
         }

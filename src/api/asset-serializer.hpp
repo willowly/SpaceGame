@@ -13,6 +13,12 @@ class AssetSerializer {
         file << std::to_string(value);
     }
 
+    template<typename T>
+    void serializeEnum(T obj,GenericPropertyInfo* property,ofstream& file) {
+        auto value = property->getEnumValue(obj);
+        file << std::to_string(value);
+    }
+
     template<typename PropertyType,typename T>
     void serializeBasic(T obj,GenericPropertyInfo* property,ofstream& file) {
         auto value = property->get<PropertyType>(obj);
@@ -84,6 +90,9 @@ class AssetSerializer {
             case PropertyTypeEnum::Int:
                 serializeNumber<int>(obj,property,file);
                 break;
+            case PropertyTypeEnum::Enum:
+                serializeEnum(obj,property,file);
+                break;
             case PropertyTypeEnum::Float:
                 serializeNumber<float>(obj,property,file);
                 break;
@@ -137,6 +146,17 @@ class AssetSerializer {
             Debug::warn("not an int! (expected an int)");
         }
         property->set(obj,i);
+    }
+
+    template<typename T>
+    void deserializeEnum(T obj,GenericPropertyInfo* property,SerializationNode node) {
+        int i = 0;
+        try {
+            i = std::stoi(node.getValue());
+        } catch (std::invalid_argument& e) {
+            Debug::warn("not an int! (expected an int)");
+        }
+        property->setEnumValue(obj,i);
     }
     template<typename T>
     void deserializeFloat(T obj,GenericPropertyInfo* property,SerializationNode node) {
@@ -291,6 +311,9 @@ class AssetSerializer {
         switch(property->getPropertyType()) {
             case PropertyTypeEnum::Int:
                 deserializeInt(obj,property,node);
+                break;
+            case PropertyTypeEnum::Enum:
+                deserializeEnum(obj,property,node);
                 break;
             case PropertyTypeEnum::Float:
                 deserializeFloat(obj,property,node);

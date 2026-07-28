@@ -25,7 +25,8 @@ class Actor {
 
         vec3 lastPosition = vec3(0);
         quat lastRotation = vec3(0);
-
+        
+        Actor(const Actor& actor) = default;
 
     public:
 
@@ -42,7 +43,6 @@ class Actor {
         bool networkLocal = true;
 
         virtual ~Actor() = default;
-        Actor(const Actor& actor) = default;
 
         // general-purpose functions
 
@@ -139,6 +139,33 @@ class Actor {
 
         }
 
+        virtual vec3 getVelocity() {
+            return vec3(0.0f);
+        }
+
+        virtual void setVelocity(vec3 velocity) {
+
+        }
+
+        virtual vec3 getAngularVelocity() {
+            return vec3(0.0f);
+        }
+
+        virtual void setAngularVelocity(vec3 velocity) {
+
+        }
+
+        virtual bool hasVelocity() {
+            return false;
+        }
+
+        virtual bool hasAngularVelocity() {
+            return hasVelocity();
+        }
+
+
+
+
         virtual void step(World* world,float dt) {
             updateLastTransform();
         }
@@ -174,8 +201,8 @@ class Actor {
 
         // Saving and loading
 
-        virtual data_ActorType getActorDataType() {
-            return data_ActorType::DUMMY;
+        virtual string getActorDataType() {
+            return "dummy";
         }
 
         virtual std::vector<std::uint8_t> createSaveBuffer() {
@@ -193,8 +220,8 @@ class Actor {
 
         std::optional<data_ActorEntry> getDataEntry() {
             data_ActorEntry data_entry;
-            data_ActorType type = getActorDataType();
-            if (type == data_ActorType::DONT_SAVE)
+            string type = getActorDataType();
+            if (type == "")
                 return std::nullopt;
 
             data_entry.type = type;

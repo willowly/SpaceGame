@@ -1,7 +1,0 @@
-type: thruster
-force: 100000.000000
-side_force: 20000.000000
-mesh: thruster
-texture: pickaxe2
-default_drop: super_thruster
-solid: 0

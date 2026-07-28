@@ -1,6 +1,7 @@
 print("hello")
 print(items.pickaxe)
 print(player)
+player:give(items.hammer,1)
 player:give(items.pickaxe,1)
 player:give(items.tin_plate,99)
 player:give(items.thruster,99)
