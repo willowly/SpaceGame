@@ -9,8 +9,9 @@ struct TerrainMaterial {
 };
 
 struct TerrainType {
-    Item* item;
-    TextureID texture;
+    string name;
+    Item* item = {};
+    TextureID texture = 0;
 };
 
 struct GenerationSettings {
@@ -20,8 +21,8 @@ struct GenerationSettings {
     int noiseOctaves = 1;
     float noiseGain = 0.5f;
     float noiseLacunarity = 2.0;
-    TerrainType stoneType;
-    TerrainType oreType;
+    TerrainType* stoneType = {};
+    TerrainType* oreType = {};
 
     struct OreSettings {
         TerrainType type;
@@ -32,6 +33,8 @@ struct GenerationSettings {
 
 
 struct TerrainSettings {
+
+    string name;
 
     GenerationSettings generationSettings;
 

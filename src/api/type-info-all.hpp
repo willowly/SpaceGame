@@ -5,6 +5,7 @@
 #include "api/type-info-graphics.hpp"
 #include "api/type-info-math.hpp"
 #include "api/type-info-widget.hpp"
+#include "api/type-info-actor.hpp"
 
 
 namespace TypeInfoLoader {
@@ -16,6 +17,7 @@ namespace TypeInfoLoader {
         TypeInfoLoader::loadGraphics(registry);
         TypeInfoLoader::loadMath(registry);
         TypeInfoLoader::loadWidget(registry);
+        TypeInfoLoader::loadActor(registry);
 
     }
 

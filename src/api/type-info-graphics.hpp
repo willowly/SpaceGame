@@ -31,6 +31,13 @@ namespace TypeInfoLoader {
 
         TypeInfo* mesh = registry.addTypeInfo<Mesh<Vertex>>("mesh");
 
+
+        TypeInfo* color = registry.addTypeInfo<Color>("color");
+        color->addConstProperty("r",&Color::r);
+        color->addConstProperty("g",&Color::g);
+        color->addConstProperty("b",&Color::b);
+        color->addConstProperty("a",&Color::a);
+
         TypeInfo* basicModel = registry.addTypeInfo<BasicModel>("basic_model");
         basicModel->addConstProperty("mesh",&BasicModel::mesh);
         basicModel->addConstProperty("material",&BasicModel::material);

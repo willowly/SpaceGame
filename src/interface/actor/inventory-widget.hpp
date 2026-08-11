@@ -8,11 +8,11 @@
 #include "interface/text-widget.hpp"
 #include "interface/item-slot-widget.hpp"
 
-class InventoryWidget : public Object{
+class InventoryWidget : public Widget {
     
     public:
         Sprite backgroundSprite;
-        Font* font;
+        Font* font = nullptr;
         vec2 size = vec2(550,200);
         float padding = 3;
         vec2 slotSize = vec2(60,60);

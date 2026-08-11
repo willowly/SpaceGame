@@ -16,6 +16,7 @@ class Character;
 struct BlockPlaceInfo {
     vec3 normal = {}; //local to the construction
     vec3 lookDir = {};
+    vec3 upDir = vec3(0,1,0);
     bool attached = false; //is this block being placed attached to terrain?
 };
 

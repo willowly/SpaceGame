@@ -18,9 +18,9 @@ class Loader {
     public:
 
         inline const static string DEFAULT_CONSTRUCTION_MATERIAL_KEY = "default_construction";
+        inline const static string DEFAULT_TERRAIN_MATERIAL_KEY = "default_terrain";
 
         void loadAll(Registry& registry,sol::state& lua,Vulkan* vulkan) {
-            std::cout << "Current loader path is: " << std::filesystem::current_path() << '\n';
             copyAssets();
             loadModels(registry,vulkan);
             loadTextures(registry,vulkan);
@@ -35,29 +35,49 @@ class Loader {
         
         void copyAssets() {
             string path = "..\\..\\assets";
+            auto source = std::filesystem::path(path);
+            auto dest = std::filesystem::current_path().append("assets");
             if(std::filesystem::exists(path)) {
-                copyAssetsFromDir(std::filesystem::path(path),std::filesystem::current_path());
+                copyAssetsFromDir(source,dest);
+                deleteMissingAssetsFromDir(source,dest);
+            }
+        }
+
+        void deleteMissingAssetsFromDir(std::filesystem::path sourcePath,std::filesystem::path destPath) {
+            for (const auto & entry : std::filesystem::directory_iterator(destPath)) {
+                auto entryDest = entry.path();
+                auto entrySource = sourcePath;
+                entrySource.append(entry.path().filename().string());
+
+                if(!std::filesystem::exists(entrySource) ) {
+                    std::filesystem::remove(entryDest);
+                    Debug::info("deleted " + entryDest.string(),InfoPriority::MEDIUM);
+                    continue;
+                }
+
+                if(entry.is_directory()) {
+                    deleteMissingAssetsFromDir(entrySource,entryDest);
+                    continue;
+                }
             }
         }
 
         void copyAssetsFromDir(std::filesystem::path sourcePath,std::filesystem::path destPath) {
+            
+            if(!std::filesystem::exists(destPath)) {
+                std::filesystem::create_directory(destPath);
+            }
             for (const auto & entry : std::filesystem::directory_iterator(sourcePath)) {
                 auto entrySource = entry.path();
                 auto entryDest = destPath;
                 entryDest.append(entry.path().filename().string());
 
                 if(entry.is_directory()) {
-                    if(!std::filesystem::exists(entryDest)) {
-                        std::filesystem::create_directory(entryDest);
-                    }
                     copyAssetsFromDir(entrySource,entryDest);
                     continue;
                 }
 
                 std::filesystem::copy_file(entrySource,entryDest,std::filesystem::copy_options::overwrite_existing);
-
-                
-                
 
             }
         }
@@ -67,7 +87,7 @@ class Loader {
             Debug::addTrace("models");
             std::cout << "Loading Models" << std::endl;
             
-            loadModelsFromDir(registry,vulkan,"models");
+            loadModelsFromDir(registry,vulkan,"assets/models");
             Debug::subtractTrace();
             
         }
@@ -97,7 +117,7 @@ class Loader {
             Debug::addTrace("textures");
             std::cout << "Loading Textures" << std::endl;
             vulkan->clearTextures(); // easiest way to do this
-            loadTexturesFromDir(registry,vulkan,"textures");
+            loadTexturesFromDir(registry,vulkan,"assets/textures");
             if(!registry.hasTexture("error")) {
                 Debug::warn("[WARNING] no fallback/error texture!");
             }
@@ -134,6 +154,7 @@ class Loader {
 
         void loadDefaultMaterials(Registry& registry,Vulkan* vulkan) {
             registry.addMaterial(DEFAULT_CONSTRUCTION_MATERIAL_KEY,vulkan->createMaterial<LitMaterialData,ConstructionVertex>("construction",LitMaterialData(registry.getTexture("rock"))));
+            registry.addMaterial(DEFAULT_TERRAIN_MATERIAL_KEY,vulkan->createMaterial<LitMaterialData,TerrainVertex>("terrain",LitMaterialData(registry.getTexture("rock"))));
         }
 
         void loadShaders(Registry& registry,Vulkan* vulkan) {
@@ -146,29 +167,33 @@ class Loader {
         }
 
         void loadFonts(Registry& registry,Vulkan* vulkan) {
-            auto& font = registry.font;
-            font.texture = registry.getTexture("characters");
-            font.start = '0';
-            font.charSize = vec2(8,12);
-            font.textureSize = vec2(312,12);
-            font.characters = "0123456789x.ABCDEFGHIJKLMNOPQRSTUVWXYZ ";
+            auto* font = registry.addAny<Font>("default",Font());
+            font->texture = registry.getTexture("characters");
+            font->start = '0';
+            font->charSize = vec2(8,12);
+            font->textureSize = vec2(312,12);
+            font->characters = "0123456789x.ABCDEFGHIJKLMNOPQRSTUVWXYZ ";
         }
 
         void loadAssetFileStubs(Registry& registry,Vulkan* vulkan) {
             Debug::addTrace("items");
-            loadObjectStubsFromDir<Item>(registry,vulkan,"items");
-            loadObjectStubsFromDir<Block>(registry,vulkan,"blocks");
-            loadObjectStubsFromDir<MaterialObject>(registry,vulkan,"materials");
-            loadObjectStubsFromDir<Recipe>(registry,vulkan,"recipes");
+            loadObjectStubsFromDir<Item>(registry,vulkan,"assets/items");
+            loadObjectStubsFromDir<Block>(registry,vulkan,"assets/blocks");
+            loadObjectStubsFromDir<MaterialObject>(registry,vulkan,"assets/materials");
+            loadObjectStubsFromDir<Recipe>(registry,vulkan,"assets/recipes");
+            loadObjectStubsFromDir<Actor>(registry,vulkan,"assets/actors");
+            loadObjectStubsFromDir<Widget>(registry,vulkan,"assets/widgets");
             Debug::subtractTrace();
         }
 
         void loadAssetFileProperties(Registry& registry,Vulkan* vulkan) {
             Debug::addTrace("items");
-            loadObjectPropertiesFromDir<Item>(registry,vulkan,"items");
-            loadObjectPropertiesFromDir<Block>(registry,vulkan,"blocks");
-            loadObjectPropertiesFromDir<MaterialObject>(registry,vulkan,"materials");
-            loadObjectPropertiesFromDir<Recipe>(registry,vulkan,"recipes");
+            loadObjectPropertiesFromDir<Item>(registry,vulkan,"assets/items");
+            loadObjectPropertiesFromDir<Block>(registry,vulkan,"assets/blocks");
+            loadObjectPropertiesFromDir<MaterialObject>(registry,vulkan,"assets/materials");
+            loadObjectPropertiesFromDir<Recipe>(registry,vulkan,"assets/recipes");
+            loadObjectPropertiesFromDir<Actor>(registry,vulkan,"assets/actors");
+            loadObjectPropertiesFromDir<Widget>(registry,vulkan,"assets/widgets");
             for(auto pair : registry.getObjects<MaterialObject>()) {
                 auto mat = pair.second;
                 mat->loadMaterial(vulkan);
@@ -201,7 +226,7 @@ class Loader {
 
                 auto obj = serializer.deserializeStub<T>(file);
 
-                registry.addObject(name,std::move(obj));
+                registry.addObject<T>(name,std::move(obj));
 
                 Debug::info("Loaded Object \"" + name + "\" (" + registry.getTypeName(typeid(T).name()) + ")",InfoPriority::MEDIUM);
                 Debug::subtractTrace();

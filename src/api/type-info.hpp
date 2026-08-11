@@ -32,6 +32,7 @@ enum class PropertyTypeEnum {
     Texture,
     Material,
     ObjectPointer,
+    Pointer,
     Composite
 };
 
@@ -47,6 +48,8 @@ struct GenericPropertyInfo {
     virtual std::any getPtr(Object* obj) const = 0;
     virtual Object* getObj(Object* obj) const = 0;
     virtual Object* getObj(std::any obj) const = 0;
+    virtual void* getVoidPtr(std::any obj) const = 0; // for getting pointer type names
+    virtual void* getVoidPtr(Object* obj) const = 0; // for getting pointer type names
 
     template<typename T>
     T get(std::any obj) const {
@@ -64,6 +67,8 @@ struct GenericPropertyInfo {
     virtual void set(Object* obj,std::any value) const = 0;
     virtual void set(Object* obj,Object* value) const = 0;
     virtual void set(std::any obj,Object* value) const = 0;
+    virtual void setPtr(std::any obj,std::any& value) const = 0;
+    virtual void setPtr(Object* obj,std::any& value) const = 0;
 
     template<typename T>
     void set(std::any obj,T value) const {
@@ -112,6 +117,9 @@ struct GenericPropertyInfo {
         }
         if constexpr(IsVector<T>::value) {
             return PropertyTypeEnum::Vector;
+        }
+        if constexpr(std::is_pointer_v<T>) {
+            return PropertyTypeEnum::Pointer;
         }
         return PropertyTypeEnum::Composite;
     };
@@ -183,6 +191,28 @@ struct ElementPropertyInfo : GenericPropertyInfo {
         }
     }
 
+    void* getVoidPtr(std::any obj) const override {
+        if constexpr(std::is_pointer_v<PropertyType>) {
+            ClassType* typedObj = std::any_cast<ClassType*>(obj);
+            assert(typedObj != nullptr);
+            PropertyType value = typedObj->at(index);
+            return static_cast<void*>(value);
+        } else {
+            return nullptr;
+        }
+    }
+
+    void* getVoidPtr(Object* obj) const override {
+        if constexpr(std::is_pointer_v<PropertyType>) {
+            ClassType* typedObj = dynamic_cast<ClassType*>(obj);
+            assert(typedObj != nullptr);
+            PropertyType value = typedObj->at(index);
+            return static_cast<void*>(value);
+        } else {
+            return nullptr;
+        }
+    }
+
     void set(std::any obj,std::any value) const override {
         ClassType* typedObj = std::any_cast<ClassType*>(obj);
         typedObj->at(index) = std::any_cast<PropertyType>(value);
@@ -192,12 +222,28 @@ struct ElementPropertyInfo : GenericPropertyInfo {
         assert(typedObj != nullptr);
         typedObj->at(index) = std::any_cast<PropertyType>(value);
     }
+    void setPtr(std::any obj,std::any& value) const override {
+        ClassType* typedObj = std::any_cast<ClassType*>(obj);
+        if constexpr(std::is_pointer_v<PropertyType>) {
+            typedObj->at(index) = std::any_cast<std::remove_pointer_t<PropertyType>>(&value);
+        }
+    }
+    void setPtr(Object* obj,std::any& value) const override {
+        ClassType* typedObj = dynamic_cast<ClassType*>(obj);
+        assert(typedObj != nullptr);
+        if constexpr(std::is_pointer_v<PropertyType>) {
+            typedObj->at(index) = std::any_cast<std::remove_pointer_t<PropertyType>>(&value);
+        }
+    }
     void set(Object* obj,Object* value) const override {
         if constexpr(std::is_convertible_v<PropertyType,Object*>) {
             ClassType* typedObj = dynamic_cast<ClassType*>(obj);
             assert(typedObj != nullptr);
             PropertyType typedValue = dynamic_cast<PropertyType>(value);
-            assert(typedValue != nullptr);
+            if(typedValue == nullptr && value != nullptr) {
+                Debug::warn("invalid type for property " + name);
+                return;
+            }
             typedObj->at(index) = typedValue;
         }
     }
@@ -206,7 +252,10 @@ struct ElementPropertyInfo : GenericPropertyInfo {
             ClassType* typedObj = std::any_cast<ClassType*>(obj);
             assert(typedObj != nullptr);
             PropertyType typedValue = dynamic_cast<PropertyType>(value);
-            assert(typedValue != nullptr);
+            if(typedValue == nullptr && value != nullptr) {
+                Debug::warn("invalid type for property " + name);
+                return;
+            }
             typedObj->at(index) = typedValue;
         }
     }
@@ -325,6 +374,28 @@ struct PropertyInfo : GenericPropertyInfo {
         }
     }
 
+    void* getVoidPtr(std::any obj) const override {
+        if constexpr(std::is_pointer_v<PropertyType>) {
+            ClassType* typedObj = std::any_cast<ClassType*>(obj);
+            assert(typedObj != nullptr);
+            PropertyType value = typedObj->*(property);
+            return static_cast<void*>(value);
+        } else {
+            return nullptr;
+        }
+    }
+
+    void* getVoidPtr(Object* obj) const override {
+        if constexpr(std::is_pointer_v<PropertyType>) {
+            ClassType* typedObj = dynamic_cast<ClassType*>(obj);
+            assert(typedObj != nullptr);
+            PropertyType value = typedObj->*(property);
+            return static_cast<void*>(value);
+        } else {
+            return nullptr;
+        }
+    }
+
     void set(std::any obj,std::any value) const override {
         ClassType* typedObj = std::any_cast<ClassType*>(obj);
         typedObj->*(property) = std::any_cast<PropertyType>(value);
@@ -334,12 +405,29 @@ struct PropertyInfo : GenericPropertyInfo {
         assert(typedObj != nullptr);
         typedObj->*(property) = std::any_cast<PropertyType>(value);
     }
+     void setPtr(std::any obj,std::any& value) const override {
+        ClassType* typedObj = std::any_cast<ClassType*>(obj);
+        if constexpr(std::is_pointer_v<PropertyType>) {
+            typedObj->*(property) = std::any_cast<std::remove_pointer_t<PropertyType>>(&value);
+        }
+     }
+    
+    void setPtr(Object* obj,std::any& value) const override {
+        ClassType* typedObj = dynamic_cast<ClassType*>(obj);
+        assert(typedObj != nullptr);
+        if constexpr(std::is_pointer_v<PropertyType>) {
+            typedObj->*(property) = std::any_cast<std::remove_pointer_t<PropertyType>>(&value);
+        }
+    }
     void set(Object* obj,Object* value) const override {
         if constexpr(std::is_convertible_v<PropertyType,Object*>) {
             ClassType* typedObj = dynamic_cast<ClassType*>(obj);
             assert(typedObj != nullptr);
             PropertyType typedValue = dynamic_cast<PropertyType>(value);
-            assert(typedValue != nullptr);
+            if(typedValue == nullptr && value != nullptr) {
+                Debug::warn("invalid type for property " + name);
+                return;
+            }
             typedObj->*(property) = typedValue;
         }
     }
@@ -348,10 +436,14 @@ struct PropertyInfo : GenericPropertyInfo {
             ClassType* typedObj = std::any_cast<ClassType*>(obj);
             assert(typedObj != nullptr);
             PropertyType typedValue = dynamic_cast<PropertyType>(value);
-            assert(typedValue != nullptr);
+            if(typedValue == nullptr && value != nullptr) {
+                Debug::warn("invalid type for property " + name);
+                return;
+            }
             typedObj->*(property) = typedValue;
         }
     }
+    
 
     GenericPropertyInfo* getElement(int index) override {
         if constexpr(IsVector<PropertyType>::value) {
@@ -593,6 +685,7 @@ class TypeInfo {
     
     string name = "";
     string folderName = "";
+    string typeIdName = "";
 
     
     TypeInfo* parent = nullptr;
@@ -605,6 +698,7 @@ class TypeInfo {
         TypeInfo(TypeInfo& typeinfo) = delete;
         TypeInfo() = default;
         TypeInfo(string name) : name(name) {}
+        TypeInfo(string name,string typeIdName) : name(name), typeIdName(typeIdName) {}
         template<typename ClassType,typename PropertyType>
         GenericPropertyInfo* addConstProperty(string name, PropertyType ClassType::* property) {
             auto info = std::make_unique<PropertyInfo<ClassType,PropertyType>>(name,property);
@@ -622,11 +716,13 @@ class TypeInfo {
         }
 
         void setParent(TypeInfo* info) {
+            Debug::addTrace(name);
             if(parent != nullptr) {
                 Debug::warn("a parent has already been set");
             }
             parent = info;
             info->addDerviedType(this);
+            Debug::subtractTrace();
         }
 
         void addDerviedType(TypeInfo* info) {
@@ -639,6 +735,10 @@ class TypeInfo {
 
         string getName() {
             return name;
+        }
+
+        string getTypeId() {
+            return typeIdName;
         }
 
         string getFolderName() {
@@ -669,3 +769,12 @@ class TypeInfo {
         }
 
 };
+
+
+// #define TYPE_INFO(typeName) \
+//     TypeInfo* _typeName = registry.addTypeInfo<typeName>(#typeName); \
+//     // set CURRENT_TYPEINFO = typeName
+
+
+// #define TYPE_INFO_PROPERTY(propertyName) \
+//     CURRENT_TYPE_INFO->addConstProperty(#propertyName, &CURRENT_TYPE_INFO::propertyName);

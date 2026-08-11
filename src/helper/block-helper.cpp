@@ -47,6 +47,50 @@ quat BlockHelper::getRotationFromFacing(BlockFacing blockFacing) {
     return glm::angleAxis(glm::radians(0.0f),vec3(0,1.0f,0));
 }
 
+quat BlockHelper::getRotationFromFacing(BlockFacing blockFacing,int rotationIndex) {
+    switch(blockFacing) {
+        case BlockFacing::FORWARD:
+            return glm::angleAxis(glm::radians(0.0f),vec3(0,1.0f,0)) * glm::angleAxis(glm::radians(90.0f * rotationIndex),vec3(0,0,1.0f));
+            break;
+        case BlockFacing::BACKWARD:
+            return glm::angleAxis(glm::radians(180.0f),vec3(0,1.0f,0)) * glm::angleAxis(glm::radians(90.0f * rotationIndex),vec3(0,0,1.0f));
+            break;
+        case BlockFacing::UP:
+            return glm::angleAxis(glm::radians(-90.0f),vec3(1.0f,0,0)) * glm::angleAxis(glm::radians(90.0f * rotationIndex),vec3(0,0,1.0f));
+            break;
+        case BlockFacing::DOWN:
+            return glm::angleAxis(glm::radians(90.0f),vec3(1.0f,0,0)) * glm::angleAxis(glm::radians(90.0f * rotationIndex),vec3(0,0,1.0f));
+            break;
+        case BlockFacing::RIGHT:
+            return glm::angleAxis(glm::radians(90.0f),vec3(0,1.0f,0)) * glm::angleAxis(glm::radians(90.0f * rotationIndex),vec3(0,0,1.0f));
+            break;
+        case BlockFacing::LEFT:
+            return glm::angleAxis(glm::radians(-90.0f),vec3(0,1.0f,0)) * glm::angleAxis(glm::radians(90.0f * rotationIndex),vec3(0,0,1.0f));
+            break;
+    }
+    return glm::angleAxis(glm::radians(0.0f),vec3(0,1.0f,0));
+}
+
+int BlockHelper::getRotationIndexFromVector(vec2 direction) {
+    direction = glm::normalize(direction);
+
+    int rotation = 0;
+    if(abs(direction.x) > abs(direction.y)) {
+        if(direction.x > 0) {
+            rotation = 3;
+        } else {
+            rotation = 1;
+        }
+    } else {
+        if(direction.y > 0) {
+            rotation = 0;
+        } else {
+            rotation = 2;
+        }
+    }
+    return rotation;
+}
+
 BlockFacing BlockHelper::rotateFacingByFacing(BlockFacing a, BlockFacing b) {
     return getFacingFromVector(vec3(0,0,1) * getRotationFromFacing(a) * getRotationFromFacing(b));
 }
@@ -86,7 +130,7 @@ void BlockHelper::addBlockFace(Construction* construction,MeshData<ConstructionV
 }
 
 
-void BlockHelper::addSingleBlock(Construction* construction,MeshData<ConstructionVertex>& meshData,ivec3 position,quat rotation,TextureID texture) {
+void BlockHelper::addSingleBlock(Construction* construction,MeshData<ConstructionVertex>& meshData,ivec3 position,TextureID texture,quat rotation) {
 
     if(construction == nullptr) {
         Debug::warn("construction is null during mesh build");
@@ -113,6 +157,14 @@ void BlockHelper::addMesh(MeshData<ConstructionVertex>& meshData,ivec3 position,
     for(auto index : blockMeshData.indices) {
         meshData.indices.push_back(index + indexOffset); 
     }
+}
+
+void BlockHelper::addMesh(MeshData<ConstructionVertex>& meshData,ivec3 position,BlockFacing facing,int rotationIndex,Mesh<Vertex>* blockMesh,TextureID texture) {
+    if(blockMesh == nullptr) {
+        Debug::warn("tried to render block with no mesh");
+    }
+    quat rotation = BlockHelper::getRotationFromFacing(facing,rotationIndex);
+    BlockHelper::addMesh(meshData,position,rotation,blockMesh->meshData,texture);
 }
 
 void BlockHelper::addMesh(MeshData<ConstructionVertex>& meshData,ivec3 position,BlockFacing facing,Mesh<Vertex>* blockMesh,TextureID texture) {

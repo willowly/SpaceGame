@@ -33,7 +33,14 @@ namespace DebugMenu {
                 }
             }
 
-            string getTypeName() override {return "texture_obj";};
+            string getTypeName() override {return "texture_obj";}
+        };
+
+        struct AnyObject : public Object {
+            std::any value;
+            TypeInfo* typeInfo;
+
+            string getTypeName() override {return "any_obj";}
         };
 
         struct MetaData {
@@ -43,6 +50,7 @@ namespace DebugMenu {
         using DisplayFunction = bool(AssetViewer*,const char*,std::any&,bool&);
 
         std::map<string,TextureObject> textureObjects;
+        std::map<string,AnyObject> anyObjects;
         std::map<string,std::function<DisplayFunction>> displayFunctions;
         AssetSerializer serializer;
 
@@ -51,6 +59,8 @@ namespace DebugMenu {
 
         using CachedObjectMap = std::map<string,Object*>;
         std::map<string,CachedObjectMap> cachedObjectMaps;
+        using CachedAnyMap = std::map<string,std::any>;
+        std::map<string,CachedAnyMap> cachedAnyMaps;
 
         using MetaDataMap = std::map<string,MetaData>;
         std::map<string,MetaDataMap> metaDataMaps;
@@ -67,19 +77,42 @@ namespace DebugMenu {
             }
         }
 
+        template<typename T>
+        void loadCachedAnyMap(string name,T iter) {
+            cachedAnyMaps[name].clear();
+            for (auto pair : iter) {
+                cachedAnyMaps[name][pair.first] = pair.second;
+            }
+        }
+
         void refreshCachedObjectMaps() {
             assert(registry != nullptr);
             loadCachedObjectMap("block",registry->getBlocks());
             loadCachedObjectMap("item",registry->getItems());
             loadCachedObjectMap("material_object",registry->getObjects<MaterialObject>());
-            loadCachedObjectMap("text_widget",registry->getObjects<TextWidget>());
-            loadCachedObjectMap("item_slot_widget",registry->getObjects<ItemSlotWidget>());
-            loadCachedObjectMap("furnace_widget",registry->getObjects<FurnaceWidget>());
-            loadCachedObjectMap("toolbar_widget",registry->getObjects<ToolbarWidget>());
-            loadCachedObjectMap("inventory_widget",registry->getObjects<InventoryWidget>());
-            loadCachedObjectMap("player_widget",registry->getObjects<PlayerWidget>());
+            loadCachedObjectMap("widget",registry->getObjects<Widget>());
+
+            loadCachedAnyMap("font",registry->getAnys<Font>());
+            // loadCachedObjectMap("item_slot_widget",registry->getObjects<ItemSlotWidget>());
+            // loadCachedObjectMap("furnace_widget",registry->getObjects<FurnaceWidget>());
+            // loadCachedObjectMap("toolbar_widget",registry->getObjects<ToolbarWidget>());
+            // loadCachedObjectMap("inventory_widget",registry->getObjects<InventoryWidget>());
+            // loadCachedObjectMap("player_widget",registry->getObjects<PlayerWidget>());
             //loadCachedObjectMap("actor",registry->getActors());
             
+        }
+
+        void cacheWidgetObjectMap(string typeName) {
+            TypeInfo* typeInfo = registry->getTypeInfo(typeName);
+            if(typeInfo == nullptr) {
+                Debug::warn("no type info for " + typeName);
+                return;
+            }
+            cachedObjectMaps[typeName].clear();
+            for (auto pair : registry->getObjects<Widget>())
+            {
+                cachedObjectMaps[typeName][pair.first] = pair.second;
+            }
         }
 
         MetaData& getMetaData(Object* obj) {
@@ -105,7 +138,7 @@ namespace DebugMenu {
                         obj = registry->getRecipe(name);
                     } else if constexpr(std::is_same_v<T,Mesh<Vertex>>) {
                         obj = registry->getModel(name);
-                    }else{
+                    } else {
                         obj = pair.second;
                         if(getMetaData(obj).unsaved) {
                             unsaved = true;
@@ -129,21 +162,45 @@ namespace DebugMenu {
             }
         }
 
-        template<typename T>
-        void widgetSection(string name) {
-            if(ImGui::CollapsingHeader(name.c_str())) {
-                for (auto pair : registry->getObjects<T>())
+        void widgetSection(TypeInfo* info) {
+            string label = prettyPrintLabel(info->getName());
+            if(ImGui::CollapsingHeader(label.c_str())) {
+                for (auto pair : registry->getObjects(info->getTypeId()))
                 {
                     string name = pair.first;
                     Object* obj = pair.second;
                     ImGui::PushID(name.c_str());
                     bool isSelected = selectedObject == obj;
-                    if(ImGui::Selectable(name.c_str(),selectedObject)) {
+                    if(ImGui::Selectable(name.c_str(),isSelected)) {
                         selectedObject = obj;
                     }
                     ImGui::PopID();
                 }
             }
+        }
+
+        template<typename T>
+        void anySection(string name) {
+            string typeInfoName = registry->getTypeName(typeid(T).name());
+            TypeInfo* typeInfo = registry->getTypeInfo(typeInfoName);
+            if(typeInfo == nullptr) {
+                return;
+            }
+            if(ImGui::CollapsingHeader(name.c_str())) {
+                for (auto pair : registry->getAnys<T>())
+                {
+                    string name = pair.first;
+                    auto* value = pair.second;
+                    ImGui::PushID(name.c_str());
+                    if(ImGui::Selectable(name.c_str(),false)) {
+                        anyObjects[name].value = value;
+                        anyObjects[name].typeInfo = typeInfo;
+                        selectedObject = &anyObjects[name];
+                    }
+                    ImGui::PopID();
+                }
+            }
+            
         }
         
         void textureInspector(TextureObject* obj) {
@@ -189,7 +246,14 @@ namespace DebugMenu {
                 textureInspector(textureObj);
                 return;
             }
+
             
+
+            if(obj->getTypeName() == "any_obj") {
+                AnyObject* anyObj = dynamic_cast<AnyObject*>(obj);
+                anyInspector(anyObj);
+                return;
+            }
             auto typeInfo = registry->getTypeInfo(obj->getTypeName());
             if(typeInfo == nullptr) {
                 ImGui::Text("Type Info is null (%s)",obj->getTypeName().c_str());
@@ -203,6 +267,18 @@ namespace DebugMenu {
                     getMetaData(obj).unsaved = true;
                     std::cout << "CHANGED!" << std::endl;
                 }
+            }
+        }
+
+        void anyInspector(AnyObject* obj) {
+            // if(ImGui::Button("Save")) {
+            //     saveAsset(obj,obj->typeInfo);
+            // }
+            bool changed = false;
+            displayProperties(obj->value,obj->typeInfo,changed);
+            if(changed) {
+                getMetaData(obj).unsaved = true;
+                std::cout << "CHANGED!" << std::endl;
             }
         }
         
@@ -282,6 +358,9 @@ namespace DebugMenu {
                 case PropertyTypeEnum::ObjectPointer:
                     displayObjectReference(label,obj,property,changed);
                     break;
+                case PropertyTypeEnum::Pointer:
+                    displayPointer(label,obj,property,changed);
+                    break;
                 default:
                     displayComposite(label,obj,property,changed);
                 break;
@@ -350,41 +429,6 @@ namespace DebugMenu {
             }
         }
 
-        template<typename T>
-        void displayVec2(const char* label,T obj,GenericPropertyInfo* property,bool& changed) {
-            vec2 f = property->get<vec2>(obj);
-            float list[] = {f.x,f.y};
-            ImGui::InputFloat2(label,list);
-            property->set<vec2>(obj,vec2(list[0],list[1]));
-        }
-        
-
-        template<typename T>
-        void displayVec4(const char* label,T obj,GenericPropertyInfo* property,bool& changed) {
-            vec4 f = property->get<vec4>(obj);
-            float list[] = {f.x,f.y,f.z,f.w};
-            if(ImGui::InputFloat4(label,list)) {
-                property->set<vec3>(obj,vec4(list[0],list[1],list[2],list[3]));
-            }
-        }
-        
-        template<typename T>
-        void displayQuat(const char* label,T obj,GenericPropertyInfo* property,bool& changed) {
-            quat f = property->get<quat>(obj);
-            vec3 v = glm::degrees(glm::eulerAngles(f));
-            float list[] = {v.x,v.y,v.z};
-            if(ImGui::InputFloat3(label,list)) {
-                quat q = glm::quat(glm::radians(vec3(vec3(list[0],list[1],list[2]))));
-                property->set<quat>(obj,q);
-            }
-        }
-        template<typename T>
-        void displayIVec3(const char* label,T obj,GenericPropertyInfo* property,bool& changed) {
-            ivec3 f = property->get<ivec3>(obj);
-            int list[] = {f.x,f.y,f.z};
-            ImGui::InputInt3(label,list);
-            property->set<ivec3>(obj,ivec3(list[0],list[1],list[2]));
-        }
 
         bool displayRect(const char* label,std::any& value,bool& changed) {
             Rect r = std::any_cast<Rect>(value);
@@ -427,7 +471,13 @@ namespace DebugMenu {
                 typeName = ref->getTypeName();
                 refName = ref->name;
             }
-            string baseTypeName = registry->getTypeName(property->typeIdNameNonPointer());
+            string propertyTypeName = registry->getTypeName(property->typeIdNameNonPointer());
+            auto propertyType = registry->getTypeInfo(propertyTypeName);
+            if(propertyType == nullptr) {
+                Debug::warn("no type info for " + propertyTypeName);
+                return;
+                propertyTypeName = propertyType->getRootName();
+            }
 
             ImGui::PushID(label);
             auto response = selector(label,(refName + " (" + typeName + ")"));
@@ -437,11 +487,35 @@ namespace DebugMenu {
             if(response == SelectorResponse::Change) {
                 openSelectorPopup("ObjectRefPopup");
             }
-            if(cachedObjectMaps.contains(baseTypeName)) {
-                if(selectorPopup("ObjectRefPopup",cachedObjectMaps[baseTypeName],refName,ref)) {
+            if(cachedObjectMaps.contains(propertyTypeName)) {
+                if(selectorPopup("ObjectRefPopup",cachedObjectMaps[propertyTypeName],refName,ref)) {
                     property->set(obj,ref);
                     changed = true;
                 }
+            } else {
+                cacheWidgetObjectMap(propertyTypeName);
+            }
+            ImGui::PopID();
+        }
+
+        template<typename T>
+        void displayPointer(const char* label,T obj,GenericPropertyInfo* property,bool& changed) {
+            void* ptr = property->getVoidPtr(obj);
+            auto ref = property->get(obj);
+            string typeName = "null";
+            string refName = "null";
+            if(ptr != nullptr) {
+                typeName = registry->getTypeName(property->typeIdNameNonPointer());
+                refName = registry->getPointerName(property->typeIdNameNonPointer(),ptr);
+            }
+            ImGui::PushID(label);
+            auto response = selector(label,(refName + " (" + typeName + ")"));
+            if(response == SelectorResponse::Change) {
+                openSelectorPopup("PointerPopup");
+            }
+            if(selectorPopup("PointerPopup",cachedAnyMaps[typeName],refName,ref)) {
+                property->set(obj,ref);
+                changed = true;
             }
             ImGui::PopID();
         }
@@ -480,6 +554,41 @@ namespace DebugMenu {
             return false;
         }
 
+        bool displayVec2(const char* label,std::any& value,bool& changed) {
+            vec2 f = std::any_cast<vec2>(value);
+            float list[] = {f.x,f.y};
+            if(ImGui::InputFloat2(label,list)) {
+                value = vec2(list[0],list[1]);
+                changed = true;
+                return true;
+            }
+            return false;
+        }
+
+        bool displayQuat(const char* label,std::any& value,bool& changed) {
+            quat f = std::any_cast<quat>(value);
+            vec3 v = glm::degrees(glm::eulerAngles(f));
+            float list[] = {v.x,v.y,v.z};
+            if(ImGui::InputFloat3(label,list)) {
+                value = glm::quat(glm::radians(vec3(list[0],list[1],list[2])));
+                changed = true;
+                return true;
+            }
+            return false;
+        }
+
+        bool displayColor(const char* label,std::any& value,bool& changed) {
+            Color f = std::any_cast<Color>(value);
+            float list[] = {f.r,f.g,f.b,f.a};
+            if(ImGui::ColorEdit4(label,list)) {
+                value = Color(list[0],list[1],list[2],list[3]);
+                changed = true;
+                return true;
+            }
+            return false;
+        }
+
+
         void openSelectorPopup(string id) {
             ImGui::OpenPopup(id.c_str());
             strcpy(searchBuffer.data(), "");
@@ -491,7 +600,7 @@ namespace DebugMenu {
         }
 
         template<bool texturePopup = false,typename PropertyType,typename PropertyMapType>
-        bool selectorPopup(string id,map<string, PropertyMapType> & map,string selectedName,PropertyType& property) {
+        bool selectorPopup(string id,map<string, PropertyMapType> & map,string selectedName,PropertyType& propertyValue) {
             if(ImGui::BeginPopup(id.c_str())) {
                 ImGui::InputText("##Search", searchBuffer.data(), searchBuffer.size());
                 if(ImGui::BeginListBox("##List")) {
@@ -501,10 +610,10 @@ namespace DebugMenu {
                         
                         if(ImGui::Selectable(pair.first.c_str(),selectedName == pair.first)) {
                             if constexpr(std::is_same_v<PropertyMapType,PropertyType>) {
-                                property = pair.second;
+                                propertyValue = pair.second;
                             }
                             if constexpr(std::is_same_v<PropertyMapType*,PropertyType>) {
-                                property = &pair.second;
+                                propertyValue = &pair.second;
                             }
                             ImGui::CloseCurrentPopup();
                             ImGui::EndListBox();
@@ -668,7 +777,7 @@ namespace DebugMenu {
             }
 
             
-            auto ptr = registry->addObject(name,std::move(uniqueTypedPtr));
+            auto ptr = registry->addObject<T>(name,std::move(uniqueTypedPtr));
             getMetaData(ptr).unsaved = true;
         }
 
@@ -677,6 +786,9 @@ namespace DebugMenu {
             if(ImGui::BeginMenu(label.c_str())) {
                 for (auto info : registry->getTypeInfo(name)->derived)
                 {
+                    if(!info->constructorFunction) {
+                        continue;
+                    }
                     auto label = "New " + prettyPrintLabel(info->getName());
                     strcpy(nameBuffer.data(), "");
                     if(ImGui::Selectable(label.c_str())) {
@@ -692,6 +804,9 @@ namespace DebugMenu {
         void newObjectModal(string name) {
             for (auto info : registry->getTypeInfo(name)->derived)
             {
+                if(!info->constructorFunction) {
+                    continue;
+                }
                 auto label = "New " + prettyPrintLabel(info->getName());
                 if(createObjectPopup == label) {
                     ImGui::OpenPopup(label.c_str());
@@ -721,6 +836,9 @@ namespace DebugMenu {
             addDisplayFunction<Rect>(&AssetViewer::displayRect);
             addDisplayFunction<Mesh<Vertex>*>(&AssetViewer::displayMesh);
             addDisplayFunction<vec3>(&AssetViewer::displayVec3);
+            addDisplayFunction<quat>(&AssetViewer::displayQuat);
+            addDisplayFunction<Color>(&AssetViewer::displayColor);
+            addDisplayFunction<vec2>(&AssetViewer::displayVec2);
         }
 
     
@@ -761,10 +879,10 @@ namespace DebugMenu {
                 if(iconFont == nullptr) {
                     ImGuiIO& io = ImGui::GetIO();
                     #ifdef __APPLE__
-                        iconFont = io.Fonts->AddFontFromFileTTF("fonts/lucide.ttf");
+                        iconFont = io.Fonts->AddFontFromFileTTF("assets/fonts/lucide.ttf");
                     #endif
                     #ifndef __APPLE__
-                        iconFont = io.Fonts->AddFontFromFileTTF("fonts\\lucide.ttf");
+                        iconFont = io.Fonts->AddFontFromFileTTF("assets\\fonts\\lucide.ttf");
                     #endif
                 }
                 bool open = true;
@@ -778,12 +896,16 @@ namespace DebugMenu {
                     newObjectMenu("item");
                     newObjectMenu("block");
                     newObjectMenu("material_object");
+                    newObjectMenu("actor");
+                    newObjectMenu("widget");
                     ImGui::EndPopup();
                 }
 
                 newObjectModal<Item>("item");
                 newObjectModal<Block>("block");
                 newObjectModal<MaterialObject>("material_object");
+                newObjectModal<Actor>("actor");
+                newObjectModal<Widget>("widget");
 
     
 
@@ -806,20 +928,28 @@ namespace DebugMenu {
                 
                 ImGui::BeginTabBar("RegistryBar");
                 
+                tab<Actor>("Actors",registry->getActors());
                 tab<Item>("Items",registry->getItems());
                 tab<Block>("Blocks",registry->getBlocks());
                 tab<Recipe>("Recipes",registry->getRecipes());
                 tab<MaterialObject>("Materials",registry->getObjects<MaterialObject>());
                 tab<TextureID>("Textures",registry->getTextures());
                 tab<Mesh<Vertex>>("Models",registry->getModels());
-                if(ImGui::BeginTabItem("Widgets")) {
+                tab<Widget>("Widgets",registry->getObjects<Widget>());
+                // if(ImGui::BeginTabItem("Widgets")) {
 
-                    widgetSection<TextWidget>("TextWidget");
-                    widgetSection<ItemSlotWidget>("ItemSlotWidget");
-                    widgetSection<FurnaceWidget>("FurnaceWidget");
-                    widgetSection<InventoryWidget>("InventoryWidget");
-                    widgetSection<ToolbarWidget>("ToolbarWidget");
-                    widgetSection<PlayerWidget>("PlayerWidget");
+                //     auto widgetTypeInfo = registry->getTypeInfo<Widget>();
+                //     for (auto widgetTypeInfo :  widgetTypeInfo->derived)
+                //     {
+                //         widgetSection(widgetTypeInfo);
+                //     }
+                //     ImGui::EndTabItem();
+                // }
+
+                if(ImGui::BeginTabItem("Terrain")) {
+
+                    anySection<TerrainType>("Terrain Types");
+                    anySection<TerrainSettings>("Terrain Settings");
                     ImGui::EndTabItem();
                 }
                 

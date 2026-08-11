@@ -6,8 +6,9 @@
 #include "cista.h"
 
 struct data_TerrainChunk {
-    data_ivec3 location;
-    std::vector<VoxelData> terrainData;
+    data_ivec3 location = {};
+    cista::raw::vector<VoxelData> terrainData;
+    cista::raw::vector<cista::raw::string> terrainTypes;
 };
 
 
@@ -17,7 +18,9 @@ struct data_TerrainLayer {
 
 struct data_Terrain {
 
-    unsigned int seed;
+    data_Actor actor;
+    unsigned int seed = {};
+    cista::raw::string terrainSettings;
 
     cista::raw::vector<data_TerrainLayer> chunkLayers;
 

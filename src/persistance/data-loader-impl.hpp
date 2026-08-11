@@ -10,9 +10,10 @@
 class DataLoaderImpl : public DataLoader {
 
     Registry& registry;
+    TerrainLoader* loader = nullptr;
 
     public:
-        DataLoaderImpl(Registry& registry) : registry(registry) {}
+        DataLoaderImpl(Registry& registry,TerrainLoader* loader = nullptr) : registry(registry), loader(loader) {}
 
         template <typename T, typename data_T, bool includeLoader = false>
         std::unique_ptr<Actor> actorLoadSpecPrototype(data_ActorEntry entry) {
@@ -44,7 +45,7 @@ class DataLoaderImpl : public DataLoader {
         }
 
         std::unique_ptr<Actor> loadActor(data_ActorEntry entry) {
-            
+        
             
             if(entry.type == "dummy") return actorLoadSpecPrototype<Actor,data_Actor>(entry);
             if(entry.type == "character") return actorLoadSpecPrototype<Character,data_Character,true>(entry);
@@ -59,24 +60,40 @@ class DataLoaderImpl : public DataLoader {
                     std::cout << "Failed to deserialize actor data from buffer: "<< e.what() << std::endl;
                 }
             }
+            if(entry.type == "terrain") {
+                try {
+                    data_Terrain* data = cista::deserialize<data_Terrain>(entry.data);
+                    auto terrain = Terrain::makeInstanceFromSave(*data,registry.getMaterial(Loader::DEFAULT_TERRAIN_MATERIAL_KEY),*this);
+                    if(loader != nullptr) {
+                        loader->addTerrain(terrain->id);
+                    }
+                    return terrain;
+                } catch(std::runtime_error e) {
+                    std::cout << "Failed to deserialize actor data from buffer: "<< e.what() << std::endl;
+                }
+            }
             Debug::warn("Invalid Actor in save file: " + (string)entry.type);
             return nullptr;
         }
 
-        Actor* getActorPrototype(string name) {
+        Actor* getActorPrototype(string name) override {
             return registry.getActor(name);
         }
 
-        Item* getItemPrototype(string name) {
+        Item* getItemPrototype(string name) override {
             return registry.getItem(name);
         }
 
-        Block* getBlockPrototype(string name) {
+        Block* getBlockPrototype(string name) override {
             return registry.getBlock(name);
         }
 
-        Recipe* getRecipePrototype(string name) {
+        Recipe* getRecipePrototype(string name) override {
             return registry.getRecipe(name);
+        }
+
+        TerrainSettings* getTerrainSettings(string name) override {
+            return registry.getPtr<TerrainSettings>(name);
         }
 
 };

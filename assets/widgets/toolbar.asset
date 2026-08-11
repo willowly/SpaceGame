@@ -1,0 +1,33 @@
+type: toolbar_widget
+item_slot_sprite: 
+  texture: item_slot
+  rect: 
+    position: 
+      x: 0.000000
+      y: 0.000000
+    size: 
+      x: 0.000000
+      y: 0.000000
+sprite: 
+  texture: tech_hotbar
+  rect: 
+    position: 
+      x: 0.000000
+      y: 0.000000
+    size: 
+      x: 0.000000
+      y: 0.000000
+selector_sprite: 
+  texture: tech_hotbar_selector
+  rect: 
+    position: 
+      x: 0.000000
+      y: 0.000000
+    size: 
+      x: 0.000000
+      y: 0.000000
+item_slot: toolbar_item_slot
+slot_size: 75.000000
+slot_gap: 3.000000
+slot_height: 137.000000
+selector_size: 95.000000

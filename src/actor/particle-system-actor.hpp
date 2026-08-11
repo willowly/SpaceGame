@@ -33,6 +33,11 @@ class ParticleEffectActor : public Actor {
             
         }
 
+        string getTypeName() override 
+        {
+            return "particle-system";
+        }
+
         void addRenderables(Vulkan* vulkan,float dt,float interpolation) override {
             effect.addRenderables(vulkan,dt);
         }

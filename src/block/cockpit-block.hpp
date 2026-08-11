@@ -14,25 +14,33 @@ class CockpitBlock : public Block {
 
         // ints
         static const int FACING_VAR = 0;
+        static const int ROTATION_VAR = 1;
 
-        Mesh<Vertex>* mesh;
-        TextureID texture;
+        Mesh<Vertex>* mesh = {};
+        TextureID texture = {};
 
         virtual BlockStorage onPlace(Construction* construction,ivec3 position,BlockPlaceInfo placeInfo) {
             BlockStorage storage;
-            storage.setFacing(FACING_VAR,BlockHelper::getFacingFromVector(placeInfo.normal));
+            auto facing = BlockHelper::getFacingFromVector(placeInfo.normal);
+            storage.setFacing(FACING_VAR,facing);
+            vec2 up = glm::inverse(BlockHelper::getRotationFromFacing(facing)) * placeInfo.upDir;
+            int rotation = BlockHelper::getRotationIndexFromVector(up);
+
+            storage.setInt(ROTATION_VAR,rotation);
             return storage;
         }
 
         virtual void addToMesh(Construction* construction,MeshData<ConstructionVertex>& meshData,ivec3 position,BlockStorage& storage) {
             BlockFacing facing = storage.getFacing(FACING_VAR);
-            BlockHelper::addMesh(meshData,position,facing,mesh,texture);
+            int rotationIndex = storage.getInt(ROTATION_VAR);
+            BlockHelper::addMesh(meshData,position,facing,rotationIndex,mesh,texture);
         }
 
 
         virtual void onInteract(Construction* construction,ivec3 position,BlockStorage& storage,Character& character) {
             BlockFacing facing = storage.getFacing(FACING_VAR);
-            character.ride(construction,position,BlockHelper::getRotationFromFacing(facing));
+            int rotationIndex = storage.getInt(ROTATION_VAR);
+            character.ride(construction,position,BlockHelper::getRotationFromFacing(facing,rotationIndex));
         }
 
         string getTypeName() override {

@@ -1,5 +1,5 @@
 dofile("scripts/load/materials.lua")
-dofile("scripts/load/widgets.lua")
+-- dofile("scripts/load/widgets.lua")
 -- dofile("scripts/load/blocks.lua")
 -- dofile("scripts/load/items.lua")
 -- dofile("scripts/load/recipes.lua")

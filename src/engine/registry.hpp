@@ -42,8 +42,7 @@ class Registry {
     map<string,Sprite> sprites;
     map<string,Material> materials;
     map<string,std::unique_ptr<Object>> materialDataMap;
-    
-    map<string,unique_ptr<Actor>> actors;
+
     // map<string,unique_ptr<Block>> blocks;
     // map<string,unique_ptr<Item>> items;
     //map<string,unique_ptr<Widget>> widgets;
@@ -55,6 +54,8 @@ class Registry {
 
     map<string,map<string,unique_ptr<Object>>> objectMaps;
     map<string,map<string,std::any>> anyMaps;
+
+    map<string,map<void*,string>> pointerToName;
     
     TextureID errorTexture = 0; 
 
@@ -65,9 +66,9 @@ class Registry {
             textures.clear();
             sprites.clear();
             materials.clear();
-            actors.clear();
             objectMaps.clear();
             anyMaps.clear();
+            pointerToName.clear();
             //widgets.clear();
             typeInfo.clear();
             particleEffects.clear();
@@ -90,7 +91,7 @@ class Registry {
         }
 
         bool hasActor(string name) {
-            return actors.contains(name);
+            return has<Actor>(name);
         }
 
         bool hasBlock(string name) {
@@ -166,12 +167,7 @@ class Registry {
             return nullptr;
         }
         Actor* getActor(string name) {
-            if(actors.contains(name)) {
-                return actors.at(name).get();
-            } else {
-                Debug::warn("no actor prototype called \"" + name + "\"");
-            }
-            return nullptr;
+            return getPtr<Actor>(name);
         }
 
         Recipe* getRecipe(string name) {
@@ -201,10 +197,14 @@ class Registry {
                 }
             } else {
                 if (anyMaps.contains(typeStr) && anyMaps.at(typeStr).contains(name)) {
-                    return any_cast<T>(anyMaps.at(typeStr).at(name));
+                    if constexpr (std::is_same_v<T*,ReturnType>) {
+                        return any_cast<T>(&anyMaps.at(typeStr).at(name));
+                    } else {
+                        return any_cast<T>(anyMaps.at(typeStr).at(name));
+                    }
                 } else {
                     Debug::warn(typeName + " " + name + " doesn't exist");
-                    if(std::is_pointer_v<T>) {
+                    if constexpr(std::is_pointer_v<ReturnType>) {
                         return nullptr;
                     } else {
                         return T();
@@ -212,6 +212,27 @@ class Registry {
                 }
             }
             
+        }
+
+        std::any* getAny(string typeStr,string name) {
+            
+            string typeName = getTypeName(typeStr);
+            if(anyMaps.contains(typeStr) && anyMaps.at(typeStr).contains(name)) {
+                return &anyMaps.at(typeStr).at(name);
+            } else {
+                if(name == "") {
+                    Debug::warn("tried to get any of type " + typeName + " with empty name");
+                } else {
+                    Debug::warn(typeName + " " + name + " doesn't exist");
+                }
+                return nullptr;
+            }
+        }
+
+        template<typename T>
+        std::any* getAny(string name) {
+            string typeStr = typeid(T).name();
+            return getAny(typeStr,name);
         }
 
         void addRecipesToVector(std::vector<Recipe*>& recipeList,string category,int maxIngredients) {
@@ -236,6 +257,19 @@ class Registry {
             return typedActor;
         }
 
+        template<typename T>
+        T* getWidget(string name) {
+            Widget* widget = getPtr<Widget>(name);
+            if(widget == nullptr) {
+                return nullptr;
+            }
+            T* typedWidget = dynamic_cast<T*>(widget);
+            if(typedWidget == nullptr) {
+                return nullptr;
+            }
+            return typedWidget;
+        }
+
         Block* getBlock(string name) {
             return getPtr<Block>(name);
         }
@@ -256,6 +290,13 @@ class Registry {
             return getTypeName(typeid(T).name());
         }
 
+        string getPointerName(string typeIdName,void* ptr) {
+            if(pointerToName[typeIdName].contains(ptr)) {
+                return pointerToName[typeIdName].at(ptr);
+            }
+            return "";
+        }
+
         TypeInfo* getTypeInfo(string name) {
             if(typeInfo.contains(name)) {
                 return &typeInfo.at(name);
@@ -263,6 +304,11 @@ class Registry {
                 Debug::warn("no type info called \"" + name + "\"");
             }
             return nullptr;
+        }
+
+        template<typename T>
+        TypeInfo* getTypeInfo() {
+            return getTypeInfo(getTypeName<T>());
         }
 
         // template<typename T>
@@ -321,6 +367,10 @@ class Registry {
                     string typeStr = typeid(T).name();
                     map = &registry->objectMaps[typeStr];
                 }
+
+                ObjectMap(Registry* registry,string typeStr) {
+                    map = &registry->objectMaps[typeStr];
+                }
                 
                 Iterator begin() { return Iterator(map->begin()); }
                 Iterator end()   { return Iterator(map->end()); }
@@ -336,6 +386,67 @@ class Registry {
             
         };
 
+        // could probably combine these into one template map
+        template<typename T>
+        struct AnyMap {
+            std::map<string,std::any>* map;
+            public:
+                struct Iterator {
+
+                    std::map<string,std::any>::iterator iter;
+                
+                    Iterator(std::map<string,std::any>::iterator iter) : iter(iter) {
+
+                    }
+
+                    using iterator_category = std::forward_iterator_tag;
+                    using difference_type   = std::ptrdiff_t;
+                    using value_type        = std::pair<string,T*>;
+                    using pointer           = std::pair<string,T*>*;  // or also value_type*
+                    using reference         = std::pair<string,T*>&;  // or also value_type&
+
+                    value_type operator*() const { 
+                        auto& pair = *iter;
+                        return std::pair(pair.first,any_cast<T>(&pair.second));
+                    }
+                    // pointer operator->() { 
+                    //     std::pair<string,unique_ptr<Object>> pair = *iter;
+                    //     return std::pair(pair.first,static_cast<T*>(pair.second.get())); 
+                    // }
+
+                    // Prefix increment
+                    Iterator& operator++() { iter++; return *this; }  
+
+                    // Postfix increment
+                    Iterator operator++(int) { Iterator tmp = *this; ++(*this); return tmp; }
+
+                    friend bool operator== (const Iterator& a, const Iterator& b) { return a.iter == b.iter; };
+                    friend bool operator!= (const Iterator& a, const Iterator& b) { return a.iter != b.iter; };     
+                };
+
+                AnyMap(Registry* registry) {
+                    string typeStr = typeid(T).name();
+                    map = &registry->anyMaps[typeStr];
+                }
+                
+                Iterator begin() { return Iterator(map->begin()); }
+                Iterator end()   { return Iterator(map->end()); }
+
+
+                T* operator[](string name) {
+                    if(map->contains(name)) {
+                        return static_cast<T*>(map->at(name));
+                    } else {
+                        return nullptr;
+                    }
+                }
+            
+        };
+
+        ObjectMap<Actor> getActors() {
+            return ObjectMap<Actor>(this);
+        }
+
         ObjectMap<Item> getItems() {
             return ObjectMap<Item>(this);
         }
@@ -349,10 +460,21 @@ class Registry {
             return ObjectMap<T>(this);
         }
 
+        ObjectMap<Object> getObjects(string typeStr) {
+            return ObjectMap<Object>(this,typeStr);
+        }
+
+        template<typename T>
+        AnyMap<T> getAnys() {
+            return AnyMap<T>(this);
+        }
+
 
         ObjectMap<Recipe> getRecipes() {
             return getObjects<Recipe>();
         }
+
+
 
         map<string,Mesh<Vertex>>& getModels() {
             return models;
@@ -408,10 +530,9 @@ class Registry {
 
         template <typename T>
         T* addActor(string name) {
-            auto actor = T::makeDefaultPrototype();
-            actor->name = name;
-            actors.emplace(name,std::move(actor));
-            return dynamic_cast<T*>(actors.at(name).get());
+
+            return addObject<Actor,T>(name,T::makeDefaultPrototype());
+
         }
 
         template <typename T>
@@ -440,8 +561,8 @@ class Registry {
             return static_cast<ObjType*>(objectMaps[typeStr].at(name).get());
         }
 
-        template<typename BaseType>
-        BaseType* addObject(string name,std::unique_ptr<BaseType> objPtr) {
+        template<typename BaseType,typename ObjType = BaseType>
+        ObjType* addObject(string name,std::unique_ptr<ObjType> objPtr) {
             if(objPtr == nullptr) {
                 Debug::warn("object added to registry is null");
                 return nullptr;
@@ -449,18 +570,21 @@ class Registry {
             string typeStr = typeid(BaseType).name();
             objectMaps[typeStr].emplace(name,std::move(objPtr));
             objectMaps[typeStr].at(name)->name = name;
-            return static_cast<BaseType*>(objectMaps[typeStr].at(name).get());
+            return static_cast<ObjType*>(objectMaps[typeStr].at(name).get());
         }
 
         template<typename T>
-        void addAny(string name,T object) {
+        T* addAny(string name,T object) {
             string typeStr = typeid(T).name();
             anyMaps[typeStr][name] = std::any(object);
+            T* ptr = std::any_cast<T>(&anyMaps[typeStr][name]);
+            pointerToName[typeStr][ptr] = name;
+            return ptr;
         }
 
         template<typename T>
         TypeInfo* addTypeInfo(string name) {
-            typeInfo.emplace(std::piecewise_construct,std::make_tuple(name),std::make_tuple(name));
+            typeInfo.emplace(std::piecewise_construct,std::make_tuple(name),std::make_tuple(name,typeid(T).name()));
             typeIdToName[typeid(T).name()] = name;
             return &typeInfo.at(name);
         }

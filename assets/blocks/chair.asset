@@ -1,0 +1,5 @@
+type: cockpit
+mesh: chair
+texture: solid
+default_drop: tin_plate
+solid: 0

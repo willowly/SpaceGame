@@ -202,7 +202,17 @@ class World {
                 rawSpawned->id = nextID; // possible this should be in the actual actor creation
                 nextID++;
             } else {
-                nextID = rawSpawned->id; //to make sure ids of other entities are unique
+                if(nextID <= rawSpawned->id) {
+                    nextID = rawSpawned->id + 1; //to make sure ids of other entities are unique
+                }
+            }
+
+            assert(!actorIDMap.contains(rawSpawned->id));
+
+            //failsafe
+            while(actorIDMap.contains(rawSpawned->id)) {
+                rawSpawned->id++;
+                Debug::warn("AAA actor ids are being reused");
             }
 
             actorIDMap[rawSpawned->id] = rawSpawned;
@@ -320,8 +330,6 @@ class World {
         // do rendering, step and everything else
         void frame(Vulkan* vulkan,float dt) {
             
-            ZoneScoped;
-            
             float clock = glfwGetTime();
             addRenderables(vulkan,dt,sinceLastStep/stepDt);
             renderProcessMs = ((float)glfwGetTime() - clock) * 1000;
@@ -344,7 +352,7 @@ class World {
         // do rendering, step and everything else
         void frameClient(Vulkan* vulkan,float dt) {
             
-            ZoneScoped;
+            //ZoneScoped;
             
             float clock = glfwGetTime();
             addRenderables(vulkan,dt,1);
@@ -354,7 +362,7 @@ class World {
 
 
         void addRenderables(Vulkan* vulkan,float dt,float interpolation) {
-            ZoneScoped;
+            //ZoneScoped;
             for (auto& actor : actors)
             {
                 actor->addRenderables(vulkan,dt,interpolation);
@@ -364,7 +372,7 @@ class World {
 
         void physicsStep(float dt) {
             
-            ZoneScoped;
+            //ZoneScoped;
 
             {
                 //ZoneScopedN("prePhysics")
@@ -520,7 +528,6 @@ class World {
             ObjectLayerFilter filter(ObjectLayerTable{true,true,true,false});
 
             std::cout << "overlapping box" << std::endl;
-            //Debug::drawCube(position,size,rotation,Color::red,0.2f);
 
             
 
@@ -548,7 +555,9 @@ class World {
             mat = mat.PostTranslated(Physics::toJoltVec(position));
             mat = mat * mat.sRotation(Physics::toJoltQuat(rotation));
             OverlapCollector collector(&physics_system);
-            physics_system.GetNarrowPhaseQuery().CollideShape(new JPH::BoxShape(Physics::toJoltVec(size*0.5f)),JPH::Vec3::sOne(),mat,JPH::CollideShapeSettings(),JPH::Vec3(0,0,0),collector,broadFilter,filter,JPH::BodyFilter(),JPH::ShapeFilter());
+            JPH::CollideShapeSettings settings;
+            settings.mBackFaceMode = JPH::EBackFaceMode::CollideWithBackFaces;
+            physics_system.GetNarrowPhaseQuery().CollideShape(new JPH::BoxShape(Physics::toJoltVec(size*0.5f)),JPH::Vec3::sOne(),mat,settings,JPH::Vec3(0,0,0),collector,broadFilter,filter,JPH::BodyFilter(),JPH::ShapeFilter());
             if(collector.actor != nullptr) {
                 return collector.actor;
             }
@@ -592,7 +601,22 @@ class World {
                 }
             }
             
-
+            JPH::BodyIDVector vector;
+            physics_system.GetBodies(vector);
+            for(auto body : vector) {
+                auto rawUserData = physics_system.GetBodyInterface().GetUserData(body);
+                string actorName = "unknown";
+                if(rawUserData != 0) {
+                    auto userData = ActorUserData::decode(rawUserData);
+                    if(userData->actor != nullptr) {
+                        actorName = userData->actor->name;
+                    }
+                }
+                Debug::warn("leftover body after all actors destroyed! actor: " + actorName);
+                physics_system.GetBodyInterface().RemoveBody(body);
+                physics_system.GetBodyInterface().DestroyBody(body);
+            }
+            
             actors.clear();
             spawnedActors.clear();
             actorIDMap.clear();
@@ -607,6 +631,8 @@ class World {
         
         void load(data_World data,DataLoader& dataLoader) {
 
+            Debug::addTrace("world");
+            Debug::addTrace("loading");
             clear();
 
             for (auto& data_actor : data.actors)
@@ -616,6 +642,8 @@ class World {
                 //     auto possible_player = dynamic_cast<std::shared_ptr<Character>>()>(spawned_shared);
                 // }
             }
+            Debug::subtractTrace();
+            Debug::subtractTrace();
         }
 
         void destroyActor(ActorID id) {
@@ -626,7 +654,11 @@ class World {
         }
 
         Actor* loadActor(data_ActorEntry data_entry,DataLoader& dataLoader) {
+            Debug::addTrace((string)data_entry.type);
+            Debug::addTrace((string)data_entry.name);
             auto newActor = dataLoader.loadActor(data_entry);
+            Debug::subtractTrace();
+            Debug::subtractTrace();
             if(newActor == nullptr) {
                 Debug::warn("actor to load is null");
                 return nullptr;

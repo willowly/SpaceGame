@@ -15,19 +15,28 @@ class FurnaceWidget : public BlockWidget<FurnaceBlock> {
     
     public:
         Sprite solid;
-        Font* font;
+        Font* font = nullptr;
         vec2 size = vec2(380,80);
         float padding = 3;
         vec2 slotSize = vec2(60,60);
         float spacing = 2;
 
-        ItemSlotWidget* itemSlot;
-        ItemSlotWidget* recipeSlot;
+        ItemSlotWidget* itemSlot = {};
+        ItemSlotWidget* recipeSlot = {};
 
-        TextWidget* tooltipTextTitle;
+        TextWidget* tooltipTextTitle = {};
 
         void draw(DrawContext context,Character& user,FurnaceBlock& furnace,BlockStorage& storage) {
 
+
+            if(itemSlot == nullptr) {
+                Debug::warn("itemSlot is null");
+                return;
+            }
+            if(recipeSlot == nullptr) {
+                Debug::warn("recipeSlot is null");
+                return;
+            }
             Rect screen = context.getScreenSize();
 
             auto backgroundColor = Color(0.2,0.2,0.2);

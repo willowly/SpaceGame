@@ -1,6 +1,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include "engine/world.hpp"
 #include "actor/construction.hpp"
+#include "interface/debug/asset-menu.hpp"
 #include <catch2/catch_test_macros.hpp>
 
 TEST_CASE("Construction", "[construction]") {
@@ -56,3 +57,14 @@ TEST_CASE("Construction", "[construction]") {
 
     }
 }
+
+
+// TEST_CASE("Asset Menu", "[asset-menu]") {
+
+//     SECTION("create new thing") {
+//         // auto DebugMenu::AssetViewer assetViewer;
+
+//         // assetViewer = 
+//     }
+
+// }

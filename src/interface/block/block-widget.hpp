@@ -6,7 +6,7 @@
 #include "interface/widget.hpp"
 
 template<typename BlockType>
-class BlockWidget : public Object {
+class BlockWidget : public Widget {
 
     public:
 

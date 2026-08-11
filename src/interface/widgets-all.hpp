@@ -8,3 +8,4 @@
 #include "actor/player-widget.hpp"
 
 #include "block/furnace-widget.hpp"
+#include "block/container-widget.hpp"

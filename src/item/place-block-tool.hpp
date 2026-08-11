@@ -20,10 +20,13 @@ class PlaceBlockTool: public Tool {
                 auto actor = overlapResult.value();
                 Terrain* terrain = dynamic_cast<Terrain*>(actor);
                 if(terrain != nullptr) {
+                    Debug::drawCube(pointWorld,vec3(0.9f),rotation,Color::blue,0.2f);
                     return PlacementBlockedResult::Terrain;
                 }
+                Debug::drawCube(pointWorld,vec3(0.9f),rotation,Color::red,0.2f);
                 return PlacementBlockedResult::Blocked;
             }
+            Debug::drawCube(pointWorld,vec3(0.9f),rotation,Color::green,0.2f);
             return PlacementBlockedResult::Clear;
         }
 
@@ -67,6 +70,7 @@ class PlaceBlockTool: public Tool {
                         result.velocity = user.getVelocity();
                     }
                     result.placeInfo.lookDir = construction->inverseTransformDirection(ray.direction);
+                    result.placeInfo.upDir = construction->inverseTransformDirection(user.transformDirection(vec3(0,1,0)));
                     result.placeInfo.normal = construction->inverseTransformDirection(hit.normal);
                     result.position = placePointWorld;
                     result.rotation = construction->getRotation();
@@ -78,11 +82,16 @@ class PlaceBlockTool: public Tool {
                 if(terrain != nullptr) {
                     result.position = hit.point+glm::vec3(0,0.4,0);
                     result.rotation = user.getRotation();
+                    result.placeInfo.lookDir = ray.direction;
+                    result.placeInfo.upDir = vec3(0,1,0) * result.rotation; //needs to be block relative i have no idea why its upside down
+                    result.placeInfo.attached = true;
                     return result;
                 }
             } else {
                 result.position = ray.origin + ray.direction*10.0f;
-                result.rotation = glm::quatLookAt(ray.direction,vec3(0,1,0));
+                result.rotation = glm::quatLookAt(ray.direction,user.transformDirection(vec3(0,1,0)));
+                result.placeInfo.upDir = vec3(0,1,0) * result.rotation;  //needs to be block relative. Might want to change this
+                result.velocity = user.getVelocity();
                 return result;
             }
             return std::nullopt;
@@ -94,7 +103,7 @@ class PlaceBlockTool: public Tool {
             if(placeResultOpt) {
                 auto placeResult = placeResultOpt.value();
                 if(placeResult.construction == nullptr) {
-                    auto construction = world->spawn(Construction::makeInstance(world->constructionMaterial,block,placeResult.position,placeResult.rotation,false));
+                    auto construction = world->spawn(Construction::makeInstance(world->constructionMaterial,block,placeResult.position,placeResult.rotation,placeResult.placeInfo.attached));
                 } else {
                     placeResult.construction->placeBlock(placeResult.localBlockPos,block,placeResult.placeInfo);
                 }

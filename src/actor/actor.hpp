@@ -4,6 +4,7 @@
 #include "graphics/mesh.hpp"
 #include "graphics/vulkan.hpp"
 #include "physics/structs.hpp"
+#include "engine/object.hpp"
 
 #include "persistance/actor/data-actor.hpp"
 
@@ -17,7 +18,7 @@ class World;
 typedef unsigned int ActorID;
 #define Invalid_ActorID 0
 
-class Actor {
+class Actor : public Object {
 
     protected:
         vec3 position = vec3(0);
@@ -30,13 +31,8 @@ class Actor {
 
     public:
 
-        // for tracking prototype names
-        string name;
-        ActorID id = Invalid_ActorID; // unique identifier
         
-        Mesh<Vertex>* model = nullptr;
-        Material material = Material::none;
-        float modelScale = 1;
+        ActorID id = Invalid_ActorID; // unique identifier
 
         bool destroyed = false;
 
@@ -180,8 +176,7 @@ class Actor {
         }
 
         virtual void addRenderables(Vulkan* vulkan,float dt,float interpolation) {
-            if(model == nullptr) return; //if no model, nothing to render :)
-            model->addToRender(vulkan,material,position,rotation,vec3(modelScale));
+
         }
 
         virtual void destroy(World* world) {
@@ -213,6 +208,7 @@ class Actor {
 
         data_Actor save() {
             data_Actor data{};
+            data.id = id;
             data.position.set(position);
             data.rotation.set(rotation);
             return data;
@@ -249,6 +245,10 @@ class Actor {
             std::cout << "LOADING DUMMY ACTOR" << std::endl;
 
             return actor;
+        }
+
+        string getTypeName() override {
+            return "actor";
         }
 
         template<typename T, typename data_T>

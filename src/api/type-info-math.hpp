@@ -8,6 +8,10 @@
 namespace TypeInfoLoader {
 
     inline void loadMath(Registry& registry) {
+
+        // TYPE_INFO(glm::vec2);
+        // TYPE_INFO_PROPERTY(x);
+        // TYPE_INFO_PROPERTY(y);
         
         TypeInfo* vec2 = registry.addTypeInfo<glm::vec2>("vec2");
         vec2->addConstProperty("x",&glm::vec2::x);

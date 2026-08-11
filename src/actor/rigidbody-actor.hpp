@@ -43,8 +43,6 @@ class RigidbodyActor : public Actor {
 
 
         RigidbodyActor(Mesh<Vertex>* mesh,Material material) : Actor() {
-            model = mesh;
-            this->material = material;
             
         }
         
@@ -121,16 +119,16 @@ class RigidbodyActor : public Actor {
         }
 
         void addRenderables(Vulkan* vulkan,float dt,float interpolation) {
-            if(model == nullptr) return; //if no model, nothing to render :)
-            glm::mat4 matrix(1.0f);
-            matrix = glm::translate(matrix,position);
-            matrix = matrix * glm::toMat4(rotation);
-            matrix = glm::scale(matrix,vec3(modelScale));
-            model->addToRender(vulkan,material,matrix);
+
+        }
+
+        string getTypeName() override 
+        {
+            return "rigidbody";
         }
 
         string getActorDataType() {
-            return "physics";
+            return getTypeName();
         }
 
         virtual std::vector<std::uint8_t> createSaveBuffer() {

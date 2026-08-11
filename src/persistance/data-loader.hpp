@@ -10,6 +10,7 @@ class Actor;
 class Item;
 class Block;
 class Recipe;
+class TerrainSettings;
 
 using std::string;
 
@@ -25,6 +26,10 @@ class DataLoader {
         virtual Recipe* getRecipePrototype(string name) = 0;
 
         virtual Actor* getActorPrototype(string name) = 0;
+
+        virtual TerrainSettings* getTerrainSettings(string name) = 0;
+
+        //virtual TerrainType* getTerrainType(string name) = 0;
 
         template <typename T>
         T * getActorPrototype(string name) {

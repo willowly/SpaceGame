@@ -18,6 +18,14 @@ void GameApplication::spawnAsteroidScene()  {
 
     rnd.seed(0);
 
+    auto settings = registry.getPtr<TerrainSettings>("asteroid");
+
+    auto terrainMaterial = registry.getMaterial(Loader::DEFAULT_TERRAIN_MATERIAL_KEY);
+
+    if(settings == nullptr) {
+        return;
+    }
+
     // for (size_t i = 0; i < 10; i++)
     // {
     //     std::uniform_real_distribution<> dist(-3000, 3000);
@@ -27,7 +35,7 @@ void GameApplication::spawnAsteroidScene()  {
     //     terrainLoader.addTerrain(terrain->id);
     // }
 
-    auto terrain = world->spawn(Terrain::makeInstance(terrainMaterial,settings,rnd(),vec3(0,0,0)));
+    auto terrain = world->spawn(Terrain::makeInstance(terrainMaterial,*settings,rnd(),vec3(0,0,0)));
     terrainLoader.addTerrain(terrain->id);
 }
 
@@ -64,46 +72,31 @@ void GameApplication::setup() {
 
     auto playerPrototype = registry.getActor<Character>("player");
 
-    auto playerWidget = registry.addObject<PlayerWidget>("playerWidget");
-    playerWidget->inventoryWidget = registry.getPtr<InventoryWidget>("inventory");
-
-    playerWidget->toolbarWidget = registry.getPtr<ToolbarWidget>("toolbar");
-    playerWidget->cursorSlotWidget = registry.getPtr<ItemSlotWidget>("clear_item_slot");
-    playerWidget->speedText = registry.getPtr<TextWidget>("text_default");
-    playerWidget->cursorRectSprite = registry.getSprite("solid");
-
-    playerPrototype->widget = playerWidget;
 
     // terrain setup
 
     //IMGUI FONT SETUp
     //ImGui::PushFont(defaultFont, 14.0f);
 
-    terrainMaterial = vulkan->createMaterial<LitMaterialData,TerrainVertex>("terrain",LitMaterialData(registry.getTexture("rock")));
-            
-    settings.generationSettings.noiseScale = 1;
-    settings.generationSettings.radius = 15;
-    settings.generationSettings.noiseFactor = 15;
-    settings.generationSettings.noiseOctaves = 5;
-    settings.generationSettings.noiseGain = 0.3f;
-    settings.generationSettings.noiseLacunarity = 2.5f;
-    settings.generationSettings.stoneType.item = registry.getItem("stone");
-    settings.generationSettings.stoneType.texture = registry.getTexture("rock");
-    settings.generationSettings.oreType.item = registry.getItem("tin_ore");
-    settings.generationSettings.oreType.texture = registry.getTexture("tin_ore");
+    registry.addAny<TerrainType>("stone",TerrainType("stone",registry.getItem("stone"),registry.getTexture("rock")));
+    registry.addAny<TerrainType>("tin_ore",TerrainType("tin_ore",registry.getItem("tin_ore"),registry.getTexture("tin_ore")));
+    
+    registry.addAny<TerrainSettings>("asteroid",{});
 
+    auto settings = registry.getPtr<TerrainSettings>("asteroid");
+    settings->name = "asteroid";
+    settings->generationSettings.noiseScale = 1;
+    settings->generationSettings.radius = 15;
+    settings->generationSettings.noiseFactor = 15;
+    settings->generationSettings.noiseOctaves = 5;
+    settings->generationSettings.noiseGain = 0.3f;
+    settings->generationSettings.noiseLacunarity = 2.5f;
+    settings->generationSettings.stoneType = registry.getPtr<TerrainType>("stone");
+    settings->generationSettings.oreType = registry.getPtr<TerrainType>("tin_ore");
+    
     
     registry.addRecipesToVector(playerPrototype->recipes,"crafting",1);
     
-
-    furnaceWidget.solid = registry.getSprite("solid");
-    furnaceWidget.font = &font;
-    furnaceWidget.tooltipTextTitle = registry.getPtr<TextWidget>("text_default");
-    furnaceWidget.recipeSlot = registry.getPtr<ItemSlotWidget>("recipe_slot");
-
-    auto itemSlotWidget = registry.getPtr<ItemSlotWidget>("item_slot");
-
-    furnaceWidget.itemSlot = itemSlotWidget;
 
     PipelineOptions options;
     options.blend = VK_TRUE;
@@ -116,7 +109,6 @@ void GameApplication::setup() {
     
     FurnaceBlock* furnace = static_cast<FurnaceBlock*>(registry.getBlock("furnace"));
     registry.addRecipesToVector(furnace->recipes,"smelting",1);
-    furnace->widget = &furnaceWidget;
     // wowie
 
     // auto pickaxe = dynamic_cast<PickaxeTool*>(registry.getItem("pickaxe")); 
@@ -156,6 +148,9 @@ void GameApplication::debugUI(float dt) {
 
     ImGui::NewFrame();
 
+    // do even if the debugUI isn't open :)
+    DebugMenu::issuesMenu();
+
     if(!debugUIOpen) return;
     //imgui commands
 
@@ -168,6 +163,21 @@ void GameApplication::debugUI(float dt) {
             ImGui::Text("position: <%.1f,%.1f,%.1f>",playerPos.x,playerPos.y,playerPos.z);
         }
         ImGui::Text("Scroll: %8.1f",input.currentMouseScrollDelta);
+        if(ImGui::CollapsingHeader("Physics System")) {
+            JPH::BodyIDVector vector;
+            world->physics_system.GetBodies(vector);
+            for(auto body : vector) {
+                auto rawUserData = world->physics_system.GetBodyInterface().GetUserData(body);
+                string actorName = "unknown";
+                if(rawUserData != 0) {
+                    auto userData = ActorUserData::decode(rawUserData);
+                    if(userData->actor != nullptr) {
+                        actorName = userData->actor->name;
+                    }
+                }
+                ImGui::Text("Body: %i Actor: %s",body,actorName.c_str());
+            }
+        }
     ImGui::End();
 
     
@@ -292,7 +302,10 @@ void GameApplication::loop() {
         if(dataOpt) {
             playerID = Invalid_ActorID;
             DataLoaderImpl dataLoader(registry);
+            terrainLoader.stop();
+            terrainLoader.clear();
             load(dataOpt.value());
+            terrainLoader.start(world.get());
         }
     }
 
@@ -392,7 +405,7 @@ data_GameSave GameApplication::save() {
 
 void GameApplication::load(data_GameSave data) {
 
-    DataLoaderImpl dataLoader(registry);
+    DataLoaderImpl dataLoader(registry,&terrainLoader);
     world->load(data.world,dataLoader);
     playerID = data.playerID;
     lua["player"] = playerID;

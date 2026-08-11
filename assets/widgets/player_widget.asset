@@ -1,0 +1,19 @@
+type: player_widget
+cursor_rect_sprite: 
+  texture: solid
+  rect: 
+    position: 
+      x: 0.000000
+      y: 0.000000
+    size: 
+      x: 0.000000
+      y: 0.000000
+inventory_widget: inventory
+toolbar_widget: toolbar
+cursor_slot_widget: item_slot_clear
+speed_text: text_default
+cursor_slot_size: 
+  x: 60.000000
+  y: 60.000000
+cursor_rect_length: 15.000000
+cursor_rect_width: 3.000000

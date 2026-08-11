@@ -76,7 +76,9 @@ struct ItemStack {
     }
 
     void load(const data_ItemStack data,DataLoader& loader) {
-        item = loader.getItemPrototype((string)data.item);
+        if(data.item != "") {
+            item = loader.getItemPrototype((string)data.item);
+        }
         amount = data.amount;
         storage.load(data.storage);
     }

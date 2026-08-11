@@ -44,6 +44,7 @@
 
 #include "api/type-info.hpp"
 #include "interface/debug/asset-menu.hpp"
+#include "interface/debug/issues-menu.hpp"
 
 JPH_SUPPRESS_WARNINGS
 
@@ -121,8 +122,6 @@ class GameApplication {
 
         Interface interface;
 
-        FurnaceWidget furnaceWidget;
-
         Font font;
 
         TerrainLoader terrainLoader;
@@ -131,19 +130,10 @@ class GameApplication {
         Material terrainMaterial = Material::none;
         Material terrainMaterialDebug = Material::none;
 
-
-        Recipe makeAluminumPlate;
-        Recipe makeFurnace;
-        Recipe makeThruster;
-        Recipe makeCockpit;
-        Recipe makePickaxe;
-
         Skybox skybox;
 
         std::atomic<bool> closing = false;
         std::atomic<bool> chunkLoadPaused = false;
-
-        TerrainSettings settings;
 
         float frametimes[60];
         int currentFrameTimeIndex = 0;

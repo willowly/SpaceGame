@@ -5,3 +5,5 @@
 #include "furnace-block.hpp"
 #include "thruster-block.hpp"
 #include "slope-block.hpp"
+#include "drill-block.hpp"
+#include "container-block.hpp"

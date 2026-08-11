@@ -6,17 +6,22 @@
 #include "interface/widget.hpp"
 
 
-class ItemSlotWidget : public Object {
+class ItemSlotWidget : public Widget {
 
     public:
         Sprite sprite;
         Sprite barSprite;
         Color color;
-        Font* font;
+        Font* font = nullptr;
         TextWidget text;
+        vec2 size = vec2(60);
 
         float barWidth = 6.0; // the bottom bar to (normally) show durability
         float padding = 2.0;
+
+        bool draw(DrawContext context,vec2 position,std::optional<ItemStack>& stackOpt) {
+            return draw(context,Rect(position,size),stackOpt);
+        }
 
         bool draw(DrawContext context,Rect rect,std::optional<ItemStack>& stackOpt) {
             if(stackOpt) {
@@ -26,12 +31,20 @@ class ItemSlotWidget : public Object {
             }
         }
 
+        bool drawEmpty(DrawContext context,vec2 position) {
+            drawEmpty(context,Rect(position,size));
+        }
+
         bool drawEmpty(DrawContext context,Rect rect) {
             context.drawRect(rect,sprite,color);
             if(context.mouseInside(rect)) {
                 return true;
             }
             return false;
+        }
+
+        bool draw(DrawContext context,vec2 position,ItemStack& stack) {
+            return draw(context,Rect(position,size),stack);
         }
     
         // returns if mouse inside
@@ -44,7 +57,7 @@ class ItemSlotWidget : public Object {
             rect = Rect::anchored(Rect::centered(rect.size-padding),rect,vec2(0.5f,0.5f));
             context.drawRect(rect,stack.item->getIcon());
 
-            if(stack.amount > 1) {
+            if(stack.amount > 1 && font != nullptr) {
                 float width = 12;
                 float ratio = 1.5;
                 float padding = 0.1f;

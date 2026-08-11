@@ -1,7 +1,6 @@
 type: hammer_tool
-block: sloped_tin
-held_model: 
-held_model_material: 
+held_model: block
+held_model_material: error
 model_offset: 
   x: 0.300000
   y: -0.300000
@@ -23,6 +22,6 @@ default_sprite:
     size: 
       x: 0.000000
       y: 0.000000
-default_model: 
-default_material: 
+default_model: block
+default_material: error
 default_model_scale: 0.300000

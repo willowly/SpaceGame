@@ -125,7 +125,9 @@ class Construction : public Actor
 
         void load(data_BlockPaletteEntry data, DataLoader &loader)
         {
-            block = loader.getBlockPrototype((string)data.block);
+            if(data.block != "") {
+                block = loader.getBlockPrototype((string)data.block);
+            }
             storage.load(data.storage, loader);
         }
     };
@@ -144,12 +146,14 @@ class Construction : public Actor
         {
             data_BlockData data;
             data.id = id;
+            data.attached = attached;
             return data;
         }
 
         void load(data_BlockData data)
         {
             id = data.id;
+            attached = data.attached;
         }
     };
 
@@ -357,7 +361,9 @@ public:
                     { // optimization i guess
                         auto entry = blockPalette[data.id];
                         auto block = entry.block;
-                        block->addToMesh(this, meshData, ivec3(x, y, z), entry.storage);
+                        if(block != nullptr) {
+                            block->addToMesh(this, meshData, ivec3(x, y, z), entry.storage);
+                        }
                     }
 
                     i++;
@@ -665,6 +671,12 @@ public:
 
         removeBlockNoUpdate(location); // does the main removal, tracking, and storage/callback cleanup
 
+        if (blockCount <= 0)
+        {
+            destroy(world);
+            return;
+        }
+
         recalculateBoundsFromBreak(location); // reduce bounds or break up construction. makes index invalid
 
         // recalculatePivot();
@@ -674,10 +686,6 @@ public:
 
         // printIDList();
 
-        if (blockCount <= 0)
-        {
-            destroy(world);
-        }
     }
 
     // remove block with no other side-effects or breakup calculations. Used for networking rn
@@ -1243,9 +1251,13 @@ public:
         return ptr;
     }
 
-    string getActorDataType()
-    {
+    string getTypeName() override {
         return "construction";
+    }
+
+    string getActorDataType() override
+    {
+        return getTypeName();
     }
 
     virtual std::vector<std::uint8_t> createSaveBuffer()

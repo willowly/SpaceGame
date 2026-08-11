@@ -1,0 +1,8 @@
+type: drill
+mesh: drill
+texture: solid
+range: 1.000000
+amount: 0.100000
+radius: 2.000000
+default_drop: drill_block
+solid: 0

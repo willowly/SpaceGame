@@ -33,6 +33,7 @@ namespace TypeInfoLoader {
         furnace->addConstProperty("craft_speed",&FurnaceBlock::craftSpeed);
         furnace->addConstProperty("mesh",&FurnaceBlock::mesh);
         furnace->addConstProperty("texture",&FurnaceBlock::texture);
+        furnace->addConstProperty("widget",&FurnaceBlock::widget);
         furnace->setParent(block);
 
         TypeInfo* connected = registry.addTypeInfo<ConnectedBlock>("connected");
@@ -45,6 +46,22 @@ namespace TypeInfoLoader {
         sloped->constructorFunction = [&]() {return std::make_unique<SlopedBlock>();};
         sloped->addConstProperty("texture",&SlopedBlock::texture);
         sloped->setParent(block);
+
+        TypeInfo* drill = registry.addTypeInfo<DrillBlock>("drill");
+        drill->constructorFunction = [&]() {return std::make_unique<DrillBlock>();};
+        drill->addConstProperty("mesh",&DrillBlock::mesh);
+        drill->addConstProperty("texture",&DrillBlock::texture);
+        drill->addConstProperty("range",&DrillBlock::range);
+        drill->addConstProperty("amount",&DrillBlock::amount);
+        drill->addConstProperty("radius",&DrillBlock::radius);
+        drill->setParent(block);
+
+        TypeInfo* container = registry.addTypeInfo<ContainerBlock>("container");
+        container->constructorFunction = [&]() { return std::make_unique<ContainerBlock>(); };
+        container->addConstProperty("texture",&ContainerBlock::texture);
+        container->addConstProperty("widget",&ContainerBlock::widget);
+        container->setParent(block);
+
     }
 
 }

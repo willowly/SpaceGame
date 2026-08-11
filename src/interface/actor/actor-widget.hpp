@@ -5,7 +5,7 @@
 #include "interface/widget.hpp"
 
 template<typename ActorType>
-class ActorWidget : public Object {
+class ActorWidget : public Widget {
 
     public:
 

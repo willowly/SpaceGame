@@ -20,6 +20,7 @@ class FurnaceBlock : public Block {
 
         //ints
         static const int FACING_VAR = 0;
+        static const int ROTATION_VAR = 1;
 
         //floats
         static const int FUEL_VAR = 0;
@@ -32,7 +33,7 @@ class FurnaceBlock : public Block {
         //pointers
         static const int CURRENTRECIPE_VAR = 0;
 
-        BlockWidget<FurnaceBlock>* widget;
+        BlockWidget<FurnaceBlock>* widget = {};
         std::vector<Recipe*> recipes;
 
         Mesh<Vertex>* mesh = nullptr;
@@ -49,7 +50,12 @@ class FurnaceBlock : public Block {
             BlockStorage storage;
             auto facing = BlockHelper::getFacingFromVector(placeInfo.normal);
             construction->addStepCallback(position);
+
+            vec2 up = glm::inverse(BlockHelper::getRotationFromFacing(facing)) * placeInfo.lookDir;
+            int rotation = BlockHelper::getRotationIndexFromVector(up);
+
             storage.setFacing(FACING_VAR,facing);
+            storage.setInt(ROTATION_VAR,rotation);
             storage.setFloat(FUEL_VAR,fuelMax);
             storage.setStack(INPUTSTACK_VAR,ItemStack(nullptr,0));
             storage.clearStack(INPUTSTACK_VAR);
@@ -67,7 +73,7 @@ class FurnaceBlock : public Block {
         }
 
         virtual void addToMesh(Construction* construction,MeshData<ConstructionVertex>& meshData,ivec3 position,BlockStorage& storage) {
-            quat rotation = BlockHelper::getRotationFromFacing(storage.getFacing(FACING_VAR)) * glm::quat(glm::radians(vec3(90.0f,0.0f,0.0f)));
+            quat rotation = BlockHelper::getRotationFromFacing(storage.getFacing(FACING_VAR),storage.getInt(ROTATION_VAR)) * glm::quat(glm::radians(vec3(90.0f,0.0f,0.0f)));
             BlockHelper::addMesh(meshData,position,rotation,mesh->meshData,texture);
         }
 

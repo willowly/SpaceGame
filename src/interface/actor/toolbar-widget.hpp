@@ -6,7 +6,7 @@
 #include "interface/item-slot-widget.hpp"
 #include "interface/widget.hpp"
 
-class ToolbarWidget : public Object {
+class ToolbarWidget : public Widget {
     
     public:
         Sprite itemSlotSprite;

@@ -1,0 +1,29 @@
+type: character
+move_speed: 5.000000
+look_sensitivity: 5.000000
+height: 1.000000
+radius: 0.400000
+ground_acceleration: 15.000000
+ground_decelleration: 20.000000
+air_acceleration: 3.000000
+jump_force: 3.000000
+craft_speed: 1.000000
+rotation_speed: 90.000000
+rotation_acceleration: 5.000000
+item_drop_distance: 4.000000
+third_person_camera_offset: 
+  x: 1.000000
+  y: 2.000000
+  z: 10.000000
+third_person_camera_rot: 
+  x: 0.000000
+  y: 0.000000
+  z: 0.000000
+input_buffer: 0.050000
+coyote_time: 0.100000
+camera_clear_radius: 0.200000
+inventory_disabled: 0
+model: capsule
+material: player
+model_scale: 1.000000
+widget: player_widget

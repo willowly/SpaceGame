@@ -45,6 +45,12 @@ class AssetSerializer {
         }
     }
 
+    template<typename T>
+    void serializePointer(T obj,GenericPropertyInfo* property,ofstream& file) {
+        void* ptr = property->getVoidPtr(obj);
+        file << registry->getPointerName(property->typeIdNameNonPointer(),ptr);
+    }
+
     template<typename PropertyType,typename T>
     void serializeComposite(T obj,GenericPropertyInfo* property,string typeName,ofstream& file,int indents = 0) {
         auto value = property->get<PropertyType>(obj);
@@ -114,6 +120,9 @@ class AssetSerializer {
                 break;
             case PropertyTypeEnum::ObjectPointer:
                 serializeObjectPointer(obj,property,file);
+                break;
+            case PropertyTypeEnum::Pointer:
+                serializePointer(obj,property,file);
                 break;
             case PropertyTypeEnum::Composite:
                 serializeComposite(obj,property,registry->getTypeName(property->typeIdName()),file,indents);
@@ -194,9 +203,26 @@ class AssetSerializer {
     }
 
     template<typename T>
+    void deserializeFont(T obj,GenericPropertyInfo* property,SerializationNode node) {
+        auto fontPtr = registry->getPtr<Font>(node.getValue());
+        if(fontPtr == nullptr) {
+            fontPtr = registry->getPtr<Font>("default");
+        }
+        property->set(obj,fontPtr);
+    }
+
+    template<typename T>
     void deserializeObjectPointer(T obj,GenericPropertyInfo* property,SerializationNode node) {
 
         string typeName = registry->getTypeName(property->typeIdNameNonPointer());
+        TypeInfo* typeInfo = registry->getTypeInfo(typeName);
+
+        if(typeInfo->getParent() == registry->getTypeInfo("widget")) {
+            Object* widget = registry->getPtr<Widget>(node.getValue()); //yeah I hate it too
+            property->set(obj,widget);
+            return;
+        }
+
         if(typeName == "item") {
             property->set(obj,registry->getItem(node.getValue()));
             return;
@@ -224,6 +250,22 @@ class AssetSerializer {
         if(typeName == "mesh") {
             property->set(obj,registry->getModel(node.getValue()));
             return;
+        }
+    }
+
+    template<typename T>
+    void deserializePointer(T obj,GenericPropertyInfo* property,SerializationNode node) {
+
+        // problem: this performs a copy. we need a pointer
+        std::any* value = registry->getAny(property->typeIdNameNonPointer(),node.getValue());
+        if(value != nullptr && value->has_value()) {
+            property->setPtr(obj,*value);
+        } else {
+            if(property->typeIdNameNonPointer() == typeid(Font).name()) {
+                property->set(obj,registry->getPtr<Font>("default"));
+            } else {
+                Debug::warn("Couldn't deserialize pointer, value not found: " + node.getValue());
+            }
         }
     }
 
@@ -332,6 +374,9 @@ class AssetSerializer {
                 break;
             case PropertyTypeEnum::ObjectPointer:
                 deserializeObjectPointer(obj,property,node);
+                break;
+            case PropertyTypeEnum::Pointer:
+                deserializePointer(obj,property,node);
                 break;
             case PropertyTypeEnum::Vector:
                 deserializeVector(obj,property,node);

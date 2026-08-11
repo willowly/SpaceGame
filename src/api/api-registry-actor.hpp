@@ -12,8 +12,7 @@ using std::string,std::variant;
 namespace API {
 
     inline void loadActorDummyType(sol::table table,Actor* actor,Registry& registry) {
-        getMesh(table,"model",actor->model,registry,false);
-        getMaterial(table,"material",actor->material,registry,false);
+
     }
 
     inline void loadActorCharacter(sol::table table,Character* actor,Registry& registry) {
@@ -36,6 +35,8 @@ namespace API {
         get<float>(table,"coyote_time",actor->coyoteTime);
         get<float>(table,"camera_clear_radius",actor->cameraClearRadius);
         get<bool>(table,"inventory_disabled",actor->inventoryDisabled);
+        getMesh(table,"model",actor->model,registry,false);
+        getMaterial(table,"material",actor->material,registry,false);
         getWidget<ActorWidget<Character>>(table,"widget",actor->widget,registry);
     }
     

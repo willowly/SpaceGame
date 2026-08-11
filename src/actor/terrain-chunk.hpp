@@ -19,6 +19,8 @@
 
 #include "FastNoiseLite.h"
 
+#include "persistance/actor/data-terrain.hpp"
+
 
 #define SURFACE_LVL 0.5
 
@@ -32,7 +34,7 @@ class TerrainChunk {
     MeshBuffer meshBuffer[FRAMES_IN_FLIGHT];
     bool gpuMeshOutOfDate = false;
     bool physicsMeshOutOfDate = false;
-    TerrainType terrainTypes[8];
+    std::array<TerrainType,8> terrainTypes;
     std::atomic<bool> meshOutOfDate;
 
     TerrainShape* physicsShape = nullptr;
@@ -199,8 +201,12 @@ class TerrainChunk {
         void generateData(GenerationSettings settings,int layer) {
 
             std::unique_lock lock(mtx);
-            terrainTypes[0] = settings.stoneType;
-            terrainTypes[1] = settings.oreType;
+            if(settings.stoneType != nullptr) {
+                terrainTypes[0] = *settings.stoneType;
+            }
+            if(settings.oreType != nullptr) {
+                terrainTypes[1] = *settings.oreType;
+            }
             terrainData.resize(size*size*size);
 
 
@@ -281,7 +287,7 @@ class TerrainChunk {
         }
 
         //position is in terrain space
-        void terraformSphere(vec3 pos,float radius,float change,TerraformResults& results) {
+        bool terraformSphere(vec3 pos,float radius,float change,TerraformResults& results) {
 
 
             std::unique_lock lock(mtx);
@@ -289,6 +295,8 @@ class TerrainChunk {
             auto posCellSpace = localToCellPos(pos);
             assert(cellSize > 0);
             auto radiusCellSpace = radius/cellSize;
+
+            bool modified = false;
             // std::cout << radiusCellSpace << std::endl;
             // std::cout << posCellSpace.z-radiusCellSpace << std::endl;
             // std::cout << posCellSpace.z+radiusCellSpace << std::endl;
@@ -314,11 +322,14 @@ class TerrainChunk {
                                 results.addItem(ItemStack(terrainTypes[terrainTypeID].item,1));
                             }
                             meshOutOfDate = true;
+                            modified = true;
                         }
                         i++;
                     }
                 }
             }
+
+            return modified;
         }
 
         //adds a physics body if needed. terrain pointer is stored in userdata
@@ -372,6 +383,34 @@ class TerrainChunk {
             
 
             
+        }
+        
+        void destroy(World* world) {
+            if(body != nullptr) {
+                world->physics_system.GetBodyInterface().RemoveBody(body->GetID());
+                world->physics_system.GetBodyInterface().DestroyBody(body->GetID());
+            }
+        }
+
+        data_TerrainChunk save(ivec3 location) {
+            std::shared_lock lock(mtx);
+            data_TerrainChunk data;
+            data.location.set(location);
+            data.terrainData.reserve(terrainData.size());
+            for (size_t i = 0; i < terrainData.size(); i++)
+            {
+                data.terrainData.push_back(terrainData[i]);
+            }
+            for (size_t i = 0; i < terrainTypes.size(); i++)
+            {
+                data.terrainTypes.push_back(terrainTypes[i].name);
+            }
+            return data;
+        }
+
+        void load(data_TerrainChunk data) {
+            std::unique_lock lock(mtx);
+            //offset = 
         }
 
         string getDebugInfo() {

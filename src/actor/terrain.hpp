@@ -24,6 +24,8 @@ using glm::vec3, glm::ivec4,glm::vec4;
 
 #include "physics/jolt-conversions.hpp"
 
+#include "persistance/actor/data-terrain.hpp"
+
 struct ChunkAddress {
     int layer = 0;
     ivec3 pos;
@@ -57,6 +59,8 @@ class Terrain : public Actor {
     int nextLODlayer = 0; // the one that should be loaded next
 
     unsigned int seed = 0;
+
+    std::vector<ChunkAddress> chunksToRegenerate{};
 
     std::atomic<unsigned int> nextChunkId;
     
@@ -259,7 +263,7 @@ class Terrain : public Actor {
 
         auto chunks = getChunksLocked(0);
         auto time = clock.getTime();
-        if(time > 0.01f) {
+        if(time > 0.1f) {
             Debug::warn(" main thread blocked for " + std::to_string((int)(time*1000)) + "ms");
         }
 
@@ -363,9 +367,19 @@ class Terrain : public Actor {
 
         updateLOD(world);
 
+        regenerateChunkQueue();
+
     }
 
     void destroy(World* world) override {
+        std::shared_lock lock(chunksMtx);
+        lockType = 77;
+        for(auto& chunkLayer : chunkLayers) {
+            for(auto& pair : chunkLayer) {
+                auto& chunk = pair.second;
+                chunk.destroy(world);
+            }
+        }
         //world->removeGravityWell(&gravityWell);
     }
 
@@ -398,9 +412,21 @@ class Terrain : public Actor {
         setCurrentLOD(LODlayers - 1); //fallback option
     }
 
+    void regenerateChunkQueue() {
+        std::lock_guard lock(chunksMtx);
+        lockType = 4;
+        for(int i = 0;i < chunksToRegenerate.size();i++) {
+            auto address = chunksToRegenerate[i];
+            chunkLayers[address.layer].at(address.pos).generateMesh();
+        }
+        chunksToRegenerate.clear();
+    }
     
+    void queueChunkRegeneration(ChunkAddress address) {
+        chunksToRegenerate.push_back(address);
+    }
 
-    void terraformSphere(World* world,vec3 pos,float radius,float change) {
+    TerraformResults terraformSphere(World* world,vec3 pos,float radius,float change,bool spawnItems = true) {
         
         TerraformResults results;
         {
@@ -410,19 +436,25 @@ class Terrain : public Actor {
             auto& chunks = chunkLayers[0];
             for(auto& pair : chunks) {
                 auto& chunk = pair.second;
-                chunk.terraformSphere(localPosition,radius,change,results);
+                if(chunk.terraformSphere(localPosition,radius,change,results)) {
+                    queueChunkRegeneration({0,pair.first.asVec3()});
+                }
             }
-            for(auto& pair : chunks) {
-                auto& chunk = pair.second;
-                chunk.generateMesh(); //only generates if it needs an update
+            // for(auto& pair : chunks) {
+            //     auto& chunk = pair.second;
+            //     chunk.generateMesh(); //only generates if it needs an update
+            // }
+            
+        }
+
+        if(spawnItems) {
+            for (auto stack : results.items)
+            {
+                world->spawn(ItemActor::makeInstance(stack,pos,Random::rotation()));
             }
         }
 
-
-        for (auto stack : results.items)
-        {
-            world->spawn(ItemActor::makeInstance(stack,pos,Random::rotation()));
-        }
+        return results;
         
 
     }
@@ -461,7 +493,7 @@ class Terrain : public Actor {
         Clock clock;
         std::shared_lock lock(chunksMtx);
         auto time = clock.getTime();
-        if(time > 0.01f) {
+        if(time > 0.1f) {
             Debug::warn(" render thread blocked for " + std::to_string((int)(time*1000)) + "ms lock type:" + std::to_string(lockType));
         }
         auto& chunks = chunkLayers[currentLODlayer];
@@ -491,26 +523,53 @@ class Terrain : public Actor {
         return std::unique_ptr<Terrain>(ptr);
     }
 
-    string getActorDataType() {
-        return "";
+    string getTypeName() override {
+        return "terrain";
     }
 
-    //     virtual std::vector<std::uint8_t> createSaveBuffer() {
-    //         auto data = save();
-    //         auto buf = cista::serialize(data);
-    //         return buf;
-    //     }
+    string getActorDataType() override {
+        return getTypeName();
+    }
 
-    //     data_Construction save() {
+    virtual std::vector<std::uint8_t> createSaveBuffer() {
+        auto data = save();
+        auto buf = cista::serialize(data);
+        return buf;
+    }
 
-    //     }
+    data_Terrain save() {
+        data_Terrain data;
+        data.actor = Actor::save();
+        data.seed = seed;
+        data.terrainSettings = settings.name;
+        for(auto& chunkLayer : chunkLayers) {
+            data.chunkLayers.push_back({});
+            auto& dataChunkLayer = data.chunkLayers.back();
+            for(auto& pair : chunkLayer) {
+                auto& chunk = pair.second;
+                dataChunkLayer.chunks.push_back(chunk.save(pair.first.asVec3()));
+            }
+        }
 
-    //     static std::unique_ptr<Actor> makeInstanceFromSave(data_Construction& data,Material material,DataLoader& loader) {
-    //         auto actor = makeInstance(material,vec3(0.0f));
-    //         actor->load(data,loader);
-    //         std::cout << "LOADING CONSTRUCTION ACTOR" << std::endl;
+        return data;
+    }
 
-    //         return actor;
-    //     }
+
+    void load(data_Terrain data,DataLoader& loader) {
+        Actor::load(data.actor);
+    }
+
+    static std::unique_ptr<Actor> makeInstanceFromSave(data_Terrain& data,Material material,DataLoader& loader) {
+        auto settings = loader.getTerrainSettings((string)data.terrainSettings);
+        if(settings == nullptr) {
+            Debug::warn("terrain settings missing: " + (string)data.terrainSettings);
+            return nullptr;
+        }
+        auto actor = makeInstance(material,*settings,data.seed,vec3(0.0f));
+        actor->load(data,loader);
+        std::cout << "LOADING TERRAIN ACTOR" << std::endl;
+
+        return actor;
+    }
 
 };

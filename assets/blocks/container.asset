@@ -1,0 +1,5 @@
+type: container
+texture: container_block
+widget: container_widget
+default_drop: container
+solid: 0

@@ -1,0 +1,10 @@
+type: text_widget
+height: 20.000000
+ratio: 1.500000
+spacing: 2.000000
+color: 
+  r: 1.000000
+  g: 1.000000
+  b: 1.000000
+  a: 1.000000
+font: default

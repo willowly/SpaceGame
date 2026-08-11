@@ -33,6 +33,14 @@ class PlayerWidget : public ActorWidget<Character> {
             Debug::warn("Toolbar Widget is null!");
             return;
         }
+        if(cursorSlotWidget == nullptr) {
+            Debug::warn("Cursor Slot Widget is null!");
+            return;
+        }
+        if(speedText == nullptr) {
+            Debug::warn("Speed Text Widget is null!");
+            return;
+        }
         if(player.inMenu) {
             if(player.openMenuObject != nullptr) {
                 player.openMenuObject->drawMenu(context,player);

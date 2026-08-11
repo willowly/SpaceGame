@@ -88,6 +88,11 @@ class CharacterBody {
         
         void spawn(World* world,Actor* actor,JPH::CharacterVirtualSettings settings) {
             
+            if(character != nullptr) {
+                Debug::warn("spawning CharacterBody while its already spawned");
+                world->physics_system.GetBodyInterface().RemoveBody(character->GetInnerBodyID());
+                world->physics_system.GetBodyInterface().DestroyBody(character->GetInnerBodyID());
+            }
             
             character = new JPH::CharacterVirtual(&settings,Physics::toJoltVec(actor->getPosition()),Physics::toJoltQuat(actor->getRotation()),ActorUserData::encode(&userData),&world->physics_system);
 
@@ -171,6 +176,7 @@ class CharacterBody {
         void destroy(World* world) {
             assert(character != nullptr);
             world->physics_system.GetBodyInterface().RemoveBody(character->GetInnerBodyID());
+            world->physics_system.GetBodyInterface().DestroyBody(character->GetInnerBodyID());
         }
 
         data_Rigidbody save() {

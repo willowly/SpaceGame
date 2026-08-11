@@ -8,6 +8,7 @@
 
 struct data_BlockData {
     BlockID id;
+    bool attached;
 };
 
 struct data_BlockPaletteEntry {

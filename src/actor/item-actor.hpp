@@ -105,8 +105,13 @@ class ItemActor : public Actor {
 
         // Saving
 
-        string getActorDataType() {
+        string getTypeName() override {
             return "item_actor";
+        }
+
+        string getActorDataType() override
+        {
+            return getTypeName();
         }
 
         static std::unique_ptr<Actor> makeInstanceFromSave(const data_ItemActor& data,DataLoader& loader) {

@@ -5,7 +5,7 @@
 #include "font.hpp"
 #include "interface/widget.hpp"
 
-class TextWidget : public Object {
+class TextWidget : public Widget {
 
     public:
 

@@ -249,9 +249,9 @@ class TerrainShape : public JPH::Shape {
                         JPH::Vec3 b = Physics::toJoltVec(meshData.vertices[indexB].pos);
                         JPH::Vec3 c = Physics::toJoltVec(meshData.vertices[indexC].pos);
 
-                        Debug::drawLine(meshData.vertices[indexA].pos,meshData.vertices[indexB].pos,Color::green,0.01f);
-                        Debug::drawLine(meshData.vertices[indexB].pos,meshData.vertices[indexC].pos,Color::green,0.01f);
-                        Debug::drawLine(meshData.vertices[indexC].pos,meshData.vertices[indexA].pos,Color::green,0.01f);
+                        // Debug::drawLine(meshData.vertices[indexA].pos,meshData.vertices[indexB].pos,Color::green,0.01f);
+                        // Debug::drawLine(meshData.vertices[indexB].pos,meshData.vertices[indexC].pos,Color::green,0.01f);
+                        // Debug::drawLine(meshData.vertices[indexC].pos,meshData.vertices[indexA].pos,Color::green,0.01f);
 
 
                         int id = i/3;
