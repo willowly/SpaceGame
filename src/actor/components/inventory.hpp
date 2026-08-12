@@ -46,6 +46,20 @@ class IInventory {
             
         }
 
+        // returns the remaining items (empty if they fit)
+        ItemStack tryGive(ItemStack newStack) {
+            if(maxWeight > 0 && getTotalWeight() > maxWeight) return newStack; //reject it outright
+            give(newStack);
+            if(maxWeight == 0) return {};
+            float overWeight = getTotalWeight() - maxWeight;
+            if(overWeight > 0) {
+                newStack.amount = take(newStack.item,ceil(overWeight / newStack.item->getWeight()));
+            } else {
+                newStack.amount = 0;
+            }
+            return newStack;
+        }
+
         float getTotalWeight() {
             float weight = 0;
             for (size_t i = 0; i < size(); i++)
@@ -54,6 +68,12 @@ class IInventory {
                 weight += stack.getWeight();
             }
             return weight;
+        }
+
+        float getSpaceLeft() {
+            if(maxWeight == 0) return std::numeric_limits<int>().max();
+
+            return maxWeight - getTotalWeight();
         }
 
 
@@ -214,7 +234,7 @@ class BlockInventory : public IInventory {
         }
 
     public:
-        BlockInventory(BlockStorage& storage,int startIndex,int sizeVar) : storage(storage), startIndex(startIndex), sizeVar(sizeVar), IInventory() {
-            
+        BlockInventory(BlockStorage& storage,int startIndex,int sizeVar,float maxWeight = {}) : storage(storage), startIndex(startIndex), sizeVar(sizeVar), IInventory() {
+            this->maxWeight = maxWeight; 
         }
 };

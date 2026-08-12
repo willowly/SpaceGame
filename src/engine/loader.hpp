@@ -171,8 +171,8 @@ class Loader {
             font->texture = registry.getTexture("characters");
             font->start = '0';
             font->charSize = vec2(8,12);
-            font->textureSize = vec2(312,12);
-            font->characters = "0123456789x.ABCDEFGHIJKLMNOPQRSTUVWXYZ ";
+            font->textureSize = vec2(352,12);
+            font->characters = "0123456789x./+-=_ ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         }
 
         void loadAssetFileStubs(Registry& registry,Vulkan* vulkan) {

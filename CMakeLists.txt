@@ -182,18 +182,18 @@ endif()
 
 
 target_include_directories(SpaceGame PUBLIC ${JoltPhysics_SOURCE_DIR})
-target_compile_features(SpaceGame PRIVATE cxx_std_20 )
+target_compile_features(SpaceGame PRIVATE cxx_std_23 )
 target_link_libraries(SpaceGame PUBLIC ${LINKED_LIBRARIES})
 target_link_libraries(SpaceGame PUBLIC GameNetworkingSockets)
 
-target_compile_features(SpaceGameApp PRIVATE cxx_std_20 )
+target_compile_features(SpaceGameApp PRIVATE cxx_std_23 )
 target_link_libraries(SpaceGameApp PUBLIC SpaceGame)
 if(WIN32)
     target_link_options(SpaceGameApp PRIVATE "-mwindows")
 endif()
 
 add_executable(SpaceGameTest src/test.cpp)
-target_compile_features(SpaceGameTest PRIVATE cxx_std_20 )
+target_compile_features(SpaceGameTest PRIVATE cxx_std_23 )
 target_link_libraries(SpaceGameTest PUBLIC SpaceGame Catch2::Catch2WithMain)
 
 list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)

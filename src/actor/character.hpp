@@ -42,6 +42,8 @@
 
 #include "helper/event.hpp"
 
+#include <print>
+
 class Character : public Actor
 {
 
@@ -1081,6 +1083,30 @@ public:
         recipeTimer = 0;
     }
 
+    // when the player is hovering over an inventory (either background panel or with an item in the cursor)
+    bool inventoryHoverActions(DrawContext context,IInventory& inventory) {
+        if(cursorStack.isEmpty()) {
+            return false;
+        }
+        int amountToAdd = 0;
+        if(context.mouseLeftClicked()) {
+            amountToAdd = cursorStack.amount;
+        }
+        if(context.mouseRightClicked()) {
+            amountToAdd = 1;
+        }
+        if(amountToAdd == 0) return false;
+
+        ItemStack stackToAdd = cursorStack;
+        float spaceLeft = inventory.getSpaceLeft();
+        int maxAmount = (int)floor(spaceLeft / stackToAdd.item->getWeight());
+        stackToAdd.amount = std::min(maxAmount,amountToAdd);
+        cursorStack.amount -= stackToAdd.amount;
+        inventory.give(stackToAdd);
+
+        return !stackToAdd.isEmpty();
+    }
+
     // returns true if the itemstack was modified
     bool itemSlotHoverActions(DrawContext context, ItemStack &stack, ItemSlotInteractOptions options = {})
     {
@@ -1120,14 +1146,17 @@ public:
     // returns the itemstack in cursor
     ItemStack replaceCursor(ItemStack stack)
     {
-        if (stack.tryInsert(cursorStack))
+        if (!cursorStack.isEmpty() && stack.tryInsert(cursorStack))
         {
+            std::println("insert");
             // insert
             cursorStack.clear();
             return stack;
         }
         else
         {
+
+            std::println("swap");
             // swap em
             ItemStack returnStack = cursorStack;
             cursorStack = stack;

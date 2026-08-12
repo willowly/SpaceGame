@@ -40,11 +40,23 @@ class ContainerWidget : public BlockWidget<ContainerBlock> {
             
             Rect mainPanel = Rect::anchored(Rect::withPivot(vec2(0,-padding),size,vec2(0.5,1)),screen,vec2(0.5,0.5));
             context.drawRect(mainPanel,solid,backgroundColor);
+            
+            ItemSlotInteractOptions interactOptions;
+            
+            auto inventory = container.getInventory(storage);
+            if(inventory.maxWeight == 0) {
+                tooltipTextTitle->draw(context,mainPanel.topLeft() + vec2(margin),std::format("{:0}",inventory.getTotalWeight()));
+            } else {
+                tooltipTextTitle->draw(context,mainPanel.topLeft() + vec2(margin),std::format("{:0}/{:0}",inventory.getTotalWeight(),inventory.maxWeight));
+                interactOptions.spaceLeft = inventory.getSpaceLeft();
+            }
 
             auto slotPosition = mainPanel.position;
             slotPosition += vec2(margin);
+            slotPosition.y += tooltipTextTitle->height;
+            slotPosition.y += margin;
 
-            auto inventory = container.getInventory(storage);
+            
 
             bool hoveringPanel = context.mouseInside(mainPanel);
             int column = 0;
@@ -53,8 +65,10 @@ class ContainerWidget : public BlockWidget<ContainerBlock> {
                 if(stackPtr == nullptr) continue;
 
                 if(itemSlot->draw(context,slotPosition,*stackPtr)) {
-                    user.itemSlotHoverActions(context,*stackPtr);
-                    hoveringPanel = false;
+                    if(user.cursorStack.isEmpty()) {
+                        user.itemSlotHoverActions(context,*stackPtr,interactOptions);
+                        hoveringPanel = false;
+                    }
                 }
 
                 slotPosition.x += (itemSlot->size.x + spacing);
@@ -67,10 +81,8 @@ class ContainerWidget : public BlockWidget<ContainerBlock> {
             }
 
             if(hoveringPanel) {
-                ItemStack stack;
-                if(user.itemSlotHoverActions(context,stack)) {
-                    inventory.give(stack);
-                }
+                ItemStack stack = user.cursorStack;
+                user.inventoryHoverActions(context,inventory);
             }
             
             

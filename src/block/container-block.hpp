@@ -16,7 +16,7 @@ class ContainerBlock : public Block {
     static const int SIZE_VAR = 0;
 public:
     
-
+    float maxWeight = 50;
     BlockWidget<ContainerBlock>* widget = nullptr;
     TextureID texture = 0;
 
@@ -48,7 +48,7 @@ public:
     }
     
     BlockInventory getInventory(BlockStorage& storage) {
-        return BlockInventory(storage,INVENTORY_VAR,SIZE_VAR);
+        return BlockInventory(storage,INVENTORY_VAR,SIZE_VAR,maxWeight);
     }
 
     std::vector<ItemStack> getDrops(Construction* construction, ivec3 position, BlockStorage& storage) override {

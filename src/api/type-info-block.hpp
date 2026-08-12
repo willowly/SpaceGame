@@ -60,6 +60,7 @@ namespace TypeInfoLoader {
         container->constructorFunction = [&]() { return std::make_unique<ContainerBlock>(); };
         container->addConstProperty("texture",&ContainerBlock::texture);
         container->addConstProperty("widget",&ContainerBlock::widget);
+        container->addConstProperty("max_weight",&ContainerBlock::maxWeight);
         container->setParent(block);
 
     }
