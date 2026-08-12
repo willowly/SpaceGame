@@ -23,10 +23,7 @@ class BlockStorage : public GenericStorage {
     std::vector<BlockDisplay*> blockDisplays;
     public:
         void setStack(size_t index,ItemStack value) {
-            if(stacks.size() <= index) {
-                stacks.resize(index+1);
-            }
-            stacks[index] = value;
+            getStack(index) = value;
         }
         void clearStack(size_t index) {
             setStack(index,ItemStack(nullptr,0));
@@ -39,9 +36,9 @@ class BlockStorage : public GenericStorage {
             }
             pointers[index] = value;
         }
-        ItemStack getStack(size_t index) {
-            if(stacks.size() <= index) {
-                return ItemStack(nullptr,0);
+        ItemStack& getStack(size_t index) {
+             if(stacks.size() <= index) {
+                stacks.resize(index+1);
             }
             return stacks[index];
         }

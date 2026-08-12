@@ -37,6 +37,7 @@ class Item : public Object {
         Mesh<Vertex>* defaultModel = nullptr;
         MaterialObject* defaultMaterial = nullptr;
         float defaultModelScale = 0.3f;
+        float defaultWeight = 1;
 
         virtual ~Item() {}
 
@@ -81,6 +82,10 @@ class Item : public Object {
 
         virtual void addRenderablesHeld(Vulkan* vulkan,Character& user,float dt,float interpolation) {
             
+        }
+
+        virtual float getWeight() {
+            return defaultWeight;
         }
 
         virtual string getTypeName() {

@@ -96,6 +96,8 @@ namespace TypeInfoLoader {
         containerWidget->addConstProperty("size",&ContainerWidget::size);
         containerWidget->addConstProperty("padding",&ContainerWidget::padding);
         containerWidget->addConstProperty("spacing",&ContainerWidget::spacing);
+        containerWidget->addConstProperty("margin",&ContainerWidget::margin);
+        containerWidget->addConstProperty("columns",&ContainerWidget::columns);
         containerWidget->addConstProperty("item_slot",&ContainerWidget::itemSlot);
         containerWidget->addConstProperty("tooltip_text_title",&ContainerWidget::tooltipTextTitle);
         containerWidget->setParent(widget);

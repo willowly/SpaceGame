@@ -65,6 +65,11 @@ struct ItemStack {
 
     }
 
+    float getWeight() {
+        if(item == nullptr) return 0;
+        return item->getWeight() * amount;
+    }
+
     data_ItemStack save() {
         data_ItemStack data;
         if(item != nullptr) {

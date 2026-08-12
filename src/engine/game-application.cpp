@@ -132,7 +132,7 @@ void GameApplication::setup() {
     // lua
     lua["player"] = world->getActor<Character>(playerID);
 
-    lua.do_file("scripts/start.lua");
+    lua.do_file("assets/scripts/start.lua");
 
 }
 

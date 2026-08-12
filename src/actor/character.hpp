@@ -81,7 +81,7 @@ public:
     float cameraClearRadius = 0.2f; // the distance away from a wall that the camera should be
     bool inventoryDisabled = false;
     Mesh<Vertex> *model = nullptr;
-    Material material = Material::none;
+    MaterialObject* material = nullptr;
     float modelScale = 1;
 
     // inputs
@@ -232,9 +232,9 @@ public:
         RenderingSettings settings;
         settings.mainPass = thirdPerson || alwaysRender;
         shake.step(dt);
-        if (model == nullptr)
+        if (model == nullptr || material == nullptr)
             return; // if no model, nothing to render :)
-        model->addToRender(vulkan, material, getInterpolatedPosition(interpolation), getInterpolatedRotation(interpolation), vec3(modelScale), settings);
+        model->addToRender(vulkan, material->material, getInterpolatedPosition(interpolation), getInterpolatedRotation(interpolation), vec3(modelScale), settings);
     }
 
     void spawn(World *world) override
@@ -1081,20 +1081,21 @@ public:
         recipeTimer = 0;
     }
 
-    void itemSlotHoverActions(DrawContext context, ItemStack &stack, ItemSlotInteractOptions options = {})
+    // returns true if the itemstack was modified
+    bool itemSlotHoverActions(DrawContext context, ItemStack &stack, ItemSlotInteractOptions options = {})
     {
         if (!options.allowInsert && !cursorStack.isEmpty())
         {
-            return; // block insertion
+            return false; // block insertion
         }
         if (!options.allowRemove && !stack.isEmpty())
         {
-            return; // block removal
+            return false; // block removal
         }
         if (context.mouseLeftClicked())
         {
             stack = replaceCursor(stack);
-            return;
+            return true;
         }
         // insert or take one TODO: IDK what to do lol
         if (context.mouseRightClicked())
@@ -1104,15 +1105,16 @@ public:
                 // place one
                 cursorStack.amount--;
                 stack.tryInsert(ItemStack(cursorStack.item, 1, cursorStack.storage));
-                return;
+                return true;
             }
             if (!stack.isEmpty() && cursorStack.canInsert(stack))
             {
                 stack.amount--;
                 cursorStack.tryInsert(ItemStack(stack.item, 1, stack.storage));
-                return;
+                return true;
             }
         }
+        return false;
     }
 
     // returns the itemstack in cursor

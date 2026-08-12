@@ -39,6 +39,8 @@ class InventoryWidget : public Widget {
             float width = 1.5;
             float ratio = 1.5;
             float padding = 0.1f;
+            
+            tooltipTextTitle->draw(context,mainPanel.topLeft() + vec2(0,-12),std::format("{:0}",player.inventory.getTotalWeight()));
 
             
 

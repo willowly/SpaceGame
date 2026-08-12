@@ -44,25 +44,33 @@ class ContainerWidget : public BlockWidget<ContainerBlock> {
             auto slotPosition = mainPanel.position;
             slotPosition += vec2(margin);
 
+            auto inventory = container.getInventory(storage);
 
-            for (size_t i = 0; i < 30; i++)
+            bool hoveringPanel = context.mouseInside(mainPanel);
+            int column = 0;
+            for (auto stackPtr : inventory.getItems())
             {
-                auto stack = container.getStack(storage,i);
+                if(stackPtr == nullptr) continue;
 
-                if(itemSlot->draw(context,slotPosition,stack)) {
-                    ItemSlotInteractOptions options;
-                    options.allowInsert = true;
-                    user.itemSlotHoverActions(context,stack,options);
+                if(itemSlot->draw(context,slotPosition,*stackPtr)) {
+                    user.itemSlotHoverActions(context,*stackPtr);
+                    hoveringPanel = false;
                 }
 
                 slotPosition.x += (itemSlot->size.x + spacing);
-
-                if(slotPosition.x > mainPanel.topRight().x) {
+                column++;
+                if(column == columns) {
                     slotPosition.x = mainPanel.topLeft().x + margin;
                     slotPosition.y += (itemSlot->size.y + spacing);
+                    column = 0;
                 }
+            }
 
-                container.setStack(storage,stack,stack,i);
+            if(hoveringPanel) {
+                ItemStack stack;
+                if(user.itemSlotHoverActions(context,stack)) {
+                    inventory.give(stack);
+                }
             }
             
             

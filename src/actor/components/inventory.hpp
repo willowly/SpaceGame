@@ -4,17 +4,24 @@
 #include "item/recipe.hpp"
 #include "persistance/actor/component/data-inventory.hpp"
 #include "persistance/data-loader.hpp"
+#include <ranges>
 
-class Inventory {
-
-    std::vector<ItemStack> items;
+class IInventory {
+    
+    protected:
+        virtual ItemStack& at(size_t index) = 0; //if the index is larger than the size, resize the representation
+        virtual size_t size() = 0;
+        virtual void clear() = 0;
 
     public:
 
+        float maxWeight = 0; // 0 disables max weight
+
         std::vector<ItemStack*> getItems() {
             std::vector<ItemStack*> list;
-            for (auto&& stack : items)
+            for (size_t i = 0; i < size(); i++)
             {
+                auto& stack = at(i);
                 if(stack.item != nullptr && stack.amount > 0) {
                     list.push_back(&stack);
                 }
@@ -34,9 +41,19 @@ class Inventory {
             auto stack = getStack(newStack.item);
             // if the stack is null, try inserting. If inserting fails, add a new item. Kinda weird syntax maybe i can make it better idk
             if(stack == nullptr || !stack->tryInsert(newStack)) {
-                items.push_back(newStack);
+                at(size()) = newStack; //set the last element.
             }
             
+        }
+
+        float getTotalWeight() {
+            float weight = 0;
+            for (size_t i = 0; i < size(); i++)
+            {
+                auto& stack = at(i);
+                weight += stack.getWeight();
+            }
+            return weight;
         }
 
 
@@ -74,8 +91,9 @@ class Inventory {
         }
 
         ItemStack* getStackIncludeEmpty(Item* item) {
-            for (auto& stack : items)
+            for (size_t i = 0; i < size(); i++)
             {
+                auto& stack = at(i);
                 if(stack.item == item) {
                     return &stack;
                 }
@@ -130,12 +148,73 @@ class Inventory {
         }
 
         void load(data_Inventory data,DataLoader& loader) {
-            items.clear();
+            for (size_t i = 0; i < size(); i++)
+            {
+                at(i) = ItemStack(); //remove all items
+            }
             for (auto data_stack : data.itemStacks)
             {
                 ItemStack stack;
                 stack.load(data_stack,loader);
-                items.push_back(stack);
+                at(size()) = stack;
             }
+        }
+
+        IInventory() {}
+        virtual ~IInventory() {}
+        IInventory(const IInventory& inventory) = delete;
+        IInventory& operator=(const IInventory& inventory) = delete;
+};
+
+class Inventory : public IInventory {
+
+    std::vector<ItemStack> items;
+
+    protected:
+        ItemStack& at(size_t index) override {
+            if(index >= items.size()) {
+                items.resize(index+1);
+            }
+            return items[index];
+        }
+        size_t size() override {
+            return items.size();
+        }
+        void clear() override {
+            items.clear();
+        }
+};
+
+class BlockInventory : public IInventory {
+
+    BlockStorage& storage;
+    int startIndex = 0;
+    int sizeVar = 0;
+
+    
+
+    protected:
+        ItemStack& at(size_t index) override {
+            int size = storage.getInt(sizeVar);
+            if(index+1 > size) {
+                storage.setInt(sizeVar,static_cast<int>(index+1));
+            }
+            return storage.getStack(startIndex + index);
+        } 
+        size_t size() override {
+            return storage.getInt(sizeVar);
+        }
+        void clear() override {
+            for (size_t i = 0; i < size(); i++)
+            {
+                storage.clearStack(startIndex + i);
+            }
+            storage.setInt(sizeVar,0);
+            
+        }
+
+    public:
+        BlockInventory(BlockStorage& storage,int startIndex,int sizeVar) : storage(storage), startIndex(startIndex), sizeVar(sizeVar), IInventory() {
+            
         }
 };

@@ -36,7 +36,7 @@ namespace API {
         get<float>(table,"camera_clear_radius",actor->cameraClearRadius);
         get<bool>(table,"inventory_disabled",actor->inventoryDisabled);
         getMesh(table,"model",actor->model,registry,false);
-        getMaterial(table,"material",actor->material,registry,false);
+        //getMaterial(table,"material",actor->material,registry,false);
         getWidget<ActorWidget<Character>>(table,"widget",actor->widget,registry);
     }
     

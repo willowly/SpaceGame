@@ -13,7 +13,7 @@ class ContainerBlock : public Block {
 
     static const int INVENTORY_VAR = 0;
 
-    static const int MAX_SLOT = 0;
+    static const int SIZE_VAR = 0;
 public:
     
 
@@ -46,24 +46,9 @@ public:
     void addToMesh(Construction* construction, MeshData<ConstructionVertex>& meshData, ivec3 position, BlockStorage& storage) override {
         BlockHelper::addSingleBlock(construction,meshData,position,texture);
     }
-
-    void setStack(BlockStorage& storage,ItemStack stack,int slot) {
-        int maxSlot = getMaxSlot(storage);
-        storage.setStack(ContainerBlock::INVENTORY_VAR+slot,stack);
-        std::vector<ItemStack> inventory;
-        // for (size_t i = 0; i < maxSlot; i++)
-        // {
-        //     inventory.push_back(storage.getStack())
-        // }
-        
-    }
-
-    int getMaxSlot(BlockStorage& storage) {
-        return storage.getInt(ContainerBlock::MAX_SLOT);
-    }
-
-    ItemStack getStack(BlockStorage& storage,int slot) {
-        return storage.getStack(ContainerBlock::INVENTORY_VAR+slot);
+    
+    BlockInventory getInventory(BlockStorage& storage) {
+        return BlockInventory(storage,INVENTORY_VAR,SIZE_VAR);
     }
 
     std::vector<ItemStack> getDrops(Construction* construction, ivec3 position, BlockStorage& storage) override {
