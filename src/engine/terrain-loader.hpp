@@ -23,15 +23,16 @@ class TerrainJob {
             return state;
         }
         
-        bool trySetJob(ActorID terrain,ChunkAddress address) {
+        // sets up the job
+        bool trySetJob(Terrain* terrain,ChunkAddress address) {
 
-            
             std::unique_lock lock(mutex,std::defer_lock);
             
             if(lock.try_lock()) {
                 if(state != TerrainJobState::FINISHED) return false;
                 this->address = address;
-                this->terrain = terrain;
+                this->terrain = terrain->id;
+                terrain->addPlaceholder(address);
                 state = TerrainJobState::WAITING;
                 return true;
             }
@@ -103,7 +104,7 @@ class TerrainLoader {
                 auto pos = getCameraPosition();
                 if(terrain != nullptr) {
                     auto addressOpt = terrain->getNextChunkToload(pos);
-                    if(addressOpt == std::nullopt) {
+                    if(addressOpt == std::nullopt) { // theres no next chunk
                         continue;
                     }
                     auto address = addressOpt.value();
@@ -112,8 +113,7 @@ class TerrainLoader {
                         static_assert(terrainJobCount > 0);
                         //std::cout << "MAIN: checking job" << jobIndex << std::endl;
                         jobIndex = getNextJob(jobIndex);
-                        if(terrainJobs.at(jobIndex).trySetJob(terrain->id,address)) {
-                            terrain->addPlaceholder(address);
+                        if(terrainJobs.at(jobIndex).trySetJob(terrain,address)) {
                             //std::cout << "MAIN: setting job" << jobIndex << std::endl;
                             break;
                         };

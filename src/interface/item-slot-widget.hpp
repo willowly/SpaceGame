@@ -60,8 +60,6 @@ class ItemSlotWidget : public Widget {
                 TextDisplaySettings settings;
                 settings.pivot = vec2(1,1);
                 textWidget->draw(context,rect.bottomRight(), std::to_string((int)stack.amount),settings);
-            } else {
-                Debug::warn("text is null (item slot)");
             }
 
             
