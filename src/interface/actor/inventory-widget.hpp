@@ -12,140 +12,75 @@ class InventoryWidget : public Widget {
     
     public:
         Sprite backgroundSprite;
-        Font* font = nullptr;
-        vec2 size = vec2(550,200);
-        float padding = 3;
-        vec2 slotSize = vec2(60,60);
+        Color backgroundColor;
+        float margin = 5;
         float spacing = 2;
+        int columns = 8;
 
         ItemSlotWidget* itemSlot;
 
         TextWidget* tooltipTextTitle;
-        ItemSlotWidget* recipeSlot;
 
-        void draw(DrawContext context,Character& player) {
+        void draw(DrawContext context,Rect rect,Character& user,IInventory& inventory) {
+
+            if(itemSlot == nullptr) {
+                Debug::warn("item slot is null (inventory widget)");
+            }
 
             Rect screen = context.getScreenSize();
 
-            auto backgroundColor = Color(0.2,0.2,0.2);
-            auto slots = Color(0.1,0.1,0.1);
-            auto slotsHover = Color(0.1,0.1,1);
             //interface.drawRect(vulkan,glm::vec2(0,-3),glm::vec2(101,12),glm::vec2(0.5,1),vec2(0.5,1),Color(0.5,0.5,0.5),solidTexture);
             
-            Rect mainPanel = Rect::anchored(Rect::withPivot(vec2(0,3),size,vec2(0.5f,0)),screen,vec2(0.5,0.5));
+            Rect mainPanel = rect;
             context.drawRect(mainPanel,backgroundSprite,backgroundColor);
-
-
-            float width = 1.5;
-            float ratio = 1.5;
-            float padding = 0.1f;
             
-            tooltipTextTitle->draw(context,mainPanel.topLeft() + vec2(0,-12),std::format("{:0}",player.inventory.getTotalWeight()));
-
+            ItemSlotInteractOptions interactOptions;
             
-
-
-            Rect item = Rect::anchored(Rect(vec2(padding),slotSize),mainPanel,vec2(0,0));
-
-            ItemStack* selectedItem = nullptr;
-            Recipe* selectedRecipe = nullptr;
-            bool itemHover = false;
-            for (auto stack : player.inventory.getItems())
-            {
-                if(stack != nullptr) {
-                    if(itemSlot->draw(context,item,*stack)) {
-                        itemHover = true;
-                        if(context.mouseLeftClicked()) {
-                            auto droppedStack = player.replaceCursor(*stack);
-                            player.inventory.take(*stack);
-                            player.inventory.give(droppedStack);
-                        } else {
-                            selectedItem = stack; //if we pick it up, its no longer selected
-                        }
-                    }
-                }
-                
-                item.position.x += slotSize.x + spacing;
-                
-            }
-
-            if(!itemHover && context.mouseInside(mainPanel)) {
-                if(context.mouseLeftClicked()) {
-                    auto droppedStack = player.dropCursor();
-                    player.inventory.give(droppedStack);
-                }
-            }
-
-            item = Rect::anchored(Rect::withPivot(vec2(padding,-padding),slotSize,vec2(1,0)),mainPanel,vec2(1,0));
-
-            for (auto recipe : player.recipes)
-            {
-                if(recipe == nullptr) {
-                    Debug::warn("null recipe in player");
-                    continue;
-                }
-                if(recipeSlot->draw(context,item,recipe->result)) {
-                    selectedRecipe = recipe;
-                }
-
-                if(player.currentRecipe == recipe) {
-                    float progressPercent = player.recipeTimer/recipe->time;
-                    //context.drawRect(item,slots,solid);
-                    Rect fill(item.position + vec2(0,(1-progressPercent)*item.size.y),vec2(item.size.x,item.size.y * progressPercent));
-                    context.drawRect(fill,backgroundSprite,Color(1,1,1,0.2));
-                }
-                
-                item.position.x -= slotSize.x + spacing;
-                
-            }
-
-            if(selectedRecipe != nullptr) {
-                drawTooltip(context,*selectedRecipe);
-                if(context.mouseLeftClicked()) {
-                    player.startCraft(*selectedRecipe);
-                }
-                
+            if(inventory.maxWeight == 0) {
+                tooltipTextTitle->draw(context,mainPanel.topLeft() + vec2(margin),std::format("{:0}",inventory.getTotalWeight()));
             } else {
-                if(selectedItem != nullptr) {
-                    drawTooltip(context,*selectedItem);
-                    for(int i = 0; i <= Character::toolbarSize; i++) {
-                        if(context.getInput().getKeyPressed(GLFW_KEY_1 + i)) {
-                            player.setToolbar(i,*selectedItem);
-                            player.inventory.take(*selectedItem);
-                        }
+                tooltipTextTitle->draw(context,mainPanel.topLeft() + vec2(margin),std::format("{:0}/{:0}",inventory.getTotalWeight(),inventory.maxWeight));
+                interactOptions.spaceLeft = inventory.getSpaceLeft();
+            }
+
+            auto slotPosition = mainPanel.position;
+            slotPosition += vec2(margin);
+            slotPosition.y += tooltipTextTitle->height;
+            slotPosition.y += margin;
+
+            
+
+            bool hoveringPanel = context.mouseInside(mainPanel);
+            int column = 0;
+            for (auto stackPtr : inventory.getItems())
+            {
+                if(stackPtr == nullptr) continue;
+
+                if(itemSlot->draw(context,slotPosition,*stackPtr)) {
+                    if(user.cursorStack.isEmpty()) {
+                        user.itemSlotHoverActions(context,*stackPtr,interactOptions);
+                        hoveringPanel = false;
                     }
                 }
+
+                slotPosition.x += (itemSlot->size.x + spacing);
+                column++;
+                if(column == columns) {
+                    slotPosition.x = mainPanel.topLeft().x + margin;
+                    slotPosition.y += (itemSlot->size.y + spacing);
+                    column = 0;
+                }
+            }
+
+            if(hoveringPanel) {
+                ItemStack stack = user.cursorStack;
+                user.inventoryHoverActions(context,inventory);
             }
             
             
         }
 
-        void drawTooltip(DrawContext context,ItemStack& stack) {
-            
-            Rect tooltip = Rect(context.getMousePosition()+vec2(3,3),vec2(70,25));
-            tooltip.size.x = tooltipTextTitle->getSize(stack.item->displayName).x + 4.0f;
-            context.drawRect(tooltip,backgroundSprite,Color(0.05,0.05,0.05));
-
-            tooltipTextTitle->draw(context,tooltip.position + vec2(2.0f,2.0f),stack.item->displayName);
-        }
-
-        void drawTooltip(DrawContext context,Recipe& recipe) {
-            
-            Rect tooltip = Rect(context.getMousePosition()+vec2(3,3),vec2(70,25));
-
-            if(recipe.result.isEmpty()) {
-                return;
-            }
-
-            string text = "CRAFT " + recipe.result.item->displayName;
-
-            tooltip.size.x = tooltipTextTitle->getSize(text).x + 4.0f;
-            context.drawRect(tooltip,backgroundSprite,Color(0.05,0.05,0.05));
-
-            tooltipTextTitle->draw(context,tooltip.position + vec2(2.0f,2.0f),text);
-        }
-
-        string getTypeName() override {
+        string getTypeName() {
             return "inventory_widget";
         }
 };

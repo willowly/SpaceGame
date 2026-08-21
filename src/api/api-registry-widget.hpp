@@ -31,7 +31,7 @@ namespace API {
         get<Color>(table,"color",widget->color);
         get<float>(table,"bar_width",widget->barWidth);
         get<float>(table,"padding",widget->padding);
-        widget->font = &registry.font;
+        // widget->font = &registry.font;
         Debug::info("Loaded Item Slot Widget \"" + name + "\"",InfoPriority::MEDIUM);
     }
 
@@ -50,15 +50,15 @@ namespace API {
 
     inline void addInventoryWidget(string name,sol::table table,Registry& registry) {
         InventoryWidget* widget = registry.addObject<InventoryWidget>(name);
-        getSprite(table,"background_sprite",widget->backgroundSprite,registry);
-        get<vec2>(table,"size",widget->size);
-        get<float>(table,"padding",widget->padding);
-        get<vec2>(table,"slot_size",widget->slotSize);
-        get<float>(table,"spacing",widget->spacing);
-        getWidget<ItemSlotWidget>(table,"item_slot",widget->itemSlot,registry,true);
-        getWidget<ItemSlotWidget>(table,"recipe_slot",widget->recipeSlot,registry,true);
-        getWidget<TextWidget>(table,"tooltip_text_title",widget->tooltipTextTitle,registry,true);
-        widget->font = &registry.font;
+        // getSprite(table,"background_sprite",widget->backgroundSprite,registry);
+        // get<vec2>(table,"size",widget->size);
+        // get<float>(table,"padding",widget->padding);
+        // get<vec2>(table,"slot_size",widget->slotSize);
+        // get<float>(table,"spacing",widget->spacing);
+        // getWidget<ItemSlotWidget>(table,"item_slot",widget->itemSlot,registry,true);
+        // getWidget<ItemSlotWidget>(table,"recipe_slot",widget->recipeSlot,registry,true);
+        // getWidget<TextWidget>(table,"tooltip_text_title",widget->tooltipTextTitle,registry,true);
+        //widget->font = &registry.font;
         Debug::info("Loaded Inventory Widget \"" + name + "\"",InfoPriority::MEDIUM);
     }
 

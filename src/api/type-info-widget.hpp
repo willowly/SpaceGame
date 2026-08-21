@@ -16,14 +16,12 @@ namespace TypeInfoLoader {
         //inventoryWidget->parent = widget;
         inventoryWidget->constructorFunction = [&]() { return std::make_unique<InventoryWidget>(); };
         inventoryWidget->addConstProperty("background_sprite",&InventoryWidget::backgroundSprite);
-        inventoryWidget->addConstProperty("font",&InventoryWidget::font);
-        inventoryWidget->addConstProperty("size",&InventoryWidget::size);
-        inventoryWidget->addConstProperty("padding",&InventoryWidget::padding);
-        inventoryWidget->addConstProperty("slot_size",&InventoryWidget::slotSize);
+        inventoryWidget->addConstProperty("background_color",&InventoryWidget::backgroundColor);
+        inventoryWidget->addConstProperty("margin",&InventoryWidget::margin);
         inventoryWidget->addConstProperty("spacing",&InventoryWidget::spacing);
+        inventoryWidget->addConstProperty("columns",&InventoryWidget::columns);
         inventoryWidget->addConstProperty("item_slot",&InventoryWidget::itemSlot);
         inventoryWidget->addConstProperty("tooltip_text_title",&InventoryWidget::tooltipTextTitle);
-        inventoryWidget->addConstProperty("recipe_slot",&InventoryWidget::recipeSlot);
         inventoryWidget->setParent(widget);
 
         TypeInfo* toolbarWidget = registry.addTypeInfo<ToolbarWidget>("toolbar_widget");
@@ -44,12 +42,16 @@ namespace TypeInfoLoader {
         playerWidget->constructorFunction = [&]() { return std::make_unique<PlayerWidget>(); };
         playerWidget->addConstProperty("cursor_rect_sprite",&PlayerWidget::cursorRectSprite);
         playerWidget->addConstProperty("inventory_widget",&PlayerWidget::inventoryWidget);
+        playerWidget->addConstProperty("inventory_size",&PlayerWidget::inventorySize);
         playerWidget->addConstProperty("toolbar_widget",&PlayerWidget::toolbarWidget);
         playerWidget->addConstProperty("cursor_slot_widget",&PlayerWidget::cursorSlotWidget);
+        playerWidget->addConstProperty("tooltip_widget",&PlayerWidget::tooltipWidget);
         playerWidget->addConstProperty("speed_text",&PlayerWidget::speedText);
         playerWidget->addConstProperty("cursor_slot_size",&PlayerWidget::cursorSlotSize);
         playerWidget->addConstProperty("cursor_rect_length",&PlayerWidget::cursorRectLength);
         playerWidget->addConstProperty("cursor_rect_width",&PlayerWidget::cursorRectWidth);
+        playerWidget->addConstProperty("character_panel_size",&PlayerWidget::characterPanelSize);
+        playerWidget->addConstProperty("recipe_slot",&PlayerWidget::recipeSlot);
         playerWidget->setParent(widget);
 
         TypeInfo* furnaceWidget = registry.addTypeInfo<FurnaceWidget>("furnace_widget");
@@ -59,8 +61,9 @@ namespace TypeInfoLoader {
         furnaceWidget->addConstProperty("font",&FurnaceWidget::font);
         furnaceWidget->addConstProperty("size",&FurnaceWidget::size);
         furnaceWidget->addConstProperty("padding",&FurnaceWidget::padding);
-        furnaceWidget->addConstProperty("slot_size",&FurnaceWidget::slotSize);
         furnaceWidget->addConstProperty("spacing",&FurnaceWidget::spacing);
+        furnaceWidget->addConstProperty("slot_size",&FurnaceWidget::slotSize);
+        furnaceWidget->addConstProperty("bar_width",&FurnaceWidget::barWidth);
         furnaceWidget->addConstProperty("item_slot",&FurnaceWidget::itemSlot);
         furnaceWidget->addConstProperty("recipe_slot",&FurnaceWidget::recipeSlot);
         furnaceWidget->addConstProperty("tooltip_text_title",&FurnaceWidget::tooltipTextTitle);
@@ -72,11 +75,19 @@ namespace TypeInfoLoader {
         itemSlotWidget->addConstProperty("sprite",&ItemSlotWidget::sprite);
         itemSlotWidget->addConstProperty("bar_sprite",&ItemSlotWidget::barSprite);
         itemSlotWidget->addConstProperty("color",&ItemSlotWidget::color);
-        itemSlotWidget->addConstProperty("font",&ItemSlotWidget::font);
-        itemSlotWidget->addConstProperty("text",&ItemSlotWidget::text);
+        itemSlotWidget->addConstProperty("text",&ItemSlotWidget::textWidget);
         itemSlotWidget->addConstProperty("bar_width",&ItemSlotWidget::barWidth);
         itemSlotWidget->addConstProperty("padding",&ItemSlotWidget::padding);
         itemSlotWidget->setParent(widget);
+
+        TypeInfo* recipeSlotWidget = registry.addTypeInfo<RecipeSlotWidget>("recipe_slot_widget");
+        //itemSlotWidget->parent = widget;
+        recipeSlotWidget->constructorFunction = [&]() { return std::make_unique<RecipeSlotWidget>(); };
+        recipeSlotWidget->addConstProperty("sprite",&RecipeSlotWidget::sprite);
+        recipeSlotWidget->addConstProperty("color",&RecipeSlotWidget::color);
+        recipeSlotWidget->addConstProperty("text",&RecipeSlotWidget::text);
+        recipeSlotWidget->addConstProperty("padding",&RecipeSlotWidget::padding);
+        recipeSlotWidget->setParent(widget);
 
 
         TypeInfo* textWidget = registry.addTypeInfo<TextWidget>("text_widget");
@@ -102,12 +113,28 @@ namespace TypeInfoLoader {
         containerWidget->addConstProperty("tooltip_text_title",&ContainerWidget::tooltipTextTitle);
         containerWidget->setParent(widget);
 
+        TypeInfo* drillWidget = registry.addTypeInfo<DrillWidget>("drill_widget");
+        drillWidget->constructorFunction = [&]() { return std::make_unique<DrillWidget>(); };
+        drillWidget->addConstProperty("size",&DrillWidget::size);
+        drillWidget->addConstProperty("padding",&DrillWidget::padding);
+        drillWidget->addConstProperty("inventory",&DrillWidget::inventory);
+        drillWidget->setParent(widget);
+
+        TypeInfo* tooltipWidget = registry.addTypeInfo<TooltipWidget>("tooltip_widget");
+        tooltipWidget->constructorFunction = [&]() { return std::make_unique<TooltipWidget>(); };
+        tooltipWidget->addConstProperty("background_sprite",&TooltipWidget::backgroundSprite);
+        tooltipWidget->addConstProperty("background_color",&TooltipWidget::backgroundColor);
+        tooltipWidget->addConstProperty("text_widget",&TooltipWidget::textWidget);
+        tooltipWidget->addConstProperty("padding",&TooltipWidget::padding);
+        tooltipWidget->addConstProperty("margin",&TooltipWidget::margin);
+        tooltipWidget->setParent(widget);
 
         TypeInfo* font = registry.addTypeInfo<Font>("font");
 
         WIDGET_TYPE(BlockWidget<FurnaceBlock>, blockWidget_Furnace);
         WIDGET_TYPE(ActorWidget<Character>, actorWidget_Character);
         WIDGET_TYPE(BlockWidget<ContainerBlock>, blockWidget_Container);
+        WIDGET_TYPE(BlockWidget<DrillBlock>, blockWidget_Drill);
 
 
     }

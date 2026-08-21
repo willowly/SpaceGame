@@ -9,11 +9,19 @@ cursor_rect_sprite:
       x: 0.000000
       y: 0.000000
 inventory_widget: inventory
+inventory_size: 
+  x: 400.000000
+  y: 300.000000
 toolbar_widget: toolbar
 cursor_slot_widget: item_slot_clear
+tooltip_widget: tooltip_widget
 speed_text: text_default
 cursor_slot_size: 
   x: 60.000000
   y: 60.000000
 cursor_rect_length: 15.000000
 cursor_rect_width: 3.000000
+character_panel_size: 
+  x: 400.000000
+  y: 200.000000
+recipe_slot: recipe_slot

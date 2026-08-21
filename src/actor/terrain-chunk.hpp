@@ -317,9 +317,11 @@ class TerrainChunk {
                             terrainData[i].amount += change * influence;
                             terrainData[i].amount = std::min(std::max(terrainData[i].amount,0.0f),1.0f);
                             int terrainTypeID = terrainData[i].type;
+
+                            auto terrainType = terrainTypes[terrainTypeID];
                             
-                            if(old > SURFACE_LVL && terrainData[i].amount < SURFACE_LVL) {
-                                results.addItem(ItemStack(terrainTypes[terrainTypeID].item,1));
+                            if(old > SURFACE_LVL && terrainData[i].amount < SURFACE_LVL && Random::value() < terrainType.dropChance) {
+                                results.addItem(ItemStack(terrainType.item,1));
                             }
                             meshOutOfDate = true;
                             modified = true;

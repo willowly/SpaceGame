@@ -54,6 +54,10 @@ namespace TypeInfoLoader {
         drill->addConstProperty("range",&DrillBlock::range);
         drill->addConstProperty("amount",&DrillBlock::amount);
         drill->addConstProperty("radius",&DrillBlock::radius);
+        drill->addConstProperty("widget",&DrillBlock::widget);
+        drill->addConstProperty("max_weight",&DrillBlock::maxWeight);
+        drill->addConstProperty("drill_head_model",&DrillBlock::drillHeadModel);
+        drill->addConstProperty("drill_rotate_speed",&DrillBlock::drillRotateSpeed);
         drill->setParent(block);
 
         TypeInfo* container = registry.addTypeInfo<ContainerBlock>("container");

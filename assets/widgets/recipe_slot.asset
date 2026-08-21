@@ -1,15 +1,6 @@
-type: item_slot_widget
+type: recipe_slot_widget
 sprite: 
-  texture: recipe_slot
-  rect: 
-    position: 
-      x: 0.000000
-      y: 0.000000
-    size: 
-      x: 0.000000
-      y: 0.000000
-bar_sprite: 
-  texture: basic_block_sheet
+  texture: item_slot
   rect: 
     position: 
       x: 0.000000
@@ -18,20 +9,9 @@ bar_sprite:
       x: 0.000000
       y: 0.000000
 color: 
-  r: 0.000000
-  g: 0.000000
-  b: 0.000000
-  a: 0.000000
-font: default
-text: 
-  height: 12.000000
-  ratio: 1.500000
-  spacing: 0.250000
-  color: 
-    r: 1.000000
-    g: 1.000000
-    b: 1.000000
-    a: 1.000000
-  font: default
-bar_width: 6.000000
+  r: 0.642157
+  g: 0.642157
+  b: 0.642157
+  a: 1.000000
+text: text_default
 padding: 2.000000

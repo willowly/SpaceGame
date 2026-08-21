@@ -359,7 +359,7 @@ class Terrain : public Actor {
 
         updateLOD(world);
 
-        //world->addGravityWell(&gravityWell);
+        world->addGravityWell(&gravityWell);
 
     }
 
@@ -380,7 +380,7 @@ class Terrain : public Actor {
                 chunk.destroy(world);
             }
         }
-        //world->removeGravityWell(&gravityWell);
+        world->removeGravityWell(&gravityWell);
     }
 
     void updateLOD(World* world) {

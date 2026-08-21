@@ -1,8 +1,24 @@
 type: drill
-mesh: drill
-texture: solid
-range: 1.000000
+mesh: drill_base
+texture: drill_base
+range: 0.300000
 amount: 0.100000
 radius: 2.000000
+widget: drill_widget
+max_weight: 20.000000
+drill_head_model: 
+  mesh: drill_head
+  material: drill_head
+  offset: 
+    x: 0.000000
+    y: 0.000000
+    z: 0.000000
+  rotation: 
+    x: 0.000000
+    y: 0.000000
+    z: 0.000000
+    w: 1.000000
+  scale: 1.000000
+drill_rotate_speed: 5.000000
 default_drop: drill_block
 solid: 0

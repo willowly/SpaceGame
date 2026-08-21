@@ -9,6 +9,11 @@
 #include "helper/rect.hpp"
 #include "helper/sprite.hpp"
 
+#include <variant>
+#include <functional>
+
+#include "item/item-stack.hpp"
+
 
 using glm::ivec2, glm::vec2;
 
@@ -111,6 +116,10 @@ class Interface {
 
 };
 
+struct Recipe;
+
+typedef std::variant<std::monostate,ItemStack,Recipe*> TooltipTarget;
+
 struct DrawContext {
     private:
         Interface& interface;
@@ -118,6 +127,7 @@ struct DrawContext {
         Input& input;
         bool clicksDisabled = false;
     public:
+        std::function<void(TooltipTarget)> setTooltip = [](auto target){};
         DrawContext(Interface& interface,Vulkan& vulkan,Input& input) : interface(interface), vulkan(vulkan), input(input) {}
 
         void drawRect(Rect rect,Sprite sprite,Color color = Color::white) {
@@ -143,6 +153,7 @@ struct DrawContext {
         Input& getInput() {
             return input;
         }
+
 
         bool mouseInside(Rect rect) {
             vec2 mouse = getMousePosition();

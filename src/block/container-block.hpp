@@ -47,19 +47,30 @@ public:
         BlockHelper::addSingleBlock(construction,meshData,position,texture);
     }
     
-    BlockInventory getInventory(BlockStorage& storage) {
-        return BlockInventory(storage,INVENTORY_VAR,SIZE_VAR,maxWeight);
+    BlockInventoryInstance getInventory(BlockStorage& storage) {
+        return BlockInventoryInstance(storage,INVENTORY_VAR,SIZE_VAR,maxWeight);
     }
 
     std::vector<ItemStack> getDrops(Construction* construction, ivec3 position, BlockStorage& storage) override {
         std::vector<ItemStack> drops = Block::getDrops(construction, position, storage);
 
-        ItemStack inventory = storage.getStack(INVENTORY_VAR);
-        if (!inventory.isEmpty()) {
-            drops.push_back(inventory);
+        auto inventory = getInventory(storage);
+        for(auto stack : inventory.getItems()) {
+            if(stack == nullptr) continue;
+            drops.push_back(*stack);
         }
 
         return drops;
+    }
+
+    ItemStack tryInsert(ivec3 position,BlockStorage& storage,BlockFacing direction,ItemStack stack) override {
+        auto inventory = getInventory(storage);
+        stack = inventory.tryGive(stack);
+        return stack;
+    }
+
+    bool canInsert() override {
+        return true;
     }
 
     string getTypeName() override {

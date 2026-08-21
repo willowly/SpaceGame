@@ -91,6 +91,17 @@ class Block : public Object {
 
         virtual void onInteract(Construction* construction,ivec3 position,BlockStorage& storage,Character& character) {}
 
+        // sets the stack to remaining items
+        // return true if insertable, return false if no capability
+        virtual ItemStack tryInsert(ivec3 position,BlockStorage& storage,BlockFacing direction,ItemStack stack) {
+            return stack;
+        }
+
+        // if this block type is able to be inserted into at all
+        virtual bool canInsert() {
+            return false;
+        }
+
         string getTypeName() override {
             return "block";
         }

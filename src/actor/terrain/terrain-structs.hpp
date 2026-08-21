@@ -12,6 +12,7 @@ struct TerrainType {
     string name;
     Item* item = {};
     TextureID texture = 0;
+    float dropChance = 0.2f;
 };
 
 struct GenerationSettings {

@@ -1,0 +1,6 @@
+type: drill_widget
+size: 
+  x: 380.000000
+  y: 300.000000
+padding: 3
+inventory: inventory

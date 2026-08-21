@@ -22,16 +22,6 @@ color:
   g: 0.000000
   b: 0.000000
   a: 0.000000
-font: default
-text: 
-  height: 12.000000
-  ratio: 1.500000
-  spacing: 0.250000
-  color: 
-    r: 1.000000
-    g: 1.000000
-    b: 1.000000
-    a: 1.000000
-  font: default
+text: text_default
 bar_width: 6.000000
 padding: 11.000000

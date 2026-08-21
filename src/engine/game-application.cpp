@@ -12,7 +12,7 @@ void GameApplication::spawnPlayer(vec3 pos) {
 }
 
 void GameApplication::spawnAsteroidScene()  {
-    spawnPlayer(vec3(0,30,0));
+    spawnPlayer(vec3(0,10,0));
 
     std::minstd_rand rnd;
 
@@ -35,7 +35,7 @@ void GameApplication::spawnAsteroidScene()  {
     //     terrainLoader.addTerrain(terrain->id);
     // }
 
-    auto terrain = world->spawn(Terrain::makeInstance(terrainMaterial,*settings,rnd(),vec3(0,0,0)));
+    auto terrain = world->spawn(Terrain::makeInstance(terrainMaterial,*settings,rnd(),vec3(0,-settings->generationSettings.radius,0)));
     terrainLoader.addTerrain(terrain->id);
 }
 
@@ -86,13 +86,15 @@ void GameApplication::setup() {
     auto settings = registry.getPtr<TerrainSettings>("asteroid");
     settings->name = "asteroid";
     settings->generationSettings.noiseScale = 1;
-    settings->generationSettings.radius = 15;
+    settings->generationSettings.radius = 150;
     settings->generationSettings.noiseFactor = 15;
     settings->generationSettings.noiseOctaves = 5;
     settings->generationSettings.noiseGain = 0.3f;
     settings->generationSettings.noiseLacunarity = 2.5f;
     settings->generationSettings.stoneType = registry.getPtr<TerrainType>("stone");
     settings->generationSettings.oreType = registry.getPtr<TerrainType>("tin_ore");
+    settings->LODdistance = 10;
+    settings->gravity = 9;
     
     
     registry.addRecipesToVector(playerPrototype->recipes,"crafting",1);

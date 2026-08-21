@@ -139,6 +139,8 @@ public:
 
     Inventory inventory;
 
+    int maxWeight;
+
     ItemStack craftingStack;
 
     ItemStack cursorStack;
@@ -1098,9 +1100,16 @@ public:
         if(amountToAdd == 0) return false;
 
         ItemStack stackToAdd = cursorStack;
-        float spaceLeft = inventory.getSpaceLeft();
-        int maxAmount = (int)floor(spaceLeft / stackToAdd.item->getWeight());
-        stackToAdd.amount = std::min(maxAmount,amountToAdd);
+
+        stackToAdd.amount = amountToAdd;
+
+        if(inventory.maxWeight != 0) {
+            float spaceLeft = inventory.getSpaceLeft();
+            spaceLeft = spaceLeft / stackToAdd.item->getWeight();
+            int maxAmount = static_cast<int>(floor(spaceLeft));
+            stackToAdd.amount = std::min(maxAmount,stackToAdd.amount);
+        }
+        
         cursorStack.amount -= stackToAdd.amount;
         inventory.give(stackToAdd);
 
@@ -1135,8 +1144,9 @@ public:
             }
             if (!stack.isEmpty() && cursorStack.canInsert(stack))
             {
-                stack.amount--;
-                cursorStack.tryInsert(ItemStack(stack.item, 1, stack.storage));
+                int amountToRemove = floor(stack.amount / 2);
+                stack.amount -= amountToRemove;
+                cursorStack.tryInsert(ItemStack(stack.item, amountToRemove, stack.storage));
                 return true;
             }
         }
@@ -1203,6 +1213,19 @@ public:
             }
         }
         return inventory.take(ItemStack(item, amount - amountTaken)) + amountTaken;
+    }
+
+    float getTotalWeight() {
+        float weight = inventory.getTotalWeight();
+        for (auto &toolbarStack : toolbar)
+        {
+            weight += toolbarStack.getWeight();
+        }
+        return weight;
+    }
+
+    float getSpaceLeft() {
+        return maxWeight - getTotalWeight();
     }
 
     // this is kinda janky :shrug:

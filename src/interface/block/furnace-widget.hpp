@@ -20,9 +20,10 @@ class FurnaceWidget : public BlockWidget<FurnaceBlock> {
         float padding = 3;
         vec2 slotSize = vec2(60,60);
         float spacing = 2;
+        float barWidth = 60; 
 
         ItemSlotWidget* itemSlot = {};
-        ItemSlotWidget* recipeSlot = {};
+        RecipeSlotWidget* recipeSlot = {};
 
         TextWidget* tooltipTextTitle = {};
 
@@ -44,11 +45,11 @@ class FurnaceWidget : public BlockWidget<FurnaceBlock> {
             auto slotsHover = Color(0.1,0.1,1);
             //interface.drawRect(vulkan,glm::vec2(0,-3),glm::vec2(101,12),glm::vec2(0.5,1),vec2(0.5,1),Color(0.5,0.5,0.5),solidTexture);
             
-            Rect mainPanel = Rect::anchored(Rect::withPivot(vec2(0,-3),size,vec2(0.5,1)),screen,vec2(0.5,0.5));
+            Rect mainPanel = Rect::anchored(Rect::withPivot(vec2(padding,0),size,vec2(0,0.5)),screen,vec2(0.5,0.5));
             context.drawRect(mainPanel,solid,backgroundColor);
 
 
-            
+            // variables
             auto inputStack = storage.getStack(furnace.INPUTSTACK_VAR);
             auto outputStack = storage.getStack(furnace.OUTPUTSTACK_VAR);
             auto currentRecipe = storage.getPointer<Recipe>(furnace.CURRENTRECIPE_VAR);
@@ -56,28 +57,19 @@ class FurnaceWidget : public BlockWidget<FurnaceBlock> {
 
             ItemStack* selectedSlot = nullptr;
 
+            // input slot
             auto slotRect = Rect::anchored(Rect(vec2(padding),slotSize),mainPanel,vec2(0,0));
             if(itemSlot->draw(context,slotRect,inputStack)) {
                 selectedSlot = &inputStack;
-                Item* lastItem = inputStack.item; 
-                user.itemSlotHoverActions(context,inputStack);
-                if(lastItem != inputStack.item) {
+                if(user.itemSlotHoverActions(context,inputStack)) {
                     furnace.trySetMatchingRecipe(currentRecipe,inputStack);
                 }
             }
+            
+            auto barRect = Rect(slotRect.topRight(),vec2(0.0f));
 
-            auto barRect = Rect::withPivot(slotRect.topRight()+vec2(60-slotRect.size.x*0.5f,slotRect.size.y*0.5f),vec2(80.0-slotRect.size.x*0.5f,20.0),vec2(0.5f));
-
-            context.drawRect(barRect,solid,slots);
-
-            if(currentRecipe != nullptr) {
-                auto progress = timer/currentRecipe->time;
-                progress = fmin(fmax(progress,0),1);
-                barRect = Rect::anchored(Rect::withPivot(vec2(barRect.size.x*progress,barRect.size.y),vec2(0,0.5)),barRect,vec2(0,0.5));
-                context.drawRect(barRect,solid,Color::red);
-            }
-
-            slotRect.position += vec2(120,0);
+            // output slot
+            slotRect = Rect::anchored(Rect::withPivot(vec2(-padding,padding),slotSize,vec2(1,0)),mainPanel,vec2(1,0));
             if(itemSlot->draw(context,slotRect,outputStack)) {
                 selectedSlot = &outputStack;
                 ItemSlotInteractOptions options;
@@ -85,7 +77,18 @@ class FurnaceWidget : public BlockWidget<FurnaceBlock> {
                 user.itemSlotHoverActions(context,outputStack,options);
             }
 
-            Rect item = Rect::anchored(Rect::withPivot(vec2(-padding,padding),slotSize,vec2(1,0)),mainPanel,vec2(1,0));
+            barRect.size = slotRect.bottomLeft() - barRect.position;
+            barRect = Rect::anchored(Rect::withPivot(vec2(barRect.size.x - padding*2.0f,barWidth),vec2(0.5,0.5)),barRect,vec2(0.5,0.5f));
+            context.drawRect(barRect,solid,slots); //background
+            if(currentRecipe != nullptr) {
+                auto progress = timer/currentRecipe->time;
+                progress = fmin(fmax(progress,0),1);
+                barRect = Rect::anchored(Rect::withPivot(vec2(barRect.size.x*progress,barRect.size.y),vec2(0,0.5)),barRect,vec2(0,0.5));
+                context.drawRect(barRect,solid,Color::red); //foreground
+            }
+
+            Rect recipeRect = Rect::anchored(Rect(vec2(padding,padding),slotSize),mainPanel,vec2(0,0));
+            recipeRect.position.y += slotSize.y + spacing;
 
             Recipe* selectedRecipe = nullptr;
 
@@ -95,54 +98,30 @@ class FurnaceWidget : public BlockWidget<FurnaceBlock> {
                     Debug::warn("null recipe in furnace");
                     continue;
                 }
-                if(recipeSlot->draw(context,item,recipe->result)) {
+                if(recipeSlot->draw(context,recipeRect,*recipe)) {
                     selectedRecipe = recipe;
                 }
                 
-                item.position.x -= slotSize.x + spacing;
+                recipeRect.position.x += slotSize.x + spacing;
                 
             }
 
+
+
             if(selectedRecipe != nullptr) {
-                drawTooltip(context,*selectedRecipe);
                 if(context.mouseLeftClicked()) {
                     furnace.tryStartCraft(*selectedRecipe,user,storage);
                 }
                 return; //need to fix this,see comment below
                 
-            } else {
-                if(selectedSlot != nullptr && selectedSlot->item != nullptr) {
-                    drawTooltip(context,*selectedSlot);
-                    
-                }
-                
             }
+
+            // variables
             storage.setPointer<Recipe>(furnace.CURRENTRECIPE_VAR,currentRecipe);
             storage.setStack(furnace.INPUTSTACK_VAR,inputStack);
             storage.setStack(furnace.OUTPUTSTACK_VAR,outputStack);
             
             
-        }
-
-        void drawTooltip(DrawContext context,ItemStack& stack) {
-            
-            Rect tooltip = Rect(context.getMousePosition()+vec2(3,3),vec2(40,7));
-            tooltip.size.x = tooltipTextTitle->getSize(stack.item->displayName).x + 4.0f;
-            context.drawRect(tooltip,solid,Color(0.05,0.05,0.05));
-
-            tooltipTextTitle->draw(context,tooltip.position + vec2(2.0f,2.0f),stack.item->displayName);
-        }
-
-        void drawTooltip(DrawContext context,Recipe& recipe) {
-            
-            Rect tooltip = Rect(context.getMousePosition()+vec2(3,3),vec2(40,7));
-
-            string text = "CRAFT " + recipe.result.item->displayName;
-
-            tooltip.size.x = tooltipTextTitle->getSize(text).x + 4.0f;
-            context.drawRect(tooltip,solid,Color(0.05,0.05,0.05));
-
-            tooltipTextTitle->draw(context,tooltip.position + vec2(2.0f,2.0f),text);
         }
 
         string getTypeName() override {

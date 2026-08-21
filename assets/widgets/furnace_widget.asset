@@ -10,13 +10,14 @@ solid:
       y: 0.000000
 font: default
 size: 
-  x: 380.000000
-  y: 80.000000
+  x: 400.000000
+  y: 200.000000
 padding: 3.000000
+spacing: 2.000000
 slot_size: 
   x: 60.000000
   y: 60.000000
-spacing: 2.000000
+bar_width: 10.000000
 item_slot: item_slot
 recipe_slot: recipe_slot
 tooltip_text_title: text_default

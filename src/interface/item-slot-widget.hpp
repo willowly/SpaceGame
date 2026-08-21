@@ -12,8 +12,7 @@ class ItemSlotWidget : public Widget {
         Sprite sprite;
         Sprite barSprite;
         Color color;
-        Font* font = nullptr;
-        TextWidget text;
+        TextWidget* textWidget;
         vec2 size = vec2(60);
 
         float barWidth = 6.0; // the bottom bar to (normally) show durability
@@ -50,35 +49,29 @@ class ItemSlotWidget : public Widget {
         // returns if mouse inside
         bool draw(DrawContext context,Rect rect,ItemStack& stack) {
 
-            drawEmpty(context,rect);
+            bool mouseInside = drawEmpty(context,rect);
             if(stack.item == nullptr || stack.amount == 0) {
                 return context.mouseInside(rect);
             }
             rect = Rect::anchored(Rect::centered(rect.size-padding),rect,vec2(0.5f,0.5f));
             context.drawRect(rect,stack.item->getIcon());
 
-            if(stack.amount > 1 && font != nullptr) {
-                float width = 12;
-                float ratio = 1.5;
-                float padding = 0.1f;
-
-                if(stack.amount > 1) {
-                    std::string str = std::to_string((int)stack.amount);
-
-                    vec2 position = vec2(0.0f);
-                    std::reverse(str.begin(),str.end());
-                    for(char c : str) {
-                        context.drawRect(Rect::anchored(Rect::withPivot(position,vec2(width,width*ratio),vec2(1,1)),rect,vec2(1,1)),font->getSprite(c));
-                        position.x -= width + padding;
-                        
-                    }
-                }
+            if(stack.amount > 1 && textWidget != nullptr) {
+                TextDisplaySettings settings;
+                settings.pivot = vec2(1,1);
+                textWidget->draw(context,rect.bottomRight(), std::to_string((int)stack.amount),settings);
+            } else {
+                Debug::warn("text is null (item slot)");
             }
 
             
             auto display = stack.item->getItemDisplay(stack);
             if(display.bar) {
                 context.drawRect(Rect(rect.position+vec2(0,rect.size.y-barWidth),vec2(rect.size.x*display.barPercent,barWidth)),barSprite,Color::red);
+            }
+
+            if(mouseInside) {
+                context.setTooltip(stack);
             }
 
             return context.mouseInside(rect);

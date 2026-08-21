@@ -17,6 +17,17 @@ class IInventory {
 
         float maxWeight = 0; // 0 disables max weight
 
+        ItemStack getFirstItem() {
+            for (size_t i = 0; i < size(); i++)
+            {
+                auto& stack = at(i);
+                if(stack.item != nullptr && stack.amount > 0) {
+                    return stack;
+                }
+            }
+            return {};
+        }
+
         std::vector<ItemStack*> getItems() {
             std::vector<ItemStack*> list;
             for (size_t i = 0; i < size(); i++)
@@ -205,7 +216,7 @@ class Inventory : public IInventory {
         }
 };
 
-class BlockInventory : public IInventory {
+class BlockInventoryInstance : public IInventory {
 
     BlockStorage& storage;
     int startIndex = 0;
@@ -234,7 +245,7 @@ class BlockInventory : public IInventory {
         }
 
     public:
-        BlockInventory(BlockStorage& storage,int startIndex,int sizeVar,float maxWeight = {}) : storage(storage), startIndex(startIndex), sizeVar(sizeVar), IInventory() {
+        BlockInventoryInstance(BlockStorage& storage,int startIndex,int sizeVar,float maxWeight = {}) : storage(storage), startIndex(startIndex), sizeVar(sizeVar), IInventory() {
             this->maxWeight = maxWeight; 
         }
 };
