@@ -7,6 +7,9 @@
 #include "material-object.hpp"
 
 struct LitMaterialData {
+    LitMaterialData() {}
+    LitMaterialData(TextureID texture) : texture(texture) {}
+    LitMaterialData(TextureID texture,vec4 color) : texture(texture), color(color) {}
     TextureID texture = 0;
     vec4 color = vec4(1);
 };

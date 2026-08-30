@@ -10,7 +10,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /bigobj /we4183 /we4715")
 endif()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -Wall -Wextra -Werror=return-type -pedantic -Wno-unused-parameter")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -Wall -Wextra -Werror=return-type -pedantic -Wno-unused-parameter -g -fsanitize=thread")
 endif()
 
 set(CMAKE_VERBOSE_MAKEFILE ON) 
@@ -110,6 +110,8 @@ set_property(TARGET Jolt PROPERTY
 
 target_compile_options(Jolt PRIVATE "-frtti")
 
+set(CMAKE_XCODE_ATTRIBUTE_DEBUG_INFORMATION_FORMAT "dwarf-with-dsym")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
 
 include_directories(src)
 
@@ -171,9 +173,9 @@ if(WIN32)
 link_directories(lib/win)
 endif()
 
- add_library(GameNetworkingSockets STATIC IMPORTED)
 
 if(WIN32)
+add_library(GameNetworkingSockets STATIC IMPORTED)
 set_target_properties(GameNetworkingSockets PROPERTIES
     IMPORTED_LOCATION "${CMAKE_CURRENT_LIST_DIR}/build/Debug/GameNetworkingSockets.lib"
 )
@@ -184,7 +186,9 @@ endif()
 target_include_directories(SpaceGame PUBLIC ${JoltPhysics_SOURCE_DIR})
 target_compile_features(SpaceGame PRIVATE cxx_std_23 )
 target_link_libraries(SpaceGame PUBLIC ${LINKED_LIBRARIES})
-target_link_libraries(SpaceGame PUBLIC GameNetworkingSockets)
+if(WIN32)
+    target_link_libraries(SpaceGame PUBLIC GameNetworkingSockets)
+endif()
 
 target_compile_features(SpaceGameApp PRIVATE cxx_std_23 )
 target_link_libraries(SpaceGameApp PUBLIC SpaceGame)

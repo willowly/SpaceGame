@@ -5,6 +5,8 @@
 #include "actor/character.hpp"
 #include "helper/block-helper.hpp"
 #include "block/display/model-block-display.hpp"
+#include "actor/terrain.hpp"
+#include "interface/block/block-widget.hpp"
 
 class DrillBlock : public Block {
     public:

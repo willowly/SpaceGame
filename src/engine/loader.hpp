@@ -34,7 +34,17 @@ class Loader {
         }
         
         void copyAssets() {
-            string path = "..\\..\\assets";
+
+            std::cout << std::filesystem::current_path() << std::endl;
+            
+            string path = "../../assets";
+            if(!std::filesystem::exists(path)) {
+                path = "../assets";
+            }
+            if(!std::filesystem::exists(path)) {
+                return;
+            }
+            
             auto source = std::filesystem::path(path);
             auto dest = std::filesystem::current_path().append("assets");
             if(std::filesystem::exists(path)) {

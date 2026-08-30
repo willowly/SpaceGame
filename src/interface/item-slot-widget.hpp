@@ -31,7 +31,7 @@ class ItemSlotWidget : public Widget {
         }
 
         bool drawEmpty(DrawContext context,vec2 position) {
-            drawEmpty(context,Rect(position,size));
+            return drawEmpty(context,Rect(position,size));
         }
 
         bool drawEmpty(DrawContext context,Rect rect) {

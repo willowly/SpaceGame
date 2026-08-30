@@ -9,6 +9,8 @@ struct TerrainMaterial {
 };
 
 struct TerrainType {
+    TerrainType() {};
+    TerrainType(string name,Item* item,TextureID texture) : name(name), item(item), texture(texture) {}
     string name;
     Item* item = {};
     TextureID texture = 0;

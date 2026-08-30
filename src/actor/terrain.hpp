@@ -2,6 +2,7 @@
 #pragma once
 #include "graphics/mesh.hpp"
 #include "actor/actor.hpp"
+#include "helper/string-helper.hpp"
 #include "helper/terrain-helper.hpp"
 #include "engine/debug.hpp"
 #include "SimplexNoise.h"
@@ -24,11 +25,15 @@ using glm::vec3, glm::ivec4,glm::vec4;
 
 #include "physics/jolt-conversions.hpp"
 
+#include "actor/item-actor.hpp"
+
 #include "persistance/actor/data-terrain.hpp"
 
 struct ChunkAddress {
     int layer = 0;
-    ivec3 pos;
+    ivec3 pos = {};
+    ChunkAddress() {};
+    ChunkAddress(int layer,ivec3 pos) : layer(layer),pos(pos) {}
 };
 
 
@@ -48,11 +53,11 @@ class Terrain : public Actor {
 
     std::shared_mutex chunksMtx;
 
+    bool renderChildren = false;
+
     std::atomic<int> lockType = 0;
 
-    int currentLODlayer = -1;
-    static const int LODlayers = 3;
-    static const int LODscaleFactor = 4;
+    static const int LODlayers = 2;
 
     std::shared_mutex loadedLayersMtx;
     std::array<bool,LODlayers> loadedLayers{};
@@ -70,28 +75,7 @@ class Terrain : public Actor {
     int selectedChunk = 0;
     // DEBUG
     
-    void setCurrentLOD(int layer) {
 
-        
-        if(layer < 0 || layer >= LODlayers) return;
-
-        if(currentLODlayer == -1) currentLODlayer = layer; //if we dont have a current layer, dont even check
-        
-        std::shared_lock lock(loadedLayersMtx,std::defer_lock);
-
-        if(!lock.try_lock()) return;
-        if(!loadedLayers[layer]) return;
-        currentLODlayer = layer;
-    }
-
-    void setNextLOD(int layer) {
-        if(layer < 0 || layer >= LODlayers) return;
-        nextLODlayer = layer;
-    }
-
-    void changeLOD(int change) {
-        setCurrentLOD(currentLODlayer + change);
-    }
 
     // adds a chunk to the terrain. Able to be called on loader thread
     void addChunk(ChunkAddress address) {
@@ -104,7 +88,7 @@ class Terrain : public Actor {
         LocationKey key(pos);
         ivec3 offset = pos*settings.chunkSize;
 
-        float newCellSize = settings.baseCellSize * powf(LODscaleFactor,layer);
+        float newCellSize = settings.baseCellSize * powf(TerrainChunk::LODscaleFactor,layer);
         
         TerrainChunk* chunk = nullptr;
 
@@ -165,9 +149,35 @@ class Terrain : public Actor {
         chunks.emplace(std::piecewise_construct,std::make_tuple(address.pos),std::make_tuple());
     }
 
+    void testNextChunkToLoad(ChunkAddress address,ChunkAddress& closest,float& closestDistance,vec3 cameraPosition,bool& chunkFound) {
+        auto& chunks = chunkLayers[address.layer];
+        if(!chunks.contains(address.pos)) {
+            vec3 center = TerrainChunk::getWorldCenter(position,address.pos,getChunkWorldSize(address.layer));
+            float dist = glm::length( - cameraPosition);
+            if(dist < closestDistance) {
+                closest = address;
+                chunkFound = true;
+            }
+            
+        } else {
+            if(address.layer != 0) {
+                for (int z = 0; z <= 1; z++)
+                {
+                    for (int y = 0; y <= 1; y++)
+                    {
+                        for (int x = 0; x <= 1; x++)
+                        {
+                            auto key = (address.pos * TerrainChunk::LODscaleFactor) + ivec3(x,y,z);
+                            testNextChunkToLoad(ChunkAddress(address.layer-1,key),closest,closestDistance,cameraPosition,chunkFound);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     std::optional<ChunkAddress> getNextChunkToload(vec3 cameraPosition) {
         ZoneScoped
-        assert(currentLODlayer >= 0 && currentLODlayer < LODlayers);
 
         //std::cout << "terrain at " << StringHelper::toString(position) << std::endl;
         vec3 cameraPositionRelative = inverseTransformPoint(cameraPosition);
@@ -192,52 +202,36 @@ class Terrain : public Actor {
             // }
         }
 
-        int layerToLoad = currentLODlayer;
-        {
-            std::shared_lock lock(loadedLayersMtx);
-            if(loadedLayers.at(layerToLoad)) {
-                layerToLoad = nextLODlayer;
-            }
+        int topLayer = chunkLayers.size()-1;
         
-        }
-        
-        int size = getChunkGridSize(layerToLoad);
+        int size = getChunkGridSize(topLayer);
         bool chunkFound = false;
         float closestChunkDist = std::numeric_limits<float>::max();
-        ivec3 closestChunkPos = {};
-        auto& chunks = chunkLayers[layerToLoad];
+        ChunkAddress closestChunkAddress = {};
+        auto& chunks = chunkLayers[topLayer];
         // generate one extra
-        for (int z = -size; z <= size; z++)
+        for (int z = -size; z < size; z++)
         {
-            for (int y = -size; y <= size; y++)
+            for (int y = -size; y < size; y++)
             {
-                for (int x = -size; x <= size; x++)
+                for (int x = -size; x < size; x++)
                 {
                     ivec3 chunkPos = ivec3(x,y,z);
                     LocationKey key(chunkPos);
                     std::shared_lock lock(chunksMtx);
                     lockType = 1;
-                    if(!chunks.contains(key)) {
-                        float dist = glm::length(vec3(x,y,z) - cameraPositionChunk);
-                        if(dist < closestChunkDist) {
-                            closestChunkPos = chunkPos;
-                            closestChunkDist = dist;
-                            chunkFound = true;
-                        }
-                        
-                    }
-                   
+                    testNextChunkToLoad(ChunkAddress(topLayer,chunkPos),closestChunkAddress,closestChunkDist,cameraPosition,chunkFound);
                 }
             }
         }
 
         if(!chunkFound) {
             std::lock_guard lock(loadedLayersMtx);
-            loadedLayers.at(layerToLoad) = true;
+            loadedLayers.at(topLayer) = true;
             return std::nullopt;
         }
 
-        return ChunkAddress{layerToLoad,closestChunkPos};
+        return closestChunkAddress;
         
     }
     // how big the overall grid of chunks is
@@ -249,7 +243,7 @@ class Terrain : public Actor {
     }
 
     float getChunkWorldSize(int layer) {
-        return getChunkWorldSizeBase() * pow(LODscaleFactor,layer);
+        return getChunkWorldSizeBase() * pow(TerrainChunk::LODscaleFactor,layer);
     }
 
     float getChunkWorldSizeBase() {
@@ -290,7 +284,7 @@ class Terrain : public Actor {
         return array;
     }
 
-    
+
     void connect(TerrainChunk& chunk,ChunkAddress address) {
 
         std::vector<TerrainChunk*> chunksSurrounding; 
@@ -302,8 +296,34 @@ class Terrain : public Actor {
 
         {
             std::shared_lock lock(chunksMtx);
+
+            
             lockType = 301;
             auto& chunks = chunkLayers[layer];
+            // if(layer > 0) { //if not smallest layer
+            //     auto& smallerLayer = chunkLayers[layer-1];
+            //     for (int x = 0;x < TerrainChunk::LODscaleFactor;x++) {
+            //         for (int y = 0;y < TerrainChunk::LODscaleFactor;y++) {
+            //             for (int z = 0;z < TerrainChunk::LODscaleFactor;z++) {
+            //                 ivec3 childPos = ivec3(x,y,z);
+            //                 ivec3 smallerPos = pos *= TerrainChunk::LODscaleFactor;
+            //                 smallerPos += childPos;
+            //                 if(smallerLayer.contains(smallerPos) && !smallerLayer.at(smallerPos).isPlaceHolder) {
+            //                     chunk.setChild(&smallerLayer.at(smallerPos),childPos);
+            //                 }
+            //             }
+            //         }
+            //     }
+            // }
+            if(layer+1 < LODlayers) { // if not largest layer
+                auto& largerLayer = chunkLayers[layer+1];
+                ivec3 largerPos = pos / TerrainChunk::LODscaleFactor;
+                if(largerLayer.contains(largerPos) && !largerLayer.at(largerPos).isPlaceHolder) {
+                    ivec3 childPos = MathHelper::mod(pos,TerrainChunk::LODscaleFactor);
+                    std::cout << "childPos: " << StringHelper::toString(childPos) << std::endl;
+                    largerLayer.at(largerPos).setChild(&chunk, childPos);
+                }
+            }
             LocationKey keyPosX(pos+ivec3(1,0,0));
             if(chunks.contains(keyPosX) && !chunks.at(keyPosX).isPlaceHolder) {
                 chunk.connectPosX(&chunks.at(keyPosX));
@@ -384,33 +404,17 @@ class Terrain : public Actor {
     }
 
     void updateLOD(World* world) {
-        float distance = glm::length(world->getCamera().position - position);
+        //float distance = glm::length(world->getCamera().position - position);
+        auto& chunks = chunkLayers.back();
 
-        setCurrentLODBasedOnDistance(distance);
-    }
-    
-
-    void setCurrentLODBasedOnDistance(float distance) {
-        for (int i = 0; i < LODlayers; i++)
-        {
-            if(distance < settings.LODdistance * pow(settings.LODdistanceFactor,i)) {
-                setCurrentLOD(i);
-                if(currentLODlayer == 0) {
-                    nextLODlayer = 1;
-                } else if (currentLODlayer == LODlayers - 1) {
-                    nextLODlayer = currentLODlayer - 1;
-                } else {
-                    if (distance < settings.LODdistance * pow(settings.LODdistanceFactor,i-0.5f)) {
-                        nextLODlayer = currentLODlayer - 1;
-                    } else {
-                        nextLODlayer = currentLODlayer + 1;
-                    }
-                }
-                return;
-            }
+        for(auto& pair : chunks) {
+            auto& chunk = pair.second;
+            chunk.updateLOD(position,world->getCamera().position,chunkLayers.size() - 1,settings.LODdistance);
         }
-        setCurrentLOD(LODlayers - 1); //fallback option
+
+        //setCurrentLODBasedOnDistance(distance);
     }
+
 
     void regenerateChunkQueue() {
         std::lock_guard lock(chunksMtx);
@@ -496,7 +500,9 @@ class Terrain : public Actor {
         if(time > 0.1f) {
             Debug::warn(" render thread blocked for " + std::to_string((int)(time*1000)) + "ms lock type:" + std::to_string(lockType));
         }
-        auto& chunks = chunkLayers[currentLODlayer];
+
+        // start at lowest level
+        auto& chunks = chunkLayers.back();
 
         for(auto& pair : chunks) {
             auto& chunk = pair.second;

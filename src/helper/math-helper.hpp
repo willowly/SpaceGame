@@ -3,7 +3,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <algorithm>
 
-using glm::vec3;
+using glm::vec3,glm::ivec3;
 
 #define _USE_MATH_DEFINES // need this for constants (M_E)
 #include <cmath> // for constants
@@ -66,10 +66,26 @@ namespace MathHelper {
         return (a2b*onLine) + a;
     }
 
-    // returns the acceleration
-    inline float accelerateTo(float current,float target,float velocity,float maxAcceleration,float dt) {
-        
+    inline ivec3 mod(ivec3 a,ivec3 b) {
+        return ivec3(
+            a.x - (b.x * floor((float)a.x/b.x)),
+            a.y - (b.y * floor((float)a.y/b.y)),
+            a.z - (b.z * floor((float)a.z/b.z))
+        );
     }
+
+    inline ivec3 mod(ivec3 a,int b) {
+        return ivec3(
+            a.x - (b * floor((float)a.x/b)),
+            a.y - (b * floor((float)a.y/b)),
+            a.z - (b * floor((float)a.z/b))
+        );
+    }
+
+    // returns the acceleration
+    // inline float accelerateTo(float current,float target,float velocity,float maxAcceleration,float dt) {
+        
+    // }
 
     // inline float smoothDamp(float current,float target,float& velocity,float smoothTime,float dt) {
     //     auto w = 2 / smoothTime;

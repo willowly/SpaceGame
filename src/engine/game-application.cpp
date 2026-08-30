@@ -86,14 +86,14 @@ void GameApplication::setup() {
     auto settings = registry.getPtr<TerrainSettings>("asteroid");
     settings->name = "asteroid";
     settings->generationSettings.noiseScale = 1;
-    settings->generationSettings.radius = 150;
+    settings->generationSettings.radius = 30;
     settings->generationSettings.noiseFactor = 15;
     settings->generationSettings.noiseOctaves = 5;
     settings->generationSettings.noiseGain = 0.3f;
     settings->generationSettings.noiseLacunarity = 2.5f;
     settings->generationSettings.stoneType = registry.getPtr<TerrainType>("stone");
     settings->generationSettings.oreType = registry.getPtr<TerrainType>("tin_ore");
-    settings->LODdistance = 10;
+    settings->LODdistance = 30;
     settings->gravity = 9;
     
     

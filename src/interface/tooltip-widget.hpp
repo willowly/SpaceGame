@@ -18,6 +18,8 @@ class TooltipWidget : public Widget {
         float padding = 3;
         float spacing = 2;
         float margin = 3;
+
+        
        
     
         // returns if mouse inside
@@ -29,30 +31,32 @@ class TooltipWidget : public Widget {
             }
 
             std::vector<string> lines;
+
+            static_assert(__cplusplus>202001);
             
 
-            const auto visitor = overloads {
-                [] (std::monostate m) {
-                },
-                [&] (ItemStack stack) {
-                    if(stack.isEmpty()) return;
-                    lines.push_back(stack.item->displayName);
-                },
-                [&] (Recipe* recipe) {
-                    if(recipe == nullptr) return;
-                    lines.push_back("CRAFT " + recipe->result.item->displayName);
-                    for(auto ingredient : recipe->ingredients) {
-                        if(ingredient.isEmpty()) continue;
-                        lines.push_back(std::format(" - x{} {}",ingredient.amount,ingredient.item->displayName));
-                    }
-                }
-            };
+            // const auto visitor = overloads {
+            //     [] (std::monostate m) {
+            //     },
+            //     [&] (ItemStack stack) {
+            //         if(stack.isEmpty()) return;
+            //         lines.push_back(stack.item->displayName);
+            //     },
+            //     [&] (Recipe* recipe) {
+            //         if(recipe == nullptr) return;
+            //         lines.push_back("CRAFT " + recipe->result.item->displayName);
+            //         for(auto ingredient : recipe->ingredients) {
+            //             if(ingredient.isEmpty()) continue;
+            //             lines.push_back(std::format(" - x{} {}",ingredient.amount,ingredient.item->displayName));
+            //         }
+            //     }
+            // };
 
             
 
             
 
-            std::visit(visitor,target);
+            // std::visit(visitor,target);
 
             
 

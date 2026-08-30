@@ -1,8 +1,10 @@
+#include "helper/random.hpp"
 #include "helper/terrain-helper.hpp"
 #include "graphics/mesh.hpp"
 #include <shared_mutex>
 #include <vector>
 #include "glm/glm.hpp"
+#include "item/item-stack.hpp"
 #include "item/item.hpp"
 #include "SimplexNoise.h"
 #include "terrain/terrain-structs.hpp"
@@ -26,6 +28,11 @@
 
 class TerrainChunk {
 
+    public:
+        static const int LODscaleFactor = 2;
+
+    private:
+
     ivec3 offset = {}; //offset in overall terrain cell-space
 
     std::vector<VoxelData> terrainData;
@@ -43,10 +50,13 @@ class TerrainChunk {
     int size = 30;
     float cellSize = 0.5f;
 
+   
+
     unsigned int seed = 0;
 
     std::shared_timed_mutex mtx;
     std::atomic<bool> readyToRender = false;
+    std::atomic<bool> childrenReadyToRender = false;
 
     JPH::Body* body = nullptr;
 
@@ -136,9 +146,13 @@ class TerrainChunk {
     TerrainChunk* posZ = nullptr;
     TerrainChunk* posY = nullptr;
 
+    std::array<TerrainChunk*,LODscaleFactor*LODscaleFactor*LODscaleFactor> children;
+
 
 
     public:
+
+        bool renderChildren;
 
         std::atomic<bool> isPlaceHolder = false;
 
@@ -166,16 +180,24 @@ class TerrainChunk {
             return false;
         }
 
-        TerrainChunk() : isPlaceHolder(true) {
+        void updateLOD(vec3 terrainPosition,vec3 cameraPosition,int lODLayer,float LODDistance) {
+            if(isPlaceHolder) return;
+            vec3 center = getWorldCenter(terrainPosition);
+            if(lODLayer == 0 || glm::distance(center,cameraPosition) > LODDistance * pow(LODscaleFactor,lODLayer)) {
+                renderChildren = false;
+                Debug::drawCube(center,getWorldSize(),glm::identity<quat>(),Color(0,1,(lODLayer*0.2f)));
+            } else {
+                renderChildren = true;
+                if(lODLayer == 0) return;
+                for (auto child : children) {
+                    if(child == nullptr) continue;
+                    child->updateLOD(terrainPosition, cameraPosition, lODLayer-1, LODDistance/LODscaleFactor);
+                }
+                //Debug::drawCube(chunk.getWorldCenter(position),chunk.getWorldSize(),glm::identity<quat>(),Color::red);
+            }
         }
 
-        TerrainChunk(ivec3 offset,int chunkSize,float cellSize,unsigned int id,unsigned int seed) : offset(offset), size(chunkSize), cellSize(cellSize), id(id), seed(seed) {
-
-            for (auto& buffer : meshBuffer)
-            {
-                buffer.buffer = VK_NULL_HANDLE;
-            }
-            
+        TerrainChunk() : isPlaceHolder(true) {
         }
 
         // turns a placeholder into a chunk that can be generated and stuff
@@ -185,6 +207,8 @@ class TerrainChunk {
             if(!lock.try_lock_for(std::chrono::seconds(3))) {
                 throw std::runtime_error("timeout");
             }
+
+            children.fill({});
 
             isPlaceHolder = false;
             this->offset = offset;
@@ -284,6 +308,18 @@ class TerrainChunk {
                     }
                 }
             }
+        }
+
+        static vec3 getWorldCenter(vec3 terrainPosition,ivec3 pos,float worldSize) {
+            return terrainPosition + ((vec3)pos + vec3(0.5f)) * worldSize;
+        }
+
+        vec3 getWorldCenter(vec3 terrainPosition) {
+            return terrainPosition + (vec3)offset * cellSize + getWorldSize() * 0.5f;
+        }
+
+        vec3 getWorldSize() {
+            return vec3(size*cellSize);
         }
 
         //position is in terrain space
@@ -427,6 +463,15 @@ class TerrainChunk {
 
         void addRenderables(Vulkan* vulkan,float dt,vec3 position,Material material) {
             if(!readyToRender) return;
+
+            if(renderChildren && childrenReadyToRender) {
+                for (auto child : children) {
+                    assert(child != nullptr);
+                    child->addRenderables(vulkan, dt, position, material);
+                
+                }
+                return;
+            }
             std::shared_lock lock(mtx,std::defer_lock);
             
             if(lock.try_lock()) {
@@ -539,7 +584,7 @@ class TerrainChunk {
 
             //consolodate normals
             std::vector<TerrainVertex> newVertices;
-            unordered_map<vec3,std::vector<TerrainVertex*>> vertexMap;
+            std::unordered_map<vec3,std::vector<TerrainVertex*>> vertexMap;
             for(auto& i : meshData.indices) {
                 auto& vertex = meshData.vertices[i];
                 if(!vertexMap.contains(vertex.pos)) {
@@ -702,6 +747,27 @@ class TerrainChunk {
                 meshOutOfDate = true;
                 //generateMesh();
             }
+        }
+
+        int getChildIndex(ivec3 pos) {
+            return pos.x + (pos.y * LODscaleFactor) + (pos.z * LODscaleFactor * LODscaleFactor);
+        }
+
+        void setChild(TerrainChunk* chunk,ivec3 pos) {
+
+            std::unique_lock lock(mtx);
+
+            int index = getChildIndex(pos);
+            assert(index >= 0 && index < children.size());
+            children[index] = chunk;
+            childrenReadyToRender = allChildrenReady();
+        }
+
+        bool allChildrenReady() {
+            for (auto child : children) {
+                if(child == nullptr) return false;
+            }
+            return true;
         }
 
         vec3 getEdgePos(int index,float t) {

@@ -2,6 +2,7 @@
 #include "type-info.hpp"
 
 #include <iostream>
+#include "engine/registry.hpp"
 
 class AssetSerializer {
 
@@ -135,6 +136,11 @@ class AssetSerializer {
     }
 
     struct SerializationNode {
+
+        SerializationNode() : value("") {}
+        SerializationNode(string str) : value(str) {}
+        SerializationNode(map<string,SerializationNode> map) : value(map) {}
+
         std::variant<string,map<string,SerializationNode>> value;
 
         string getValue() {

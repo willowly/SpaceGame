@@ -77,16 +77,19 @@ class ParticleEffect {
                 Debug::warn("particle count not high enough!");
             }
 
+            //TODO break this into functions
+            vec3 spherePos;
+            vec2 circlePos;
             //vec3 spawnPosRelative = 
             switch(settings->emitterShape) {
                 case EmitterShape::Sphere:
                     
-                    vec3 spherePos = glm::sphericalRand(1.0f);
+                    spherePos = glm::sphericalRand(1.0f);
                     newParticle.pos = (glm::linearRand(0.0f,settings->emitterRadius) * spherePos) + position;
                     newParticle.velocity = spherePos;
                     break;
                 case EmitterShape::Cone:
-                    vec2 circlePos = glm::circularRand(1.0f);
+                    circlePos = glm::circularRand(1.0f);
                     circlePos *= glm::linearRand(0.0f,settings->emitterRadius);
                     newParticle.pos = (rotation * vec3(circlePos.x,circlePos.y,0)) + position;
                     newParticle.velocity = rotation * vec3(0,0,1);

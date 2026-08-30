@@ -144,6 +144,7 @@ class TerrainLoader {
                 auto pair = (terrainJobs.at(jobIndex).tryGetJob());
                 auto terrain = world->getActor<Terrain>(pair.first);
                 if(terrain != nullptr) {
+                    std::cout << "loading chunk at" << StringHelper::toString(pair.second.pos) << " layer " << pair.second.layer << std::endl; 
                     terrain->addChunk(pair.second);
                     terrainJobs.at(jobIndex).finishJob();
                     //std::cout << std::this_thread::get_id() << "WORKER: done job" << jobIndex << std::endl;
@@ -206,6 +207,8 @@ class TerrainLoader {
             if(allowedWorkerThreads > 8) {
                 allowedWorkerThreads = 8;
             }
+
+            allowedWorkerThreads = 1;
 
             stopSignal = false;
             mainThread = std::thread(&TerrainLoader::mainTask,this);
