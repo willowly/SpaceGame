@@ -32,7 +32,7 @@ class TooltipWidget : public Widget {
 
             std::vector<string> lines;
 
-            static_assert(__cplusplus>202001);
+            // static_assert(__cplusplus>202001);
             
 
             // const auto visitor = overloads {

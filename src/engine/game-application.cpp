@@ -16,7 +16,7 @@ void GameApplication::spawnAsteroidScene()  {
 
     std::minstd_rand rnd;
 
-    rnd.seed(0);
+    rnd.seed(1);
 
     auto settings = registry.getPtr<TerrainSettings>("asteroid");
 
@@ -390,7 +390,7 @@ void GameApplication::loop() {
 
     input.clearInputBuffers();
 
-    //FrameMark;
+    FrameMark;
     
 
 }

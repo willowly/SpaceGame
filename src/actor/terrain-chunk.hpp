@@ -185,7 +185,8 @@ class TerrainChunk {
             vec3 center = getWorldCenter(terrainPosition);
             if(lODLayer == 0 || glm::distance(center,cameraPosition) > LODDistance * pow(LODscaleFactor,lODLayer)) {
                 renderChildren = false;
-                Debug::drawCube(center,getWorldSize(),glm::identity<quat>(),Color(0,1,(lODLayer*0.2f)));
+                //Debug::drawCube(center,getWorldSize(),glm::identity<quat>(),Color(0,1,(lODLayer*0.2f)),0.02f);
+                //Debug::drawCube(terrainPosition+(vec3)offset * cellSize,vec3(1.0f),glm::identity<quat>(),Color(0,1,(lODLayer*0.2f)),0.02f);
             } else {
                 renderChildren = true;
                 if(lODLayer == 0) return;
@@ -193,7 +194,7 @@ class TerrainChunk {
                     if(child == nullptr) continue;
                     child->updateLOD(terrainPosition, cameraPosition, lODLayer-1, LODDistance/LODscaleFactor);
                 }
-                //Debug::drawCube(chunk.getWorldCenter(position),chunk.getWorldSize(),glm::identity<quat>(),Color::red);
+                // Debug::drawCube(center,getWorldSize(),glm::identity<quat>(),Color::red);
             }
         }
 
@@ -564,8 +565,8 @@ class TerrainChunk {
             }
 
             
-
-            smoothNormals();
+            randomizeNormals();
+            //smoothNormals();
             
             //std::cout << "chunk ready to render " << std::endl;
             readyToRender = true;
@@ -577,6 +578,20 @@ class TerrainChunk {
         void generateEdges() {
             std::scoped_lock lock(mtx);
 
+            
+        }
+
+        void randomizeNormals() {
+            std::minstd_rand rnd;
+
+            rnd.seed(seed);
+            for (size_t i = 2; i < meshData.vertices.size(); i += 3)
+            {
+                vec3 n = vec3(rnd()/(float)rnd.max(),rnd()/(float)rnd.max(),rnd()/(float)rnd.max());
+                meshData.vertices[i].normal = n;
+                meshData.vertices[i-1].normal = n;
+                meshData.vertices[i-2].normal = n;
+            }
             
         }
 

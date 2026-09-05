@@ -42,7 +42,7 @@ class Terrain : public Actor {
     
 
     Terrain() : Actor() {
-        chunkLayers =  std::vector<std::map<LocationKey,TerrainChunk>>(LODlayers);
+        
     }
 
     GravityWell gravityWell;
@@ -57,10 +57,9 @@ class Terrain : public Actor {
 
     std::atomic<int> lockType = 0;
 
-    static const int LODlayers = 2;
 
     std::shared_mutex loadedLayersMtx;
-    std::array<bool,LODlayers> loadedLayers{};
+    //std::array<bool,LODlayers> loadedLayers{};
     int nextLODlayer = 0; // the one that should be loaded next
 
     unsigned int seed = 0;
@@ -83,7 +82,7 @@ class Terrain : public Actor {
         int layer = address.layer;
         ivec3 pos = address.pos;
 
-        assert(layer >= 0 && layer < LODlayers);
+        assert(layer >= 0 && layer < settings.LODlayers);
         
         LocationKey key(pos);
         ivec3 offset = pos*settings.chunkSize;
@@ -151,16 +150,17 @@ class Terrain : public Actor {
 
     void testNextChunkToLoad(ChunkAddress address,ChunkAddress& closest,float& closestDistance,vec3 cameraPosition,bool& chunkFound) {
         auto& chunks = chunkLayers[address.layer];
+        float size = getChunkWorldSize(address.layer);
+        vec3 center = TerrainChunk::getWorldCenter(position,address.pos,size);
+        float dist = glm::length(center - cameraPosition) - size/2;
         if(!chunks.contains(address.pos)) {
-            vec3 center = TerrainChunk::getWorldCenter(position,address.pos,getChunkWorldSize(address.layer));
-            float dist = glm::length( - cameraPosition);
             if(dist < closestDistance) {
+                closestDistance = dist;
                 closest = address;
                 chunkFound = true;
             }
-            
         } else {
-            if(address.layer != 0) {
+            if(address.layer != 0 && dist < settings.LODdistance * address.layer) {
                 for (int z = 0; z <= 1; z++)
                 {
                     for (int y = 0; y <= 1; y++)
@@ -227,7 +227,7 @@ class Terrain : public Actor {
 
         if(!chunkFound) {
             std::lock_guard lock(loadedLayersMtx);
-            loadedLayers.at(topLayer) = true;
+            //loadedLayers.at(topLayer) = true;
             return std::nullopt;
         }
 
@@ -238,7 +238,7 @@ class Terrain : public Actor {
     // range of valid coordinates is (-size,size). 0 means 1 single chunk
     int getChunkGridSize(int layer) {
         int chunkSize = getChunkWorldSize(layer);
-        float extent = std::ceilf(settings.generationSettings.radius/chunkSize);
+        float extent = std::ceilf(1.2f*settings.generationSettings.radius/chunkSize);
         return extent;
     }
 
@@ -315,12 +315,14 @@ class Terrain : public Actor {
             //         }
             //     }
             // }
-            if(layer+1 < LODlayers) { // if not largest layer
+            if(layer+1 < settings.LODlayers) { // if not largest layer
                 auto& largerLayer = chunkLayers[layer+1];
-                ivec3 largerPos = pos / TerrainChunk::LODscaleFactor;
+                vec3 largerPosUnrounded = (vec3)pos / (float)TerrainChunk::LODscaleFactor;
+
+                ivec3 largerPos = glm::floor(largerPosUnrounded);
                 if(largerLayer.contains(largerPos) && !largerLayer.at(largerPos).isPlaceHolder) {
                     ivec3 childPos = MathHelper::mod(pos,TerrainChunk::LODscaleFactor);
-                    std::cout << "childPos: " << StringHelper::toString(childPos) << std::endl;
+                    //std::cout << "childPos: " << StringHelper::toString(childPos) << std::endl;
                     largerLayer.at(largerPos).setChild(&chunk, childPos);
                 }
             }
@@ -404,6 +406,7 @@ class Terrain : public Actor {
     }
 
     void updateLOD(World* world) {
+        std::shared_lock lock(chunksMtx);
         //float distance = glm::length(world->getCamera().position - position);
         auto& chunks = chunkLayers.back();
 
@@ -417,6 +420,7 @@ class Terrain : public Actor {
 
 
     void regenerateChunkQueue() {
+        if(chunksToRegenerate.size() == 0) return;
         std::lock_guard lock(chunksMtx);
         lockType = 4;
         for(int i = 0;i < chunksToRegenerate.size();i++) {
@@ -526,6 +530,7 @@ class Terrain : public Actor {
         ptr->settings = settings; 
         ptr->position = position;
         ptr->gravityWell = GravityWell(position,settings.gravity,settings.generationSettings.radius);
+        ptr->chunkLayers = std::vector<std::map<LocationKey,TerrainChunk>>(settings.LODlayers);
         return std::unique_ptr<Terrain>(ptr);
     }
 

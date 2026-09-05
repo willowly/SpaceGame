@@ -198,17 +198,15 @@ class TerrainLoader {
 
             int allowedThreads = std::thread::hardware_concurrency();
             std::cout << allowedThreads << " threads are allowed" << std::endl;
-            int allowedWorkerThreads = allowedThreads - 1;
+            int allowedWorkerThreads = allowedThreads / 2;
 
             if(allowedWorkerThreads <= 0) {
                 throw std::runtime_error("not enough threads " + std::to_string(allowedThreads));
             }
 
-            if(allowedWorkerThreads > 8) {
-                allowedWorkerThreads = 8;
+            if(allowedWorkerThreads > 16) {
+                allowedWorkerThreads = 16;
             }
-
-            allowedWorkerThreads = 1;
 
             stopSignal = false;
             mainThread = std::thread(&TerrainLoader::mainTask,this);
