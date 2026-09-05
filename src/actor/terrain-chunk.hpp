@@ -183,7 +183,7 @@ class TerrainChunk {
         void updateLOD(vec3 terrainPosition,vec3 cameraPosition,int lODLayer,float LODDistance) {
             if(isPlaceHolder) return;
             vec3 center = getWorldCenter(terrainPosition);
-            if(lODLayer == 0 || glm::distance(center,cameraPosition) > LODDistance * pow(LODscaleFactor,lODLayer)) {
+            if(lODLayer == 0 || glm::distance(center,cameraPosition) > LODDistance * cellSize) {
                 renderChildren = false;
                 //Debug::drawCube(center,getWorldSize(),glm::identity<quat>(),Color(0,1,(lODLayer*0.2f)),0.02f);
                 //Debug::drawCube(terrainPosition+(vec3)offset * cellSize,vec3(1.0f),glm::identity<quat>(),Color(0,1,(lODLayer*0.2f)),0.02f);
@@ -192,7 +192,7 @@ class TerrainChunk {
                 if(lODLayer == 0) return;
                 for (auto child : children) {
                     if(child == nullptr) continue;
-                    child->updateLOD(terrainPosition, cameraPosition, lODLayer-1, LODDistance/LODscaleFactor);
+                    child->updateLOD(terrainPosition, cameraPosition, lODLayer-1, LODDistance);
                 }
                 // Debug::drawCube(center,getWorldSize(),glm::identity<quat>(),Color::red);
             }
@@ -465,8 +465,9 @@ class TerrainChunk {
         void addRenderables(Vulkan* vulkan,float dt,vec3 position,Material material) {
             if(!readyToRender) return;
 
-            if(renderChildren && childrenReadyToRender) {
+            if(renderChildren) {
                 for (auto child : children) {
+                    if(child == nullptr) continue;
                     assert(child != nullptr);
                     child->addRenderables(vulkan, dt, position, material);
                 
@@ -565,8 +566,8 @@ class TerrainChunk {
             }
 
             
-            randomizeNormals();
-            //smoothNormals();
+            //randomizeNormals();
+            smoothNormals();
             
             //std::cout << "chunk ready to render " << std::endl;
             readyToRender = true;

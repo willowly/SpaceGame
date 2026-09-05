@@ -165,7 +165,7 @@ class Vulkan {
 
         struct DirectionalLight {
             vec3 direction = vec3(0.5f,-1.0f,0.3f);
-            Color color = Color(3,3,3);
+            Color color = Color(2,2,2);
         } mainLight;
 
         Color ambientLight = Color(0.1f,0.1f,0.1f);

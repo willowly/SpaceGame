@@ -43,8 +43,8 @@ void main() {
 
     albedo = albedo * toLinear(material.color.rgb);
     vec3 result = simpleLitShadow(albedo,normal,lightSpacePosition);
-    //outColor = vec4(result.xyz, 1.0);
-    outColor = vec4(normal,1.0);
+    outColor = vec4(result.xyz, 1.0);
+    //outColor = vec4(normal,1.0);
     
     //outColor = vec4(texCoord,0,0);
 

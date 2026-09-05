@@ -78,6 +78,7 @@ void GameApplication::setup() {
     //IMGUI FONT SETUp
     //ImGui::PushFont(defaultFont, 14.0f);
 
+    registry.addAny<TerrainType>("sand",TerrainType("sand",registry.getItem("sand"),registry.getTexture("sand")));
     registry.addAny<TerrainType>("stone",TerrainType("stone",registry.getItem("stone"),registry.getTexture("rock")));
     registry.addAny<TerrainType>("tin_ore",TerrainType("tin_ore",registry.getItem("tin_ore"),registry.getTexture("tin_ore")));
     
@@ -86,14 +87,15 @@ void GameApplication::setup() {
     auto settings = registry.getPtr<TerrainSettings>("asteroid");
     settings->name = "asteroid";
     settings->generationSettings.noiseScale = 1;
-    settings->generationSettings.radius = 30;
+    settings->generationSettings.radius = 500;
     settings->generationSettings.noiseFactor = 15;
     settings->generationSettings.noiseOctaves = 5;
     settings->generationSettings.noiseGain = 0.3f;
     settings->generationSettings.noiseLacunarity = 2.5f;
-    settings->generationSettings.stoneType = registry.getPtr<TerrainType>("stone");
+    settings->generationSettings.stoneType = registry.getPtr<TerrainType>("sand");
     settings->generationSettings.oreType = registry.getPtr<TerrainType>("tin_ore");
     settings->LODdistance = 30;
+    settings->LODlayers = 6;
     settings->gravity = 9;
     
     
