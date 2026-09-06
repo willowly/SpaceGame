@@ -94,7 +94,7 @@ void GameApplication::setup() {
     settings->generationSettings.noiseLacunarity = 2.5f;
     settings->generationSettings.stoneType = registry.getPtr<TerrainType>("sand");
     settings->generationSettings.oreType = registry.getPtr<TerrainType>("tin_ore");
-    settings->LODdistance = 30;
+    settings->LODdistance = 50;
     settings->LODlayers = 6;
     settings->gravity = 9;
     
