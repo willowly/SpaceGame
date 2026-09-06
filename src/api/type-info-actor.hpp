@@ -47,6 +47,8 @@ namespace TypeInfoLoader {
         terrainSettings->addConstProperty("base_cell_size",&TerrainSettings::baseCellSize);
         terrainSettings->addConstProperty("lod_distance",&TerrainSettings::LODdistance);
         terrainSettings->addConstProperty("lod_distance_factor",&TerrainSettings::LODdistanceFactor);
+        terrainSettings->addConstProperty("debris_mesh",&TerrainSettings::debrisMesh);
+        terrainSettings->addConstProperty("debris_material",&TerrainSettings::debrisMaterial);
 
         auto generationSettings = registry.addTypeInfo<GenerationSettings>("generation_settings");
 
@@ -58,6 +60,8 @@ namespace TypeInfoLoader {
         generationSettings->addConstProperty("noise_lacunarity",&GenerationSettings::noiseLacunarity);
         generationSettings->addConstProperty("stone_type",&GenerationSettings::stoneType); 
         generationSettings->addConstProperty("ore_type",&GenerationSettings::oreType); 
+        generationSettings->addConstProperty("debris_chance",&GenerationSettings::debrisChance);
+        generationSettings->addConstProperty("debris_size",&GenerationSettings::debrisSize);
         
        
 

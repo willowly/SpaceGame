@@ -1,7 +1,7 @@
 type: resource_item
-display_name: Sand
+display_name: Stone
 default_sprite: 
-  texture: sand_item
+  texture: stone_item
   rect: 
     position: 
       x: 0.000000
@@ -12,3 +12,4 @@ default_sprite:
 default_model: item_ore
 default_material: stone
 default_model_scale: 0.300000
+default_weight: 1.000000

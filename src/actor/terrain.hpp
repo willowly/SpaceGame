@@ -100,7 +100,7 @@ class Terrain : public Actor {
                 std::cout << std::this_thread::get_id() << "chunk not available" << std::endl;
                 return;
             }
-            chunks.at(key).create(offset,settings.chunkSize,newCellSize,nextChunkId,seed);
+            chunks.at(key).create(offset,settings.chunkSize,newCellSize,nextChunkId,seed,settings);
             //std::cout << std::this_thread::get_id() << "adding chunk " << std::endl;
             chunk = &chunks.at(key);
         }
@@ -108,6 +108,8 @@ class Terrain : public Actor {
         assert(chunk != nullptr);
 
         nextChunkId++;
+
+        
 
         chunk->generateData(settings.generationSettings,address.layer);
         //chunk.generateMesh();

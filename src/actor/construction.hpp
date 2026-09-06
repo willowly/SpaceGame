@@ -294,6 +294,8 @@ public:
             }
         }
 
+        //drawTrajectory(world);
+
         body.applyGravity(world, position, dt);
 
         if (turnControl.x < 0.01)
@@ -325,6 +327,23 @@ public:
         angularVelocity += accumulatedTorque * dt;
         body.setAngularVelocity(angularVelocity);
     }
+
+    void drawTrajectory(World* world,int steps = 500,int subSteps = 60,float stepSize = 1.0f) {
+        vec3 position = this->position;
+        vec3 velocity = getVelocity();
+        for (size_t i = 0; i < steps; i++)
+        {
+            vec3 lastPosition = position;
+            for (size_t i = 0; i < subSteps; i++)
+            {
+                position += velocity * stepSize/(float)subSteps;
+                velocity += world->getGravityVector(position) * stepSize/(float)subSteps;
+            }
+            Debug::drawLine(lastPosition,position,Color::cyan,0.02f);
+        }
+        
+
+    } 
 
     // maybe we should accululate force and apply it prephysics :shrug:
     void applyForce(vec3 force)

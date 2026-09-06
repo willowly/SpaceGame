@@ -11,8 +11,8 @@ void GameApplication::spawnPlayer(vec3 pos) {
     }
 }
 
-void GameApplication::spawnAsteroidScene()  {
-    spawnPlayer(vec3(0,10,0));
+void GameApplication::spawnPlanetScene()  {
+    spawnPlayer(vec3(0,1000,1000));
 
     std::minstd_rand rnd;
 
@@ -96,7 +96,9 @@ void GameApplication::setup() {
     settings->generationSettings.oreType = registry.getPtr<TerrainType>("tin_ore");
     settings->LODdistance = 30;
     settings->LODlayers = 6;
-    settings->gravity = 9;
+    settings->gravity = 4;
+    settings->debrisMesh = registry.getModel("item_ore");
+    settings->debrisMaterial = registry.getPtr<MaterialObject>("sand");
     
     
     registry.addRecipesToVector(playerPrototype->recipes,"crafting",1);
@@ -129,7 +131,7 @@ void GameApplication::setup() {
     assetViewer.registry = &registry;
     assetViewer.vulkan = vulkan;
 
-    spawnAsteroidScene();
+    spawnPlanetScene();
 
     lua["world"] = world.get();
 

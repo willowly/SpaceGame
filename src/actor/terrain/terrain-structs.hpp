@@ -24,6 +24,9 @@ struct GenerationSettings {
     int noiseOctaves = 1;
     float noiseGain = 0.5f;
     float noiseLacunarity = 2.0;
+    float debrisChance = 0.02f;
+    float debrisSize = 0.1f;
+    float debrisSizeVariance = 0.1f;
     TerrainType* stoneType = {};
     TerrainType* oreType = {};
 
@@ -49,6 +52,9 @@ struct TerrainSettings {
     float LODdistance = 300;
     int LODlayers = 3;
     float LODdistanceFactor = 3; // so the distance between each is a factor of 2
+
+    Mesh<Vertex>* debrisMesh = {};
+    MaterialObject* debrisMaterial = {};
 
 };
 
