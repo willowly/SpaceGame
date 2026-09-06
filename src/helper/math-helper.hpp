@@ -41,6 +41,15 @@ namespace MathHelper {
         return a + delta;
     }
 
+    inline vec3 getClosestPointOnBox(vec3 point,vec3 boxCenter,vec3 boxHalfSize) {
+        vec3 closestPoint;
+        vec3 delta = point - boxCenter;
+        closestPoint.x = glm::clamp(delta.x,-boxHalfSize.x,boxHalfSize.x);
+        closestPoint.y = glm::clamp(delta.y,-boxHalfSize.y,boxHalfSize.y);
+        closestPoint.z = glm::clamp(delta.z,-boxHalfSize.z,boxHalfSize.z);
+        return closestPoint + boxCenter;
+    }
+
     inline float sign(float a) {
         if(a < 0) {
             return -1;

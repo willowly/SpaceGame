@@ -189,6 +189,7 @@ class TerrainChunk {
             vec3 center = getWorldCenter(terrainPosition);
             if(lODLayer == 0 || glm::distance(center,cameraPosition) > LODDistance * cellSize) {
                 renderChildren = false;
+                
                 //Debug::drawCube(center,getWorldSize(),glm::identity<quat>(),Color(0,1,(lODLayer*0.2f)),0.02f);
                 //Debug::drawCube(terrainPosition+(vec3)offset * cellSize,vec3(1.0f),glm::identity<quat>(),Color(0,1,(lODLayer*0.2f)),0.02f);
             } else {
@@ -198,7 +199,9 @@ class TerrainChunk {
                     if(child == nullptr) continue;
                     child->updateLOD(terrainPosition, cameraPosition, lODLayer-1, LODDistance);
                 }
-                // Debug::drawCube(center,getWorldSize(),glm::identity<quat>(),Color::red);
+                if(!childrenReadyToRender) {
+                    Debug::drawCube(center,getWorldSize(),glm::identity<quat>(),Color::red);
+                }
             }
         }
 
