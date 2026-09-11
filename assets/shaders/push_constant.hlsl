@@ -7,9 +7,13 @@
     layout(buffer_reference) buffer MaterialData;
 #endif
 
+layout(buffer_reference) buffer ModelMatrixBuffer {
+    mat4 matrices[];
+};
+
 layout( push_constant ) uniform constants
 {
-	mat4 modelMatrix;
+	ModelMatrixBuffer modelMatrixBuffer;
     uint frameIndex;
     MaterialData material;
 } push;

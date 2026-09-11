@@ -1,3 +1,4 @@
+#pragma once
 #include "actor/terrain.hpp"
 
 #include "glm/glm.hpp"
@@ -16,11 +17,33 @@ class TerrainJob {
     ActorID terrain;
     ChunkAddress address;
     TerrainJobState state = TerrainJobState::FINISHED;
+
+    // debug info
+    vec3 center;
+    float size;
+    Color color;
     public:
         std::atomic<std::thread::id> worker;
 
-        TerrainJobState getJobState() const {
-            return state;
+        // ChunkAddress getAddress() {
+        //     return address;
+        // }
+
+        TerrainJobState getJobState() {
+            std::shared_lock lock(mutex,std::defer_lock);
+            
+            if(lock.try_lock()) {
+                return state;
+            }
+            return TerrainJobState::WAITING;
+        }
+
+        void tryDrawDebug() {
+            std::shared_lock lock(mutex,std::defer_lock);
+            
+            if(lock.try_lock()) {
+                Debug::drawCube(center,vec3(size),glm::identity<quat>(),color,0.02f);
+            }
         }
         
         // sets up the job
@@ -33,6 +56,9 @@ class TerrainJob {
                 this->address = address;
                 this->terrain = terrain->id;
                 terrain->addPlaceholder(address);
+                size = terrain->getChunkWorldSize(address.layer);
+                center = TerrainChunk::getWorldCenter(terrain->getPosition(),address.pos,size);
+                color = Color::yellow;
                 state = TerrainJobState::WAITING;
                 return true;
             }
@@ -48,8 +74,9 @@ class TerrainJob {
 
             
             if(lock.try_lock()) {
-                if(state != TerrainJobState::WAITING) return std::pair<ActorID,ChunkAddress>(Invalid_ActorID,ChunkAddress());;
+                if(state != TerrainJobState::WAITING) return std::pair<ActorID,ChunkAddress>(Invalid_ActorID,ChunkAddress());
                 state = TerrainJobState::IN_PROGRESS;
+                color = Color::blue;
                 worker = std::this_thread::get_id();
                 return std::pair<ActorID,ChunkAddress>(terrain,address);
             }
@@ -58,7 +85,7 @@ class TerrainJob {
 
         void finishJob() {
             std::unique_lock lock(mutex);
-            
+            color = Color::green;
             state = TerrainJobState::FINISHED;
         }
 };
@@ -66,10 +93,14 @@ class TerrainJob {
 class TerrainLoader {
 
     public:
-        static const int terrainJobCount = 64;
+        static const int terrainJobCount = 16;
+        std::array<std::atomic<int>,16> chunksLoaded;
 
+        // ChunkAddress getJobChunk(int index) {
+        //     return terrainJobs.at(index).getAddress();//terrainJobs.at(index).getJobState();
+        // } 
         TerrainJobState getJobState(int index) {
-            return TerrainJobState::WAITING;//terrainJobs.at(index).getJobState();
+            return terrainJobs.at(index).getJobState();
         } 
         std::thread::id getJobWorker(int index) {
             return terrainJobs.at(index).worker;
@@ -83,6 +114,8 @@ class TerrainLoader {
     std::mutex terrainMutex;
     std::atomic<bool> stopSignal;
 
+    
+
     std::vector<std::thread> workerThreads;
 
     
@@ -90,7 +123,9 @@ class TerrainLoader {
     
     std::mutex cameraPositionMutex;
     vec3 cameraPosition = {};
+    
 
+    
 
     void mainTask() {
         int jobIndex = 0;
@@ -147,6 +182,9 @@ class TerrainLoader {
                     std::cout << "loading chunk at" << StringHelper::toString(pair.second.pos) << " layer " << pair.second.layer << std::endl; 
                     terrain->addChunk(pair.second);
                     terrainJobs.at(jobIndex).finishJob();
+                    if(pair.second.layer < chunksLoaded.size()) {
+                        chunksLoaded[pair.second.layer]++;
+                    }
                     //std::cout << std::this_thread::get_id() << "WORKER: done job" << jobIndex << std::endl;
                 }
             }
@@ -207,6 +245,7 @@ class TerrainLoader {
             if(allowedWorkerThreads > 16) {
                 allowedWorkerThreads = 16;
             }
+            //allowedWorkerThreads = 1;
 
             stopSignal = false;
             mainThread = std::thread(&TerrainLoader::mainTask,this);
@@ -243,6 +282,14 @@ class TerrainLoader {
                 workerThread.join();
             }
             workerThreads.clear();
+        }
+
+        void renderDebug() {
+            for (int i = 0; i < TerrainLoader::terrainJobCount; i++)
+            {
+                terrainJobs[i].tryDrawDebug();
+            }
+            
         }
     
     

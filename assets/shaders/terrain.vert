@@ -21,7 +21,7 @@ layout(location = 4) out vec4 outLightSpacePosition;
 void main() {
 
     uint frameIndex = push.frameIndex;
-    mat4 modelMatrix = push.modelMatrix;
+    mat4 modelMatrix = push.modelMatrixBuffer.matrices[gl_InstanceIndex];
 
     gl_Position = sceneData[frameIndex].proj * sceneData[frameIndex].view * modelMatrix * vec4(inPosition, 1.0);
     outNormal = normalize(mat3(transpose(inverse(modelMatrix))) * inNormal);

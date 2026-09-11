@@ -6,6 +6,7 @@
 #include "graphics/vulkan.hpp"
 #include "data-loader.hpp"
 #include "item/recipe.hpp"
+#include "engine/terrain-loader.hpp"
 
 class DataLoaderImpl : public DataLoader {
 

@@ -10,7 +10,7 @@ layout(location = 0) in vec3 inPosition;
 void main() {
 
     uint frameIndex = push.frameIndex;
-    mat4 modelMatrix = push.modelMatrix;
+    mat4 modelMatrix = push.modelMatrixBuffer.matrices[gl_InstanceIndex];
 
     gl_Position = sceneData[frameIndex].proj * sceneData[frameIndex].view * modelMatrix * vec4(inPosition, 1.0);
     

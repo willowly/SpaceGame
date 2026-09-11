@@ -12,7 +12,7 @@ void GameApplication::spawnPlayer(vec3 pos) {
 }
 
 void GameApplication::spawnPlanetScene()  {
-    spawnPlayer(vec3(0,1000,1000));
+    spawnPlayer(vec3(-57,-3,6));
 
     std::minstd_rand rnd;
 
@@ -35,7 +35,7 @@ void GameApplication::spawnPlanetScene()  {
     //     terrainLoader.addTerrain(terrain->id);
     // }
 
-    auto terrain = world->spawn(Terrain::makeInstance(terrainMaterial,*settings,rnd(),vec3(0,-settings->generationSettings.radius,0)));
+    terrain = world->spawn(Terrain::makeInstance(terrainMaterial,*settings,rnd(),vec3(0,-settings->generationSettings.radius,0)));
     terrainLoader.addTerrain(terrain->id);
 }
 
@@ -149,10 +149,7 @@ void GameApplication::debugUI(float dt) {
     }
 
 
-    ImGui_ImplVulkan_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-
-    ImGui::NewFrame();
+    vulkan->imguiNewFrame();
 
     // do even if the debugUI isn't open :)
     DebugMenu::issuesMenu();
@@ -209,20 +206,48 @@ void GameApplication::debugUI(float dt) {
 
     ImGui::Begin("TerrainLoader");
 
+        for (size_t i = 0; i < terrainLoader.chunksLoaded.size(); i++)
+        {
+            int chunksLoaded = terrainLoader.chunksLoaded[i];
+            ImGui::Text("Layer %i chunks Loaded: %i",i,chunksLoaded);
+        }
+
+        static int currentTerrainLayer = 0;
+
+        ImGui::InputInt("Layer",&currentTerrainLayer);
+        
+        auto terrain = world->getActorOfType<Terrain>();
+
+        auto chunk = terrain->tryGetChunkAtWorldPosition(player->getPosition(),currentTerrainLayer);
+        if(chunk != nullptr) {
+            chunkInfo.time = glfwGetTime();
+            chunkInfo.layer = currentTerrainLayer;
+            chunkInfo.childrenLoaded = chunk->loadedChildCount();
+            chunkInfo.pos = terrain->worldToChunkPos(player->getPosition(),currentTerrainLayer);
+        }
+        ImGui::Text("Info From: %fs ago",glfwGetTime() - chunkInfo.time);
+        ImGui::Text("Layer: %i",currentTerrainLayer);
+        ImGui::Text("Children Loaded:  %i",chunkInfo.childrenLoaded);
+        ImGui::Text("Pos: <%i,%i,%i>",chunkInfo.pos.x,chunkInfo.pos.y,chunkInfo.pos.z);
+        terrainLoader.renderDebug();
         for (int i = 0; i < TerrainLoader::terrainJobCount; i++)
         {
+            //auto address = terrainLoader.getJobChunk(i);
+            
+            // float size = terrain->getChunkWorldSize(address.layer);
+            // vec3 center = TerrainChunk::getWorldCenter(terrain->getPosition(),address.pos,size);
             ImGui::PushID(i);
             std::ostringstream stream;
             switch(terrainLoader.getJobState(i)) {
                 case TerrainJobState::FINISHED:
-                    ImGui::Text("FINISHED");
+                    ImGui::Text("FINISHED: %i",terrainLoader.getJobWorker(i));
                     break;
                 case TerrainJobState::IN_PROGRESS:
                     stream << "IN PROGRESS:" << terrainLoader.getJobWorker(i);
                     ImGui::Text(stream.str().c_str());
                     break;
                 case TerrainJobState::WAITING:
-                    ImGui::Text("FINISHED");
+                    ImGui::Text("WAITING:");
                     break;
             }
             ImGui::PopID();
@@ -370,7 +395,7 @@ void GameApplication::loop() {
             window->setCursorMode(CursorMode::Locked);
             drawContext.disableClicks();
         }
-        if(player->widget != nullptr) player->widget->draw(drawContext,*player);
+        //if(player->widget != nullptr) player->widget->draw(drawContext,*player);
     }
     
 

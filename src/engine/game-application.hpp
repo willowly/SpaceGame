@@ -52,6 +52,15 @@ using std::string;
 using std::unique_ptr, std::shared_ptr;
 
 
+struct DebugChunkInfo {
+
+    float time = {};
+    ivec3 pos = {};
+    int layer = {};
+    int childrenLoaded = {};
+
+};
+
 struct data_GameSave {
     data_World world;
     ActorID playerID;
@@ -126,6 +135,8 @@ class GameApplication {
 
         TerrainLoader terrainLoader;
 
+        Terrain* terrain;
+
 
         Material terrainMaterial = Material::none;
         Material terrainMaterialDebug = Material::none;
@@ -144,6 +155,9 @@ class GameApplication {
 
         // debug menu
         DebugMenu::AssetViewer assetViewer;
+
+
+        DebugChunkInfo chunkInfo;
         
 
         float lastTime = 0; //tells how long its been since the last update

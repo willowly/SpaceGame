@@ -123,9 +123,15 @@ class Terrain : public Actor {
     }
 
     ivec3 worldToChunkPos(vec3 position) {
+        position = inverseTransformPoint(position);
         return glm::floor(position/getChunkWorldSizeBase());
     }
+    ivec3 worldToChunkPos(vec3 position,int layer) {
+        position = inverseTransformPoint(position);
+        return glm::floor(position/getChunkWorldSize(layer));
+    }
     ivec3 worldToChunkPosRounded(vec3 position) {
+        position = inverseTransformPoint(position);
         return glm::round(position/getChunkWorldSizeBase());
     }
 
@@ -150,10 +156,32 @@ class Terrain : public Actor {
         chunks.emplace(std::piecewise_construct,std::make_tuple(address.pos),std::make_tuple());
     }
 
+    // can return null
+    TerrainChunk* tryGetChunkAtWorldPosition(vec3 position,int layer) {
+        assert(layer < chunkLayers.size());
+        assert(layer >= 0);
+
+        std::shared_lock lock(chunksMtx,std::defer_lock);
+
+        if(lock.try_lock()) {
+
+
+            ivec3 pos = worldToChunkPos(position,layer);
+
+            auto& chunks = chunkLayers[layer];
+            if(chunks.contains(pos)) {
+                return &chunks.at(pos);
+            }
+        }
+        return nullptr;
+    }
+
     void testNextChunkToLoad(ChunkAddress address,ChunkAddress& closest,float& closestDistance,vec3 cameraPosition,bool& chunkFound,bool allowNextLayer) {
         auto& chunks = chunkLayers[address.layer];
-        float size = getChunkWorldSize(address.layer);
-        vec3 center = TerrainChunk::getWorldCenter(position,address.pos,size);
+        float size = getChunkWorldSize(address.layer+1);
+        vec3 largerPosUnrounded = (vec3)address.pos / (float)TerrainChunk::LODscaleFactor;
+        ivec3 largerPos = glm::floor(largerPosUnrounded);
+        vec3 center = TerrainChunk::getWorldCenter(position,largerPos,size);
         vec3 closestPoint = MathHelper::getClosestPointOnBox(cameraPosition,center,vec3(size/2.0f));
         float dist = glm::length(closestPoint - cameraPosition);
         if(!chunks.contains(address.pos)) {
@@ -164,7 +192,7 @@ class Terrain : public Actor {
             }
         } else {
             auto& chunk = chunks[address.pos];
-            if(allowNextLayer && address.layer != 0 && dist < 2 * settings.LODdistance * pow(2,address.layer)) {
+            if(allowNextLayer && address.layer != 0 && dist < settings.LODdistance * pow(2,address.layer)) {
                 for (int z = 0; z <= 1; z++)
                 {
                     for (int y = 0; y <= 1; y++)
@@ -373,7 +401,7 @@ class Terrain : public Actor {
 
         // to leave things locked for less time
         for(auto chunkRegen : chunksSurrounding) {
-            chunkRegen->generateMesh(true);
+            chunkRegen->generateMesh(position,true);
         }
         
     }
@@ -426,7 +454,7 @@ class Terrain : public Actor {
         lockType = 4;
         for(int i = 0;i < chunksToRegenerate.size();i++) {
             auto address = chunksToRegenerate[i];
-            chunkLayers[address.layer].at(address.pos).generateMesh();
+            chunkLayers[address.layer].at(address.pos).generateMesh(position);
         }
         chunksToRegenerate.clear();
     }

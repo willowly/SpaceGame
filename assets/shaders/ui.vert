@@ -13,8 +13,9 @@ layout(location = 0) out vec2 outTexCoord;
 
 void main() {
     uint frameIndex = push.frameIndex;
+    mat4 modelMatrix = push.modelMatrixBuffer.matrices[gl_InstanceIndex];
 
-    gl_Position = sceneData[frameIndex].screen * push.modelMatrix * vec4(position, 0.0, 1.0);
+    gl_Position = sceneData[frameIndex].screen * modelMatrix * vec4(position, 0.0, 1.0);
     gl_Position.z = 0.0;
 
     outTexCoord = uv;

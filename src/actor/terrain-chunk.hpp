@@ -45,6 +45,7 @@ class TerrainChunk {
     std::atomic<bool> meshOutOfDate;
 
     std::vector<glm::mat4> debris;
+    Buffer debrisBuffer[FRAMES_IN_FLIGHT];
 
     TerrainShape* physicsShape = nullptr;
 
@@ -158,7 +159,7 @@ class TerrainChunk {
 
         bool renderChildren;
 
-        std::atomic<bool> isPlaceHolder = false;
+        std::atomic<bool> isPlaceHolder = true;
 
         static TerrainChunk makePlaceHolder() {
             return TerrainChunk();
@@ -199,9 +200,9 @@ class TerrainChunk {
                     if(child == nullptr) continue;
                     child->updateLOD(terrainPosition, cameraPosition, lODLayer-1, LODDistance);
                 }
-                if(!childrenReadyToRender) {
-                    Debug::drawCube(center,getWorldSize(),glm::identity<quat>(),Color::red);
-                }
+                // if(!childrenReadyToRender) {
+                //     Debug::drawCube(center,getWorldSize(),glm::identity<quat>(),Color::red);
+                // }
             }
         }
 
@@ -287,6 +288,7 @@ class TerrainChunk {
             generateOre(1,5,0.7f,offset);
             //std::cout << "generation time:" << clock.getTime() << std::endl;
             meshOutOfDate = true;
+            isPlaceHolder = false;
             // generateOre(2,60,0.4,offset,chunk);
         }
 
@@ -471,35 +473,23 @@ class TerrainChunk {
         }
         
 
-        void addRenderables(Vulkan* vulkan,float dt,vec3 position,Material material) {
-            if(!readyToRender) return;
-
-            vec3 chunkPosition = position+((vec3)offset*cellSize);
+        void addDebrisRenderables(Vulkan* vulkan,vec3 chunkPosition) {
+            if(debris.size() == 0) return;
+            if(meshState == -1) return;
+            if(debrisBuffer[meshState].buffer == VK_NULL_HANDLE) return; //this shouldn't happen but whatever
             if(settings != nullptr && settings->debrisMesh != nullptr && settings->debrisMaterial != nullptr) {
-                for (size_t i = 0; i < debris.size(); i++)
-                {
-                    settings->debrisMesh->addToRender(vulkan,settings->debrisMaterial->material,glm::translate(glm::mat4(1.0f),chunkPosition) * debris[i]);
-                }
+                vulkan->addMeshInstanced(settings->debrisMesh->meshBuffer,settings->debrisMaterial->material,{},debrisBuffer[meshState],debris.size());
             }
+        }
 
-            if(renderChildren && childrenReadyToRender) {
-                for (auto child : children) {
-                    if(child == nullptr) continue;
-                    assert(child != nullptr);
-                    child->addRenderables(vulkan, dt, position, material);
-                
-                }
-                return;
-            }
+        void updateBuffers(Vulkan* vulkan) {
             std::shared_lock lock(mtx,std::defer_lock);
 
-            
-            
-            
             if(lock.try_lock()) {
                 if(meshState == -1) {
                     if(meshData.vertices.size() == 0 || meshData.indices.size() == 0) return;
                     meshBuffer[0] = vulkan->createMeshBuffers(meshData.vertices,meshData.indices);
+                    if(debris.size() > 0) debrisBuffer[0] = vulkan->createArrayBuffer(debris);
                     //meshBuffer[1] = vulkan->createMeshBuffers(meshData.vertices,meshData.indices);
                     gpuMeshOutOfDate = false;
                     meshState = 0;
@@ -508,11 +498,32 @@ class TerrainChunk {
                         meshState++;
                         if(meshState >= FRAMES_IN_FLIGHT) meshState = 0;
                         vulkan->updateMeshBuffer(meshBuffer[meshState],meshData.vertices,meshData.indices);
+                        if(debris.size() > 0) vulkan->updateArrayBuffer(debrisBuffer[meshState],debris);
                         gpuMeshOutOfDate = false;
                     }
                 }
                 lock.unlock();
             }
+        }
+
+        void addRenderables(Vulkan* vulkan,float dt,vec3 position,Material material) {
+            if(!readyToRender) return;
+
+            vec3 chunkPosition = position+((vec3)offset*cellSize);
+            addDebrisRenderables(vulkan,chunkPosition);
+
+            updateBuffers(vulkan);
+
+            if(childrenReadyToRender) {
+                for (auto child : children) {
+                    if(child == nullptr) continue;
+                    assert(child != nullptr);
+                    child->addRenderables(vulkan, dt, position, material);
+                
+                }
+                return;
+            }
+            
             if(meshState != -1) {
                 vulkan->addMesh(meshBuffer[meshState],material,glm::translate(glm::mat4(1.0f),chunkPosition));
             }
@@ -547,8 +558,12 @@ class TerrainChunk {
         }
 
         // force
-        void generateMesh(bool force = false) {
+        void generateMesh(vec3 terrainPosition,bool force = false) {
 
+
+            if(terrainData.size() == 0) {
+                return; // if this somehow tries to generate before its data is loaded
+            }
             if(!meshOutOfDate && !force) {
                 return;
             }
@@ -592,7 +607,7 @@ class TerrainChunk {
             smoothNormals();
 
             if(cellSize <= 2.0f) {
-                generateDebris();
+                generateDebris(terrainPosition);
             }
             
             //std::cout << "chunk ready to render " << std::endl;
@@ -602,7 +617,7 @@ class TerrainChunk {
             physicsMeshOutOfDate = true;
         }
 
-        void generateDebris() {
+        void generateDebris(vec3 terrainPosition) {
             if(settings == nullptr) {
                 Debug::warn("no terrain settings when generating mesh");
                 return;
@@ -627,7 +642,7 @@ class TerrainChunk {
                    
                     auto scale = debrisSizeDist(e2);
                     auto rotation = glm::quat(glm::radians(vec3(randomValue(e2),randomValue(e2),randomValue(e2))*360.0f));
-                    debris.push_back(MathHelper::getTransformMatrix(debrisPosition,rotation,vec3(scale)));
+                    debris.push_back(MathHelper::getTransformMatrix(((vec3)offset*cellSize)+terrainPosition+debrisPosition,rotation,vec3(scale)));
                 }
             }
             
@@ -853,6 +868,14 @@ class TerrainChunk {
                 if(child == nullptr) return false;
             }
             return true;
+        }
+
+        int loadedChildCount() {
+            int count = 0;
+            for (auto child : children) {
+                if(child != nullptr) count++;
+            }
+            return count;
         }
 
         vec3 getEdgePos(int index,float t) {

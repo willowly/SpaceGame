@@ -123,14 +123,10 @@ struct MeshBuffer : Buffer {
 };
 
 struct MeshPushConstant {
-    glm::mat4 matrix = glm::mat4(1.0f);
+    VkDeviceAddress matrixBuffer;
     unsigned int frameIndex;
     MaterialHandle materialData;
     char extraData[48];
-
-    MeshPushConstant(glm::mat4 matrix) : matrix(matrix) {
-
-    }
 };
 
 struct PipelineOptions {
@@ -200,6 +196,8 @@ class Vulkan {
             createUniformBuffers();
             createDescriptorPool();
             createDescriptorSets(); // also includes the texture
+
+            createDefaultMatrixBuffer(1000000);
             
             createRenderTargetImages();
             updateRenderTargetDescriptors();
@@ -323,6 +321,13 @@ class Vulkan {
 
         }
 
+        void addMeshInstanced(MeshBuffer& mesh,Material material,RenderingSettings settings, Buffer matrixBuffer,int count) {
+
+            assert(matrixBuffer.buffer != VK_NULL_HANDLE);
+            renderObjects.push_back(RenderObject(mesh,matrixBuffer,count,material,settings));
+
+        }
+
         template<typename T>
         void addMesh(MeshBuffer& mesh,Material material,T data, glm::mat4 matrix = glm::mat4(1.0f),RenderingSettings settings = RenderingSettings()) {
 
@@ -335,205 +340,6 @@ class Vulkan {
 
         vec2 getScreenSize() {
             return screenSize;
-        }
-
-        void recordShadowRenderPass(VkCommandBuffer commandBuffer,const Camera& camera) {
-            // Shadow Pass
-            VkRenderPassBeginInfo renderPassInfo{};
-            renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-            renderPassInfo.renderPass = shadowRenderPass;
-            renderPassInfo.framebuffer = shadowFramebuffer;
-            
-            renderPassInfo.renderArea.offset = {0, 0};
-            renderPassInfo.renderArea.extent = {shadowMapSize,shadowMapSize};
-            
-            std::array<VkClearValue, 1> clearValues{};
-            clearValues[0].depthStencil = {1.0f, 0};
-            
-            renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-            renderPassInfo.pClearValues = clearValues.data();
-            
-            vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-            //TracyVkZone(tracyCtx,commandBuffers[frameIndex],"DrawFrame");
-
-            VkViewport viewport{};
-            viewport.x = 0.0f;
-            viewport.y = 0.0f;
-            viewport.width = static_cast<float>(shadowMapSize);
-            viewport.height = static_cast<float>(shadowMapSize);
-            viewport.minDepth = 0.0f;
-            viewport.maxDepth = 1.0f;
-            vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-
-            VkRect2D scissor{};
-            scissor.offset = {0, 0};
-            scissor.extent = {shadowMapSize,shadowMapSize};
-            vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-
-            VkPipeline currentPipeline = VK_NULL_HANDLE;
-            VkBuffer currentMeshBuffer = VK_NULL_HANDLE;
-
-            for (auto& renderObject : renderObjects)
-            {
-                if(!renderObject.settings.shadowPass) continue;
-
-                if(!renderObject.material.isValid()) {
-                    continue;
-                }
-
-                MeshBuffer meshBuffer = renderObject.meshBuffer;
-                if(currentMeshBuffer != meshBuffer.buffer) {
-                    
-                    VkBuffer vertexBuffers[] = {meshBuffer.buffer};
-                    VkDeviceSize offsets[] = {0};
-                    vkCmdBindVertexBuffers(commandBuffer,0,1,vertexBuffers,offsets);
-                    vkCmdBindIndexBuffer(commandBuffer, meshBuffer.buffer, meshBuffer.indexOffset, VK_INDEX_TYPE_UINT16);
-                    currentMeshBuffer = meshBuffer.buffer;
-                }
-
-                if(renderObject.material.shadowPipeline != currentPipeline) {
-                    vkCmdBindPipeline(commandBuffer,VK_PIPELINE_BIND_POINT_GRAPHICS,renderObject.material.shadowPipeline);
-                    currentPipeline = renderObject.material.shadowPipeline;
-                }
-                
-                MeshPushConstant pushConstant(renderObject.matrix);
-                pushConstant.frameIndex = frameIndex+FRAMES_IN_FLIGHT; // select the shadow scene_data
-                pushConstant.materialData = renderObject.material.data;
-                if(renderObject.settings.faceCamera) {
-                    pushConstant.matrix *= glm::toMat4(camera.rotation);
-                }
-                std::copy(std::begin(renderObject.extraData),std::end(renderObject.extraData),std::begin(pushConstant.extraData));
-                //std::cout << sizeof(MeshPushConstant) << std::endl;
-                vkCmdPushConstants(commandBuffer,pipelineLayout,VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,0,sizeof(MeshPushConstant),&pushConstant);
-                
-                if(currentMeshBuffer == VK_NULL_HANDLE) {
-                    std::cout << "drawing null mesh" << std::endl;
-                }
-                
-                vkCmdDrawIndexed(commandBuffer, meshBuffer.indexCount, 1, 0, 0, 0);
-
-            }
-
-            vkCmdEndRenderPass(commandBuffer);
-
-        }
-
-
-        void recordMainRenderPass(VkCommandBuffer commandBuffer,const Camera& camera,int renderTargetIndex) {
-            VkRenderPassBeginInfo renderPassInfo{};
-            renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-            renderPassInfo.renderPass = renderPass;
-            renderPassInfo.framebuffer = frameBuffers[renderTargetIndex];
-            renderTargetImageLayouts[renderTargetIndex] = VK_IMAGE_LAYOUT_GENERAL;
-
-            renderPassInfo.renderArea.offset = {0, 0};
-            renderPassInfo.renderArea.extent = swapChainExtent;
-
-            std::array<VkClearValue, 2> clearValues{};
-            clearValues[0].color = {{0.0f, 0.0f, 0.01f, 1.0f}};
-            clearValues[1].depthStencil = {1.0f, 0};
-
-            renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-            renderPassInfo.pClearValues = clearValues.data();
-
-            vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-            VkViewport viewport{};
-            viewport.x = 0.0f;
-            viewport.y = 0.0f;
-            viewport.width = static_cast<float>(swapChainExtent.width);
-            viewport.height = static_cast<float>(swapChainExtent.height);
-            viewport.minDepth = 0.0f;
-            viewport.maxDepth = 1.0f;
-            vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-
-            VkRect2D scissor{};
-            scissor.offset = {0, 0};
-            scissor.extent = swapChainExtent;
-            vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-            // vkCmdSetLineWidth(commandBuffer,5.0f); sadly doesn't exist on mac so theres no point adding support now lol
-
-            VkPipeline currentPipeline = VK_NULL_HANDLE;
-            VkBuffer currentMeshBuffer = VK_NULL_HANDLE;
-
-            for (auto& renderObject : renderObjects)
-            {
-
-                if(!renderObject.settings.mainPass) continue;
-
-                if(!renderObject.material.isValid()) {
-                    continue;
-                }
-
-                MeshBuffer meshBuffer = renderObject.meshBuffer;
-                if(currentMeshBuffer != meshBuffer.buffer) {
-                    
-                    VkBuffer vertexBuffers[] = {meshBuffer.buffer};
-                    VkDeviceSize offsets[] = {0};
-                    vkCmdBindVertexBuffers(commandBuffer,0,1,vertexBuffers,offsets);
-                    vkCmdBindIndexBuffer(commandBuffer, meshBuffer.buffer, meshBuffer.indexOffset, VK_INDEX_TYPE_UINT16);
-                    currentMeshBuffer = meshBuffer.buffer;
-                }
-
-                if(renderObject.material.pipeline != currentPipeline) {
-                    vkCmdBindPipeline(commandBuffer,VK_PIPELINE_BIND_POINT_GRAPHICS,renderObject.material.pipeline);
-                    currentPipeline = renderObject.material.pipeline;
-                }
-                
-                MeshPushConstant pushConstant(renderObject.matrix);
-                pushConstant.frameIndex = frameIndex;
-                pushConstant.materialData = renderObject.material.data;
-                if(renderObject.settings.faceCamera) {
-                    pushConstant.matrix *= glm::toMat4(camera.rotation);
-                }
-                std::copy(std::begin(renderObject.extraData),std::end(renderObject.extraData),std::begin(pushConstant.extraData));
-                //std::cout << sizeof(MeshPushConstant) << std::endl;
-                vkCmdPushConstants(commandBuffer,pipelineLayout,VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,0,sizeof(MeshPushConstant),&pushConstant);
-                
-                if(currentMeshBuffer == VK_NULL_HANDLE) {
-                    std::cout << "drawing null mesh" << std::endl;
-                }
-                
-                vkCmdDrawIndexed(commandBuffer, meshBuffer.indexCount, 1, 0, 0, 0);
-
-            }
-
-            ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
-
-            vkCmdEndRenderPass(commandBuffer);
-        }
-
-        void recordBlitToSwapchain(VkCommandBuffer commandBuffer,int renderTargetIndex,int swapchainImageIndex) {
-
-            // copy result into swapchain image
-
-            VkImageSubresourceLayers subLayer{};
-
-            subLayer.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-            subLayer.baseArrayLayer = 0;
-            subLayer.layerCount = 1;
-            subLayer.mipLevel = 0;
-
-            VkImageBlit blit{};
-            blit.srcOffsets[0] = {0,0};
-            blit.srcOffsets[1] = {static_cast<int32_t>(swapChainExtent.width),static_cast<int32_t>(swapChainExtent.height),1};
-            blit.dstOffsets[0] = {0,0};
-            blit.dstOffsets[1] = {static_cast<int32_t>(swapChainExtent.width),static_cast<int32_t>(swapChainExtent.height),1};
-            blit.srcSubresource = subLayer;
-            blit.dstSubresource = subLayer;
-            
-
-            vkCmdBlitImage(commandBuffer,renderTargetImages[renderTargetIndex].image,VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,swapChainImages[swapchainImageIndex],VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,1,&blit,VK_FILTER_NEAREST);
-        }
-
-        void recordBeginCommandBufferLabel(VkCommandBuffer commandBuffer,string name) {
-            VkDebugUtilsLabelEXT label{VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT};
-            label.pLabelName = name.c_str();
-            vkCmdBeginDebugUtilsLabelEXT(commandBuffer,&label);
-        }
-
-        void recordEndCommandBufferLabel(VkCommandBuffer commandBuffer) {
-            vkCmdEndDebugUtilsLabelEXT(commandBuffer);
         }
 
         // Example barrier:
@@ -551,12 +357,24 @@ class Vulkan {
 
         //     vkCmdDispatch(commandBuffer, swapChainExtent.width/16, swapChainExtent.height/16, 1);
         // }
+
+
+
+        void imguiNewFrame() {
+            ImGui_ImplVulkan_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+
+            ImGui::NewFrame();
+            imGuiEnabled = true;
+        }
  
         void render(const Camera& camera) {
 
             ZoneScoped;
 
-            ImGui::Render();
+            if(imGuiEnabled) {
+                ImGui::Render();
+            }
            
 
             Clock clock;
@@ -578,9 +396,9 @@ class Vulkan {
                     std::cout << "frame hang: " << (int)(time*1000) << "ms" << std::endl;
                 }
 
-            
-            
-            //3. Update scene data buffer
+                
+            //3. Update scene data buffer and default matrix buffer
+                updateDefaultMatrixBuffer(frameIndex);
                 updateUniformBuffer(frameIndex,camera);
 
                 bool frameBufferResized = window->getFrameBufferResized();
@@ -701,6 +519,9 @@ class Vulkan {
 
             frameIndex = (frameIndex + 1) % FRAMES_IN_FLIGHT;
             testIndex = (testIndex + 1) % 5;
+            imGuiEnabled = false;
+
+            vkQueueWaitIdle(graphicsQueue);
         }
 
         void recordBarrierAll(VkCommandBuffer commandBuffer) {
@@ -874,6 +695,30 @@ class Vulkan {
             return createMaterial(pipeline,shadowPipeline,materialData);
         }
 
+        Buffer createStagingBuffer(VkDeviceSize size,string name) {
+            return createBuffer(size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,0,VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT,name);
+        }
+
+        template<typename T>
+        Buffer createArrayBuffer(std::vector<T>& data) {
+            VkDeviceSize bufferSize = sizeof(T) * data.size();
+            auto& transfer = getNextTransfer();
+
+            transfer.stagingBuffer = createStagingBuffer(bufferSize,"generic transfer");
+
+            if(vmaCopyMemoryToAllocation(allocator,data.data(),transfer.stagingBuffer.allocation,0,bufferSize) != VK_SUCCESS) {
+                throw std::runtime_error("failed to copy buffer");
+            }
+
+            // create the vertex buffer
+            Buffer buffer = createManagedBuffer(bufferSize, VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,0,0,"generic");
+            
+            copyBuffer(transfer, buffer, bufferSize);
+
+            return buffer;
+
+        }
+
         template<typename Vertex>
         MeshBuffer createMeshBuffers(std::vector<Vertex>& vertices,std::vector<uint16_t>& indices) {
 
@@ -891,7 +736,6 @@ class Vulkan {
 
             //std::cout << "copying memory" << std::endl;
             //copy the memory into it
-            void* data;
             if(vmaCopyMemoryToAllocation(allocator,vertices.data(),stagingBuffer.allocation,0,vertexBufferSize) != VK_SUCCESS) {
                 throw std::runtime_error("failed to copy vertex buffer");
             }
@@ -900,7 +744,7 @@ class Vulkan {
             }
 
             // create the vertex buffer
-            Buffer buffer = createManagedBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,0,0,"mesh");
+            Buffer buffer = createManagedBuffer(bufferSize, VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,0,0,"mesh");
             
 
             // copy the data over
@@ -913,6 +757,16 @@ class Vulkan {
             meshBuffer.indexCount = static_cast<uint32_t>(indices.size());
 
             return meshBuffer;
+        }
+
+         template<typename T>
+        void updateArrayBuffer(Buffer& buffer,std::vector<T>& data) {
+
+            if(buffer.buffer != VK_NULL_HANDLE) {
+                destroyBuffer(buffer);
+            }
+            buffer = createArrayBuffer(data);
+
         }
 
         template<typename Vertex>
@@ -1145,14 +999,21 @@ class Vulkan {
             std::vector<VkPresentModeKHR> presentModes;
         };
 
+       
+
         struct RenderObject {
             MeshBuffer meshBuffer;
             glm::mat4 matrix;
             Material material;
             RenderingSettings settings;
+            Buffer matrixBuffer;
+            int instanceCount = 1;
             char extraData[48];
 
             RenderObject(MeshBuffer meshBuffer,glm::mat4 matrix,Material material,RenderingSettings settings = RenderingSettings()) : meshBuffer(meshBuffer), matrix(matrix), material(material), settings(settings) {
+
+            }
+            RenderObject(MeshBuffer meshBuffer,Buffer indexBuffer,int instanceCount,Material material,RenderingSettings settings = RenderingSettings()) : meshBuffer(meshBuffer), matrixBuffer(indexBuffer),instanceCount(instanceCount), material(material), settings(settings) {
 
             }
         };
@@ -1218,6 +1079,8 @@ class Vulkan {
 
         bool hasSwapChain = false;
 
+        bool imGuiEnabled = false;
+
         VkPipelineLayout pipelineLayout;
         
         VkDescriptorSetLayout descriptorSetLayout;
@@ -1225,7 +1088,8 @@ class Vulkan {
         VkDescriptorSet descriptorSet;
 
         std::vector<TextureResources> textures;
-
+        std::array<Buffer,FRAMES_IN_FLIGHT> defaultMatrixBuffers;
+         std::array<VkDeviceAddress,FRAMES_IN_FLIGHT> defaultMatrixBufferAddresses;
         std::array<Buffer,FRAMES_IN_FLIGHT*2> uniformBuffers;
 
         Image depthImage;
@@ -1626,6 +1490,17 @@ class Vulkan {
             }
         }
 
+        void updateDefaultMatrixBuffer(uint32_t currentFrame) {
+            std::vector<glm::mat4> data;
+            data.resize(renderObjects.size());
+            for (size_t i = 0; i < renderObjects.size(); i++)
+            {
+                data[i] = renderObjects[i].matrix;
+            }
+            void* dataPtr = data.data();
+            memcpy(defaultMatrixBuffers[currentFrame].allocationInfo.pMappedData, data.data(), sizeof(glm::mat4) * data.size()); //matrix buffer is always mapped
+        }
+
         void updateUniformBuffer(uint32_t currentFrame,const Camera& camera) {
             
             vec3 normalizedLightDirection = glm::normalize(mainLight.direction);
@@ -1685,6 +1560,216 @@ class Vulkan {
                 memcpy(uniformBuffers[currentFrame+FRAMES_IN_FLIGHT].allocationInfo.pMappedData, &shadowUBO, sizeof(shadowUBO));
             #endif
 
+        }
+
+        void recordShadowRenderPass(VkCommandBuffer commandBuffer,const Camera& camera) {
+            // Shadow Pass
+            VkRenderPassBeginInfo renderPassInfo{};
+            renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+            renderPassInfo.renderPass = shadowRenderPass;
+            renderPassInfo.framebuffer = shadowFramebuffer;
+            
+            renderPassInfo.renderArea.offset = {0, 0};
+            renderPassInfo.renderArea.extent = {shadowMapSize,shadowMapSize};
+            
+            std::array<VkClearValue, 1> clearValues{};
+            clearValues[0].depthStencil = {1.0f, 0};
+            
+            renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+            renderPassInfo.pClearValues = clearValues.data();
+            
+            vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+            //TracyVkZone(tracyCtx,commandBuffers[frameIndex],"DrawFrame");
+
+            VkViewport viewport{};
+            viewport.x = 0.0f;
+            viewport.y = 0.0f;
+            viewport.width = static_cast<float>(shadowMapSize);
+            viewport.height = static_cast<float>(shadowMapSize);
+            viewport.minDepth = 0.0f;
+            viewport.maxDepth = 1.0f;
+            vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+
+            VkRect2D scissor{};
+            scissor.offset = {0, 0};
+            scissor.extent = {shadowMapSize,shadowMapSize};
+            vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+
+            RenderPassContext context(RenderPassType::Shadow);
+
+            int i = 0;
+            for (auto& renderObject : renderObjects)
+            {
+                recordRenderObject(commandBuffer,camera,renderObject,i,context);
+                i++;
+            }
+
+            vkCmdEndRenderPass(commandBuffer);
+
+        }
+
+        void createDefaultMatrixBuffer(VkDeviceSize size) {
+            for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++)
+            {
+                
+                defaultMatrixBuffers[i] = createManagedBuffer(size,VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_2_INDIRECT_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,0,VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT,"matrix" + std::to_string(i));
+                
+                VkBufferDeviceAddressInfoKHR addressInfo{};
+                addressInfo.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
+                addressInfo.buffer = defaultMatrixBuffers[i].buffer;
+
+                defaultMatrixBufferAddresses[i] = vkGetBufferDeviceAddressKHR(device, &addressInfo);
+            }
+            
+        }
+
+        enum class RenderPassType {
+            Main,
+            Shadow
+        };
+
+        struct RenderPassContext {
+            RenderPassType type = {};
+            VkPipeline currentPipeline = VK_NULL_HANDLE;
+            VkBuffer currentMeshBuffer = VK_NULL_HANDLE;
+            RenderPassContext(RenderPassType type) : type(type) {
+
+            }
+        };
+
+        void recordRenderObject(VkCommandBuffer commandBuffer,const Camera& camera,RenderObject& renderObject,int index,RenderPassContext& context) {
+            if(context.type == RenderPassType::Main && !renderObject.settings.mainPass) return;
+            if(context.type == RenderPassType::Shadow && !renderObject.settings.shadowPass) return;
+
+            if(!renderObject.material.isValid()) {
+                return;
+            }
+
+            MeshBuffer meshBuffer = renderObject.meshBuffer;
+            if(context.currentMeshBuffer != meshBuffer.buffer) {
+                
+                VkBuffer vertexBuffers[] = {meshBuffer.buffer};
+                VkDeviceSize offsets[] = {0};
+                vkCmdBindVertexBuffers(commandBuffer,0,1,vertexBuffers,offsets);
+                vkCmdBindIndexBuffer(commandBuffer, meshBuffer.buffer, meshBuffer.indexOffset, VK_INDEX_TYPE_UINT16);
+                context.currentMeshBuffer = meshBuffer.buffer;
+            }
+
+            if(renderObject.material.pipeline != context.currentPipeline) {
+                vkCmdBindPipeline(commandBuffer,VK_PIPELINE_BIND_POINT_GRAPHICS,renderObject.material.pipeline);
+                context.currentPipeline = renderObject.material.pipeline;
+            }
+
+            MeshPushConstant pushConstant;
+            pushConstant.frameIndex = frameIndex;
+            if(context.type == RenderPassType::Shadow) {
+                pushConstant.frameIndex += FRAMES_IN_FLIGHT;
+            }
+            pushConstant.materialData = renderObject.material.data;
+            if(renderObject.instanceCount == 1) {
+                pushConstant.matrixBuffer = defaultMatrixBufferAddresses[frameIndex]+(index*sizeof(glm::mat4));
+            } else {
+                VkBufferDeviceAddressInfo info = {};
+                info.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
+                info.buffer = renderObject.matrixBuffer.buffer;
+                pushConstant.matrixBuffer = vkGetBufferDeviceAddress(device,&info);
+            }
+            // if(renderObject.settings.faceCamera) {
+            //     pushConstant.matrix *= glm::toMat4(camera.rotation);
+            // }
+            std::copy(std::begin(renderObject.extraData),std::end(renderObject.extraData),std::begin(pushConstant.extraData));
+            //std::cout << sizeof(MeshPushConstant) << std::endl;
+            vkCmdPushConstants(commandBuffer,pipelineLayout,VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,0,sizeof(MeshPushConstant),&pushConstant);
+
+            if(context.currentMeshBuffer == VK_NULL_HANDLE) {
+                std::cout << "drawing null mesh" << std::endl;
+            }
+            
+            
+            vkCmdDrawIndexed(commandBuffer, meshBuffer.indexCount, renderObject.instanceCount, 0, 0, 0);
+        }
+
+
+        void recordMainRenderPass(VkCommandBuffer commandBuffer,const Camera& camera,int renderTargetIndex) {
+            VkRenderPassBeginInfo renderPassInfo{};
+            renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+            renderPassInfo.renderPass = renderPass;
+            renderPassInfo.framebuffer = frameBuffers[renderTargetIndex];
+            renderTargetImageLayouts[renderTargetIndex] = VK_IMAGE_LAYOUT_GENERAL;
+
+            renderPassInfo.renderArea.offset = {0, 0};
+            renderPassInfo.renderArea.extent = swapChainExtent;
+
+            std::array<VkClearValue, 2> clearValues{};
+            clearValues[0].color = {{0.0f, 0.0f, 0.01f, 1.0f}};
+            clearValues[1].depthStencil = {1.0f, 0};
+
+            renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+            renderPassInfo.pClearValues = clearValues.data();
+
+            vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+            VkViewport viewport{};
+            viewport.x = 0.0f;
+            viewport.y = 0.0f;
+            viewport.width = static_cast<float>(swapChainExtent.width);
+            viewport.height = static_cast<float>(swapChainExtent.height);
+            viewport.minDepth = 0.0f;
+            viewport.maxDepth = 1.0f;
+            vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+
+            VkRect2D scissor{};
+            scissor.offset = {0, 0};
+            scissor.extent = swapChainExtent;
+            vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+            // vkCmdSetLineWidth(commandBuffer,5.0f); sadly doesn't exist on mac so theres no point adding support now lol
+
+            RenderPassContext context(RenderPassType::Main);
+
+            int i = 0;
+            for (auto& renderObject : renderObjects)
+            {
+
+                recordRenderObject(commandBuffer,camera,renderObject,i,context);
+                i++;
+            }
+
+            if(imGuiEnabled) ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
+
+            vkCmdEndRenderPass(commandBuffer);
+        }
+
+        void recordBlitToSwapchain(VkCommandBuffer commandBuffer,int renderTargetIndex,int swapchainImageIndex) {
+
+            // copy result into swapchain image
+
+            VkImageSubresourceLayers subLayer{};
+
+            subLayer.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            subLayer.baseArrayLayer = 0;
+            subLayer.layerCount = 1;
+            subLayer.mipLevel = 0;
+
+            VkImageBlit blit{};
+            blit.srcOffsets[0] = {0,0};
+            blit.srcOffsets[1] = {static_cast<int32_t>(swapChainExtent.width),static_cast<int32_t>(swapChainExtent.height),1};
+            blit.dstOffsets[0] = {0,0};
+            blit.dstOffsets[1] = {static_cast<int32_t>(swapChainExtent.width),static_cast<int32_t>(swapChainExtent.height),1};
+            blit.srcSubresource = subLayer;
+            blit.dstSubresource = subLayer;
+            
+
+            vkCmdBlitImage(commandBuffer,renderTargetImages[renderTargetIndex].image,VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,swapChainImages[swapchainImageIndex],VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,1,&blit,VK_FILTER_NEAREST);
+        }
+
+        void recordBeginCommandBufferLabel(VkCommandBuffer commandBuffer,string name) {
+            VkDebugUtilsLabelEXT label{VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT};
+            label.pLabelName = name.c_str();
+            vkCmdBeginDebugUtilsLabelEXT(commandBuffer,&label);
+        }
+
+        void recordEndCommandBufferLabel(VkCommandBuffer commandBuffer) {
+            vkCmdEndDebugUtilsLabelEXT(commandBuffer);
         }
 
         void recreateSwapChain() {
