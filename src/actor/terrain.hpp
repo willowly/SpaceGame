@@ -177,12 +177,14 @@ class Terrain : public Actor {
     }
 
     void testNextChunkToLoad(ChunkAddress address,ChunkAddress& closest,float& closestDistance,vec3 cameraPosition,bool& chunkFound,bool allowNextLayer) {
+        float size = getChunkWorldSize(address.layer);
+        vec3 center = TerrainChunk::getWorldCenter(position,address.pos,size);
+        testNextChunkToLoad(address,closest,closestDistance,cameraPosition,chunkFound,allowNextLayer,center,size);
+    }
+
+    void testNextChunkToLoad(ChunkAddress address,ChunkAddress& closest,float& closestDistance,vec3 cameraPosition,bool& chunkFound,bool allowNextLayer,vec3 testBoxCenter,float testBoxSize) {
         auto& chunks = chunkLayers[address.layer];
-        float size = getChunkWorldSize(address.layer+1);
-        vec3 largerPosUnrounded = (vec3)address.pos / (float)TerrainChunk::LODscaleFactor;
-        ivec3 largerPos = glm::floor(largerPosUnrounded);
-        vec3 center = TerrainChunk::getWorldCenter(position,largerPos,size);
-        vec3 closestPoint = MathHelper::getClosestPointOnBox(cameraPosition,center,vec3(size/2.0f));
+        vec3 closestPoint = MathHelper::getClosestPointOnBox(cameraPosition,testBoxCenter,vec3(testBoxSize/2.0f));
         float dist = glm::length(closestPoint - cameraPosition);
         if(!chunks.contains(address.pos)) {
             if(dist < closestDistance) {
@@ -191,6 +193,8 @@ class Terrain : public Actor {
                 chunkFound = true;
             }
         } else {
+            float size = getChunkWorldSize(address.layer);
+            vec3 center = TerrainChunk::getWorldCenter(position,address.pos,size);
             auto& chunk = chunks[address.pos];
             if(allowNextLayer && address.layer != 0 && dist < settings.LODdistance * pow(2,address.layer)) {
                 for (int z = 0; z <= 1; z++)
@@ -200,7 +204,7 @@ class Terrain : public Actor {
                         for (int x = 0; x <= 1; x++)
                         {
                             auto key = (address.pos * TerrainChunk::LODscaleFactor) + ivec3(x,y,z);
-                            testNextChunkToLoad(ChunkAddress(address.layer-1,key),closest,closestDistance,cameraPosition,chunkFound,chunk.allChildrenReady());
+                            testNextChunkToLoad(ChunkAddress(address.layer-1,key),closest,closestDistance,cameraPosition,chunkFound,chunk.allChildrenReady(),center,size);
                         }
                     }
                 }
@@ -349,10 +353,12 @@ class Terrain : public Actor {
                 vec3 largerPosUnrounded = (vec3)pos / (float)TerrainChunk::LODscaleFactor;
 
                 ivec3 largerPos = glm::floor(largerPosUnrounded);
-                if(largerLayer.contains(largerPos) && !largerLayer.at(largerPos).isPlaceHolder) {
+                if(largerLayer.contains(largerPos)) {
                     ivec3 childPos = MathHelper::mod(pos,TerrainChunk::LODscaleFactor);
-                    //std::cout << "childPos: " << StringHelper::toString(childPos) << std::endl;
+                    std::cout << "attaching chunk at" << StringHelper::toString(pos) << "layer" << layer << "to" << StringHelper::toString(largerPos) << " on " << StringHelper::toString(childPos) << std::endl;
                     largerLayer.at(largerPos).setChild(&chunk, childPos);
+                } else {
+                    Debug::warn("child attachment failure");
                 }
             }
             LocationKey keyPosX(pos+ivec3(1,0,0));

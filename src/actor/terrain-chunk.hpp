@@ -85,7 +85,7 @@ class TerrainChunk {
 
     float getPointUnsafe(int x,int y,int z) {
 
-        if(isPlaceHolder) {
+        if(!isDataLoaded) {
             return 0;
         }
         if(x < 0) {
@@ -157,9 +157,10 @@ class TerrainChunk {
 
     public:
 
-        bool renderChildren;
+        bool renderChildren = false;
 
         std::atomic<bool> isPlaceHolder = true;
+        std::atomic<bool> isDataLoaded = false;
 
         static TerrainChunk makePlaceHolder() {
             return TerrainChunk();
@@ -288,7 +289,7 @@ class TerrainChunk {
             generateOre(1,5,0.7f,offset);
             //std::cout << "generation time:" << clock.getTime() << std::endl;
             meshOutOfDate = true;
-            isPlaceHolder = false;
+            isDataLoaded = true;
             // generateOre(2,60,0.4,offset,chunk);
         }
 
@@ -514,7 +515,7 @@ class TerrainChunk {
 
             updateBuffers(vulkan);
 
-            if(childrenReadyToRender) {
+            if(renderChildren && childrenReadyToRender) {
                 for (auto child : children) {
                     if(child == nullptr) continue;
                     assert(child != nullptr);

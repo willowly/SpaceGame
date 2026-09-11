@@ -215,6 +215,18 @@ void GameApplication::debugUI(float dt) {
         static int currentTerrainLayer = 0;
 
         ImGui::InputInt("Layer",&currentTerrainLayer);
+
+        if(glfwGetTime() - chunkInfo.time > 0.5f) {
+            currentTerrainLayer++;
+        }
+
+        if(currentTerrainLayer < 0) {
+            currentTerrainLayer = 0;
+        }
+        if(currentTerrainLayer > 5) {
+            currentTerrainLayer = 5;
+        }
+        
         
         auto terrain = world->getActorOfType<Terrain>();
 
