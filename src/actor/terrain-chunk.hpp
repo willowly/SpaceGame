@@ -157,7 +157,7 @@ class TerrainChunk {
 
     public:
 
-        bool renderChildren = false;
+        bool renderChildren = false; //only modified on the main thread
 
         std::atomic<bool> isPlaceHolder = true;
         std::atomic<bool> isDataLoaded = false;
@@ -174,6 +174,10 @@ class TerrainChunk {
             return meshData.vertices.size();
         }
 
+        bool getChildrenReadyToRender() {
+            return childrenReadyToRender;
+        }
+
         // 
         bool isAvailable() {
             std::shared_lock lock(mtx,std::defer_lock);
@@ -187,7 +191,14 @@ class TerrainChunk {
         }
 
         void updateLOD(vec3 terrainPosition,vec3 cameraPosition,int lODLayer,float LODDistance) {
+
             if(isPlaceHolder) return;
+
+            std::shared_lock lock(mtx,std::defer_lock);
+            if(!lock.try_lock()) {
+                return;
+            }
+
             vec3 center = getWorldCenter(terrainPosition);
             if(lODLayer == 0 || glm::distance(center,cameraPosition) > LODDistance * cellSize) {
                 renderChildren = false;
@@ -475,7 +486,7 @@ class TerrainChunk {
         
 
         void addDebrisRenderables(Vulkan* vulkan,vec3 chunkPosition) {
-            if(debris.size() == 0) return;
+            //if(debris.size() == 0) return;
             if(meshState == -1) return;
             if(debrisBuffer[meshState].buffer == VK_NULL_HANDLE) return; //this shouldn't happen but whatever
             if(settings != nullptr && settings->debrisMesh != nullptr && settings->debrisMaterial != nullptr) {
@@ -511,7 +522,7 @@ class TerrainChunk {
             if(!readyToRender) return;
 
             vec3 chunkPosition = position+((vec3)offset*cellSize);
-            addDebrisRenderables(vulkan,chunkPosition);
+            //addDebrisRenderables(vulkan,chunkPosition);
 
             updateBuffers(vulkan);
 
@@ -861,10 +872,10 @@ class TerrainChunk {
             int index = getChildIndex(pos);
             assert(index >= 0 && index < children.size());
             children[index] = chunk;
-            childrenReadyToRender = allChildrenReady();
+            childrenReadyToRender = allChildrenReadyUnsafe();
         }
 
-        bool allChildrenReady() {
+        bool allChildrenReadyUnsafe() {
             for (auto child : children) {
                 if(child == nullptr) return false;
             }
@@ -872,6 +883,7 @@ class TerrainChunk {
         }
 
         int loadedChildCount() {
+            std::shared_lock lock(mtx);
             int count = 0;
             for (auto child : children) {
                 if(child != nullptr) count++;

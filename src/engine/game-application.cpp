@@ -234,7 +234,7 @@ void GameApplication::debugUI(float dt) {
         if(chunk != nullptr) {
             chunkInfo.time = glfwGetTime();
             chunkInfo.layer = currentTerrainLayer;
-            chunkInfo.childrenLoaded = chunk->loadedChildCount();
+            //chunkInfo.childrenLoaded = chunk->loadedChildCount();
             chunkInfo.pos = terrain->worldToChunkPos(player->getPosition(),currentTerrainLayer);
         }
         ImGui::Text("Info From: %fs ago",glfwGetTime() - chunkInfo.time);

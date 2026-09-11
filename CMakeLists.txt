@@ -9,9 +9,9 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /bigobj /we4183 /we4715 /SUBSYSTEM:WINDOWS")
 endif()
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -Wall -Wextra -Werror=return-type -pedantic -Wno-unused-parameter -g -fsanitize=thread")
-endif()
+# if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -Wall -Wextra -Werror=return-type -pedantic -Wno-unused-parameter -fsanitize=thread")
+# endif()
 
 set(CMAKE_VERBOSE_MAKEFILE ON) 
 

@@ -179,7 +179,7 @@ class TerrainLoader {
                 auto pair = (terrainJobs.at(jobIndex).tryGetJob());
                 auto terrain = world->getActor<Terrain>(pair.first);
                 if(terrain != nullptr) {
-                    std::cout << "loading chunk at" << StringHelper::toString(pair.second.pos) << " layer " << pair.second.layer << std::endl; 
+                    //std::cout << "loading chunk at" << StringHelper::toString(pair.second.pos) << " layer " << pair.second.layer << std::endl; 
                     terrain->addChunk(pair.second);
                     terrainJobs.at(jobIndex).finishJob();
                     if(pair.second.layer < chunksLoaded.size()) {

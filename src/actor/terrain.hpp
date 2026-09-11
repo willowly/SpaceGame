@@ -97,7 +97,7 @@ class Terrain : public Actor {
             auto& chunks = chunkLayers.at(address.layer);
             bool contains = chunks.contains(key);
             if(contains && !chunks.at(key).isPlaceHolder) {
-                std::cout << std::this_thread::get_id() << "chunk not available" << std::endl;
+                //std::cout << std::this_thread::get_id() << "chunk not available" << std::endl;
                 return;
             }
             chunks.at(key).create(offset,settings.chunkSize,newCellSize,nextChunkId,seed,settings);
@@ -204,7 +204,7 @@ class Terrain : public Actor {
                         for (int x = 0; x <= 1; x++)
                         {
                             auto key = (address.pos * TerrainChunk::LODscaleFactor) + ivec3(x,y,z);
-                            testNextChunkToLoad(ChunkAddress(address.layer-1,key),closest,closestDistance,cameraPosition,chunkFound,chunk.allChildrenReady(),center,size);
+                            testNextChunkToLoad(ChunkAddress(address.layer-1,key),closest,closestDistance,cameraPosition,chunkFound,chunk.getChildrenReadyToRender(),center,size);
                         }
                     }
                 }
@@ -355,7 +355,7 @@ class Terrain : public Actor {
                 ivec3 largerPos = glm::floor(largerPosUnrounded);
                 if(largerLayer.contains(largerPos)) {
                     ivec3 childPos = MathHelper::mod(pos,TerrainChunk::LODscaleFactor);
-                    std::cout << "attaching chunk at" << StringHelper::toString(pos) << "layer" << layer << "to" << StringHelper::toString(largerPos) << " on " << StringHelper::toString(childPos) << std::endl;
+                    //std::cout << "attaching chunk at" << StringHelper::toString(pos) << "layer" << layer << "to" << StringHelper::toString(largerPos) << " on " << StringHelper::toString(childPos) << std::endl;
                     largerLayer.at(largerPos).setChild(&chunk, childPos);
                 } else {
                     Debug::warn("child attachment failure");

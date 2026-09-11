@@ -1,15 +1,31 @@
-#include <vector>
+#include <chrono>
+#include <stdexcept>
+#include <thread>
+#define TRACY_ENABLE 1
+#include "tracy/Tracy.hpp"
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 
+#include "engine/game-application.hpp"
+// #include "networking/net-test-app.hpp"
+ #include "engine/test-app.hpp"
+#include <iostream>
+#include <print>
+
+//#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
+
+using std::string;
 int main() {
-    
-    std::vector<int> v;
 
-    v.push_back(3);
+    try {
 
-    v.push_back(2);
+        GameApplication app;
+        
 
-    v.push_back(5);
+        app.run();
 
-    v.push_back(7);
-
+    } catch (std::exception error) {
+        std::cout << error.what() << std::endl;
+    } catch (...) {
+        std::cout << "Caught a non-std::exception object" << std::endl;
+    }
 }
