@@ -34,7 +34,7 @@ class PlayerWidget : public ActorWidget<Character> {
         RecipeSlotWidget* recipeSlot = {};
 
 
-    virtual void draw(DrawContext context,Character& player) {
+    virtual void draw(DrawContext context,World& world,Character& player) {
         if(inventoryWidget == nullptr) {
             Debug::warn("Inventory Widget is null!");
             return;
@@ -57,7 +57,7 @@ class PlayerWidget : public ActorWidget<Character> {
         };
         if(player.inMenu) {
             if(player.openMenuObject != nullptr) {
-                player.openMenuObject->drawMenu(context,player);
+                player.openMenuObject->drawMenu(context,world,player);
             } else {
                 characterPanel(context,player);
             }
@@ -65,6 +65,10 @@ class PlayerWidget : public ActorWidget<Character> {
             inventoryWidget->draw(context,inventoryPanel,player,player.inventory);
 
             
+        }
+
+        if(player.previewMenuObject != nullptr) {
+            player.previewMenuObject->drawMenu(context,world,player);
         }
         toolbarWidget->draw(context,player);
         
@@ -102,6 +106,12 @@ class PlayerWidget : public ActorWidget<Character> {
                 if(context.mouseLeftClicked()) {
                     player.startCraft(*recipe);
                 }
+            }
+            if(recipe == player.currentRecipe) {
+                Rect recipeRect(recipePos,recipeSlot->size);
+                float progress = player.recipeTimer/player.currentRecipe->time;
+                auto progressRect = Rect::anchored(Rect::withPivot(vec2(recipeRect.size.x,recipeRect.size.y*progress),vec2(0.5,1.0f)),recipeRect,vec2(0.5f,1));
+                context.drawRect(progressRect,cursorRectSprite,Color(1,1,1,0.3f));
             }
             recipePos.x += recipeSlot->size.x + static_cast<int>(spacing);
         }

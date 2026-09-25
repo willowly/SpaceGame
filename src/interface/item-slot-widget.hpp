@@ -4,6 +4,7 @@
 #include "item/item-stack.hpp"
 #include "text-widget.hpp"
 #include "interface/widget.hpp"
+#include "actor/character.hpp"
 
 
 class ItemSlotWidget : public Widget {
@@ -73,6 +74,19 @@ class ItemSlotWidget : public Widget {
             }
 
             return context.mouseInside(rect);
+        }
+
+        bool drawAndInteract(DrawContext context,Rect rect,ItemStack& stack,Character& user,ItemSlotInteractOptions options = {}) {
+            if(draw(context,rect,stack)) {
+                if(user.itemSlotHoverActions(context,stack,options)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        bool drawAndInteract(DrawContext context,vec2 position,ItemStack& stack,Character& user,ItemSlotInteractOptions options = {}) {
+            return drawAndInteract(context,Rect(position,size),stack,user,options);
         }
 
         string getTypeName() override {

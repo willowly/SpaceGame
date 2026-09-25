@@ -12,7 +12,7 @@ class ActorWidget : public Widget {
         
 
 
-    virtual void draw(DrawContext context,ActorType& actor) = 0;
+    virtual void draw(DrawContext context,World& world,ActorType& actor) = 0;
 
     
 };

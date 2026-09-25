@@ -100,7 +100,7 @@ class GameApplication {
                 //     break;
                 // }
             }
-
+            
             
             terrainLoader.stop();
             vulkan->waitIdle();

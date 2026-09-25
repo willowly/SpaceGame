@@ -42,7 +42,18 @@
 
 #include "helper/event.hpp"
 
+#include "graphics/basic-model.hpp"
+
 #include <print>
+
+struct LookingAtData {
+    Actor* actor = nullptr;
+    Construction* construction = nullptr;
+    vec3 position = {};
+    vec3 normal = {};
+    ivec3 blockPosition = {};
+    vec3 blockNormal = {};
+};
 
 class Character : public Actor
 {
@@ -85,6 +96,8 @@ public:
     Mesh<Vertex> *model = nullptr;
     MaterialObject* material = nullptr;
     float modelScale = 1;
+
+    BasicModel selectorModel;
 
     // inputs
     bool clickInput = false;
@@ -147,6 +160,8 @@ public:
 
     std::unique_ptr<MenuObject> openMenuObject = nullptr;
 
+    std::unique_ptr<MenuObject> previewMenuObject = nullptr;
+
     std::vector<Recipe *> recipes;
 
     Recipe *currentRecipe = nullptr;
@@ -175,6 +190,7 @@ public:
                                             model(character.model),
                                             material(character.material),
                                             modelScale(character.modelScale),
+                                            selectorModel(character.selectorModel),
                                             Actor(character)
     {
     }
@@ -188,6 +204,8 @@ public:
     CharacterBody body;
 
     vec3 angularVelocity = vec3(0.0f);
+
+    LookingAtData lookingAtData {};
 
     struct EventHeldItemChanged
     {
@@ -231,7 +249,7 @@ public:
         if (!toolbar[selectedTool].isEmpty())
         {
             heldItemData.animationTimer += dt;
-            toolbar[selectedTool].item->addRenderablesHeld(vulkan, *this, dt, interpolation);
+            toolbar[selectedTool].item->addRenderablesHeld(vulkan, *this, dt, interpolation,lookingAtData);
         }
         RenderingSettings settings;
         settings.mainPass = thirdPerson || alwaysRender;
@@ -652,6 +670,8 @@ public:
             world->physics_system.GetBodyInterface().SetObjectLayer(body.getCharacter()->GetInnerBodyID(), Layers::DISABLED);
 
             doConstructionControl(dt);
+
+            lookingAtData = {};
         }
         else
         {
@@ -681,6 +701,8 @@ public:
                     }
                 }
             }
+            
+            getLookingAtData(world);
 
             attractItems(world);
         }
@@ -696,6 +718,45 @@ public:
         handleCamera(world);
 
         handleCrafting(dt);
+    }
+
+    void getLookingAtData(World *world) {
+        auto hitOpt = world->raycast(Ray(getEyePosition(), getEyeDirection()), 10, LayerMask::excludes({Layers::PLAYER, Layers::ITEM}));
+        if (hitOpt)
+        {
+            auto hit = hitOpt.value();
+            lookingAtData.position = hit.point;
+            lookingAtData.normal = hit.normal;
+            lookingAtData.actor = hit.actor;
+            Construction *construction = dynamic_cast<Construction *>(hit.actor);
+            if (construction != nullptr)
+            {
+                // lookingAtData.position = 
+                vec3 interactPointWorld = hit.point - hit.normal * 0.5f;
+                vec3 interactPointLocal = construction->inverseTransformPoint(interactPointWorld);
+                ivec3 interactPointInt = glm::round(interactPointLocal);
+                auto data = construction->getBlock(interactPointInt);
+                
+                ivec3 blockPosition = interactPointInt;
+                vec3 blockNormal = construction->inverseTransformDirection(hit.normal);
+                if(lookingAtData.construction != construction || lookingAtData.blockPosition != blockPosition || lookingAtData.blockNormal != blockNormal) {
+                    auto& blockEntry = construction->getBlock(blockPosition);
+                    clearPreview();
+                    if(blockEntry.block != nullptr) {
+                        blockEntry.block->onLook(construction,blockPosition,blockEntry.storage,*this);
+                    }
+                }
+                lookingAtData.blockPosition = blockPosition;
+                lookingAtData.blockNormal = blockNormal;
+            } else {
+                clearPreview();
+            }
+            lookingAtData.construction = construction;
+        } else {
+            clearPreview();
+            lookingAtData = {};
+        }
+        
     }
 
     void stepClient(World *world, float dt)
@@ -1026,6 +1087,14 @@ public:
         openMenuObject = nullptr;
 
         returnCursor();
+    }
+
+    void setPreview(std::unique_ptr<MenuObject> menuObject) {
+        previewMenuObject = std::move(menuObject);
+    }
+
+    void clearPreview() {
+        setPreview(nullptr);
     }
 
     void openMenu()

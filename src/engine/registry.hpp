@@ -235,10 +235,10 @@ class Registry {
             return getAny(typeStr,name);
         }
 
-        void addRecipesToVector(std::vector<Recipe*>& recipeList,string category,int maxIngredients) {
+        void addRecipesToVector(std::vector<Recipe*>& recipeList,RecipeFilter filter) {
             for(auto pair : getRecipes()) {
                 Recipe* recipe = pair.second;
-                if(recipe->category == category && recipe->ingredients.size() <= maxIngredients) {
+                if(recipe->category == filter.category && recipe->ingredients.size() <= filter.maxIngredients) {
                     recipeList.push_back(recipe);
                 }
             }

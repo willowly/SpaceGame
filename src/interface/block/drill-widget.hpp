@@ -20,7 +20,7 @@ class DrillWidget : public BlockWidget<DrillBlock> {
         InventoryWidget* inventory;
 
 
-        void draw(DrawContext context,Character& user,DrillBlock& drill,BlockStorage& storage) {
+        void draw(DrawContext context,Construction* construction,Character& user,DrillBlock& drill,BlockStorage& storage) {
 
             if(inventory == nullptr) {
                 Debug::warn("item slot is null (container widget)");

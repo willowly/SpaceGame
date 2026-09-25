@@ -41,7 +41,7 @@ class TerrainChunk {
     MeshBuffer meshBuffer[FRAMES_IN_FLIGHT];
     bool gpuMeshOutOfDate = false;
     bool physicsMeshOutOfDate = false;
-    std::array<TerrainType,8> terrainTypes;
+    std::vector<TerrainType> terrainTypes;
     std::atomic<bool> meshOutOfDate;
 
     std::vector<glm::mat4> debris;
@@ -151,7 +151,7 @@ class TerrainChunk {
     TerrainChunk* posZ = nullptr;
     TerrainChunk* posY = nullptr;
 
-    std::array<TerrainChunk*,LODscaleFactor*LODscaleFactor*LODscaleFactor> children;
+    std::array<TerrainChunk*,LODscaleFactor*LODscaleFactor*LODscaleFactor> children = {};
 
 
 
@@ -244,15 +244,14 @@ class TerrainChunk {
         unsigned int getID() {
             return id;
         }
+        
 
         void generateData(GenerationSettings settings,int layer) {
 
             std::unique_lock lock(mtx);
+            terrainTypes.clear();
             if(settings.stoneType != nullptr) {
-                terrainTypes[0] = *settings.stoneType;
-            }
-            if(settings.oreType != nullptr) {
-                terrainTypes[1] = *settings.oreType;
+                terrainTypes.push_back(*settings.stoneType);
             }
             terrainData.resize(size*size*size);
 
@@ -296,42 +295,52 @@ class TerrainChunk {
                 }
             }
 
-            
-            generateOre(1,5,0.7f,offset);
+            if(cellSize == 0.5f) {
+                for (auto& ore : settings.oreSettings)
+                {
+                    generateOre(ore);
+                }
+                
+            }
             //std::cout << "generation time:" << clock.getTime() << std::endl;
             meshOutOfDate = true;
             isDataLoaded = true;
             // generateOre(2,60,0.4,offset,chunk);
         }
 
-        void generateOre(int id,float scale,float surfaceLevel,vec3 offset) {
-            FastNoiseLite noise;
-            noise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
-            noise.SetFractalType(FastNoiseLite::FractalType_FBm);
-            noise.SetFractalOctaves(2);
-            noise.SetSeed(seed);
-            int i = 0;
-            for (int z = 0; z < size; z++)
+        void generateOre(OreSettings ore) {
+
+            int id = terrainTypes.size();
+            terrainTypes.push_back(*ore.type);
+
+            std::random_device rd;
+            std::mt19937 e2(rd());
+            std::uniform_real_distribution<> randomValue(0, 1);
+            std::uniform_real_distribution<> randomPosition(0, size);
+            std::uniform_real_distribution<> randomRadius(ore.minRadius, ore.maxRadius);
+
+            for (size_t i = 0; i < ore.attempts; i++)
             {
-                int percent = ((float)z/size)*100;
-                //std::cout << "generating ore " << percent << "%" << std::endl;
-                for (int y = 0; y < size; y++)
-                {
-                    for (int x = 0; x < size; x++)
-                    {
-                        vec3 samplePos = vec3(x,y,z);
-                        samplePos += offset;
-                        samplePos *= scale;
-                        samplePos *= cellSize;
-                        samplePos += vec3(size*id);
-                        float oreNoise = noise.GetNoise(samplePos.x,samplePos.y,samplePos.z);
-                        if(oreNoise > surfaceLevel) {
-                            terrainData[i].type = id;
-                        }
-                        i++;
-                    }
+                if(randomValue(e2) > ore.chance) {
+                    continue;
                 }
+                
+                vec3 position = {};
+                position.x = randomPosition(e2);
+                position.y = randomPosition(e2);
+                position.z = randomPosition(e2);
+
+                TerraformResults results;
+                TerraformSettings settings;
+                settings.changeTerrainType = true;
+                settings.terrainTypeId = id;
+                terraformSphereUnsafe(cellToLocalSpace(position),randomRadius(e2),0,results,settings);
             }
+            
+        }
+
+        vec3 cellToLocalSpace(vec3 position) {
+            return position + ((vec3)offset * cellSize);
         }
 
         static vec3 getWorldCenter(vec3 terrainPosition,ivec3 pos,float worldSize) {
@@ -346,11 +355,16 @@ class TerrainChunk {
             return vec3(size*cellSize);
         }
 
-        //position is in terrain space
-        bool terraformSphere(vec3 pos,float radius,float change,TerraformResults& results) {
-
-
+        bool terraformSphere(vec3 pos,float radius,float change,TerraformResults& results,TerraformSettings settings = {}) {
             std::unique_lock lock(mtx);
+            return terraformSphereUnsafe(pos,radius,change,results,settings);
+        }
+
+        //position is in terrain space
+        bool terraformSphereUnsafe(vec3 pos,float radius,float change,TerraformResults& results,TerraformSettings settings = {}) {
+
+
+            //std::unique_lock lock(mtx);
             
             auto posCellSpace = localToCellPos(pos);
             assert(cellSize > 0);
@@ -382,6 +396,10 @@ class TerrainChunk {
                             
                             if(old > SURFACE_LVL && terrainData[i].amount < SURFACE_LVL && Random::value() < terrainType.dropChance) {
                                 results.addItem(ItemStack(terrainType.item,1));
+                            }
+
+                            if(settings.changeTerrainType) {
+                                terrainData[i].type = settings.terrainTypeId;
                             }
                             meshOutOfDate = true;
                             modified = true;
@@ -522,7 +540,7 @@ class TerrainChunk {
             if(!readyToRender) return;
 
             vec3 chunkPosition = position+((vec3)offset*cellSize);
-            //addDebrisRenderables(vulkan,chunkPosition);
+            addDebrisRenderables(vulkan,chunkPosition);
 
             updateBuffers(vulkan);
 
@@ -871,6 +889,9 @@ class TerrainChunk {
 
             int index = getChildIndex(pos);
             assert(index >= 0 && index < children.size());
+            if(children[index] != nullptr) {
+                Debug::warn("hi");
+            }
             children[index] = chunk;
             childrenReadyToRender = allChildrenReadyUnsafe();
         }

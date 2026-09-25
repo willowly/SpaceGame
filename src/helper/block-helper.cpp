@@ -179,7 +179,10 @@ ivec3 BlockHelper::rotateByFacing(ivec3 vec,BlockFacing facing) {
     return glm::round(getRotationFromFacing(facing) * (vec3)vec); //kinda crude but it gets the job done
 }
 
-
+Construction::BlockPaletteEntry& BlockHelper::getBlockPlacedOn(Construction* construction,ivec3 position,BlockPlaceInfo info) {
+    ivec3 placedOnPos = glm::round((vec3)position - info.normal);
+    return construction->getBlock(placedOnPos);
+}
 
 void BlockHelper::addConnectedBlockFace(Construction* construction,MeshData<ConstructionVertex>& meshData,vec3 position,quat rotation,TextureID textureID) {
     ivec2 gridSize(8,8);

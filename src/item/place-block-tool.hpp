@@ -20,13 +20,13 @@ class PlaceBlockTool: public Tool {
                 auto actor = overlapResult.value();
                 Terrain* terrain = dynamic_cast<Terrain*>(actor);
                 if(terrain != nullptr) {
-                    Debug::drawCube(pointWorld,vec3(0.9f),rotation,Color::blue,0.2f);
+                    //Debug::drawCube(pointWorld,vec3(0.9f),rotation,Color::blue,0.2f);
                     return PlacementBlockedResult::Terrain;
                 }
-                Debug::drawCube(pointWorld,vec3(0.9f),rotation,Color::red,0.2f);
+                //Debug::drawCube(pointWorld,vec3(0.9f),rotation,Color::red,0.2f);
                 return PlacementBlockedResult::Blocked;
             }
-            Debug::drawCube(pointWorld,vec3(0.9f),rotation,Color::green,0.2f);
+            //Debug::drawCube(pointWorld,vec3(0.9f),rotation,Color::green,0.2f);
             return PlacementBlockedResult::Clear;
         }
 
@@ -118,6 +118,7 @@ class PlaceBlockTool: public Tool {
             Place = 0,
         };
         Block* block = nullptr;
+        MaterialObject* material;
 
         string getTypeName() override {
             return "place_block_tool";
@@ -130,9 +131,22 @@ class PlaceBlockTool: public Tool {
         quat placeAnimationRotation = glm::quat(vec3(glm::radians(-50.0f),0,0));
         float placeAnimationTime = 0.2;
 
-        void addRenderablesHeld(Vulkan* vulkan,Character& user,float dt,float interpolation) override {
-            Tool::addRenderablesHeld(vulkan,user,dt,interpolation);
-
+        void addRenderablesHeld(Vulkan* vulkan,Character& user,float dt,float interpolation,LookingAtData& lookingAtData) override {
+            Tool::addRenderablesHeld(vulkan,user,dt,interpolation,lookingAtData);
+            if(lookingAtData.construction != nullptr) {
+                auto construction = lookingAtData.construction;
+                vec3 position = construction->transformPointInterpolated(lookingAtData.blockPosition,interpolation);
+                quat rotation = construction->getInterpolatedRotation(interpolation);
+                if(abs(glm::dot(lookingAtData.blockNormal,vec3(0,1,0))) > 0.9f) {
+                    rotation = rotation * glm::quatLookAt(lookingAtData.blockNormal,vec3(1,0,0));
+                } else {
+                    rotation = rotation * glm::quatLookAt(lookingAtData.blockNormal,vec3(0,1,0));
+                }
+                RenderingSettings settings;
+                settings.shadowPass = false;
+                user.selectorModel.addRenderables(vulkan,position,rotation,settings);
+            }
+            
         }
 
         virtual std::pair<quat,vec3> animate(Character& user,float dt) {

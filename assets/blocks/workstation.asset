@@ -1,0 +1,16 @@
+type: crafter
+craft_speed: 1.000000
+mesh: block
+texture: workstation
+widget: furnace_widget
+category: crafting
+max_ingredients: 2
+fuel_burner: 
+  burn_speed: 1.000000
+  smart_fuel: 0
+electric: 1
+electric_use_speed: 3.000000
+allow_manual: 1
+manual_progress: 0.500000
+default_drop: workstation
+solid: 0

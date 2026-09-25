@@ -8,81 +8,64 @@
 #include "interface/text-widget.hpp"
 #include "interface/item-slot-widget.hpp"
 
-class InventoryWidget : public Widget {
+class RecipeGroupWidget : public Widget {
     
     public:
         Sprite backgroundSprite;
+        Color backgroundColor;
         float margin = 5;
         float spacing = 2;
         int columns = 8;
 
-        ItemSlotWidget* itemSlot;
+        RecipeSlotWidget* recipeSlot;
 
-        TextWidget* tooltipTextTitle;
+        Recipe* draw(DrawContext context,Rect rect,std::vector<Recipe*>& recipes) {
 
-        void draw(DrawContext context,Rect rect,Character& user,IInventory& inventory) {
-
-            if(itemSlot == nullptr) {
-                Debug::warn("item slot is null (inventory widget)");
+            if(recipeSlot == nullptr) {
+                Debug::warn("recipe slot is null (recipe group widget)");
+                return nullptr;
             }
 
             Rect screen = context.getScreenSize();
-
-            auto backgroundColor = Color(0.2,0.2,0.2);
-            auto slots = Color(0.1,0.1,0.1);
-            auto slotsHover = Color(0.1,0.1,1);
             //interface.drawRect(vulkan,glm::vec2(0,-3),glm::vec2(101,12),glm::vec2(0.5,1),vec2(0.5,1),Color(0.5,0.5,0.5),solidTexture);
             
             Rect mainPanel = rect;
             context.drawRect(mainPanel,backgroundSprite,backgroundColor);
             
             ItemSlotInteractOptions interactOptions;
-            
-            if(inventory.maxWeight == 0) {
-                tooltipTextTitle->draw(context,mainPanel.topLeft() + vec2(margin),std::format("{:0}",inventory.getTotalWeight()));
-            } else {
-                tooltipTextTitle->draw(context,mainPanel.topLeft() + vec2(margin),std::format("{:0}/{:0}",inventory.getTotalWeight(),inventory.maxWeight));
-                interactOptions.spaceLeft = inventory.getSpaceLeft();
-            }
 
             auto slotPosition = mainPanel.position;
             slotPosition += vec2(margin);
-            slotPosition.y += tooltipTextTitle->height;
-            slotPosition.y += margin;
 
-            
+            Recipe* clickedRecipe = nullptr;
 
             bool hoveringPanel = context.mouseInside(mainPanel);
             int column = 0;
-            for (auto stackPtr : inventory.getItems())
+            for (auto recipe : recipes)
             {
-                if(stackPtr == nullptr) continue;
+                if(recipe == nullptr) continue;
 
-                if(itemSlot->draw(context,slotPosition,*stackPtr)) {
-                    if(user.cursorStack.isEmpty()) {
-                        user.itemSlotHoverActions(context,*stackPtr,interactOptions);
-                        hoveringPanel = false;
+                if(recipeSlot->draw(context,slotPosition,*recipe)) {
+                    if(context.mouseLeftClicked()) {
+                        clickedRecipe = recipe;
                     }
                 }
 
-                slotPosition.x += (itemSlot->size.x + spacing);
+                slotPosition.x += (recipeSlot->size.x + spacing);
                 column++;
                 if(column == columns) {
                     slotPosition.x = mainPanel.topLeft().x + margin;
-                    slotPosition.y += (itemSlot->size.y + spacing);
+                    slotPosition.y += (recipeSlot->size.y + spacing);
                     column = 0;
                 }
             }
 
-            if(hoveringPanel) {
-                ItemStack stack = user.cursorStack;
-                user.inventoryHoverActions(context,inventory);
-            }
+            return clickedRecipe;
             
             
         }
 
         string getTypeName() {
-            return "inventory_widget";
+            return "recipe_group_widget";
         }
 };

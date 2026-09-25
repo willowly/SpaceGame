@@ -1,0 +1,16 @@
+type: resource_item
+display_name: Lead Gear
+default_sprite: 
+  texture: lead_gear_item
+  rect: 
+    position: 
+      x: 0.000000
+      y: 0.000000
+    size: 
+      x: 0.000000
+      y: 0.000000
+default_model: item_plate
+default_material: error
+default_model_scale: 0.300000
+default_weight: 1.000000
+fuel_value: 0.000000

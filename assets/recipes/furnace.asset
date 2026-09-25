@@ -3,7 +3,7 @@ category: crafting
 time: 3.000000
 ingredients: 
   0: 
-    item: stone
+    item: sand
     amount: 10
 result: 
   item: furnace

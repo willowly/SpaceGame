@@ -16,6 +16,40 @@ class Block;
 typedef std::variant<std::monostate,Item*,Recipe*> ResourcePointer; //monostate to hold nullptr 
 
 
+struct BlockStorageVarInitalizer {
+    int ints = 0;
+    int floats = 0;
+    int strings = 0;
+    int stacks = 0;
+    int pointers = 0;
+    int blockDisplays = 0;
+
+    int getNextInt() {
+        ints++;
+        return ints-1;
+    }
+    int getNextFloat() {
+        floats++;
+        return floats-1;
+    }
+    int getNextString() {
+        strings++;
+        return strings-1;
+    }
+    int getNextStack() {
+        stacks++;
+        return stacks-1;
+    }
+    int getNextPointer() {
+        pointers++;
+        return pointers-1;
+    }
+    int getNextBlockDisplay() {
+        blockDisplays++;
+        return blockDisplays-1;
+    }
+};
+
 class BlockStorage : public GenericStorage {
 
     std::vector<ItemStack> stacks;

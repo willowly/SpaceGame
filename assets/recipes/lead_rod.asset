@@ -1,0 +1,10 @@
+type: recipe
+category: smelting
+time: 5.000000
+ingredients: 
+  0: 
+    item: lead_ore
+    amount: 3
+result: 
+  item: lead_rod
+  amount: 1

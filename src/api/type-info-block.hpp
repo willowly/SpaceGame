@@ -6,6 +6,11 @@
 namespace TypeInfoLoader {
 
     inline void loadBlock(Registry& registry) {
+
+
+        TypeInfo* fuelBurner = registry.addTypeInfo<FuelBurner>("fuel_burner");
+        fuelBurner->addConstProperty("burn_speed",&FuelBurner::burnSpeed);
+        fuelBurner->addConstProperty("smart_fuel",&FuelBurner::smartFuel);
         
         TypeInfo* block = registry.addTypeInfo<Block>("block");
         block->addConstProperty("default_drop",&Block::defaultDrop); 
@@ -27,13 +32,34 @@ namespace TypeInfoLoader {
         cockpit->addConstProperty("texture",&CockpitBlock::texture);
         cockpit->setParent(block);
 
-        TypeInfo* furnace = registry.addTypeInfo<FurnaceBlock>("furnace");
-        furnace->constructorFunction = [&]() {return std::make_unique<FurnaceBlock>();};
-        furnace->addConstProperty("fuel_max",&FurnaceBlock::fuelMax);
-        furnace->addConstProperty("craft_speed",&FurnaceBlock::craftSpeed);
-        furnace->addConstProperty("mesh",&FurnaceBlock::mesh);
-        furnace->addConstProperty("texture",&FurnaceBlock::texture);
-        furnace->addConstProperty("widget",&FurnaceBlock::widget);
+        TypeInfo* solarPanel = registry.addTypeInfo<SolarPanelBlock>("solar_panel");
+        solarPanel->constructorFunction = [&]() {return std::make_unique<SolarPanelBlock>();};
+        solarPanel->addConstProperty("mesh",&SolarPanelBlock::mesh);
+        solarPanel->addConstProperty("texture",&SolarPanelBlock::texture);
+        solarPanel->addConstProperty("power_output",&SolarPanelBlock::powerOutput);
+        solarPanel->addConstProperty("max_charge",&SolarPanelBlock::maxCharge);
+        solarPanel->setParent(block);
+
+        TypeInfo* battery = registry.addTypeInfo<BatteryBlock>("battery");
+        battery->constructorFunction = [&]() {return std::make_unique<BatteryBlock>();};
+        battery->addConstProperty("texture",&BatteryBlock::texture);
+        battery->addConstProperty("max_charge",&BatteryBlock::maxCharge);
+        battery->addConstProperty("widget",&BatteryBlock::widget);
+        battery->setParent(block);
+
+        TypeInfo* furnace = registry.addTypeInfo<CrafterBlock>("crafter");
+        furnace->constructorFunction = [&]() {return std::make_unique<CrafterBlock>();};
+        furnace->addConstProperty("craft_speed",&CrafterBlock::craftSpeed);
+        furnace->addConstProperty("mesh",&CrafterBlock::mesh);
+        furnace->addConstProperty("texture",&CrafterBlock::texture);
+        furnace->addConstProperty("widget",&CrafterBlock::widget);
+        furnace->addConstProperty("category",&CrafterBlock::category);
+        furnace->addConstProperty("max_ingredients",&CrafterBlock::maxIngredients);
+        furnace->addConstProperty("fuel_burner",&CrafterBlock::fuelBurner);
+        furnace->addConstProperty("electric",&CrafterBlock::electric);
+        furnace->addConstProperty("electric_use_speed",&CrafterBlock::electricUseSpeed);
+        furnace->addConstProperty("allow_manual",&CrafterBlock::allowManual);
+        furnace->addConstProperty("manual_progress",&CrafterBlock::manualProgress);
         furnace->setParent(block);
 
         TypeInfo* connected = registry.addTypeInfo<ConnectedBlock>("connected");

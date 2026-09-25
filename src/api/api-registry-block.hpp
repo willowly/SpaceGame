@@ -8,7 +8,7 @@
 #include "api/api-registry.hpp"
 #include <block/cockpit-block.hpp>
 #include <block/thruster-block.hpp>
-#include <block/furnace-block.hpp>
+#include <block/crafter-block.hpp>
 #include "block/connected-block.hpp"
 
 using std::string,std::variant;
@@ -50,10 +50,9 @@ namespace API {
         getMesh(table,"mesh",block->mesh,registry,true);
         getTexture(table,"texture",block->texture,registry,true);
     }
-    inline void loadBlockFurnace(sol::table table,FurnaceBlock* block,Registry& registry) {
+    inline void loadBlockFurnace(sol::table table,CrafterBlock* block,Registry& registry) {
         getMesh(table,"mesh",block->mesh,registry,true);
         getTexture(table,"texture",block->texture,registry,true);
-        get<float>(table,"fuel_max",block->fuelMax,false);
         get<float>(table,"speed",block->craftSpeed,false);
         // should be other stuff like speed etc
     }
@@ -78,7 +77,7 @@ namespace API {
             return;
         }
         if(type == "furnace") {
-            FurnaceBlock* block = registry.addBlock<FurnaceBlock>(name);
+            CrafterBlock* block = registry.addBlock<CrafterBlock>(name);
             loadBlockFurnace(table,block,registry);
             Debug::info("Loaded Furnace Block \"" + name + "\"",InfoPriority::MEDIUM);
             return;

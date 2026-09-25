@@ -17,6 +17,14 @@ struct TerrainType {
     float dropChance = 0.2f;
 };
 
+struct OreSettings {
+    TerrainType* type;
+    int attempts;
+    float chance;
+    int minRadius;
+    float maxRadius;
+};
+
 struct GenerationSettings {
     float noiseScale = 100;
     float radius = 20;
@@ -28,12 +36,9 @@ struct GenerationSettings {
     float debrisSize = 0.1f;
     float debrisSizeVariance = 0.1f;
     TerrainType* stoneType = {};
-    TerrainType* oreType = {};
+    std::vector<OreSettings> oreSettings;
 
-    struct OreSettings {
-        TerrainType type;
-        
-    };
+    
 
 };
 
@@ -72,4 +77,10 @@ struct TerraformResults {
         }
         items.push_back(giveStack);
     }
+};
+
+struct TerraformSettings {
+    bool changeTerrainType = false;
+    int terrainTypeId;
+
 };

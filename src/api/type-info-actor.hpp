@@ -32,6 +32,7 @@ namespace TypeInfoLoader {
         character->addConstProperty("model",&Character::model);
         character->addConstProperty("material",&Character::material);
         character->addConstProperty("model_scale",&Character::modelScale);
+        character->addConstProperty("selector_model",&Character::selectorModel);
         character->addConstProperty("widget",&Character::widget);
         character->setParent(actor);
 
@@ -59,9 +60,16 @@ namespace TypeInfoLoader {
         generationSettings->addConstProperty("noise_gain",&GenerationSettings::noiseGain);
         generationSettings->addConstProperty("noise_lacunarity",&GenerationSettings::noiseLacunarity);
         generationSettings->addConstProperty("stone_type",&GenerationSettings::stoneType); 
-        generationSettings->addConstProperty("ore_type",&GenerationSettings::oreType); 
+        generationSettings->addConstProperty("ore_settings",&GenerationSettings::oreSettings); 
         generationSettings->addConstProperty("debris_chance",&GenerationSettings::debrisChance);
         generationSettings->addConstProperty("debris_size",&GenerationSettings::debrisSize);
+
+        auto oreSettings = registry.addTypeInfo<OreSettings>("ore_settings");
+        oreSettings->addConstProperty("type",&OreSettings::type);
+        oreSettings->addConstProperty("attempts",&OreSettings::attempts);
+        oreSettings->addConstProperty("chance",&OreSettings::chance);
+        oreSettings->addConstProperty("minRadius",&OreSettings::minRadius);
+        oreSettings->addConstProperty("maxRadius",&OreSettings::maxRadius);
         
        
 

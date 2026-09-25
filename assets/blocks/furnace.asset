@@ -1,8 +1,13 @@
-type: furnace
-fuel_max: 10.000000
+type: crafter
 craft_speed: 1.000000
 mesh: furnace
-texture: furnace
+texture: furnace_lit
 widget: furnace_widget
+category: smelting
+fuel_burner: 
+  burn_speed: 1.000000
+  smart_fuel: 1
+electric: 0
+electric_use_speed: 0.000000
 default_drop: furnace
 solid: 0

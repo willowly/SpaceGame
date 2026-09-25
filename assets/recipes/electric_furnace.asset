@@ -1,0 +1,13 @@
+type: recipe
+category: crafting
+time: 5.000000
+ingredients: 
+  0: 
+    item: tin_plate
+    amount: 10
+  1: 
+    item: lead_gear
+    amount: 4
+result: 
+  item: electric_furnace
+  amount: 1

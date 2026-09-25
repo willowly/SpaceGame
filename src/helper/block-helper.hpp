@@ -34,4 +34,6 @@ namespace BlockHelper {
     void addConnectedBlock(Construction* construction,MeshData<ConstructionVertex>& meshData,ivec3 position,TextureID texture);
 
     void addSlopedBlock(Construction* construction,MeshData<ConstructionVertex>& meshData,ivec3 position,int orientation,TextureID texture);
+
+    Construction::BlockPaletteEntry& getBlockPlacedOn(Construction* construction,ivec3 position,BlockPlaceInfo info);
 }

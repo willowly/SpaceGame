@@ -1,0 +1,9 @@
+type: lit_material
+data: 
+  texture: selector
+  color: 
+    x: 0.000000
+    y: 1.000000
+    z: 0.000000
+    w: 1.000000
+shader: unlit

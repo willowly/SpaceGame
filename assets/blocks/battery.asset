@@ -1,0 +1,6 @@
+type: battery
+texture: battery
+max_charge: 100.000000
+widget: battery_preview
+default_drop: battery_block
+solid: 1

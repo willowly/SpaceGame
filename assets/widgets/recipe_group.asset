@@ -1,0 +1,19 @@
+type: recipe_group_widget
+background_sprite: 
+  texture: solid
+  rect: 
+    position: 
+      x: 0.000000
+      y: 0.000000
+    size: 
+      x: 0.000000
+      y: 0.000000
+background_color: 
+  r: 0.121569
+  g: 0.121569
+  b: 0.121569
+  a: 0.149020
+margin: 5.000000
+spacing: 2.000000
+columns: 8
+recipe_slot: recipe_slot

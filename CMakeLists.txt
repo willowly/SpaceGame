@@ -9,9 +9,9 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /bigobj /we4183 /we4715 /SUBSYSTEM:WINDOWS")
 endif()
 
-# if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -Wall -Wextra -Werror=return-type -pedantic -Wno-unused-parameter -fsanitize=thread")
-# endif()
+endif()
 
 set(CMAKE_VERBOSE_MAKEFILE ON) 
 
@@ -259,6 +259,7 @@ endmacro()
 message("output dir: ${OUTPUT_DIR}")
 
 compile_shader("lit")
+compile_shader("unlit")
 compile_shader("terrain")
 compile_shader("terrain-debug")
 compile_shader("ui")

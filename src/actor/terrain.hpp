@@ -588,14 +588,14 @@ class Terrain : public Actor {
         data.actor = Actor::save();
         data.seed = seed;
         data.terrainSettings = settings.name;
-        for(auto& chunkLayer : chunkLayers) {
-            data.chunkLayers.push_back({});
-            auto& dataChunkLayer = data.chunkLayers.back();
-            for(auto& pair : chunkLayer) {
-                auto& chunk = pair.second;
-                dataChunkLayer.chunks.push_back(chunk.save(pair.first.asVec3()));
-            }
-        }
+        // for(auto& chunkLayer : chunkLayers) {
+        //     data.chunkLayers.push_back({});
+        //     auto& dataChunkLayer = data.chunkLayers.back();
+        //     for(auto& pair : chunkLayer) {
+        //         auto& chunk = pair.second;
+        //         dataChunkLayer.chunks.push_back(chunk.save(pair.first.asVec3()));
+        //     }
+        // }
 
         return data;
     }

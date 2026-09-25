@@ -1,0 +1,13 @@
+type: recipe
+category: crafting
+time: 1.000000
+ingredients: 
+  0: 
+    item: lead_rod
+    amount: 4
+  1: 
+    item: tin_plate
+    amount: 1
+result: 
+  item: lead_gear
+  amount: 1

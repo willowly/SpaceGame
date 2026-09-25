@@ -781,6 +781,14 @@ namespace DebugMenu {
             getMetaData(ptr).unsaved = true;
         }
 
+        void newObjectButton(string name) {
+            string label = "New " + prettyPrintLabel(name);
+            strcpy(nameBuffer.data(), "");
+            if(ImGui::Selectable(label.c_str())) {
+                createObjectPopup = label;
+            }
+        }
+
         void newObjectMenu(string name) {
             string label = "New " + prettyPrintLabel(name);
             if(ImGui::BeginMenu(label.c_str())) {
@@ -801,33 +809,72 @@ namespace DebugMenu {
         }
 
         template<typename T>
-        void newObjectModal(string name) {
+        void newAnyModal(string name) {
+            auto info = registry->getTypeInfo(name);
+            auto label = "New " + prettyPrintLabel(info->getName());
+            if(createObjectPopup == label) {
+                ImGui::OpenPopup(label.c_str());
+            }
+            if(ImGui::BeginPopupModal(label.c_str(),NULL,ImGuiWindowFlags_AlwaysAutoResize)) {
+                if(createObjectPopup != "") {
+                    createObjectPopup = "";
+                    ImGui::SetKeyboardFocusHere();
+                }
+                ImGui::InputText("Name",nameBuffer.data(),nameBuffer.size());
+                if(ImGui::Button("Create")) {
+                    newAny<T>((string)nameBuffer.data());
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::SameLine();
+                if(ImGui::Button("Cancel")) {
+                    ImGui::CloseCurrentPopup();
+                }
+                ImGui::EndPopup();
+                
+            }
+        }
+
+        template<typename T>
+        void newObjectModalDerived(string name) {
             for (auto info : registry->getTypeInfo(name)->derived)
             {
-                if(!info->constructorFunction) {
-                    continue;
+                newObjectModal<T>(info);
+            }
+        }
+        template<typename T>
+        void newObjectModal(string name) {
+            newObjectModal<T>(registry->getTypeInfo(name));
+        }
+        template<typename T>
+        void newObjectModal(TypeInfo* info) {
+
+            if(info == nullptr) {
+                return;
+            }
+            
+            if(!info->constructorFunction) {
+                return;
+            }
+            auto label = "New " + prettyPrintLabel(info->getName());
+            if(createObjectPopup == label) {
+                ImGui::OpenPopup(label.c_str());
+            }
+            if(ImGui::BeginPopupModal(label.c_str(),NULL,ImGuiWindowFlags_AlwaysAutoResize)) {
+                if(createObjectPopup != "") {
+                    createObjectPopup = "";
+                    ImGui::SetKeyboardFocusHere();
                 }
-                auto label = "New " + prettyPrintLabel(info->getName());
-                if(createObjectPopup == label) {
-                    ImGui::OpenPopup(label.c_str());
+                ImGui::InputText("Name",nameBuffer.data(),nameBuffer.size());
+                if(ImGui::Button("Create")) {
+                    newObject<T>((string)nameBuffer.data(),info);
+                    ImGui::CloseCurrentPopup();
                 }
-                if(ImGui::BeginPopupModal(label.c_str(),NULL,ImGuiWindowFlags_AlwaysAutoResize)) {
-                    if(createObjectPopup != "") {
-                        createObjectPopup = "";
-                        ImGui::SetKeyboardFocusHere();
-                    }
-                    ImGui::InputText("Name",nameBuffer.data(),nameBuffer.size());
-                    if(ImGui::Button("Create")) {
-                        newObject<T>((string)nameBuffer.data(),info);
-                        ImGui::CloseCurrentPopup();
-                    }
-                    ImGui::SameLine();
-                    if(ImGui::Button("Cancel")) {
-                        ImGui::CloseCurrentPopup();
-                    }
-                    ImGui::EndPopup();
-                    
+                ImGui::SameLine();
+                if(ImGui::Button("Cancel")) {
+                    ImGui::CloseCurrentPopup();
                 }
+                ImGui::EndPopup();
+                
             }
         }
 
@@ -898,14 +945,16 @@ namespace DebugMenu {
                     newObjectMenu("material_object");
                     newObjectMenu("actor");
                     newObjectMenu("widget");
+                    newObjectButton("recipe");
                     ImGui::EndPopup();
                 }
 
-                newObjectModal<Item>("item");
-                newObjectModal<Block>("block");
-                newObjectModal<MaterialObject>("material_object");
-                newObjectModal<Actor>("actor");
-                newObjectModal<Widget>("widget");
+                newObjectModalDerived<Item>("item");
+                newObjectModalDerived<Block>("block");
+                newObjectModalDerived<MaterialObject>("material_object");
+                newObjectModalDerived<Actor>("actor");
+                newObjectModalDerived<Widget>("widget");
+                newObjectModal<Recipe>("recipe");
 
     
 

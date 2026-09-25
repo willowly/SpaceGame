@@ -1,0 +1,10 @@
+type: recipe
+category: crafting
+time: 2.000000
+ingredients: 
+  0: 
+    item: lead_rod
+    amount: 5
+result: 
+  item: battery_block
+  amount: 1

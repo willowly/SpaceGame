@@ -4,7 +4,10 @@ time: 1.000000
 ingredients: 
   0: 
     item: tin_plate
-    amount: 3
+    amount: 1
+  1: 
+    item: lead_rod
+    amount: 5
 result: 
   item: thruster
   amount: 1

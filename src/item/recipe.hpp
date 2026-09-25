@@ -4,6 +4,11 @@
 #include "engine/object.hpp"
 
 
+struct RecipeFilter {
+    string category = "";
+    int maxIngredients = 1;
+};
+
 struct Recipe : public Object {
 
     string category;

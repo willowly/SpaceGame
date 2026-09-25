@@ -12,6 +12,8 @@ struct ItemStack;
 
 class Character;
 
+class LookingAtData;
+
 // just the durability bar for now, but maybe there will be more idk
 struct ItemDisplayData {
     bool bar = false;
@@ -38,6 +40,7 @@ class Item : public Object {
         MaterialObject* defaultMaterial = nullptr;
         float defaultModelScale = 0.3f;
         float defaultWeight = 1;
+        float fuelValue = 0;
 
         virtual ~Item() {}
 
@@ -80,8 +83,8 @@ class Item : public Object {
             
         }
 
-        virtual void addRenderablesHeld(Vulkan* vulkan,Character& user,float dt,float interpolation) {
-            
+        virtual void addRenderablesHeld(Vulkan* vulkan,Character& user,float dt,float interpolation,LookingAtData& LookingAtData) {
+
         }
 
         virtual float getWeight() {

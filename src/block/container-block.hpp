@@ -39,7 +39,7 @@ public:
             return;
         }
 
-        auto menuObj = std::make_unique<BlockMenuObject<ContainerBlock>>(construction, position, *widget);
+        auto menuObj = std::make_unique<BlockMenuObject<ContainerBlock>>(construction->id, position, *widget);
         character.openMenu(std::move(menuObj));
     }
 

@@ -14,9 +14,9 @@ struct BasicModel {
     quat rotation = {};
     float scale = 1;
 
-    void addRenderables(Vulkan* vulkan,vec3 position,quat rotation) {
+    void addRenderables(Vulkan* vulkan,vec3 position,quat rotation,RenderingSettings settings = {}) {
         if(mesh == nullptr) return;
         if(material == nullptr) return;
-        mesh->addToRender(vulkan,material->material,position + rotation*offset,rotation * this->rotation,vec3(scale));
+        mesh->addToRender(vulkan,material->material,position + rotation*offset,rotation * this->rotation,vec3(scale),settings);
     }
 };

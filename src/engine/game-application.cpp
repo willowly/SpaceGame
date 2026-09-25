@@ -12,17 +12,18 @@ void GameApplication::spawnPlayer(vec3 pos) {
 }
 
 void GameApplication::spawnPlanetScene()  {
-    spawnPlayer(vec3(-57,-3,6));
+    spawnPlayer(vec3(-57,0,6));
 
     std::minstd_rand rnd;
 
     rnd.seed(1);
 
-    auto settings = registry.getPtr<TerrainSettings>("asteroid");
-
+    
     auto terrainMaterial = registry.getMaterial(Loader::DEFAULT_TERRAIN_MATERIAL_KEY);
+    auto dustSettings = registry.getPtr<TerrainSettings>("dust");
+    auto moonSettings = registry.getPtr<TerrainSettings>("moon");
 
-    if(settings == nullptr) {
+    if(dustSettings == nullptr) {
         return;
     }
 
@@ -35,7 +36,9 @@ void GameApplication::spawnPlanetScene()  {
     //     terrainLoader.addTerrain(terrain->id);
     // }
 
-    terrain = world->spawn(Terrain::makeInstance(terrainMaterial,*settings,rnd(),vec3(0,-settings->generationSettings.radius,0)));
+    terrain = world->spawn(Terrain::makeInstance(terrainMaterial,*dustSettings,rnd(),vec3(0,-dustSettings->generationSettings.radius,0)));
+    terrainLoader.addTerrain(terrain->id);
+    terrain = world->spawn(Terrain::makeInstance(terrainMaterial,*moonSettings,rnd(),vec3(1500,0,0)));
     terrainLoader.addTerrain(terrain->id);
 }
 
@@ -57,6 +60,8 @@ void GameApplication::setup() {
     Debug::setLogInfoEnabled(true);
 
     lastTime = (float)glfwGetTime();
+
+    vulkan->ambientLight = Color::black;
 
     SkyboxMaterialData skyboxMaterial;
     skyboxMaterial.top = registry.getTexture("space_up");
@@ -81,27 +86,74 @@ void GameApplication::setup() {
     registry.addAny<TerrainType>("sand",TerrainType("sand",registry.getItem("sand"),registry.getTexture("sand")));
     registry.addAny<TerrainType>("stone",TerrainType("stone",registry.getItem("stone"),registry.getTexture("rock")));
     registry.addAny<TerrainType>("tin_ore",TerrainType("tin_ore",registry.getItem("tin_ore"),registry.getTexture("tin_ore")));
+    registry.addAny<TerrainType>("coal_ore",TerrainType("coal_ore",registry.getItem("coal_ore"),registry.getTexture("coal_ore")));
+     registry.addAny<TerrainType>("lead_ore",TerrainType("lead_ore",registry.getItem("lead_ore"),registry.getTexture("lead_ore")));
     
-    registry.addAny<TerrainSettings>("asteroid",{});
+    registry.addAny<TerrainSettings>("dust",{});
+    registry.addAny<TerrainSettings>("moon",{});
 
-    auto settings = registry.getPtr<TerrainSettings>("asteroid");
-    settings->name = "asteroid";
-    settings->generationSettings.noiseScale = 1;
-    settings->generationSettings.radius = 500;
-    settings->generationSettings.noiseFactor = 15;
-    settings->generationSettings.noiseOctaves = 5;
-    settings->generationSettings.noiseGain = 0.3f;
-    settings->generationSettings.noiseLacunarity = 2.5f;
-    settings->generationSettings.stoneType = registry.getPtr<TerrainType>("sand");
-    settings->generationSettings.oreType = registry.getPtr<TerrainType>("tin_ore");
-    settings->LODdistance = 50;
-    settings->LODlayers = 6;
-    settings->gravity = 4;
-    settings->debrisMesh = registry.getModel("item_ore");
-    settings->debrisMaterial = registry.getPtr<MaterialObject>("sand");
+    auto dustSettings = registry.getPtr<TerrainSettings>("dust");
+    dustSettings->name = "dust";
+    dustSettings->generationSettings.noiseScale = 1;
+    dustSettings->generationSettings.radius = 500;
+    dustSettings->generationSettings.noiseFactor = 15;
+    dustSettings->generationSettings.noiseOctaves = 5;
+    dustSettings->generationSettings.noiseGain = 0.3f;
+    dustSettings->generationSettings.noiseLacunarity = 2.5f;
+    dustSettings->generationSettings.stoneType = registry.getPtr<TerrainType>("sand");
+    dustSettings->generationSettings.oreSettings.push_back(
+        OreSettings{
+            .type = registry.getPtr<TerrainType>("tin_ore"),
+            .attempts = 8,
+            .chance = 0.3f,
+            .minRadius = 1,
+            .maxRadius = 3,
+        }
+    );
+    dustSettings->generationSettings.oreSettings.push_back(
+        OreSettings{
+            .type = registry.getPtr<TerrainType>("coal_ore"),
+            .attempts = 4,
+            .chance = 0.3f,
+            .minRadius = 1,
+            .maxRadius = 2,
+        }
+    );
+    dustSettings->generationSettings.oreSettings.push_back(
+        OreSettings{
+            .type = registry.getPtr<TerrainType>("lead_ore"),
+            .attempts = 3,
+            .chance = 0.2f,
+            .minRadius = 1,
+            .maxRadius = 2.5,
+        }
+    );
+    dustSettings->LODdistance = 50;
+    dustSettings->LODlayers = 6;
+    dustSettings->gravity = 4;
+    dustSettings->debrisMesh = registry.getModel("item_ore");
+    dustSettings->debrisMaterial = registry.getPtr<MaterialObject>("sand");
+
+    auto moonSettings = registry.getPtr<TerrainSettings>("moon");
+    moonSettings->name = "moon";
+    moonSettings->generationSettings.noiseScale = 1;
+    moonSettings->generationSettings.radius = 100;
+    moonSettings->generationSettings.noiseFactor = 8;
+    moonSettings->generationSettings.noiseOctaves = 5;
+    moonSettings->generationSettings.noiseGain = 0.3f;
+    moonSettings->generationSettings.noiseLacunarity = 2.5f;
+    moonSettings->generationSettings.stoneType = registry.getPtr<TerrainType>("stone");
+    moonSettings->LODdistance = 50;
+    moonSettings->LODlayers = 5;
+    moonSettings->gravity = 2;
+    moonSettings->debrisMesh = registry.getModel("item_ore");
+    moonSettings->debrisMaterial = registry.getPtr<MaterialObject>("stone");
     
     
-    registry.addRecipesToVector(playerPrototype->recipes,"crafting",1);
+    registry.addRecipesToVector(playerPrototype->recipes,RecipeFilter{
+        .category = "crafting",
+        .maxIngredients = 1
+    });
     
 
     PipelineOptions options;
@@ -113,8 +165,6 @@ void GameApplication::setup() {
 
     // recipes
     
-    FurnaceBlock* furnace = static_cast<FurnaceBlock*>(registry.getBlock("furnace"));
-    registry.addRecipesToVector(furnace->recipes,"smelting",1);
     // wowie
 
     // auto pickaxe = dynamic_cast<PickaxeTool*>(registry.getItem("pickaxe")); 
@@ -187,10 +237,10 @@ void GameApplication::debugUI(float dt) {
     ImGui::Begin("Console");
         if(ImGui::InputText("##",consoleBuffer,IM_ARRAYSIZE(consoleBuffer),ImGuiInputTextFlags_EnterReturnsTrue)) {
             Debug::lua("> " + (string)consoleBuffer);
-            try {
-                auto result = lua.do_string("return " + (string)consoleBuffer);
+            auto result = lua.do_string("return " + (string)consoleBuffer);
+            if(result.valid()) {
                 lua["print"](result);
-            } catch(...) {
+            } else {
                 lua.do_string(consoleBuffer);
             }
 
@@ -203,70 +253,73 @@ void GameApplication::debugUI(float dt) {
             ImGui::Text(line.c_str());
         }
     ImGui::End();
+    
+    // if(terrain == nullptr) {
+    //     return;
+    // }
+    // ImGui::Begin("TerrainLoader");
 
-    ImGui::Begin("TerrainLoader");
+    //     for (size_t i = 0; i < terrainLoader.chunksLoaded.size(); i++)
+    //     {
+    //         int chunksLoaded = terrainLoader.chunksLoaded[i];
+    //         ImGui::Text("Layer %i chunks Loaded: %i",i,chunksLoaded);
+    //     }
 
-        for (size_t i = 0; i < terrainLoader.chunksLoaded.size(); i++)
-        {
-            int chunksLoaded = terrainLoader.chunksLoaded[i];
-            ImGui::Text("Layer %i chunks Loaded: %i",i,chunksLoaded);
-        }
+    //     static int currentTerrainLayer = 0;
 
-        static int currentTerrainLayer = 0;
+    //     ImGui::InputInt("Layer",&currentTerrainLayer);
 
-        ImGui::InputInt("Layer",&currentTerrainLayer);
+    //     if(glfwGetTime() - chunkInfo.time > 0.5f) {
+    //         currentTerrainLayer++;
+    //     }
 
-        if(glfwGetTime() - chunkInfo.time > 0.5f) {
-            currentTerrainLayer++;
-        }
-
-        if(currentTerrainLayer < 0) {
-            currentTerrainLayer = 0;
-        }
-        if(currentTerrainLayer > 5) {
-            currentTerrainLayer = 5;
-        }
+    //     if(currentTerrainLayer < 0) {
+    //         currentTerrainLayer = 0;
+    //     }
+    //     if(currentTerrainLayer > 5) {
+    //         currentTerrainLayer = 5;
+    //     }
         
         
-        auto terrain = world->getActorOfType<Terrain>();
+    //     auto terrain = world->getActorOfType<Terrain>();
 
-        auto chunk = terrain->tryGetChunkAtWorldPosition(player->getPosition(),currentTerrainLayer);
-        if(chunk != nullptr) {
-            chunkInfo.time = glfwGetTime();
-            chunkInfo.layer = currentTerrainLayer;
-            //chunkInfo.childrenLoaded = chunk->loadedChildCount();
-            chunkInfo.pos = terrain->worldToChunkPos(player->getPosition(),currentTerrainLayer);
-        }
-        ImGui::Text("Info From: %fs ago",glfwGetTime() - chunkInfo.time);
-        ImGui::Text("Layer: %i",currentTerrainLayer);
-        ImGui::Text("Children Loaded:  %i",chunkInfo.childrenLoaded);
-        ImGui::Text("Pos: <%i,%i,%i>",chunkInfo.pos.x,chunkInfo.pos.y,chunkInfo.pos.z);
-        terrainLoader.renderDebug();
-        for (int i = 0; i < TerrainLoader::terrainJobCount; i++)
-        {
-            //auto address = terrainLoader.getJobChunk(i);
+    //     auto chunk = terrain->tryGetChunkAtWorldPosition(player->getPosition(),currentTerrainLayer);
+    //     if(chunk != nullptr) {
+    //         chunkInfo.time = glfwGetTime();
+    //         chunkInfo.layer = currentTerrainLayer;
+    //         //chunkInfo.childrenLoaded = chunk->loadedChildCount();
+    //         chunkInfo.pos = terrain->worldToChunkPos(player->getPosition(),currentTerrainLayer);
+    //     }
+    //     ImGui::Text("Info From: %fs ago",glfwGetTime() - chunkInfo.time);
+    //     ImGui::Text("Layer: %i",currentTerrainLayer);
+    //     ImGui::Text("Children Loaded:  %i",chunkInfo.childrenLoaded);
+    //     ImGui::Text("Pos: <%i,%i,%i>",chunkInfo.pos.x,chunkInfo.pos.y,chunkInfo.pos.z);
+    //     terrainLoader.renderDebug();
+    //     for (int i = 0; i < TerrainLoader::terrainJobCount; i++)
+    //     {
+    //         //auto address = terrainLoader.getJobChunk(i);
             
-            // float size = terrain->getChunkWorldSize(address.layer);
-            // vec3 center = TerrainChunk::getWorldCenter(terrain->getPosition(),address.pos,size);
-            ImGui::PushID(i);
-            std::ostringstream stream;
-            switch(terrainLoader.getJobState(i)) {
-                case TerrainJobState::FINISHED:
-                    ImGui::Text("FINISHED: %i",terrainLoader.getJobWorker(i));
-                    break;
-                case TerrainJobState::IN_PROGRESS:
-                    stream << "IN PROGRESS:" << terrainLoader.getJobWorker(i);
-                    ImGui::Text(stream.str().c_str());
-                    break;
-                case TerrainJobState::WAITING:
-                    ImGui::Text("WAITING:");
-                    break;
-            }
-            ImGui::PopID();
-        }
+    //         // float size = terrain->getChunkWorldSize(address.layer);
+    //         // vec3 center = TerrainChunk::getWorldCenter(terrain->getPosition(),address.pos,size);
+    //         ImGui::PushID(i);
+    //         std::ostringstream stream;
+    //         switch(terrainLoader.getJobState(i)) {
+    //             case TerrainJobState::FINISHED:
+    //                 ImGui::Text("FINISHED: %i",terrainLoader.getJobWorker(i));
+    //                 break;
+    //             case TerrainJobState::IN_PROGRESS:
+    //                 stream << "IN PROGRESS:" << terrainLoader.getJobWorker(i);
+    //                 ImGui::Text(stream.str().c_str());
+    //                 break;
+    //             case TerrainJobState::WAITING:
+    //                 ImGui::Text("WAITING:");
+    //                 break;
+    //         }
+    //         ImGui::PopID();
+    //     }
         
 
-    ImGui::End();
+    // ImGui::End();
 
     if(player != nullptr && world != nullptr) {
         DebugMenu::cheatsMenu(*player,*world,registry);
@@ -364,7 +417,7 @@ void GameApplication::loop() {
 
     camera.setAspect(frameSize.x,frameSize.y);
     
-    // test inputs
+
     //camera.rotate(vec3(mouseDelta.y * dt,mouseDelta.x * dt,0));
     camera.rotate(vec3(0,dt*-10,0));
 
@@ -383,14 +436,10 @@ void GameApplication::loop() {
     }
     
     // vulkan->mainLight.direction = vulkan->mainLight.direction * glm::quat(glm::radians(vec3(0,dt*90,0)));
-    // std::cout << StringHelper::toString(vulkan->mainLight.direction) << std::endl;
-    //std::cout << StringHelper::toString(player->getPosition()) << std::endl;
 
     
     world->frame(vulkan,dt);
     skybox.addRenderables(*vulkan,camera); // draw before UI
-
-    //std::cout << "ending world frame" << std::endl;
 
     DrawContext drawContext(interface,*vulkan,input);
     Rect screenRect = Rect(drawContext.getScreenSize());
@@ -407,7 +456,7 @@ void GameApplication::loop() {
             window->setCursorMode(CursorMode::Locked);
             drawContext.disableClicks();
         }
-        //if(player->widget != nullptr) player->widget->draw(drawContext,*player);
+        if(player->widget != nullptr) player->widget->draw(drawContext,*world,*player);
     }
     
 

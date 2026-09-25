@@ -245,7 +245,7 @@ class TerrainLoader {
             if(allowedWorkerThreads > 16) {
                 allowedWorkerThreads = 16;
             }
-            //allowedWorkerThreads = 1;
+            allowedWorkerThreads = 1;
 
             stopSignal = false;
             mainThread = std::thread(&TerrainLoader::mainTask,this);

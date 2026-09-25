@@ -26,6 +26,7 @@ namespace TypeInfoLoader {
         item->addConstProperty("default_material",&Item::defaultMaterial);
         item->addConstProperty("default_model_scale",&Item::defaultModelScale);
         item->addConstProperty("default_weight",&Item::defaultWeight);
+        item->addConstProperty("fuel_value",&Item::fuelValue);
 
         TypeInfo* resource = registry.addTypeInfo<ResourceItem>("resource_item");
         resource->constructorFunction = [&]() {return std::make_unique<ResourceItem>();};

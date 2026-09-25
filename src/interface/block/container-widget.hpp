@@ -25,7 +25,7 @@ class ContainerWidget : public BlockWidget<ContainerBlock> {
 
         TextWidget* tooltipTextTitle;
 
-        void draw(DrawContext context,Character& user,ContainerBlock& container,BlockStorage& storage) {
+        void draw(DrawContext context,Construction* construction,Character& user,ContainerBlock& container,BlockStorage& storage) {
 
             if(itemSlot == nullptr) {
                 Debug::warn("item slot is null (container widget)");

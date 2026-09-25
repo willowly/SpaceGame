@@ -7,6 +7,9 @@
 #include "persistance/block/data-block.hpp"
 #include "cista.h"
 
+struct data_ElectricNetwork {
+    float currentCharge;
+};
 
 struct data_Construction {
     data_Actor actor;
@@ -16,5 +19,6 @@ struct data_Construction {
     data_ivec3 boundsMin;
     data_ivec3 boundsMax;
     cista::raw::vector<data_ivec3> stepCallbacks;
+    cista::raw::vector<data_ElectricNetwork> electricNetworks;
     bool isStatic;
 };

@@ -93,75 +93,120 @@ struct ConstructionVertex
     }
 };
 
+class ElectricNetwork {
+    float currentCharge;
+    float maxCharge;
+
+    public:
+        float getCurrentCharge() {
+            return currentCharge;
+        }
+        void changeCurrentCharge(float change) {
+            currentCharge += change;
+            currentCharge = std::clamp(currentCharge,0.0f,maxCharge);
+        }
+
+        
+        float getMaxCharge() {
+            return maxCharge;
+        }
+        void changeMaxCharge(float change) {
+            maxCharge += change;
+            if(change < 0) {
+                currentCharge += (change/maxCharge) * currentCharge;
+            }
+            if(maxCharge < 0) maxCharge = 0;
+            currentCharge = std::clamp(currentCharge,0.0f,maxCharge);
+        }
+
+        data_ElectricNetwork save()
+        {
+            data_ElectricNetwork data;
+            data.currentCharge = currentCharge;
+            return data;
+        }
+
+        void load(data_ElectricNetwork data)
+        {
+            currentCharge = data.currentCharge;
+        }
+
+};
+
 class Construction : public Actor
 {
 
     static const Color debugGroupColors[];
 
-    struct BlockPaletteEntry
-    {
-        Block *block = nullptr;
-        BlockStorage storage;
-
-        bool operator==(const BlockPaletteEntry &entry)
+    public:
+        struct BlockPaletteEntry
         {
-            if (block != entry.block)
-                return false;
-            if (storage != entry.storage)
-                return false;
-            return true;
-        }
+            Block *block = nullptr;
+            BlockStorage storage;
 
-        data_BlockPaletteEntry save()
-        {
-            data_BlockPaletteEntry data;
-            if (block != nullptr)
+            bool operator==(const BlockPaletteEntry &entry)
             {
-                data.block = block->name;
+                if (block != entry.block)
+                    return false;
+                if (storage != entry.storage)
+                    return false;
+                return true;
             }
-            data.storage = storage.save();
-            return data;
-        }
 
-        void load(data_BlockPaletteEntry data, DataLoader &loader)
-        {
-            if(data.block != "") {
-                block = loader.getBlockPrototype((string)data.block);
+            data_BlockPaletteEntry save()
+            {
+                data_BlockPaletteEntry data;
+                if (block != nullptr)
+                {
+                    data.block = block->name;
+                }
+                data.storage = storage.save();
+                return data;
             }
-            storage.load(data.storage, loader);
-        }
-    };
 
-    // we can convert this to just block ID if we use a custom physics shape :shrug: <- not true!!!
-    struct BlockData
-    {
-        BlockID id = 0;
-        bool attached = false;
-        std::optional<JPH::Shape *> shapeOpt;
-        BlockData(BlockID id, bool attached) : id(id), attached(attached) {}
-        BlockData(BlockID id) : id(id) {}
-        BlockData() {}
+            void load(data_BlockPaletteEntry data, DataLoader &loader)
+            {
+                if(data.block != "") {
+                    block = loader.getBlockPrototype((string)data.block);
+                }
+                storage.load(data.storage, loader);
+            }
+        };
 
-        data_BlockData save()
+    
+        // we can convert this to just block ID if we use a custom physics shape :shrug: <- not true!!!
+        struct BlockData
         {
-            data_BlockData data;
-            data.id = id;
-            data.attached = attached;
-            return data;
-        }
-
-        void load(data_BlockData data)
-        {
-            id = data.id;
-            attached = data.attached;
-        }
-    };
-
+            BlockID id = 0;
+            bool attached = false;
+            std::optional<JPH::Shape *> shapeOpt;
+            BlockData(BlockID id, bool attached) : id(id), attached(attached) {}
+            BlockData(BlockID id) : id(id) {}
+            BlockData() {}
+            
+            data_BlockData save()
+            {
+                data_BlockData data;
+                data.id = id;
+                data.attached = attached;
+                return data;
+            }
+            
+            void load(data_BlockData data)
+            {
+                id = data.id;
+                attached = data.attached;
+            }
+        };
+    private:
+    
     ivec3 boundsMin = {};
     ivec3 boundsMax = {};
     std::vector<BlockPaletteEntry> blockPalette;
     std::vector<BlockData> blockDataArray;
     MeshData<ConstructionVertex> meshData;
+
+    std::vector<ElectricNetwork> electricNetworks;
 
     Material material = Material::none;
 
@@ -447,6 +492,13 @@ public:
         //Debug::drawRay(position, transformDirection(vec3(0, 0, 1)), Color::green);
         // Debug::drawRay(position,body.getAngularVelocity(),Color::blue);
         // Debug::drawRay(position,turnControl,Color::red);
+    }
+
+    ElectricNetwork& getNetwork(int i) {
+        if(electricNetworks.size() == 0) {
+            electricNetworks.push_back({});
+        }
+        return electricNetworks[0];
     }
 
     // <min,max>
@@ -1266,6 +1318,7 @@ public:
         auto ptr = makeInstance(material, position, rotation);
         BlockPlaceInfo info;
         info.attached = attached;
+        info.firstBlock = true;
         ptr->placeBlock(ivec3(0), block, info);
         return ptr;
     }
@@ -1312,6 +1365,9 @@ public:
                 data_pos.set(pair.first.asVec3());
                 data.stepCallbacks.push_back(data_pos);
             }
+        }
+        for(auto& network : electricNetworks) {
+            data.electricNetworks.push_back(network.save());
         }
         // data.body.angularVelocity = body->GetAngularVelocity();
         return data;
@@ -1389,6 +1445,11 @@ public:
         for (auto &pos : data.stepCallbacks)
         {
             addStepCallback(pos.toVec3());
+        }
+        i = 0;
+        for(auto& data_network : data.electricNetworks) {
+            getNetwork(i).load(data_network);
+            i++;
         }
         generateMesh();
     }

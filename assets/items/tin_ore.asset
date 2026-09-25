@@ -1,5 +1,5 @@
 type: resource_item
-display_name: Tin Ore
+display_name: Sphalerite
 default_sprite: 
   texture: tin_ore_item
   rect: 

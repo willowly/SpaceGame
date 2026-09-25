@@ -65,7 +65,7 @@ namespace TypeInfoLoader {
         furnaceWidget->addConstProperty("slot_size",&FurnaceWidget::slotSize);
         furnaceWidget->addConstProperty("bar_width",&FurnaceWidget::barWidth);
         furnaceWidget->addConstProperty("item_slot",&FurnaceWidget::itemSlot);
-        furnaceWidget->addConstProperty("recipe_slot",&FurnaceWidget::recipeSlot);
+        furnaceWidget->addConstProperty("recipe_group",&FurnaceWidget::recipeGroup);
         furnaceWidget->addConstProperty("tooltip_text_title",&FurnaceWidget::tooltipTextTitle);
         furnaceWidget->setParent(widget);
 
@@ -89,6 +89,18 @@ namespace TypeInfoLoader {
         recipeSlotWidget->addConstProperty("padding",&RecipeSlotWidget::padding);
         recipeSlotWidget->setParent(widget);
 
+        TypeInfo* recipeGroupWidget = registry.addTypeInfo<RecipeGroupWidget>("recipe_group_widget");
+        recipeGroupWidget->constructorFunction = [&]() { return std::make_unique<RecipeGroupWidget>(); };
+        
+        recipeGroupWidget->addConstProperty("background_sprite",&RecipeGroupWidget::backgroundSprite);
+        recipeGroupWidget->addConstProperty("background_color",&RecipeGroupWidget::backgroundColor);
+        recipeGroupWidget->addConstProperty("margin",&RecipeGroupWidget::margin);
+        recipeGroupWidget->addConstProperty("spacing",&RecipeGroupWidget::spacing);
+        recipeGroupWidget->addConstProperty("columns",&RecipeGroupWidget::columns);
+        recipeGroupWidget->addConstProperty("recipe_slot",&RecipeGroupWidget::recipeSlot);
+
+        recipeGroupWidget->setParent(widget);
+
 
         TypeInfo* textWidget = registry.addTypeInfo<TextWidget>("text_widget");
         //textWidget->parent = widget;
@@ -99,6 +111,24 @@ namespace TypeInfoLoader {
         textWidget->addConstProperty("color",&TextWidget::color);
         textWidget->addConstProperty("font",&TextWidget::font);
         textWidget->setParent(widget);
+
+        TypeInfo* batteryPreviewWidget = registry.addTypeInfo<BatteryPreviewWidget>("battery_preview_widget");
+        //textWidget->parent = widget;
+        batteryPreviewWidget->constructorFunction = [&]() { return std::make_unique<BatteryPreviewWidget>(); };
+        batteryPreviewWidget->addConstProperty("text_widget",&BatteryPreviewWidget::textWidget);
+        batteryPreviewWidget->addConstProperty("main_panel",&BatteryPreviewWidget::mainPanel);
+        batteryPreviewWidget->setParent(widget);
+
+        TypeInfo* panelWidget = registry.addTypeInfo<PanelWidget>("panel_widget");
+        //textWidget->parent = widget;
+        panelWidget->constructorFunction = [&]() { return std::make_unique<PanelWidget>(); };
+        panelWidget->addConstProperty("position",&PanelWidget::position);
+        panelWidget->addConstProperty("size",&PanelWidget::size);
+        panelWidget->addConstProperty("anchor",&PanelWidget::anchor);
+        panelWidget->addConstProperty("pivot",&PanelWidget::pivot);
+        panelWidget->addConstProperty("sprite",&PanelWidget::sprite);
+        panelWidget->addConstProperty("color",&PanelWidget::color);
+        panelWidget->setParent(widget);
 
         TypeInfo* containerWidget = registry.addTypeInfo<ContainerWidget>("container_widget");
         //furnaceWidget->parent = widget;
@@ -131,10 +161,11 @@ namespace TypeInfoLoader {
 
         TypeInfo* font = registry.addTypeInfo<Font>("font");
 
-        WIDGET_TYPE(BlockWidget<FurnaceBlock>, blockWidget_Furnace);
+        WIDGET_TYPE(BlockWidget<CrafterBlock>, blockWidget_Furnace);
         WIDGET_TYPE(ActorWidget<Character>, actorWidget_Character);
         WIDGET_TYPE(BlockWidget<ContainerBlock>, blockWidget_Container);
         WIDGET_TYPE(BlockWidget<DrillBlock>, blockWidget_Drill);
+        WIDGET_TYPE(BlockWidget<BatteryBlock>, blockWidget_Battery);
 
 
     }

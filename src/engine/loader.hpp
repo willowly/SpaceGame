@@ -31,6 +31,7 @@ class Loader {
             loadAssetFileStubs(registry,vulkan);
             runLoadScript(registry,vulkan,lua);
             loadAssetFileProperties(registry,vulkan);
+            loadRecipes(registry);
         }
         
         void copyAssets() {
@@ -209,6 +210,13 @@ class Loader {
                 mat->loadMaterial(vulkan);
             }
             Debug::subtractTrace();
+        }
+
+        void loadRecipes(Registry& registry) {
+            auto func = [&](std::vector<Recipe*>& recipes,RecipeFilter filter) { registry.addRecipesToVector(recipes,filter); };
+            for(auto pair : registry.getBlocks()) {
+                pair.second->getRecipes(func);
+            }
         }
 
         template<typename T>

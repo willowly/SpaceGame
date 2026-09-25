@@ -7,11 +7,11 @@
 #include "helper/sprite.hpp"
 #include "interface/text-widget.hpp"
 #include "interface/item-slot-widget.hpp"
-#include "block/furnace-block.hpp"
+#include "block/crafter-block.hpp"
 #include "block-widget.hpp"
 #include "interface/item-slot-interact-options.hpp"
 
-class FurnaceWidget : public BlockWidget<FurnaceBlock> {
+class FurnaceWidget : public BlockWidget<CrafterBlock> {
     
     public:
         Sprite solid;
@@ -23,19 +23,19 @@ class FurnaceWidget : public BlockWidget<FurnaceBlock> {
         float barWidth = 60; 
 
         ItemSlotWidget* itemSlot = {};
-        RecipeSlotWidget* recipeSlot = {};
+        RecipeGroupWidget* recipeGroup = {};
 
         TextWidget* tooltipTextTitle = {};
 
-        void draw(DrawContext context,Character& user,FurnaceBlock& furnace,BlockStorage& storage) {
+        void draw(DrawContext context,Construction* construction,Character& user,CrafterBlock& furnace,BlockStorage& storage) {
 
 
             if(itemSlot == nullptr) {
                 Debug::warn("itemSlot is null");
                 return;
             }
-            if(recipeSlot == nullptr) {
-                Debug::warn("recipeSlot is null");
+            if(recipeGroup == nullptr) {
+                Debug::warn("recipe group is null");
                 return;
             }
             Rect screen = context.getScreenSize();
@@ -50,76 +50,98 @@ class FurnaceWidget : public BlockWidget<FurnaceBlock> {
 
 
             // variables
-            auto inputStack = storage.getStack(furnace.INPUTSTACK_VAR);
+            std::vector<ItemStack> inputStacks;
+            for (size_t i = 0; i < furnace.maxIngredients; i++)
+            {
+                inputStacks.push_back(storage.getStack(furnace.INPUTSTACK_VAR+i));
+            }
+            
             auto outputStack = storage.getStack(furnace.OUTPUTSTACK_VAR);
+            auto fuelStack = furnace.fuelBurner.getFuelStack(storage);
             auto currentRecipe = storage.getPointer<Recipe>(furnace.CURRENTRECIPE_VAR);
             float timer = storage.getFloat(furnace.TIMER_VAR);
+            float fuel = furnace.fuelBurner.getFuel(storage);
+            float fuelMax = furnace.fuelBurner.getFuelMax(storage);
 
-            ItemStack* selectedSlot = nullptr;
-
-            // input slot
             auto slotRect = Rect::anchored(Rect(vec2(padding),slotSize),mainPanel,vec2(0,0));
-            if(itemSlot->draw(context,slotRect,inputStack)) {
-                selectedSlot = &inputStack;
-                if(user.itemSlotHoverActions(context,inputStack)) {
-                    furnace.trySetMatchingRecipe(currentRecipe,inputStack);
+            for (size_t i = 0; i < furnace.maxIngredients; i++)
+            {
+                // input slots
+                if(itemSlot->drawAndInteract(context,slotRect,inputStacks[i],user)) {
+                    furnace.trySetMatchingRecipe(currentRecipe,storage);
                 }
+                slotRect.position.x += slotRect.size.x + spacing;
             }
+            slotRect.position.x -= slotRect.size.x + spacing;
             
             auto barRect = Rect(slotRect.topRight(),vec2(0.0f));
 
             // output slot
             slotRect = Rect::anchored(Rect::withPivot(vec2(-padding,padding),slotSize,vec2(1,0)),mainPanel,vec2(1,0));
-            if(itemSlot->draw(context,slotRect,outputStack)) {
-                selectedSlot = &outputStack;
-                ItemSlotInteractOptions options;
-                options.allowInsert = false;
-                user.itemSlotHoverActions(context,outputStack,options);
-            }
+            ItemSlotInteractOptions options;
+            options.allowInsert = false;
+            itemSlot->drawAndInteract(context,slotRect,outputStack,user,options);
 
+            // recipe bar
             barRect.size = slotRect.bottomLeft() - barRect.position;
             barRect = Rect::anchored(Rect::withPivot(vec2(barRect.size.x - padding*2.0f,barWidth),vec2(0.5,0.5)),barRect,vec2(0.5,0.5f));
             context.drawRect(barRect,solid,slots); //background
             if(currentRecipe != nullptr) {
                 auto progress = timer/currentRecipe->time;
                 progress = fmin(fmax(progress,0),1);
-                barRect = Rect::anchored(Rect::withPivot(vec2(barRect.size.x*progress,barRect.size.y),vec2(0,0.5)),barRect,vec2(0,0.5));
-                context.drawRect(barRect,solid,Color::red); //foreground
+                auto barRectFront = Rect::anchored(Rect::withPivot(vec2(barRect.size.x*progress,barRect.size.y),vec2(0,0.5)),barRect,vec2(0,0.5));
+                context.drawRect(barRectFront,solid,Color::red); //foreground
             }
 
-            Rect recipeRect = Rect::anchored(Rect(vec2(padding,padding),slotSize),mainPanel,vec2(0,0));
-            recipeRect.position.y += slotSize.y + spacing;
 
-            Recipe* selectedRecipe = nullptr;
+            Rect fuelRect = Rect::anchored(Rect(vec2(padding),slotSize),mainPanel,vec2(0,0));
+            fuelRect.position.y += slotSize.y + spacing;
 
-            for (auto& recipe : furnace.recipes)
+            float progress = 0;
+            if(!furnace.electric) {
+                //fuel slot
+                
+                itemSlot->drawAndInteract(context,fuelRect,fuelStack,user);
+                progress = fuel/fuelMax;
+            } else {
+                auto network = construction->getNetwork(0);
+                progress = network.getCurrentCharge() / network.getMaxCharge();
+            }
+
+            // fuel bar
+            auto fuelBarRect = barRect;
+            fuelBarRect.position.y += slotSize.y + spacing;
+            context.drawRect(fuelBarRect,solid,slots); //background
+            progress = fmin(fmax(progress,0),1);
+            fuelBarRect = Rect::anchored(Rect::withPivot(vec2(fuelBarRect.size.x*progress,fuelBarRect.size.y),vec2(0,0.5)),fuelBarRect,vec2(0,0.5));
+            context.drawRect(fuelBarRect,solid,Color::red); //foreground
+             
+            for (size_t i = 0; i < furnace.maxIngredients; i++)
             {
-                if(recipe == nullptr) {
-                    Debug::warn("null recipe in furnace");
-                    continue;
-                }
-                if(recipeSlot->draw(context,recipeRect,*recipe)) {
-                    selectedRecipe = recipe;
-                }
-                
-                recipeRect.position.x += slotSize.x + spacing;
-                
+                storage.setStack(furnace.INPUTSTACK_VAR+i,inputStacks[i]); // try start craft overrides it
             }
 
-
-
-            if(selectedRecipe != nullptr) {
-                if(context.mouseLeftClicked()) {
-                    furnace.tryStartCraft(*selectedRecipe,user,storage);
-                }
-                return; //need to fix this,see comment below
-                
-            }
-
-            // variables
+            
+            
             storage.setPointer<Recipe>(furnace.CURRENTRECIPE_VAR,currentRecipe);
-            storage.setStack(furnace.INPUTSTACK_VAR,inputStack);
             storage.setStack(furnace.OUTPUTSTACK_VAR,outputStack);
+            furnace.fuelBurner.setFuelStack(storage,fuelStack);
+
+            if(furnace.allowManual) {
+                context.drawRect(fuelRect,solid,Color::green);
+                if(context.mouseInside(fuelRect)) {
+                    if(context.mouseLeftClicked()) {
+                        furnace.progressManual(storage);
+                    }
+                }
+            }
+
+            auto clickedRecipe = recipeGroup->draw(context,Rect::anchored(Rect::withPivot(vec2(mainPanel.size.x,mainPanel.size.y*0.5f),vec2(0.5,0)),mainPanel,vec2(0.5,0.5)),furnace.recipes);
+            if(clickedRecipe != nullptr) {
+                furnace.tryStartCraft(*clickedRecipe,user,storage);
+            }
+
+            //storage.setStack(furnace.FUELSTACK_VAR,fuelStack);
             
             
         }

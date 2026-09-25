@@ -2,3 +2,8 @@ print("hello")
 print(items.pickaxe)
 print(player)
 player:give(items.pickaxe,1)
+player:give(items.workstation,1)
+player:give(items.tin_plate,100)
+player:give(items.lead_rod,100)
+player:give(items.solar_panel,20)
+player:give(items.battery_block,10);

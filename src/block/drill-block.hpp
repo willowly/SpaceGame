@@ -122,7 +122,7 @@ class DrillBlock : public Block {
                 return;
             }
 
-            auto menuObj = std::make_unique<BlockMenuObject<DrillBlock>>(construction, position, *widget);
+            auto menuObj = std::make_unique<BlockMenuObject<DrillBlock>>(construction->id, position, *widget);
             character.openMenu(std::move(menuObj));
         }
 

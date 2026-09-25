@@ -1,0 +1,29 @@
+type: battery_preview_widget
+text_widget: text_default
+main_panel: 
+  position: 
+    x: 0.000000
+    y: -10.000000
+  size: 
+    x: 200.000000
+    y: 50.000000
+  anchor: 
+    x: 0.500000
+    y: 0.500000
+  pivot: 
+    x: 0.500000
+    y: 1.000000
+  sprite: 
+    texture: solid
+    rect: 
+      position: 
+        x: 0.000000
+        y: 0.000000
+      size: 
+        x: 0.000000
+        y: 0.000000
+  color: 
+    r: 0.113725
+    g: 0.113725
+    b: 0.113725
+    a: 0.627451

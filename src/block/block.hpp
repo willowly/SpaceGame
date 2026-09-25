@@ -17,8 +17,11 @@ struct BlockPlaceInfo {
     vec3 normal = {}; //local to the construction
     vec3 lookDir = {};
     vec3 upDir = vec3(0,1,0);
+    bool firstBlock = false; //is this the first block in a construction?
     bool attached = false; //is this block being placed attached to terrain?
 };
+
+
 
 class Block : public Object {
 
@@ -80,6 +83,7 @@ class Block : public Object {
         virtual void addToMesh(Construction* construction,MeshData<ConstructionVertex>& meshData,ivec3 position,BlockStorage& storage) {
 
         }
+        
 
         virtual std::vector<ItemStack> getDrops(Construction* construction,ivec3 position,BlockStorage& storage) {
             if(defaultDrop == nullptr) {
@@ -91,8 +95,11 @@ class Block : public Object {
 
         virtual void onInteract(Construction* construction,ivec3 position,BlockStorage& storage,Character& character) {}
 
+        virtual void onLook(Construction* construction,ivec3 position,BlockStorage& storage,Character& character) {
+            
+        }
+
         // sets the stack to remaining items
-        // return true if insertable, return false if no capability
         virtual ItemStack tryInsert(ivec3 position,BlockStorage& storage,BlockFacing direction,ItemStack stack) {
             return stack;
         }
@@ -104,6 +111,10 @@ class Block : public Object {
 
         string getTypeName() override {
             return "block";
+        }
+
+        virtual void getRecipes(std::function<void(std::vector<Recipe*>&,RecipeFilter)> getRecipesFunction) {
+
         }
 
 };

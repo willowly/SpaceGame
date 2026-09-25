@@ -126,7 +126,7 @@ struct MeshPushConstant {
     VkDeviceAddress matrixBuffer;
     unsigned int frameIndex;
     MaterialHandle materialData;
-    char extraData[48];
+    alignas(32) char extraData[48];
 };
 
 struct PipelineOptions {

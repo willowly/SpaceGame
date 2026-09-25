@@ -1,0 +1,7 @@
+type: solar_panel
+mesh: solar_panel
+texture: solar_panel
+power_output: 1.000000
+max_charge: 0.000000
+default_drop: solar_panel
+solid: 0

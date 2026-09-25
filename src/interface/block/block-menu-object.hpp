@@ -12,17 +12,22 @@ class BlockMenuObject : public MenuObject {
 
     public:
 
-        Construction* construction;
+        ActorID constructionID;
         ivec3 location = {};
         BlockWidget<BlockType>& widget;
 
-        BlockMenuObject(Construction* construction,ivec3 location,BlockWidget<BlockType>& widget) : construction(construction), location(location), widget(widget) {}
+        BlockMenuObject(ActorID constructionID,ivec3 location,BlockWidget<BlockType>& widget) : constructionID(constructionID), location(location), widget(widget) {}
 
-        void drawMenu(DrawContext context,Character& user) {
+        void drawMenu(DrawContext context,World& world,Character& user) {
             Debug::addTrace("blockmenuobj");
-            if(construction == nullptr) {
+
+            auto construction = world.getActor<Construction>(constructionID);
+            if(construction == Invalid_ActorID) {
                 Debug::warn("construction is null");
                 Debug::subtractTrace();
+                return;
+            }
+            if(construction->destroyed) {
                 return;
             }
             
@@ -35,7 +40,7 @@ class BlockMenuObject : public MenuObject {
                 return;
             }
             auto& storage = entry.storage;
-            widget.draw(context,user,*block,storage);
+            widget.draw(context,construction,user,*block,storage);
             Debug::subtractTrace();
         }
 
