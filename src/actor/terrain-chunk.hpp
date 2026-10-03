@@ -302,7 +302,7 @@ class TerrainChunk {
                 }
                 
             }
-            //std::cout << "generation time:" << clock.getTime() << std::endl;
+            std::cout << "generation time:" << clock.getTime() << std::endl;
             meshOutOfDate = true;
             isDataLoaded = true;
             // generateOre(2,60,0.4,offset,chunk);
@@ -505,10 +505,14 @@ class TerrainChunk {
 
         void addDebrisRenderables(Vulkan* vulkan,vec3 chunkPosition) {
             //if(debris.size() == 0) return;
-            if(meshState == -1) return;
-            if(debrisBuffer[meshState].buffer == VK_NULL_HANDLE) return; //this shouldn't happen but whatever
-            if(settings != nullptr && settings->debrisMesh != nullptr && settings->debrisMaterial != nullptr) {
-                vulkan->addMeshInstanced(settings->debrisMesh->meshBuffer,settings->debrisMaterial->material,{},debrisBuffer[meshState],debris.size());
+            std::shared_lock lock(mtx,std::defer_lock);
+
+            if(lock.try_lock()) {
+                if(meshState == -1) return;
+                if(debrisBuffer[meshState].buffer == VK_NULL_HANDLE) return; //this shouldn't happen but whatever
+                if(settings != nullptr && settings->debrisMesh != nullptr && settings->debrisMaterial != nullptr) {
+                    vulkan->addMeshInstanced(settings->debrisMesh->meshBuffer,settings->debrisMaterial->material,{},debrisBuffer[meshState],debris.size());
+                }
             }
         }
 

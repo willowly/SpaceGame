@@ -4,7 +4,7 @@
 #include "interface/interface.hpp"
 #include "helper/generic-storage.hpp"
 #include "interface/widget.hpp"
-#include "text-widget.hpp"
+#include "interface/text-widget.hpp"
 #include "interface/panel-widget.hpp"
 #include "block/battery-block.hpp"
 
