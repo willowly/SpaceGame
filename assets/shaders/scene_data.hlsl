@@ -6,6 +6,7 @@ layout(scalar,binding = 0) uniform SceneData {
     mat4 view;
     mat4 proj;
     mat4 screen;
+    vec2 screenSize;
     vec3 viewDir;
     vec3 mainLightColor;
     vec3 mainLightDirection;

@@ -65,6 +65,7 @@ struct SceneDataBufferObject {
     glm::mat4 view;
     glm::mat4 proj;
     glm::mat4 screen;
+    vec2 screenSize;
     vec3 viewDir;
     vec3 mainLightColor;
     vec3 mainLightDirection;
@@ -1513,6 +1514,7 @@ class Vulkan {
             ubo.proj[1][1] *= -1; //flip the y because theres discrepancy
             
             ubo.viewDir = camera.rotation * vec3(0,0,1);
+            ubo.screenSize = screenSize;
 
             ubo.mainLightColor = mainLight.color.asVec3();
             ubo.mainLightDirection = normalizedLightDirection;
