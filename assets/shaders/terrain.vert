@@ -13,6 +13,7 @@ layout(location = 1) out vec3 outNormal;
 layout(location = 2) out ivec4 outTextureID;
 layout(location = 3) out vec4 outOreBlend;
 layout(location = 4) out vec4 outLightSpacePosition;
+layout(location = 5) out vec4 outViewPosition;
 
 #include "push_constant.hlsl"
 
@@ -26,6 +27,7 @@ void main() {
     gl_Position = sceneData[frameIndex].proj * sceneData[frameIndex].view * modelMatrix * vec4(inPosition, 1.0);
     outNormal = normalize(mat3(transpose(inverse(modelMatrix))) * inNormal);
     outPosition = inPosition;
+    outViewPosition = sceneData[frameIndex].view * modelMatrix * vec4(inPosition, 1.0);
     outTextureID = inTextureID;
     outOreBlend = inOreBlend;
 

@@ -7,8 +7,10 @@ layout(location = 1) in vec3 normal;
 layout(location = 2) flat in ivec4 oreTextureID;
 layout(location = 3) in vec4 oreBlend;
 layout(location = 4) in vec4 lightSpacePosition;
+layout(location = 5) in vec4 viewPosition;
 
 layout(location = 0) out vec4 outColor;
+
 
 layout(binding = 1) uniform sampler2D texSampler[];
 
@@ -20,6 +22,8 @@ layout(binding = 1) uniform sampler2D texSampler[];
 
 #include "shading.hlsl"
 
+#include "dither_fade.hlsl"
+
 
 vec3 getAlbedo(int textureID,vec3 absNormal) {
     float texScale = 0.3f;
@@ -30,7 +34,18 @@ vec3 getAlbedo(int textureID,vec3 absNormal) {
 }
 
 void main() {
+
+    // dither
     uint frameIndex = push.frameIndex;
+
+    // outColor = vec4(-viewPosition.z,0,0,1);
+    // return;
+
+    if(distanceDither(vec3(viewPosition),25,30)) {
+        discard;
+    }
+
+
     MaterialData material = push.material;
 
     vec3 absNormal = abs(normal);
