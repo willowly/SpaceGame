@@ -16,7 +16,7 @@ layout(binding = 1) uniform sampler2D texSampler[];
 
 #include "lit_material_data.hlsl"
 
-#include "push_constant.hlsl"
+#include "terrain_push_constant.hlsl"
 
 #include "color_helper.hlsl"
 
@@ -41,9 +41,13 @@ void main() {
     // outColor = vec4(-viewPosition.z,0,0,1);
     // return;
 
-    // if(distanceDither(vec3(viewPosition),25,30)) {
-    //     discard;
-    // }
+    if(!distanceDither(vec3(viewPosition),push.ditherFadeDistances.x,push.ditherFadeDistances.y)) {
+        discard;
+    }
+
+    if(distanceDither(vec3(viewPosition),push.ditherFadeDistances.z,push.ditherFadeDistances.w)) {
+        discard;
+    }
 
 
     MaterialData material = push.material;

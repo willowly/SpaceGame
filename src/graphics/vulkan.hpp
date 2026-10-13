@@ -140,6 +140,7 @@ struct PipelineOptions {
     bool shadowPass;
     VkCullModeFlagBits cullMode = VK_CULL_MODE_NONE;
     VkRenderPass renderPass = VK_NULL_HANDLE;
+    string shadowFragmentShader = "";
 };
 
 // class DynamicMeshBuffer {
@@ -692,7 +693,10 @@ class Vulkan {
             VkPipeline pipeline = createManagedPipeline<Vertex>(vertCodePath(shaderName),fragCodePath(shaderName),options);
             options.shadowPass = true;
             //options.cullMode = VK_CULL_MODE_FRONT_BIT;
-            VkPipeline shadowPipeline = createManagedPipeline<Vertex>(vertCodePath(shaderName),"",options);
+            if(options.shadowFragmentShader == "") {
+                options.shadowFragmentShader = fragCodePath(shaderName);
+            }
+            VkPipeline shadowPipeline = createManagedPipeline<Vertex>(vertCodePath(shaderName),options.shadowFragmentShader,options);
 
             return createMaterial(pipeline,shadowPipeline,materialData);
         }

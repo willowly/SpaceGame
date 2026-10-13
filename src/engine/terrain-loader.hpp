@@ -138,21 +138,29 @@ class TerrainLoader {
                 auto terrain = getTerrain(i);
                 auto pos = getCameraPosition();
                 if(terrain != nullptr) {
-                    auto addressOpt = terrain->getNextChunkToload(pos);
-                    if(addressOpt == std::nullopt) { // theres no next chunk
-                        continue;
-                    }
-                    auto address = addressOpt.value();
-                    for (size_t i = 0; i < terrainJobCount; i++)
+
+                    int layers = terrain->getSettings().LODlayers;
+
+                    for (size_t i = 0; i < layers; i++)
                     {
-                        static_assert(terrainJobCount > 0);
-                        //std::cout << "MAIN: checking job" << jobIndex << std::endl;
-                        jobIndex = getNextJob(jobIndex);
-                        if(terrainJobs.at(jobIndex).trySetJob(terrain,address)) {
-                            //std::cout << "MAIN: setting job" << jobIndex << std::endl;
-                            break;
-                        };
+                        auto addressOpt = terrain->getNextChunkToload(pos,i);
+                        if(addressOpt == std::nullopt) { // theres no next chunk
+                            continue;
+                        }
+                        auto address = addressOpt.value();
+                        for (size_t i = 0; i < terrainJobCount; i++)
+                        {
+                            static_assert(terrainJobCount > 0);
+                            //std::cout << "MAIN: checking job" << jobIndex << std::endl;
+                            jobIndex = getNextJob(jobIndex);
+                            if(terrainJobs.at(jobIndex).trySetJob(terrain,address)) {
+                                //std::cout << "MAIN: setting job" << jobIndex << std::endl;
+                                break;
+                            };
+                        }
                     }
+                    
+                    
                 }
             }
         }

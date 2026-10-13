@@ -22,7 +22,9 @@ bool distanceDither(vec3 viewPosition,float minDist,float maxDist) {
     float bias = pattern[screenPos.x % patternSize + (screenPos.y % patternSize) * patternSize];
     bias /= (patternSize*patternSize);
 
-    float distanceNormalized = (-viewPosition.z - minDist)/(maxDist-minDist);
+    float dist = length(viewPosition);
+
+    float distanceNormalized = (dist - minDist)/(maxDist-minDist);
 
     return bias < distanceNormalized;
 

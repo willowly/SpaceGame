@@ -137,6 +137,8 @@ class GameApplication {
 
         Terrain* terrain;
 
+        float upTime = 0;
+
 
         Material terrainMaterial = Material::none;
         Material terrainMaterialDebug = Material::none;

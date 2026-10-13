@@ -165,6 +165,8 @@ class Loader {
 
         void loadDefaultMaterials(Registry& registry,Vulkan* vulkan) {
             registry.addMaterial(DEFAULT_CONSTRUCTION_MATERIAL_KEY,vulkan->createMaterial<LitMaterialData,ConstructionVertex>("construction",LitMaterialData(registry.getTexture("rock"))));
+            PipelineOptions options;
+            options.shadowFragmentShader = "terrain";
             registry.addMaterial(DEFAULT_TERRAIN_MATERIAL_KEY,vulkan->createMaterial<LitMaterialData,TerrainVertex>("terrain",LitMaterialData(registry.getTexture("rock"))));
         }
 

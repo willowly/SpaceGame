@@ -54,7 +54,8 @@ struct TerrainSettings {
     int chunkSize = 30;
     float baseCellSize = 0.5f; // cell size on the smallest size
 
-    float LODdistance = 300;
+    float LODdistance = 200;
+    float LODfadeDistance = 10;
     int LODlayers = 3;
     float LODdistanceFactor = 3; // so the distance between each is a factor of 2
 

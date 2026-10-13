@@ -143,7 +143,7 @@ void GameApplication::setup() {
     moonSettings->generationSettings.noiseGain = 0.3f;
     moonSettings->generationSettings.noiseLacunarity = 2.5f;
     moonSettings->generationSettings.stoneType = registry.getPtr<TerrainType>("stone");
-    moonSettings->LODdistance = 50;
+    moonSettings->LODdistance = 200;
     moonSettings->LODlayers = 5;
     moonSettings->gravity = 2;
     moonSettings->debrisMesh = registry.getModel("item_ore");
@@ -257,13 +257,19 @@ void GameApplication::debugUI(float dt) {
     if(terrain == nullptr) {
         return;
     }
+
     ImGui::Begin("TerrainLoader");
 
+        int totalChunksLoaded = 0;
         for (size_t i = 0; i < terrainLoader.chunksLoaded.size(); i++)
         {
             int chunksLoaded = terrainLoader.chunksLoaded[i];
             ImGui::Text("Layer %i chunks Loaded: %i",i,chunksLoaded);
+            totalChunksLoaded += chunksLoaded;
         }
+
+        ImGui::Text("Total Chunks Loaded: %i",totalChunksLoaded);
+        ImGui::Text("Chunks Loaded Per Second: %f",totalChunksLoaded/upTime);
 
         static int currentTerrainLayer = 0;
 
@@ -283,18 +289,18 @@ void GameApplication::debugUI(float dt) {
         
         auto terrain = world->getActorOfType<Terrain>();
 
-        auto chunk = terrain->tryGetChunkAtWorldPosition(player->getPosition(),currentTerrainLayer);
-        if(chunk != nullptr) {
-            chunkInfo.time = glfwGetTime();
-            chunkInfo.layer = currentTerrainLayer;
-            //chunkInfo.childrenLoaded = chunk->loadedChildCount();
-            chunkInfo.pos = terrain->worldToChunkPos(player->getPosition(),currentTerrainLayer);
-        }
-        ImGui::Text("Info From: %fs ago",glfwGetTime() - chunkInfo.time);
-        ImGui::Text("Layer: %i",currentTerrainLayer);
-        ImGui::Text("Children Loaded:  %i",chunkInfo.childrenLoaded);
-        ImGui::Text("Pos: <%i,%i,%i>",chunkInfo.pos.x,chunkInfo.pos.y,chunkInfo.pos.z);
-        terrainLoader.renderDebug();
+        // auto chunk = terrain->tryGetChunkAtWorldPosition(player->getPosition(),currentTerrainLayer);
+        // if(chunk != nullptr) {
+        //     chunkInfo.time = glfwGetTime();
+        //     chunkInfo.layer = currentTerrainLayer;
+        //     //chunkInfo.childrenLoaded = chunk->loadedChildCount();
+        //     chunkInfo.pos = terrain->worldToChunkPos(player->getPosition(),currentTerrainLayer);
+        // }
+        // ImGui::Text("Info From: %fs ago",glfwGetTime() - chunkInfo.time);
+        // ImGui::Text("Layer: %i",currentTerrainLayer);
+        // ImGui::Text("Children Loaded:  %i",chunkInfo.childrenLoaded);
+        // ImGui::Text("Pos: <%i,%i,%i>",chunkInfo.pos.x,chunkInfo.pos.y,chunkInfo.pos.z);
+        // terrainLoader.renderDebug();
         for (int i = 0; i < TerrainLoader::terrainJobCount; i++)
         {
             //auto address = terrainLoader.getJobChunk(i);
@@ -414,6 +420,8 @@ void GameApplication::loop() {
     // Get time
     float dt = (float)glfwGetTime() - lastTime;
     lastTime = glfwGetTime();
+
+    upTime += dt;
 
     camera.setAspect(frameSize.x,frameSize.y);
     
