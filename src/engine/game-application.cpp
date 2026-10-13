@@ -21,7 +21,7 @@ void GameApplication::spawnPlanetScene()  {
     
     auto terrainMaterial = registry.getMaterial(Loader::DEFAULT_TERRAIN_MATERIAL_KEY);
     auto dustSettings = registry.getPtr<TerrainSettings>("dust");
-    auto moonSettings = registry.getPtr<TerrainSettings>("moon");
+    //auto moonSettings = registry.getPtr<TerrainSettings>("moon");
 
     if(dustSettings == nullptr) {
         return;
@@ -38,8 +38,8 @@ void GameApplication::spawnPlanetScene()  {
 
     terrain = world->spawn(Terrain::makeInstance(terrainMaterial,*dustSettings,rnd(),vec3(0,-dustSettings->generationSettings.radius,0)));
     terrainLoader.addTerrain(terrain->id);
-    terrain = world->spawn(Terrain::makeInstance(terrainMaterial,*moonSettings,rnd(),vec3(1500,0,0)));
-    terrainLoader.addTerrain(terrain->id);
+    // terrain = world->spawn(Terrain::makeInstance(terrainMaterial,*moonSettings,rnd(),vec3(1500,0,0)));
+    // terrainLoader.addTerrain(terrain->id);
 }
 
 void GameApplication::setup() {
@@ -254,72 +254,72 @@ void GameApplication::debugUI(float dt) {
         }
     ImGui::End();
     
-    // if(terrain == nullptr) {
-    //     return;
-    // }
-    // ImGui::Begin("TerrainLoader");
+    if(terrain == nullptr) {
+        return;
+    }
+    ImGui::Begin("TerrainLoader");
 
-    //     for (size_t i = 0; i < terrainLoader.chunksLoaded.size(); i++)
-    //     {
-    //         int chunksLoaded = terrainLoader.chunksLoaded[i];
-    //         ImGui::Text("Layer %i chunks Loaded: %i",i,chunksLoaded);
-    //     }
+        for (size_t i = 0; i < terrainLoader.chunksLoaded.size(); i++)
+        {
+            int chunksLoaded = terrainLoader.chunksLoaded[i];
+            ImGui::Text("Layer %i chunks Loaded: %i",i,chunksLoaded);
+        }
 
-    //     static int currentTerrainLayer = 0;
+        static int currentTerrainLayer = 0;
 
-    //     ImGui::InputInt("Layer",&currentTerrainLayer);
+        ImGui::InputInt("Layer",&currentTerrainLayer);
 
-    //     if(glfwGetTime() - chunkInfo.time > 0.5f) {
-    //         currentTerrainLayer++;
-    //     }
+        if(glfwGetTime() - chunkInfo.time > 0.5f) {
+            currentTerrainLayer++;
+        }
 
-    //     if(currentTerrainLayer < 0) {
-    //         currentTerrainLayer = 0;
-    //     }
-    //     if(currentTerrainLayer > 5) {
-    //         currentTerrainLayer = 5;
-    //     }
+        if(currentTerrainLayer < 0) {
+            currentTerrainLayer = 0;
+        }
+        if(currentTerrainLayer > 5) {
+            currentTerrainLayer = 5;
+        }
         
         
-    //     auto terrain = world->getActorOfType<Terrain>();
+        auto terrain = world->getActorOfType<Terrain>();
 
-    //     auto chunk = terrain->tryGetChunkAtWorldPosition(player->getPosition(),currentTerrainLayer);
-    //     if(chunk != nullptr) {
-    //         chunkInfo.time = glfwGetTime();
-    //         chunkInfo.layer = currentTerrainLayer;
-    //         //chunkInfo.childrenLoaded = chunk->loadedChildCount();
-    //         chunkInfo.pos = terrain->worldToChunkPos(player->getPosition(),currentTerrainLayer);
-    //     }
-    //     ImGui::Text("Info From: %fs ago",glfwGetTime() - chunkInfo.time);
-    //     ImGui::Text("Layer: %i",currentTerrainLayer);
-    //     ImGui::Text("Children Loaded:  %i",chunkInfo.childrenLoaded);
-    //     ImGui::Text("Pos: <%i,%i,%i>",chunkInfo.pos.x,chunkInfo.pos.y,chunkInfo.pos.z);
-    //     terrainLoader.renderDebug();
-    //     for (int i = 0; i < TerrainLoader::terrainJobCount; i++)
-    //     {
-    //         //auto address = terrainLoader.getJobChunk(i);
+        auto chunk = terrain->tryGetChunkAtWorldPosition(player->getPosition(),currentTerrainLayer);
+        if(chunk != nullptr) {
+            chunkInfo.time = glfwGetTime();
+            chunkInfo.layer = currentTerrainLayer;
+            //chunkInfo.childrenLoaded = chunk->loadedChildCount();
+            chunkInfo.pos = terrain->worldToChunkPos(player->getPosition(),currentTerrainLayer);
+        }
+        ImGui::Text("Info From: %fs ago",glfwGetTime() - chunkInfo.time);
+        ImGui::Text("Layer: %i",currentTerrainLayer);
+        ImGui::Text("Children Loaded:  %i",chunkInfo.childrenLoaded);
+        ImGui::Text("Pos: <%i,%i,%i>",chunkInfo.pos.x,chunkInfo.pos.y,chunkInfo.pos.z);
+        terrainLoader.renderDebug();
+        for (int i = 0; i < TerrainLoader::terrainJobCount; i++)
+        {
+            //auto address = terrainLoader.getJobChunk(i);
             
-    //         // float size = terrain->getChunkWorldSize(address.layer);
-    //         // vec3 center = TerrainChunk::getWorldCenter(terrain->getPosition(),address.pos,size);
-    //         ImGui::PushID(i);
-    //         std::ostringstream stream;
-    //         switch(terrainLoader.getJobState(i)) {
-    //             case TerrainJobState::FINISHED:
-    //                 ImGui::Text("FINISHED: %i",terrainLoader.getJobWorker(i));
-    //                 break;
-    //             case TerrainJobState::IN_PROGRESS:
-    //                 stream << "IN PROGRESS:" << terrainLoader.getJobWorker(i);
-    //                 ImGui::Text(stream.str().c_str());
-    //                 break;
-    //             case TerrainJobState::WAITING:
-    //                 ImGui::Text("WAITING:");
-    //                 break;
-    //         }
-    //         ImGui::PopID();
-    //     }
+            // float size = terrain->getChunkWorldSize(address.layer);
+            // vec3 center = TerrainChunk::getWorldCenter(terrain->getPosition(),address.pos,size);
+            ImGui::PushID(i);
+            std::ostringstream stream;
+            switch(terrainLoader.getJobState(i)) {
+                case TerrainJobState::FINISHED:
+                    ImGui::Text("FINISHED: %i",terrainLoader.getJobWorker(i));
+                    break;
+                case TerrainJobState::IN_PROGRESS:
+                    stream << "IN PROGRESS:" << terrainLoader.getJobWorker(i);
+                    ImGui::Text(stream.str().c_str());
+                    break;
+                case TerrainJobState::WAITING:
+                    ImGui::Text("WAITING:");
+                    break;
+            }
+            ImGui::PopID();
+        }
         
 
-    // ImGui::End();
+    ImGui::End(); 
 
     if(player != nullptr && world != nullptr) {
         DebugMenu::cheatsMenu(*player,*world,registry);

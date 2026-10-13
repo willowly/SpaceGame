@@ -242,8 +242,8 @@ class TerrainLoader {
                 throw std::runtime_error("not enough threads " + std::to_string(allowedThreads));
             }
 
-            if(allowedWorkerThreads > 16) {
-                allowedWorkerThreads = 16;
+            if(allowedWorkerThreads > 8) {
+                allowedWorkerThreads = 8;
             }
             //allowedWorkerThreads = 1;
 

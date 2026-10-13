@@ -29,6 +29,9 @@ float getShadow(vec4 lightSpacePosition) {
 }
 
 vec4 getLightSpacePos(uint frameIndex,mat4 modelMatrix,vec3 inPosition) {
+    if(frameIndex > 1) {
+        return vec4(0,0,0,0); // we are in the shadow pass and should skip this. could probably be a compile setting but that would complicate things see https://man.archlinux.org/man/glslc.1.en#Preprocessor_Options
+    }
     return sceneData[frameIndex+2].proj * sceneData[frameIndex+2].view * modelMatrix * vec4(inPosition, 1.0);
 }
 

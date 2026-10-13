@@ -41,9 +41,9 @@ void main() {
     // outColor = vec4(-viewPosition.z,0,0,1);
     // return;
 
-    if(distanceDither(vec3(viewPosition),25,30)) {
-        discard;
-    }
+    // if(distanceDither(vec3(viewPosition),25,30)) {
+    //     discard;
+    // }
 
 
     MaterialData material = push.material;

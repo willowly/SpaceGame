@@ -231,14 +231,14 @@ endif(APPLE)
 macro(compile_shader shader_path)
     add_custom_command(
         OUTPUT "${OUTPUT_DIR}/shaders/compiled/${shader_path}_frag.spv"
-        COMMAND glslc "${CMAKE_CURRENT_LIST_DIR}/assets/shaders/${shader_path}.frag" -o "${OUTPUT_DIR}/shaders/compiled/${shader_path}_frag.spv"
+        COMMAND glslc "${CMAKE_CURRENT_LIST_DIR}/assets/shaders/${shader_path}.frag" -o "${OUTPUT_DIR}/shaders/compiled/${shader_path}_frag.spv" -g
         DEPENDS "${CMAKE_CURRENT_LIST_DIR}/assets/shaders/${shader_path}.frag"
     )
     list(APPEND SHADER_OUTPUTS "${OUTPUT_DIR}/shaders/compiled/${shader_path}_frag.spv")
     list(APPEND SHADER_SOURCES "${CMAKE_CURRENT_LIST_DIR}/assets/shaders/${shader_path}.frag")
     add_custom_command(
         OUTPUT "${OUTPUT_DIR}/shaders/compiled/${shader_path}_vert.spv"
-        COMMAND glslc "${CMAKE_CURRENT_LIST_DIR}/assets/shaders/${shader_path}.vert" -o "${OUTPUT_DIR}/shaders/compiled/${shader_path}_vert.spv"
+        COMMAND glslc "${CMAKE_CURRENT_LIST_DIR}/assets/shaders/${shader_path}.vert" -o "${OUTPUT_DIR}/shaders/compiled/${shader_path}_vert.spv" -g
         DEPENDS "${CMAKE_CURRENT_LIST_DIR}/assets/shaders/${shader_path}.vert"
     )
     list(APPEND SHADER_OUTPUTS "${OUTPUT_DIR}/shaders/compiled/${shader_path}_vert.spv")

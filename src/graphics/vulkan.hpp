@@ -139,6 +139,7 @@ struct PipelineOptions {
     VkBool32 blend = VK_FALSE;
     bool shadowPass;
     VkCullModeFlagBits cullMode = VK_CULL_MODE_NONE;
+    VkRenderPass renderPass = VK_NULL_HANDLE;
 };
 
 // class DynamicMeshBuffer {
@@ -1020,7 +1021,7 @@ class Vulkan {
         };
 
         const std::vector<const char*> validationLayers = {
-            //"VK_LAYER_KHRONOS_validation"
+            "VK_LAYER_KHRONOS_validation",
         };
 
         std::vector<const char*> deviceExtensions = {
@@ -1657,9 +1658,11 @@ class Vulkan {
                 context.currentMeshBuffer = meshBuffer.buffer;
             }
 
-            if(renderObject.material.pipeline != context.currentPipeline) {
-                vkCmdBindPipeline(commandBuffer,VK_PIPELINE_BIND_POINT_GRAPHICS,renderObject.material.pipeline);
-                context.currentPipeline = renderObject.material.pipeline;
+            auto requiredPipeline = context.type == RenderPassType::Shadow ? renderObject.material.shadowPipeline : renderObject.material.pipeline;
+
+            if(requiredPipeline != context.currentPipeline) {
+                vkCmdBindPipeline(commandBuffer,VK_PIPELINE_BIND_POINT_GRAPHICS,requiredPipeline);
+                context.currentPipeline = requiredPipeline;
             }
 
             MeshPushConstant pushConstant;
@@ -1765,13 +1768,17 @@ class Vulkan {
         }
 
         void recordBeginCommandBufferLabel(VkCommandBuffer commandBuffer,string name) {
-            VkDebugUtilsLabelEXT label{VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT};
-            label.pLabelName = name.c_str();
-            vkCmdBeginDebugUtilsLabelEXT(commandBuffer,&label);
+            if(enableValidationLayers) {
+                VkDebugUtilsLabelEXT label{VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT};
+                label.pLabelName = name.c_str();
+                vkCmdBeginDebugUtilsLabelEXT(commandBuffer,&label);
+            }
         }
 
         void recordEndCommandBufferLabel(VkCommandBuffer commandBuffer) {
-            vkCmdEndDebugUtilsLabelEXT(commandBuffer);
+            if(enableValidationLayers) {
+                vkCmdEndDebugUtilsLabelEXT(commandBuffer);
+            }
         }
 
         void recreateSwapChain() {
@@ -1952,12 +1959,7 @@ class Vulkan {
             createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
             createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
-            if (enableValidationLayers) {
-                createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
-                createInfo.ppEnabledLayerNames = validationLayers.data();
-            } else {
-                createInfo.enabledLayerCount = 0;
-            }
+            createInfo.enabledLayerCount = 0;
 
             uint32_t count = 0;
             auto enumerateExtensionResult = vkEnumerateDeviceExtensionProperties(physicalDevice,nullptr, &count, nullptr);
@@ -2541,11 +2543,13 @@ class Vulkan {
 
         template<typename T>
         void setObjectName(T object,VkObjectType type,string name) {
-            VkDebugUtilsObjectNameInfoEXT nameInfo{VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT};
-            nameInfo.objectHandle = (uint64_t)object;
-            nameInfo.objectType = type;
-            nameInfo.pObjectName = name.c_str();
-            vkSetDebugUtilsObjectNameEXT(device,&nameInfo);
+            if(enableValidationLayers) {
+                VkDebugUtilsObjectNameInfoEXT nameInfo{VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT};
+                nameInfo.objectHandle = (uint64_t)object;
+                nameInfo.objectType = type;
+                nameInfo.pObjectName = name.c_str();
+                vkSetDebugUtilsObjectNameEXT(device,&nameInfo);
+            }
         }
 
         Image createImage(string name,uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties) {
@@ -2852,6 +2856,7 @@ class Vulkan {
             depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
             depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
+
             VkAttachmentReference depthAttachmentRef{};
             depthAttachmentRef.attachment = 0;
             depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
@@ -2859,16 +2864,16 @@ class Vulkan {
             VkSubpassDescription subpass{};
             subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
             subpass.colorAttachmentCount = 0;
-            subpass.pColorAttachments = nullptr;
+            subpass.pColorAttachments = 0;
             subpass.pDepthStencilAttachment = &depthAttachmentRef;
 
             VkSubpassDependency dependency{}; //honestly, i have no idea what this does
             dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
             dependency.dstSubpass = 0;
-            dependency.srcStageMask =  VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+            dependency.srcStageMask =  VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
             dependency.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
             dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-            dependency.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+            dependency.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
             std::array<VkAttachmentDescription, 1> attachments = {depthAttachment};
             VkRenderPassCreateInfo renderPassInfo{};
